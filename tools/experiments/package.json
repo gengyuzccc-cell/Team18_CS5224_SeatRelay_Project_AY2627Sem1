@@ -1,0 +1,31 @@
+{
+  "name": "@seatrelay/experiments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@seatrelay/contracts": "workspace:*",
+    "@seatrelay/core": "workspace:*",
+    "@aws-sdk/client-cloudwatch": "3.1152.0",
+    "@aws-sdk/client-cloudwatch-logs": "3.1152.0",
+    "@aws-sdk/client-dynamodb": "3.1152.0",
+    "@aws-sdk/lib-dynamodb": "3.1152.0",
+    "@aws-sdk/client-sqs": "3.1152.0",
+    "@aws-sdk/client-lambda": "3.1152.0",
+    "@aws-sdk/client-cognito-identity-provider": "3.1152.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15",
+    "vitest": "3.2.7",
+    "typescript": "5.9.3"
+  }
+}

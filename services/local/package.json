@@ -1,0 +1,34 @@
+{
+  "name": "@seatrelay/local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts"
+  },
+  "dependencies": {
+    "@seatrelay/contracts": "workspace:*",
+    "@seatrelay/core": "workspace:*",
+    "@seatrelay/service": "workspace:*",
+    "fastify": "5.12.7",
+    "@fastify/cors": "10.1.0",
+    "pg": "8.23.1",
+    "jose": "5.10.0",
+    "nodemailer": "6.10.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "8.23.1",
+    "@types/nodemailer": "6.4.24",
+    "tsx": "4.23.15",
+    "vitest": "3.2.7",
+    "typescript": "5.9.3"
+  }
+}

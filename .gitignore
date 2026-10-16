@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnpm-store/
+# build outputs
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.aws-sam/
+samconfig.local.toml
+# env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+.token-cache*.json
+# local data
+services/local/.data/
+# python
+__pycache__/
+*.pyc
+.venv/
+# latex
+report/*.aux
+report/*.bbl
+report/*.bcf
+report/*.blg
+report/*.log
+report/*.out
+report/*.run.xml
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+# experiments scratch (raw results ARE committed under results/)
+tools/experiments/.cache/

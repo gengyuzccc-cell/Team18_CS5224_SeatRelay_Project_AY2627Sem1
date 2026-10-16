@@ -1,0 +1,38 @@
+{
+  "name": "seatrelay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SeatRelay – unified registration, waitlist and timed-hold seat relay for multi-session workshops (NUS CS5224 Team 18)",
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build",
+    "replay": "pnpm --filter @seatrelay/replay run replay",
+    "web:dev": "pnpm --filter @seatrelay/web dev",
+    "local:up": "docker compose -f services/local/docker-compose.yml up --build -d",
+    "local:down": "docker compose -f services/local/docker-compose.yml down -v"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@types/node": "20.19.43",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "3.2.7"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

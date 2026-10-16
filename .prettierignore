@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+.aws-sam
+pnpm-lock.yaml
+results
+*.md
+*.csv
