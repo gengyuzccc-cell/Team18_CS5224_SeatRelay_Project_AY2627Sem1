@@ -1,0 +1,290 @@
+import type { Command, WorkshopMode } from '@seatrelay/contracts';
+import fc from 'fast-check';
+import { describe, expect, it } from 'vitest';
+import {
+  addMinutes,
+  addSeconds,
+  applyChanges,
+  checkInvariants,
+  decide,
+  isStillOpenForAllocation,
+  newSession,
+  newWorkshop,
+  parseIso,
+  type DecideContext,
+  type Decision,
+  type DecisionLimits,
+  type WorkshopSnapshot,
+} from '../src/index';
+import { T0, UUID, WS } from './helpers';
+
+/**
+ * Model-based property test (plan §2.2): random command sequences (length ≤ 200) over 2–5
+ * sessions and up to 40 users, with random clock advances (0–20 min), random holdSeconds
+ * (30–900 s) and random per-decision limits. After EVERY step (command + its continuation
+ * chain) the snapshot must satisfy every invariant, contain no due offer, no starving
+ * registration and no cut-off-ended queue entry, and the engine must be pure and deterministic.
+ */
+
+const sessionArb = fc.record({
+  capacity: fc.integer({ min: 1, max: 6 }),
+  startOffsetMin: fc.integer({ min: 35, max: 36 * 60 }),
+});
+
+const setupArb = fc.record({
+  mode: fc.constantFrom<WorkshopMode>('UNIFIED', 'PER_SESSION'),
+  holdSeconds: fc.integer({ min: 30, max: 900 }),
+  sessions: fc.array(sessionArb, { minLength: 2, maxLength: 5 }),
+  nUsers: fc.integer({ min: 1, max: 40 }),
+  maxOffers: fc.integer({ min: 1, max: 12 }),
+  maxExpiries: fc.integer({ min: 1, max: 12 }),
+});
+
+type Kind =
+  | 'REGISTER'
+  | 'ACCEPT'
+  | 'DECLINE'
+  | 'CANCEL'
+  | 'SET_CAPACITY'
+  | 'CANCEL_SESSION'
+  | 'CANCEL_WORKSHOP'
+  | 'CLOSE'
+  | 'OPEN'
+  | 'TICK'
+  | 'REALLOCATE';
+
+const kindArb: fc.Arbitrary<Kind> = fc.oneof(
+  { arbitrary: fc.constant<Kind>('REGISTER'), weight: 30 },
+  { arbitrary: fc.constant<Kind>('ACCEPT'), weight: 14 },
+  { arbitrary: fc.constant<Kind>('DECLINE'), weight: 8 },
+  { arbitrary: fc.constant<Kind>('CANCEL'), weight: 8 },
+  { arbitrary: fc.constant<Kind>('SET_CAPACITY'), weight: 6 },
+  { arbitrary: fc.constant<Kind>('CANCEL_SESSION'), weight: 2 },
+  { arbitrary: fc.constant<Kind>('CANCEL_WORKSHOP'), weight: 1 },
+  { arbitrary: fc.constant<Kind>('CLOSE'), weight: 2 },
+  { arbitrary: fc.constant<Kind>('OPEN'), weight: 2 },
+  { arbitrary: fc.constant<Kind>('TICK'), weight: 12 },
+  { arbitrary: fc.constant<Kind>('REALLOCATE'), weight: 3 },
+);
+
+const stepArb = fc.record({
+  dtSeconds: fc.integer({ min: 0, max: 20 * 60 }),
+  kind: kindArb,
+  u: fc.nat({ max: 1_000 }),
+  k: fc.nat({ max: 1_000 }),
+  s: fc.nat({ max: 1_000 }),
+  cap: fc.integer({ min: 0, max: 8 }),
+  prefs: fc.array(fc.nat({ max: 1_000 }), { minLength: 1, maxLength: 5 }),
+});
+
+type Setup = ReturnType<typeof setupArb.generate> extends infer _ ? fc.ContextValue<typeof setupArb> : never;
+type Step = fc.ContextValue<typeof stepArb>;
+
+function buildSnapshot(setup: Setup): WorkshopSnapshot {
+  const workshop = newWorkshop({
+    id: WS,
+    orgId: 'org',
+    title: 'Property workshop',
+    mode: setup.mode,
+    holdSeconds: setup.holdSeconds,
+    createdAt: T0,
+  });
+  const sessions = setup.sessions.map((spec, index) =>
+    newSession({
+      id: `S${index}`,
+      workshopId: WS,
+      title: `Session ${index}`,
+      startsAt: addMinutes(T0, spec.startOffsetMin),
+      capacity: spec.capacity,
+    }),
+  );
+  return { workshop, sessions, registrations: [], offers: [] };
+}
+
+const actor = (n: number) => ({
+  commandId: UUID,
+  workshopId: WS,
+  actorUserId: `u${n}`,
+  actorEmail: `u${n}@example.com`,
+});
+
+/** Resolves a random step against the current state into a concrete command. */
+function toCommand(step: Step, setup: Setup, snapshot: WorkshopSnapshot): Command {
+  const n = step.u % setup.nUsers;
+  const sessionIds = snapshot.sessions.map((session) => session.id);
+  const pick = (index: number) => sessionIds[index % sessionIds.length]!;
+  switch (step.kind) {
+    case 'REGISTER': {
+      let acceptable: string[];
+      if (setup.mode === 'PER_SESSION') {
+        acceptable = [pick(step.prefs[0]!)];
+        if (step.k % 29 === 0) {
+          acceptable.push(pick(step.prefs[0]! + 1)); // PER_SESSION_REQUIRES_ONE_SESSION
+        }
+      } else {
+        acceptable = [...new Set(step.prefs.map(pick))];
+        if (step.k % 23 === 0) {
+          acceptable.push(acceptable[0]!); // DUPLICATE_SESSION_IN_PREFERENCES
+        } else if (step.k % 31 === 0) {
+          acceptable.push('ghost'); // UNKNOWN_SESSION_IN_PREFERENCES
+        }
+      }
+      return { type: 'REGISTER', ...actor(n), acceptable };
+    }
+    case 'ACCEPT':
+    case 'DECLINE': {
+      const offers = [...snapshot.offers].sort((a, b) => (a.id < b.id ? -1 : 1));
+      const offer = offers[step.k % (offers.length + 1)];
+      const offerId = offer?.id ?? `missing-${step.k}`;
+      const owner = offer === undefined || step.k % 11 === 0 ? n : Number(offer.userId.slice(1));
+      return step.kind === 'ACCEPT'
+        ? { type: 'ACCEPT_OFFER', ...actor(owner), offerId }
+        : { type: 'DECLINE_OFFER', ...actor(owner), offerId };
+    }
+    case 'CANCEL':
+      return step.k % 3 === 0
+        ? { type: 'CANCEL_REGISTRATION', ...actor(n), sessionId: pick(step.s) }
+        : { type: 'CANCEL_REGISTRATION', ...actor(n) };
+    case 'SET_CAPACITY':
+      return { type: 'SET_CAPACITY', ...actor(999), sessionId: pick(step.s), capacity: step.cap };
+    case 'CANCEL_SESSION':
+      return { type: 'CANCEL_SESSION', ...actor(999), sessionId: pick(step.s) };
+    case 'CANCEL_WORKSHOP':
+      return { type: 'CANCEL_WORKSHOP', ...actor(999) };
+    case 'CLOSE':
+      return { type: 'CLOSE_REGISTRATION', ...actor(999) };
+    case 'OPEN':
+      return { type: 'OPEN_REGISTRATION', ...actor(999) };
+    case 'TICK':
+      return step.k % 2 === 0
+        ? { type: 'TICK', workshopId: WS, source: 'SWEEP' }
+        : { type: 'TICK', workshopId: WS, source: 'TIMER' };
+    case 'REALLOCATE':
+      return { type: 'REALLOCATE', workshopId: WS };
+  }
+}
+
+function makeCtx(now: string, limits: DecisionLimits, start: number): DecideContext {
+  let counter = 0;
+  return { now, newId: () => `o${start}-${++counter}`, limits };
+}
+
+/** Post-step assertions that go beyond checkInvariants (which must hold between decisions too). */
+function assertSettled(snapshot: WorkshopSnapshot, now: string): void {
+  const nowMs = parseIso(now);
+  for (const offer of snapshot.offers) {
+    expect(parseIso(offer.expiresAt), `due offer ${offer.id} left live`).toBeGreaterThan(nowMs);
+    expect(parseIso(offer.expiresAt) - parseIso(offer.createdAt)).toBeLessThanOrEqual(
+      snapshot.workshop.holdSeconds * 1000,
+    );
+  }
+  for (const registration of snapshot.registrations) {
+    if (registration.status === 'QUEUED') {
+      const alive = registration.acceptable.some((id) => {
+        const session = snapshot.sessions.find((candidate) => candidate.id === id);
+        return session !== undefined && isStillOpenForAllocation(session, nowMs);
+      });
+      expect(alive, `registration ${registration.seq} should have ended at cut-off`).toBe(true);
+    }
+  }
+  if (snapshot.workshop.status === 'CANCELLED') {
+    expect(snapshot.workshop.nextDueAt).toBeUndefined();
+  } else if (snapshot.offers.length > 0) {
+    const earliest = snapshot.offers.map((offer) => parseIso(offer.expiresAt)).sort((a, b) => a - b)[0]!;
+    expect(snapshot.workshop.nextDueAt).toBeDefined();
+    expect(parseIso(snapshot.workshop.nextDueAt!)).toBeLessThanOrEqual(earliest);
+    expect(parseIso(snapshot.workshop.nextDueAt!)).toBeGreaterThan(nowMs);
+  }
+}
+
+function assertDecisionShape(decision: Decision, limits: DecisionLimits, before: WorkshopSnapshot): void {
+  expect(decision.metrics.offersCreated).toBeLessThanOrEqual(limits.maxOffersPerDecision);
+  expect(decision.metrics.offersExpired).toBeLessThanOrEqual(limits.maxExpiriesPerDecision);
+  expect(decision.timers).toHaveLength(decision.metrics.offersCreated);
+  expect(decision.writes.filter((w) => w.kind === 'PUT_OFFER')).toHaveLength(decision.metrics.offersCreated);
+  expect(decision.metrics.backfillLatenciesMs.every((ms) => ms >= 0)).toBe(true);
+  const stateWrites = decision.writes.filter((w) => w.kind === 'PUT_WORKSHOP_STATE');
+  expect(stateWrites.length).toBeLessThanOrEqual(1);
+  if (decision.writes.length > 0) {
+    expect(stateWrites).toHaveLength(1);
+    expect(decision.writes[0]?.kind).toBe('PUT_WORKSHOP_STATE');
+    expect(stateWrites[0]?.kind === 'PUT_WORKSHOP_STATE' && stateWrites[0].version).toBe(
+      before.workshop.version + 1,
+    );
+  }
+  if (decision.status === 'REJECTED') {
+    expect(decision.reason).toBeDefined();
+    expect(decision.resultForCommand).toBeUndefined();
+  }
+  // at most one write per entity
+  const keys = decision.writes.map((w) => {
+    switch (w.kind) {
+      case 'PUT_WORKSHOP_STATE':
+        return 'workshop';
+      case 'PUT_SESSION':
+        return `session:${w.session.id}`;
+      case 'PUT_REGISTRATION':
+      case 'ARCHIVE_REGISTRATION':
+        return `registration:${w.registration.seq}`;
+      case 'PUT_OFFER':
+      case 'ARCHIVE_OFFER':
+        return `offer:${w.offer.id}`;
+      case 'PUT_BACKFILL':
+        return `backfill:${w.record.id}`;
+    }
+  });
+  expect(new Set(keys).size).toBe(keys.length);
+}
+
+describe('decide() property test', () => {
+  it('keeps every invariant after 2,000 random command sequences', () => {
+    let steps = 0;
+    let decisions = 0;
+    let continuations = 0;
+    fc.assert(
+      fc.property(setupArb, fc.array(stepArb, { maxLength: 200, size: 'max' }), (setup, script) => {
+        const limits: DecisionLimits = {
+          maxOffersPerDecision: setup.maxOffers,
+          maxExpiriesPerDecision: setup.maxExpiries,
+        };
+        let snapshot = buildSnapshot(setup);
+        let now = T0;
+        let idSeed = 0;
+        for (const step of script) {
+          steps += 1;
+          now = addSeconds(now, step.dtSeconds);
+          let command = toCommand(step, setup, snapshot);
+          let guard = 0;
+          for (;;) {
+            const before = structuredClone(snapshot);
+            const ctx = makeCtx(now, limits, ++idSeed);
+            const decision = decide(snapshot, command, ctx);
+            decisions += 1;
+            expect(snapshot, 'decide must not mutate its input').toStrictEqual(before);
+            if (steps % 7 === 0) {
+              const replay = decide(snapshot, command, makeCtx(now, limits, idSeed));
+              expect(replay, 'decide must be deterministic').toStrictEqual(decision);
+            }
+            assertDecisionShape(decision, limits, before);
+            snapshot = applyChanges(snapshot, decision.writes);
+            if (decision.continuation === undefined) {
+              break;
+            }
+            continuations += 1;
+            command = decision.continuation;
+            if (++guard > 500) {
+              throw new Error('continuation chain did not converge');
+            }
+          }
+          const report = checkInvariants(snapshot, now);
+          expect(report.violations, `after ${command.type} at ${now}`).toEqual([]);
+          assertSettled(snapshot, now);
+        }
+      }),
+      { numRuns: 2_000 },
+    );
+    expect(steps).toBeGreaterThan(2_000);
+    expect(continuations).toBeGreaterThan(0);
+    console.log(`property test: ${steps} steps, ${decisions} decisions, ${continuations} continuations`);
+  });
+});

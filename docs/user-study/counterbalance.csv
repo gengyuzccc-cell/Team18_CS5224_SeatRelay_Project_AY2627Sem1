@@ -1,0 +1,13 @@
+participant_id,track,order,condition_1,dataset_1,condition_2,dataset_2,date,time,facilitator,note_taker
+P01,participant,SR_first,SR,A,CTRL,B,,,,
+P02,participant,CTRL_first,CTRL,B,SR,A,,,,
+P03,organiser,SR_first,SR,A,CTRL,B,,,,
+P04,participant,CTRL_first,CTRL,A,SR,B,,,,
+P05,participant,SR_first,SR,B,CTRL,A,,,,
+P06,organiser,CTRL_first,CTRL,B,SR,A,,,,
+P07,participant,SR_first,SR,B,CTRL,A,,,,
+P08,participant,CTRL_first,CTRL,A,SR,B,,,,
+P09,organiser,CTRL_first,CTRL,A,SR,B,,,,
+P10,participant,CTRL_first,CTRL,B,SR,A,,,,
+P11,participant,SR_first,SR,A,CTRL,B,,,,
+P12,organiser,SR_first,SR,B,CTRL,A,,,,
