@@ -1,0 +1,93 @@
+# SAM CLI configuration. Usage (from services/aws, after `pnpm build`):
+#   sam deploy --config-env auth                      # once per account
+#   sam deploy --config-env dev                       # application stack (dev)
+#   sam deploy --config-env web-dev                   # static hosting (dev)
+#   sam deploy --config-env pilot / web-pilot         # pilot stacks
+# All stacks: region ap-southeast-1, tag Project=SeatRelay, no interactive confirmation.
+version = 0.1
+
+[default.global.parameters]
+region = "ap-southeast-1"
+
+[default.deploy.parameters]
+resolve_s3 = true
+s3_prefix = "seatrelay"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay"
+
+[default.validate.parameters]
+lint = true
+
+# ---------------------------------------------------------------- auth (deployed once, never deleted)
+[auth.global.parameters]
+region = "ap-southeast-1"
+[auth.deploy.parameters]
+stack_name = "seatrelay-auth"
+template_file = "templates/auth.yaml"
+resolve_s3 = true
+s3_prefix = "seatrelay-auth"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay"
+# Override on the command line, e.g.
+#   --parameter-overrides SenderEmail=team@example.com BudgetEmail=team@example.com \
+#     "WebCallbackUrls=http://localhost:5173/callback,https://dxxxx.cloudfront.net/callback"
+parameter_overrides = "MonthlyBudgetUsd=20 AnnualBudgetUsd=60"
+
+# ---------------------------------------------------------------- app: dev
+[dev.global.parameters]
+region = "ap-southeast-1"
+[dev.deploy.parameters]
+stack_name = "seatrelay-app-dev"
+template_file = "templates/app.yaml"
+resolve_s3 = true
+s3_prefix = "seatrelay-app-dev"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay Stage=dev"
+parameter_overrides = "Stage=dev AllowFaultFlags=true EmailEnabled=false"
+
+# ---------------------------------------------------------------- app: pilot
+[pilot.global.parameters]
+region = "ap-southeast-1"
+[pilot.deploy.parameters]
+stack_name = "seatrelay-app-pilot"
+template_file = "templates/app.yaml"
+resolve_s3 = true
+s3_prefix = "seatrelay-app-pilot"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay Stage=pilot"
+parameter_overrides = "Stage=pilot AllowFaultFlags=false EmailEnabled=true"
+
+# ---------------------------------------------------------------- web
+[web-dev.global.parameters]
+region = "ap-southeast-1"
+[web-dev.deploy.parameters]
+stack_name = "seatrelay-web-dev"
+template_file = "templates/web.yaml"
+resolve_s3 = true
+s3_prefix = "seatrelay-web-dev"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay Stage=dev"
+parameter_overrides = "Stage=dev"
+
+[web-pilot.global.parameters]
+region = "ap-southeast-1"
+[web-pilot.deploy.parameters]
+stack_name = "seatrelay-web-pilot"
+template_file = "templates/web.yaml"
+resolve_s3 = true
+s3_prefix = "seatrelay-web-pilot"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+tags = "Project=SeatRelay Stage=pilot"
+parameter_overrides = "Stage=pilot"

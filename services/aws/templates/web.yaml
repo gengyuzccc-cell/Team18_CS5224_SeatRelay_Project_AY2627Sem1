@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  SeatRelay – static SPA hosting: private S3 bucket + CloudFront with Origin Access Control.
+  One stack per stage (seatrelay-web-dev / seatrelay-web-pilot). The same Vite build is uploaded by
+  tools/scripts/deploy-web.sh (hashed assets immutable, index.html no-cache, invalidation of /index.html).
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues: [dev, pilot]
+    Default: dev
+
+Resources:
+  WebBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub seatrelay-web-${Stage}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+        - { Key: Stage, Value: !Ref Stage }
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub seatrelay-web-${Stage}-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub SeatRelay web (${Stage})
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_200 # PriceClass_100 does not include the Singapore edge
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        Origins:
+          - Id: s3-web
+            DomainName: !GetAtt WebBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: s3-web
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
+          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03 # Managed-SecurityHeadersPolicy
+        CustomErrorResponses:
+          # SPA deep links: S3 answers 403/404 for unknown keys → serve index.html with 200, never cached
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+        - { Key: Stage, Value: !Ref Stage }
+
+  WebBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${WebBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}
+
+Outputs:
+  BucketName:
+    Value: !Ref WebBucket
+    Export: { Name: !Sub '${AWS::StackName}-BucketName' }
+  DistributionId:
+    Value: !Ref Distribution
+    Export: { Name: !Sub '${AWS::StackName}-DistributionId' }
+  DistributionDomainName:
+    Value: !GetAtt Distribution.DomainName
+    Export: { Name: !Sub '${AWS::StackName}-DomainName' }
+  WebUrl:
+    Value: !Sub https://${Distribution.DomainName}
+    Export: { Name: !Sub '${AWS::StackName}-WebUrl' }

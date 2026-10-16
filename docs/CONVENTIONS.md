@@ -24,7 +24,7 @@ Never import from `services/*` or `apps/*` into `packages/*`.
 
 ## 2. Language / tooling
 
-- TypeScript 5.9, **ESM everywhere** (`"type": "module"`), `moduleResolution: Bundler`, `strict` + `noUncheckedIndexedAccess`.
+- Node 22 everywhere (Lambda runtime `nodejs22.x` — nodejs20.x reached end of support on 2026-04-30; esbuild target node22). TypeScript 5.9, **ESM everywhere** (`"type": "module"`), `moduleResolution: Bundler`, `strict` + `noUncheckedIndexedAccess`.
 - Packages export **source** (`"exports": {".": "./src/index.ts"}`); no build step for libraries. esbuild/Vite/vitest/tsx consume TS directly.
 - Each package: `pnpm typecheck` (= `tsc -p tsconfig.json`, noEmit) and `pnpm test` (= `vitest run`). Tests live in `test/**/*.test.ts` (or `src/**/*.test.ts`).
 - Lint: root `eslint.config.js` (typescript-eslint recommended, `consistent-type-imports`). Prettier: single quotes, 100 cols, trailing commas.

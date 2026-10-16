@@ -1,0 +1,108 @@
+# SeatRelay on-premise reference deployment (plan §2.7).
+#   docker compose -f services/local/docker-compose.yml up --build -d
+# Ports: web 8081, API 3000, Keycloak 8080, Mailpit UI 8025 (SMTP 1025), Postgres 5432.
+name: seatrelay-local
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: seatrelay
+      POSTGRES_USER: seatrelay
+      POSTGRES_PASSWORD: seatrelay
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U seatrelay -d seatrelay']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: keycloak/keycloak:26.0
+    command: ['start-dev', '--import-realm']
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # Browser and server must see the SAME issuer string (plan §2.7): http://localhost:8080/realms/seatrelay
+      KC_HOSTNAME: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: 'true'
+      KC_HTTP_ENABLED: 'true'
+      KC_HEALTH_ENABLED: 'true'
+    ports:
+      - '8080:8080'
+      - '9000:9000'
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    healthcheck:
+      test: ['CMD-SHELL', "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep -q '\"status\": \"UP\"' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: '1'
+      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+
+  server:
+    build:
+      context: ../..
+      dockerfile: services/local/Dockerfile
+      target: server
+    environment:
+      PORT: '3000'
+      DATABASE_URL: postgres://seatrelay:seatrelay@postgres:5432/seatrelay
+      OIDC_ISSUER: http://localhost:8080/realms/seatrelay
+      OIDC_JWKS_URL: http://keycloak:8080/realms/seatrelay/protocol/openid-connect/certs
+      OIDC_AUDIENCE: seatrelay-web,tooling
+      SMTP_URL: smtp://mailpit:1025
+      SENDER_EMAIL: seatrelay@local.test
+      EMAIL_ENABLED: 'true'
+      ALLOW_FAULT_FLAGS: 'true'
+      WEB_ORIGIN: http://localhost:8081,http://localhost:5173
+      WORKER_POLL_MS: '200'
+      TIMER_POLL_MS: '1000'
+      LOG_LEVEL: info
+    ports:
+      - '3000:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/health || exit 1']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: ../..
+      dockerfile: services/local/Dockerfile
+      target: web
+    environment:
+      # injected into /env.js at container start (same SPA build as CloudFront)
+      VITE_OIDC_AUTHORITY: http://localhost:8080/realms/seatrelay
+      VITE_OIDC_CLIENT_ID: seatrelay-web
+      VITE_OIDC_PROVIDER: keycloak
+      VITE_API_BASE_URL: http://localhost:3000
+    ports:
+      - '8081:80'
+    depends_on:
+      server:
+        condition: service_started
+
+volumes:
+  pgdata:

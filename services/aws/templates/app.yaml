@@ -1,0 +1,601 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  SeatRelay application stack (one per stage: seatrelay-app-dev / seatrelay-app-pilot).
+  HTTP API (Cognito JWT) -> api Lambda -> SQS FIFO (one message group per workshop) -> worker Lambda
+  -> DynamoDB single table (TransactWriteItems, META optimistic lock). Per-offer expiry timers via a
+  standard SQS delay queue + expiryForwarder; EventBridge 5-minute sweep as safety net (DUE sparse GSI).
+  DynamoDB Streams -> notifier (SES). Plan section 2.3 / 2.4.
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues: [dev, pilot]
+    Default: dev
+  AuthStackName:
+    Type: String
+    Default: seatrelay-auth
+    Description: Name of the deployed auth stack whose exports (UserPool, clients) are imported.
+  WebOrigin:
+    Type: String
+    Default: http://localhost:5173
+    Description: CloudFront origin of the SPA (https://xxxx.cloudfront.net); localhost is always allowed too.
+  EmailEnabled:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: When false the notifier records notifications as SKIPPED instead of calling SES.
+  AllowFaultFlags:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'false'
+    Description: Keep the _fault field of commands (fault-injection experiments). Must be false for pilot.
+  SenderEmail:
+    Type: String
+    Default: ''
+    Description: Verified SES sender (defaults to the auth stack export when empty).
+  AlarmEmail:
+    Type: String
+    Default: ''
+    Description: E-mail subscribed to the alarm topic. Empty = topic without subscription.
+  WorkerMaxConcurrency:
+    Type: Number
+    Default: 5
+    MinValue: 2
+    MaxValue: 50
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+
+Mappings:
+  StageConfig:
+    dev:
+      ThrottleRate: 300
+      ThrottleBurst: 500
+      DeletionProtection: false
+    pilot:
+      ThrottleRate: 50
+      ThrottleBurst: 100
+      DeletionProtection: true
+
+Conditions:
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
+  HasSenderEmail: !Not [!Equals [!Ref SenderEmail, '']]
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64]
+    Handler: index.handler
+    Timeout: 10
+    MemorySize: 512
+    Tracing: Active
+    Tags:
+      Project: SeatRelay
+      Stage: !Ref Stage
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+        TABLE_NAME: !Ref Table
+        COMMANDS_QUEUE_URL: !Ref CommandsQueue
+        EXPIRY_DELAY_QUEUE_URL: !Ref ExpiryDelayQueue
+        ALLOW_FAULT_FLAGS: !Ref AllowFaultFlags
+        POWERTOOLS_METRICS_NAMESPACE: SeatRelay
+        POWERTOOLS_LOG_LEVEL: INFO
+        POWERTOOLS_LOGGER_LOG_EVENT: 'false'
+        NODE_OPTIONS: --enable-source-maps
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+
+Resources:
+  # ---------------------------------------------------------------- DynamoDB
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub seatrelay-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      DeletionProtectionEnabled: !FindInMap [StageConfig, !Ref Stage, DeletionProtection]
+      AttributeDefinitions:
+        - { AttributeName: PK, AttributeType: S }
+        - { AttributeName: SK, AttributeType: S }
+        - { AttributeName: GSI1PK, AttributeType: S }
+        - { AttributeName: GSI1SK, AttributeType: S }
+      KeySchema:
+        - { AttributeName: PK, KeyType: HASH }
+        - { AttributeName: SK, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - { AttributeName: GSI1PK, KeyType: HASH }
+            - { AttributeName: GSI1SK, KeyType: RANGE }
+          Projection:
+            ProjectionType: ALL
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+        - { Key: Stage, Value: !Ref Stage }
+
+  # ---------------------------------------------------------------- SQS
+  CommandsDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub seatrelay-${Stage}-commands-dlq.fifo
+      FifoQueue: true # a FIFO source queue requires a FIFO DLQ
+      ContentBasedDeduplication: false
+      MessageRetentionPeriod: 1209600
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+
+  CommandsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub seatrelay-${Stage}-commands.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: false # explicit MessageDeduplicationId = commandId / tick#offerId#expiresAt
+      VisibilityTimeout: 120 # >= 6 x worker timeout (20 s)
+      MessageRetentionPeriod: 345600
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CommandsDlq.Arn
+        maxReceiveCount: 3
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+
+  ExpiryDelayDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub seatrelay-${Stage}-expiry-delay-dlq
+      MessageRetentionPeriod: 1209600
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+
+  # Standard queue: FIFO queues do not support per-message timers (DelaySeconds), max 900 s.
+  ExpiryDelayQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub seatrelay-${Stage}-expiry-delay
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 345600
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ExpiryDelayDlq.Arn
+        maxReceiveCount: 5
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+
+  NotifyDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub seatrelay-${Stage}-notify-dlq
+      MessageRetentionPeriod: 1209600
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+
+  # ---------------------------------------------------------------- Log groups (explicit => retention applies)
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/seatrelay-${Stage}-api
+      RetentionInDays: !Ref LogRetentionDays
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/seatrelay-${Stage}-worker
+      RetentionInDays: !Ref LogRetentionDays
+  ExpiryForwarderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/seatrelay-${Stage}-expiry-forwarder
+      RetentionInDays: !Ref LogRetentionDays
+  SweepLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/seatrelay-${Stage}-sweep
+      RetentionInDays: !Ref LogRetentionDays
+  NotifierLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/seatrelay-${Stage}-notifier
+      RetentionInDays: !Ref LogRetentionDays
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /seatrelay/${Stage}/api-access
+      RetentionInDays: !Ref LogRetentionDays
+
+  # ---------------------------------------------------------------- HTTP API
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: $default
+      Description: !Sub SeatRelay API (${Stage})
+      Auth:
+        DefaultAuthorizer: CognitoJwt
+        Authorizers:
+          CognitoJwt:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: { 'Fn::ImportValue': !Sub '${AuthStackName}-Issuer' }
+              audience:
+                - { 'Fn::ImportValue': !Sub '${AuthStackName}-WebClientId' }
+                - { 'Fn::ImportValue': !Sub '${AuthStackName}-ToolingClientId' }
+      # Routes are declared per method (never ANY / $default) so that CORS pre-flight OPTIONS is
+      # answered by API Gateway itself instead of being rejected 401 by the authorizer.
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref WebOrigin
+          - http://localhost:5173
+        AllowHeaders: [authorization, content-type]
+        AllowMethods: [GET, POST, PUT, PATCH, DELETE]
+        MaxAge: 600
+      DefaultRouteSettings:
+        ThrottlingRateLimit: !FindInMap [StageConfig, !Ref Stage, ThrottleRate]
+        ThrottlingBurstLimit: !FindInMap [StageConfig, !Ref Stage, ThrottleBurst]
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: >-
+          {"requestId":"$context.requestId","ip":"$context.identity.sourceIp","requestTime":"$context.requestTime",
+          "method":"$context.httpMethod","path":"$context.path","routeKey":"$context.routeKey",
+          "status":"$context.status","responseLatency":"$context.responseLatency",
+          "integrationLatency":"$context.integrationLatency","authorizerError":"$context.authorizer.error",
+          "errorMessage":"$context.error.message","userAgent":"$context.identity.userAgent"}
+      Tags:
+        Project: SeatRelay
+        Stage: !Ref Stage
+
+  # ---------------------------------------------------------------- Lambda: api
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub seatrelay-${Stage}-api
+      CodeUri: ../dist/api
+      Description: HTTP API handler (sync reads/CRUD, 202 command intake, command result polling)
+      LoggingConfig:
+        LogGroup: !Ref ApiLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: api
+          WEB_ORIGIN: !Ref WebOrigin
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CommandsQueue.QueueName
+      Events:
+        Health:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /health
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        PublicWorkshop:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /public/workshops/{wsId}
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        GetProxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/{proxy+}', Method: GET }
+        PostProxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/{proxy+}', Method: POST }
+        PutProxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/{proxy+}', Method: PUT }
+        PatchProxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/{proxy+}', Method: PATCH }
+        DeleteProxy:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Path: '/{proxy+}', Method: DELETE }
+
+  # ---------------------------------------------------------------- Lambda: worker (single writer per workshop)
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub seatrelay-${Stage}-worker
+      CodeUri: ../dist/worker
+      Description: FIFO command consumer; decide() + TransactWriteItems; schedules per-offer timers
+      MemorySize: 1024
+      Timeout: 20
+      LoggingConfig:
+        LogGroup: !Ref WorkerLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: worker
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CommandsQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt ExpiryDelayQueue.QueueName
+      Events:
+        Commands:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt CommandsQueue.Arn
+            BatchSize: 1
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            ScalingConfig:
+              MaximumConcurrency: !Ref WorkerMaxConcurrency
+
+  # ---------------------------------------------------------------- Lambda: expiry forwarder (delay queue -> FIFO)
+  ExpiryForwarderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub seatrelay-${Stage}-expiry-forwarder
+      CodeUri: ../dist/expiryForwarder
+      Description: Forwards due TICK timers from the standard delay queue into the FIFO (group = workshopId); re-delays when more than 900 s remain
+      LoggingConfig:
+        LogGroup: !Ref ExpiryForwarderLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: expiryForwarder
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CommandsQueue.QueueName
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt ExpiryDelayQueue.QueueName
+      Events:
+        Timers:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ExpiryDelayQueue.Arn
+            BatchSize: 10
+            FunctionResponseTypes: [ReportBatchItemFailures]
+
+  # ---------------------------------------------------------------- Lambda: sweep (safety net, not on the latency path)
+  SweepFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub seatrelay-${Stage}-sweep
+      CodeUri: ../dist/sweep
+      Description: Every 5 min query the DUE sparse GSI (nextDueAt <= now) and enqueue a TICK per workshop
+      Timeout: 30
+      LoggingConfig:
+        LogGroup: !Ref SweepLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: sweep
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt CommandsQueue.QueueName
+      Events:
+        Every5Minutes:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(5 minutes)
+            Description: SeatRelay sweep safety net
+            FlexibleTimeWindow:
+              Mode: 'OFF'
+
+  # ---------------------------------------------------------------- Lambda: notifier (DynamoDB Streams -> SES)
+  NotifierFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub seatrelay-${Stage}-notifier
+      CodeUri: ../dist/notifier
+      Description: Sends e-mail for NOTIFICATION inserts (<= 1/s); MessageRejected is recorded, not retried
+      Timeout: 30
+      LoggingConfig:
+        LogGroup: !Ref NotifierLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: notifier
+          EMAIL_ENABLED: !Ref EmailEnabled
+          SENDER_EMAIL: !If
+            - HasSenderEmail
+            - !Ref SenderEmail
+            - { 'Fn::ImportValue': !Sub '${AuthStackName}-SenderEmail' }
+          EMAIL_RATE_PER_SEC: '1'
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt NotifyDlq.QueueName
+        - Statement:
+            - Effect: Allow
+              Action: [ses:SendEmail, ses:SendRawEmail]
+              Resource: '*'
+      Events:
+        NotificationInserts:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt Table.StreamArn
+            StartingPosition: LATEST
+            BatchSize: 10
+            MaximumBatchingWindowInSeconds: 1
+            BisectBatchOnFunctionError: true
+            MaximumRetryAttempts: 20
+            MaximumRecordAgeInSeconds: 3600
+            FunctionResponseTypes: [ReportBatchItemFailures]
+            DestinationConfig:
+              OnFailure:
+                Destination: !GetAtt NotifyDlq.Arn
+            # INSERT only: the notifier's own status updates are MODIFY, TTL deletes are REMOVE
+            FilterCriteria:
+              Filters:
+                - Pattern: '{"eventName":["INSERT"],"dynamodb":{"NewImage":{"entityType":{"S":["NOTIFICATION"]}}}}'
+
+  # ---------------------------------------------------------------- Alarms
+  AlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub seatrelay-${Stage}-alarms
+      Tags:
+        - { Key: Project, Value: SeatRelay }
+  AlarmSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlarmEmail
+    Properties:
+      TopicArn: !Ref AlarmTopic
+      Protocol: email
+      Endpoint: !Ref AlarmEmail
+
+  CommandsDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-commands-dlq-not-empty
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt CommandsDlq.QueueName }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  NotifyDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-notify-dlq-not-empty
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt NotifyDlq.QueueName }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  ExpiryDlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-expiry-dlq-not-empty
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt ExpiryDelayDlq.QueueName }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  CommandsOldestMessageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-commands-oldest-message-age
+      Namespace: AWS/SQS
+      MetricName: ApproximateAgeOfOldestMessage
+      Dimensions: [{ Name: QueueName, Value: !GetAtt CommandsQueue.QueueName }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 120
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  ApiErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-api-errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref ApiFunction }]
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  WorkerErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-worker-errors
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{ Name: FunctionName, Value: !Ref WorkerFunction }]
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  NotifierIteratorAgeAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-notifier-iterator-age
+      Namespace: AWS/Lambda
+      MetricName: IteratorAge
+      Dimensions: [{ Name: FunctionName, Value: !Ref NotifierFunction }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 60000
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+
+  # ---------------------------------------------------------------- Dashboard
+  Dashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub seatrelay-${Stage}
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {"type":"metric","x":0,"y":0,"width":12,"height":6,"properties":{"title":"API latency (ms)","region":"${AWS::Region}","stat":"p50","period":60,
+              "metrics":[["AWS/ApiGateway","Latency","ApiId","${HttpApi}",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["AWS/ApiGateway","IntegrationLatency","ApiId","${HttpApi}",{"stat":"p95","label":"integration p95"}]]}},
+            {"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"title":"API requests / 4xx / 5xx","region":"${AWS::Region}","stat":"Sum","period":60,
+              "metrics":[["AWS/ApiGateway","Count","ApiId","${HttpApi}"],["AWS/ApiGateway","4xx","ApiId","${HttpApi}"],["AWS/ApiGateway","5xx","ApiId","${HttpApi}"]]}},
+            {"type":"metric","x":0,"y":6,"width":12,"height":6,"properties":{"title":"Command settlement latency (ms, server-side)","region":"${AWS::Region}","period":60,
+              "metrics":[["SeatRelay","CommandSettledLatency","service","worker",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["...",{"stat":"Maximum","label":"max"}]]}},
+            {"type":"metric","x":12,"y":6,"width":12,"height":6,"properties":{"title":"Backfill latency (ms) and sweep-late expiries","region":"${AWS::Region}","period":60,
+              "metrics":[["SeatRelay","BackfillLatency","service","worker",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["SeatRelay","SweepLateExpiries","service","worker",{"stat":"Sum","label":"sweep-late (should be 0)","yAxis":"right"}]]}},
+            {"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"title":"Offers created / expired, notification failures","region":"${AWS::Region}","stat":"Sum","period":60,
+              "metrics":[["SeatRelay","OffersCreated","service","worker"],["SeatRelay","OffersExpired","service","worker"],["SeatRelay","NotificationFailures","service","notifier"],["SeatRelay","MetaConflictRetries","service","worker"]]}},
+            {"type":"metric","x":12,"y":12,"width":12,"height":6,"properties":{"title":"SQS depth and oldest message age","region":"${AWS::Region}","period":60,
+              "metrics":[["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${CommandsQueue.QueueName}",{"stat":"Maximum","label":"commands depth"}],["AWS/SQS","ApproximateAgeOfOldestMessage","QueueName","${CommandsQueue.QueueName}",{"stat":"Maximum","label":"commands oldest (s)","yAxis":"right"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${ExpiryDelayQueue.QueueName}",{"stat":"Maximum","label":"expiry-delay depth"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${CommandsDlq.QueueName}",{"stat":"Maximum","label":"commands DLQ"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${NotifyDlq.QueueName}",{"stat":"Maximum","label":"notify DLQ"}]]}},
+            {"type":"metric","x":0,"y":18,"width":12,"height":6,"properties":{"title":"Lambda errors","region":"${AWS::Region}","stat":"Sum","period":60,
+              "metrics":[["AWS/Lambda","Errors","FunctionName","${ApiFunction}"],["AWS/Lambda","Errors","FunctionName","${WorkerFunction}"],["AWS/Lambda","Errors","FunctionName","${ExpiryForwarderFunction}"],["AWS/Lambda","Errors","FunctionName","${SweepFunction}"],["AWS/Lambda","Errors","FunctionName","${NotifierFunction}"]]}},
+            {"type":"metric","x":12,"y":18,"width":12,"height":6,"properties":{"title":"Lambda duration p95 (ms) / concurrency","region":"${AWS::Region}","period":60,
+              "metrics":[["AWS/Lambda","Duration","FunctionName","${ApiFunction}",{"stat":"p95"}],["AWS/Lambda","Duration","FunctionName","${WorkerFunction}",{"stat":"p95"}],["AWS/Lambda","Duration","FunctionName","${NotifierFunction}",{"stat":"p95"}],["AWS/Lambda","ConcurrentExecutions","FunctionName","${WorkerFunction}",{"stat":"Maximum","yAxis":"right"}],["AWS/Lambda","IteratorAge","FunctionName","${NotifierFunction}",{"stat":"Maximum","yAxis":"right"}]]}}
+          ]
+        }
+
+Outputs:
+  ApiUrl:
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+    Export: { Name: !Sub '${AWS::StackName}-ApiUrl' }
+  HttpApiId:
+    Value: !Ref HttpApi
+  TableName:
+    Value: !Ref Table
+    Export: { Name: !Sub '${AWS::StackName}-TableName' }
+  CommandsQueueUrl:
+    Value: !Ref CommandsQueue
+    Export: { Name: !Sub '${AWS::StackName}-CommandsQueueUrl' }
+  CommandsDlqUrl:
+    Value: !Ref CommandsDlq
+  ExpiryDelayQueueUrl:
+    Value: !Ref ExpiryDelayQueue
+  ExpiryDelayDlqUrl:
+    Value: !Ref ExpiryDelayDlq
+  NotifyDlqUrl:
+    Value: !Ref NotifyDlq
+  WorkerFunctionName:
+    Value: !Ref WorkerFunction
+  NotifierFunctionName:
+    Value: !Ref NotifierFunction
+  ApiFunctionName:
+    Value: !Ref ApiFunction
+  AlarmTopicArn:
+    Value: !Ref AlarmTopic
+  DashboardUrl:
+    Value: !Sub https://${AWS::Region}.console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=seatrelay-${Stage}

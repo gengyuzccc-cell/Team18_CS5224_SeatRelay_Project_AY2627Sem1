@@ -1,0 +1,101 @@
+{
+  "realm": "seatrelay",
+  "enabled": true,
+  "displayName": "SeatRelay (local)",
+  "sslRequired": "none",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "accessTokenLifespan": 3600,
+  "ssoSessionIdleTimeout": 28800,
+  "ssoSessionMaxLifespan": 86400,
+  "roles": {
+    "realm": [
+      { "name": "user", "description": "Default role for every SeatRelay account" }
+    ]
+  },
+  "defaultRoles": ["user", "offline_access", "uma_authorization"],
+  "clients": [
+    {
+      "clientId": "seatrelay-web",
+      "name": "SeatRelay SPA",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "http://localhost:8081",
+      "baseUrl": "/",
+      "redirectUris": ["http://localhost:8081/*", "http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:8081", "http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8081/*##http://localhost:5173/*"
+      },
+      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins"],
+      "optionalClientScopes": ["offline_access"]
+    },
+    {
+      "clientId": "tooling",
+      "name": "Experiment tooling (password grant)",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "defaultClientScopes": ["openid", "profile", "email", "roles"],
+      "optionalClientScopes": []
+    }
+  ],
+  "users": [
+    {
+      "username": "organiser@example.com",
+      "email": "organiser@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Olivia",
+      "lastName": "Organiser",
+      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "alice@example.com",
+      "email": "alice@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Alice",
+      "lastName": "Participant",
+      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "bob@example.com",
+      "email": "bob@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Bob",
+      "lastName": "Participant",
+      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "carol@example.com",
+      "email": "carol@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Carol",
+      "lastName": "Participant",
+      "credentials": [{ "type": "password", "value": "Passw0rd!", "temporary": false }],
+      "realmRoles": ["user"]
+    }
+  ]
+}
