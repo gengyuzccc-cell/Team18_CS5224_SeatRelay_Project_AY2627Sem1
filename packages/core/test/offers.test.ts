@@ -164,7 +164,11 @@ describe('DECLINE_OFFER', () => {
 
 describe('post-command cut-off', () => {
   it('a decline whose remaining sessions all passed cut-off ends the registration with CUTOFF', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A' }, { id: 'B', startsInMinutes: 40 }] }); // B cut-off +10
+    // B cut-off at +10; a 30 min hold keeps the A offer alive at +15
+    const s0 = makeSnapshot({
+      holdSeconds: 1800,
+      sessions: [{ id: 'A' }, { id: 'B', startsInMinutes: 40 }],
+    });
     const s = registerMany(s0, [1], ['A', 'B'], at(0)); // holds A
     const r = run(s, cmd.decline(1, offerOf(s, 1)!.id), at(15));
     expect(r.decision.resultForCommand?.registration).toMatchObject({
@@ -177,7 +181,10 @@ describe('post-command cut-off', () => {
   });
 
   it('a session cancellation that leaves only past-cut-off fallbacks ends the confirmed participant with CUTOFF', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A' }, { id: 'B', startsInMinutes: 40 }] });
+    const s0 = makeSnapshot({
+      holdSeconds: 1800,
+      sessions: [{ id: 'A' }, { id: 'B', startsInMinutes: 40 }],
+    });
     let s = registerMany(s0, [1], ['A', 'B'], at(0));
     s = run(s, cmd.accept(1, offerOf(s, 1)!.id), at(1)).snapshot;
     const r = run(s, cmd.cancelSession('A'), at(15));

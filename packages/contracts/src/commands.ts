@@ -131,10 +131,20 @@ export const TickCommandSchema = z.object({
   offerId: IdSchema.optional(),
   expiresAt: IsoTimestampSchema.optional(),
 });
-/** Internal continuation emitted when a decision hit its per-transaction limits. */
+/**
+ * Internal continuation emitted when a decision hit a per-decision limit. It carries the seat
+ * releases of the previous decision that nobody has been relayed yet, so that the continuation
+ * attributes the offers it creates to them (backfill latency stays exact).
+ */
 export const ReallocateCommandSchema = z.object({
   type: z.literal('REALLOCATE'),
   workshopId: IdSchema,
+  /** Backfill records of the previous decision in the chain that are not yet reallocated. */
+  pendingBackfills: z.array(BackfillRecordSchema).optional(),
+  /** Seats added by SET_CAPACITY in the previous decision that nobody has taken yet. */
+  pendingCapacityUp: z
+    .array(z.object({ sessionId: IdSchema, seats: PositiveIntSchema }))
+    .optional(),
 });
 
 export const UserCommandSchema = z.discriminatedUnion('type', [

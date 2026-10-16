@@ -103,3 +103,12 @@ describe('snapshot helpers', () => {
     expect(snapshot.offers).toEqual([]);
   });
 });
+
+describe('internal guards', () => {
+  it('mustGet throws on a corrupted reference', async () => {
+    const { mustGet } = await import('../src/state');
+    expect(mustGet(new Map([['a', 1]]), 'a', 'thing')).toBe(1);
+    expect(() => mustGet(new Map<string, number>(), 'zz', 'session')).toThrow(/missing session zz/);
+    expect(() => mustGet(new Map<string, number>(), undefined, 'offer')).toThrow(/missing offer/);
+  });
+});

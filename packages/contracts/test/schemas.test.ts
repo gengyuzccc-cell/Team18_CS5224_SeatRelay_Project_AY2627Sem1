@@ -304,3 +304,24 @@ describe('api bodies', () => {
     ).toBe(true);
   });
 });
+
+describe('REALLOCATE continuation', () => {
+  it('carries pending backfill records and capacity-up seats', () => {
+    const parsed = CommandSchema.safeParse({
+      type: 'REALLOCATE',
+      workshopId: 'ws1',
+      pendingBackfills: [
+        { id: 'b1', workshopId: 'ws1', sessionId: 's1', releasedAt: T, cause: 'EXPIRED' },
+      ],
+      pendingCapacityUp: [{ sessionId: 's2', seats: 3 }],
+    });
+    expect(parsed.success).toBe(true);
+    expect(
+      CommandSchema.safeParse({
+        type: 'REALLOCATE',
+        workshopId: 'ws1',
+        pendingCapacityUp: [{ sessionId: 's2', seats: 0 }],
+      }).success,
+    ).toBe(false);
+  });
+});

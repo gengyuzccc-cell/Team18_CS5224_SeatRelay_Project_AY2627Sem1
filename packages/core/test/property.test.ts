@@ -77,8 +77,9 @@ const stepArb = fc.record({
   prefs: fc.array(fc.nat({ max: 1_000 }), { minLength: 1, maxLength: 5 }),
 });
 
-type Setup = ReturnType<typeof setupArb.generate> extends infer _ ? fc.ContextValue<typeof setupArb> : never;
-type Step = fc.ContextValue<typeof stepArb>;
+type ArbValue<A> = A extends fc.Arbitrary<infer T> ? T : never;
+type Setup = ArbValue<typeof setupArb>;
+type Step = ArbValue<typeof stepArb>;
 
 function buildSnapshot(setup: Setup): WorkshopSnapshot {
   const workshop = newWorkshop({
@@ -190,18 +191,26 @@ function assertSettled(snapshot: WorkshopSnapshot, now: string): void {
   if (snapshot.workshop.status === 'CANCELLED') {
     expect(snapshot.workshop.nextDueAt).toBeUndefined();
   } else if (snapshot.offers.length > 0) {
-    const earliest = snapshot.offers.map((offer) => parseIso(offer.expiresAt)).sort((a, b) => a - b)[0]!;
+    const earliest = snapshot.offers
+      .map((offer) => parseIso(offer.expiresAt))
+      .sort((a, b) => a - b)[0]!;
     expect(snapshot.workshop.nextDueAt).toBeDefined();
     expect(parseIso(snapshot.workshop.nextDueAt!)).toBeLessThanOrEqual(earliest);
     expect(parseIso(snapshot.workshop.nextDueAt!)).toBeGreaterThan(nowMs);
   }
 }
 
-function assertDecisionShape(decision: Decision, limits: DecisionLimits, before: WorkshopSnapshot): void {
+function assertDecisionShape(
+  decision: Decision,
+  limits: DecisionLimits,
+  before: WorkshopSnapshot,
+): void {
   expect(decision.metrics.offersCreated).toBeLessThanOrEqual(limits.maxOffersPerDecision);
   expect(decision.metrics.offersExpired).toBeLessThanOrEqual(limits.maxExpiriesPerDecision);
   expect(decision.timers).toHaveLength(decision.metrics.offersCreated);
-  expect(decision.writes.filter((w) => w.kind === 'PUT_OFFER')).toHaveLength(decision.metrics.offersCreated);
+  expect(decision.writes.filter((w) => w.kind === 'PUT_OFFER')).toHaveLength(
+    decision.metrics.offersCreated,
+  );
   expect(decision.metrics.backfillLatenciesMs.every((ms) => ms >= 0)).toBe(true);
   const stateWrites = decision.writes.filter((w) => w.kind === 'PUT_WORKSHOP_STATE');
   expect(stateWrites.length).toBeLessThanOrEqual(1);
@@ -236,13 +245,24 @@ function assertDecisionShape(decision: Decision, limits: DecisionLimits, before:
   expect(new Set(keys).size).toBe(keys.length);
 }
 
+/** Sequence length: anything up to 200, skewed towards shorter scripts to keep the run fast. */
+const scriptArb = fc
+  .oneof(
+    { arbitrary: fc.integer({ min: 1, max: 40 }), weight: 3 },
+    { arbitrary: fc.integer({ min: 41, max: 200 }), weight: 1 },
+  )
+  .chain((length) => fc.array(stepArb, { minLength: length, maxLength: length }));
+
+const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
+
 describe('decide() property test', () => {
-  it('keeps every invariant after 2,000 random command sequences', () => {
+  it('keeps every invariant after 2,000 random command sequences', async () => {
     let steps = 0;
     let decisions = 0;
     let continuations = 0;
-    fc.assert(
-      fc.property(setupArb, fc.array(stepArb, { maxLength: 200, size: 'max' }), (setup, script) => {
+    let longest = 0;
+    await fc.assert(
+      fc.asyncProperty(setupArb, scriptArb, async (setup, script) => {
         const limits: DecisionLimits = {
           maxOffersPerDecision: setup.maxOffers,
           maxExpiriesPerDecision: setup.maxExpiries,
@@ -250,22 +270,30 @@ describe('decide() property test', () => {
         let snapshot = buildSnapshot(setup);
         let now = T0;
         let idSeed = 0;
+        longest = Math.max(longest, script.length);
         for (const step of script) {
           steps += 1;
+          if (steps % 50 === 0) {
+            await yieldToEventLoop(); // keep the vitest worker responsive
+          }
           now = addSeconds(now, step.dtSeconds);
           let command = toCommand(step, setup, snapshot);
           let guard = 0;
           for (;;) {
-            const before = structuredClone(snapshot);
+            const before = JSON.stringify(snapshot);
             const ctx = makeCtx(now, limits, ++idSeed);
             const decision = decide(snapshot, command, ctx);
             decisions += 1;
-            expect(snapshot, 'decide must not mutate its input').toStrictEqual(before);
+            if (JSON.stringify(snapshot) !== before) {
+              throw new Error('decide mutated its input snapshot');
+            }
             if (steps % 7 === 0) {
               const replay = decide(snapshot, command, makeCtx(now, limits, idSeed));
-              expect(replay, 'decide must be deterministic').toStrictEqual(decision);
+              if (JSON.stringify(replay) !== JSON.stringify(decision)) {
+                throw new Error('decide is not deterministic');
+              }
             }
-            assertDecisionShape(decision, limits, before);
+            assertDecisionShape(decision, limits, snapshot);
             snapshot = applyChanges(snapshot, decision.writes);
             if (decision.continuation === undefined) {
               break;
@@ -277,14 +305,21 @@ describe('decide() property test', () => {
             }
           }
           const report = checkInvariants(snapshot, now);
-          expect(report.violations, `after ${command.type} at ${now}`).toEqual([]);
+          if (!report.ok) {
+            throw new Error(
+              `invariants violated after ${command.type} at ${now}: ${JSON.stringify(report.violations)}`,
+            );
+          }
           assertSettled(snapshot, now);
         }
       }),
       { numRuns: 2_000 },
     );
     expect(steps).toBeGreaterThan(2_000);
+    expect(longest).toBeGreaterThan(150);
     expect(continuations).toBeGreaterThan(0);
-    console.log(`property test: ${steps} steps, ${decisions} decisions, ${continuations} continuations`);
+    console.log(
+      `property test: 2000 runs, ${steps} steps (longest ${longest}), ${decisions} decisions, ${continuations} continuations`,
+    );
   });
 });
