@@ -1,0 +1,138 @@
+{
+  "meta": {
+    "retrieved": "2026-10-16",
+    "currency_note": "Prices are recorded in the currency of the source (SGD for Singapore retail, USD for cloud providers); the model converts with fx.sgd_per_usd.",
+    "method": "Retail listings and tariffs were located with web search; the listing pages themselves (Newegg SG, SourceIT, element14 SG, SP Group, Postmark, Backblaze, Notebookcheck) could not be fetched from the build environment, so each entry records whether the figure was read from the page or only from a search excerpt of it. Items marked 'assumption' are not sourced and are stated as the team's assumptions.",
+    "verification_levels": {
+      "verified_page": "Read from the cited page.",
+      "verified_snippet": "Read from a search-result excerpt of the cited page (page not fetched); re-check before publication.",
+      "verified_secondary": "Only third-party coverage of the primary source was reachable.",
+      "assumption": "Team assumption, not a sourced figure."
+    }
+  },
+  "fx": {
+    "sgd_per_usd": 1.28,
+    "as_of": "2026-10-01",
+    "source_url": "https://moneyexchangerate.org/currencyexchange/usd/sgd/262",
+    "verification": "verified_snippet",
+    "notes": "Retail aggregator quote (262 USD = 335.36 SGD on 1 Oct 2026, i.e. 1 USD = 1.28 SGD). Cross-checks: ECB mid-market 1.2930 on 2026-07-09 (clock7.com), 1.2671 on 2026-09-13 (longforecast.com). The MAS/ECB reference pages were not reachable; refresh this value before the final report."
+  },
+  "server": {
+    "model": "Beelink Mini S12 Pro (Intel N100, 16 GB DDR4, 500 GB NVMe SSD)",
+    "price_sgd": 767.56,
+    "price_includes_gst": true,
+    "source_url": "https://www.newegg.com/global/sg-en/p/3C6-01D0-000R1",
+    "source_detail": "Newegg Global (Singapore storefront) listing 'Beelink Mini S12 Pro ... 16GB DDR4 500GB SSD', S$767.56 GST-inclusive, ships from Hong Kong, 10-17 day delivery; a second listing of the same configuration shows S$921.47.",
+    "verification": "verified_snippet",
+    "retrieved": "2026-10-16",
+    "alternatives": [
+      {"model": "Prittec F8C (Intel N150, 16 GB, 512 GB) from a Singapore Carousell retailer, 3-year carry-in warranty", "price_sgd": 438.0, "source_url": "https://www.carousell.sg/intel-n150/q/", "verification": "verified_snippet", "notes": "Cheaper local option; used as the low-hardware sensitivity (--server-price-sgd 438)."},
+      {"model": "Beelink Mini S12 Pro US street price", "price_usd": 199.0, "source_url": "https://www.notebookcheck.net/Intel-N100-performance-debut-Beelink-Mini-S12-Pro-mini-PC-review.758950.0.html", "verification": "verified_secondary", "notes": "Review quotes about US$200 online for the 16 GB/512 GB unit; shows how much of the SG price is import margin."}
+    ],
+    "amortisation_years": [3, 4],
+    "amortisation_method": "straight-line, zero residual value",
+    "capacity_registrations_per_month": 1000000,
+    "capacity_note": "assumption: one N100-class machine running Postgres + the Node server handles up to ~1M registrations/month (~2.5M commands/month, <1 command/s average, ~40/s at 50x peak); beyond that the model adds a second identical machine (ceil(load/capacity)). Refine with the services/local k6 + docker stats measurements (plan §2.7)."
+  },
+  "ups": {
+    "model": "APC Back-UPS CS 650VA 230V (BK650-AS)",
+    "price_sgd": 202.40,
+    "price_includes_gst": true,
+    "source_url": "https://sourceit.com.sg/products/apc-back-ups-cs-650va-230v-asean-bk650-as",
+    "verification": "verified_snippet",
+    "retrieved": "2026-10-16",
+    "amortised_with_server": true,
+    "notes": "Battery replacement every ~3-5 years is ignored (small). Schneider SG eShop lists the same unit at S$226 before GST."
+  },
+  "power": {
+    "idle_w": 8.8,
+    "load_w": 20.1,
+    "peak_w": 32.2,
+    "ups_overhead_w": 3.0,
+    "source_url": "https://www.notebookcheck.net/Intel-N100-performance-debut-Beelink-Mini-S12-Pro-mini-PC-review.758950.0.html",
+    "source_detail": "Notebookcheck review of the same model: idle ~8.8 W average, load ~20.1 W average, ~32.2 W peak (figures as relayed by secondary summaries; the review page itself was not fetched). Corroboration: igorslab.de EQ12 (same N100) 20-23 W under Prime95; starryhope.com 9-11 W idle / 20-25 W load.",
+    "verification": "verified_secondary",
+    "ups_overhead_note": "assumption: ~3 W standby draw of the UPS itself.",
+    "utilisation_by_tier": {"1000": 0.02, "10000": 0.05, "100000": 0.20, "default_formula": "clamp(0.02 + 0.18 * (registrations / 100000), 0.02, 0.95)"},
+    "utilisation_note": "assumption: fraction of wall-clock time at load_w; the rest at idle_w. Scales with the registration tier."
+  },
+  "electricity": {
+    "tariff_cents_per_kwh_before_gst": 28.59,
+    "tariff_cents_per_kwh_incl_gst": 31.16,
+    "gst_rate": 0.09,
+    "quarter": "2026 Q4 (1 October - 31 December 2026)",
+    "provider": "SP Group regulated household tariff (low-tension)",
+    "source_url": "https://www.spgroup.com.sg/our-services/utilities/tariff-information",
+    "source_detail": "SP Group media release of 30 Sep 2026 as reported by The Star (https://www.thestar.com.my/aseanplus/aseanplus-news/2026/09/30/electricity-tariff-for-singapore-households-to-fall-by-104-in-fourth-quarter-of-2026) and Business Today (https://www.businesstoday.com.my/2026/09/30/singapore-to-lower-electricity-tariffs-in-quarter-four/): 28.59 cents/kWh before GST, down 3.32 cents (10.4%) from 31.91 in Q3 2026.",
+    "verification": "verified_secondary",
+    "retrieved": "2026-10-16",
+    "notes": "The GST-inclusive figure (31.16) is used in the model. Office (non-residential low-tension) tariffs are similar; a commercial site could instead be on a retailer contract."
+  },
+  "network": {
+    "increment_only": {
+      "monthly_sgd": 0.0,
+      "one_time_sgd": 51.0,
+      "one_time_amortisation_months": 24,
+      "source_url": "https://forums.hardwarezone.com.sg/threads/singapore-isp-comparisons.6665380",
+      "verification": "verified_secondary",
+      "notes": "Hardware-increment view assumes the organisation's existing fibre line is shared; the only increment is a static public IPv4 (MyRepublic one-time S$51 per the HardwareZone ISP comparison thread)."
+    },
+    "dedicated_line": {
+      "monthly_sgd": 108.0,
+      "plan": "M1 Fibre BizPac 1 Gbps business broadband, 24-month contract, static IP included",
+      "source_url": "https://www.m1.com.sg/business/deals/fibre-broadband",
+      "verification": "verified_snippet",
+      "notes": "Fully-amortised view uses a dedicated business line. Home-grade 1 Gbps plans are S$30-40/month (shopback.sg 2026 comparison) but carry no static IP and no business SLA."
+    }
+  },
+  "backup": {
+    "external_disk": {
+      "model": "WD Elements Portable 2 TB (WDBU6Y0020BBK-EESN)",
+      "price_sgd": 180.82,
+      "price_includes_gst": true,
+      "source_url": "https://sg.element14.com/wd/wdbu6y0020bbk-eesn/disk-drive-2-5-2tb-usb-3-0/dp/3532741",
+      "verification": "verified_snippet",
+      "retrieved": "2026-10-16",
+      "amortised_with_server": true,
+      "notes": "Local nightly pg_dump target for the hardware-increment view (S$165.89 before GST)."
+    },
+    "object_storage": {
+      "provider": "Backblaze B2",
+      "usd_per_gb_month": 0.00695,
+      "egress_usd_per_gb": 0.01,
+      "free_gb": 10,
+      "source_url": "https://www.backblaze.com/cloud-storage/pricing",
+      "verification": "verified_secondary",
+      "retrieved": "2026-10-16",
+      "notes": "US$6.95/TB-month; off-site copy for the fully-amortised view (closest equivalent to DynamoDB PITR's off-host durability). Official page not fetchable; figure from 2026 third-party comparisons."
+    },
+    "backup_size_gb_per_1000_registrations_month": 0.05,
+    "backup_retention_days": 35,
+    "backup_note": "assumption: ~50 MB of Postgres data per 1,000 registrations; retained 35 days to match PITR."
+  },
+  "email": {
+    "provider": "Amazon SES (Essentials plan), same provider as the cloud deployment",
+    "usd_per_1000": 0.16,
+    "source_url": "https://aws.amazon.com/ses/pricing/",
+    "verification": "verified_pricelist",
+    "pricing_key": "ses_email_essentials (tools/experiments/cost/pricing.json)",
+    "alternative": {
+      "provider": "Postmark",
+      "plan": "Basic: US$15/month for 10,000 e-mails, US$1.80 per extra 1,000",
+      "usd_per_1000_effective_at_10k": 1.50,
+      "source_url": "https://postmarkapp.com/pricing",
+      "verification": "verified_secondary",
+      "notes": "Shown as a sensitivity (--email-postmark). Mailpit in services/local is a development sink only; a real deployment must use a transactional provider."
+    }
+  },
+  "labour": {
+    "hours_per_month": 4,
+    "sgd_per_hour": 60,
+    "verification": "assumption",
+    "notes": "ASSUMPTION: 4 h/month of operations (patching, backup checks, restarts) at a fully-loaded S$60/h. Benchmarks: Paylab systems-administrator gross pay S$4,584-10,016/month (https://www.paylab.com/sg/salaryinfo/information-technology/systems-administrator); PayScale average S$43,180/year (https://www.payscale.com/research/SG/Job=Systems_Administrator/Salary); freelance developer rates S$45-100/h (https://www.secondtalent.com/cost-to-hire/singapore/). The hardware-increment view sets labour to 0 (the team's own unpaid time)."
+  },
+  "availability": {
+    "single_machine_note": "One mini-PC on one power circuit and one ISP line: any hardware, power, ISP or OS-update failure takes the whole service down until a person intervenes; no SLA. Annual availability of a well-run single box is typically 99-99.5% (assumption, not sourced).",
+    "cloud_note": "The managed services are multi-AZ by design (DynamoDB, SQS, Lambda, API Gateway, CloudFront) with published SLAs; see pricing.json sla_reference."
+  }
+}

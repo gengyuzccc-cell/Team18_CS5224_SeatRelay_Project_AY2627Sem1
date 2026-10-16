@@ -1,0 +1,285 @@
+{
+  "meta": {
+    "region": "ap-southeast-1 (Asia Pacific (Singapore))",
+    "currency": "USD",
+    "retrieved": "2026-10-16",
+    "method": "Unit prices were read from the public AWS Price List bulk API (pricing.us-east-1.amazonaws.com/offers/v1.0/aws/<offer>/<version>/ap-southeast-1/index.json), which is the machine-readable source behind aws.amazon.com/<service>/pricing. The 'source_detail' field names the usagetype / SKU description that was read. The human pricing pages (aws.amazon.com) and the Free Tier page could not be fetched from the build environment, so every free-tier allowance is marked with how it was verified.",
+    "verification_levels": {
+      "verified_pricelist": "Read directly from the AWS Price List API file named in source_detail on the retrieved date.",
+      "verified_official_snippet": "Confirmed from an aws.amazon.com page excerpt returned by web search (page itself not fetched).",
+      "verified_secondary": "Only third-party summaries of the official page were reachable; treat as likely but re-check before publication.",
+      "unverified": "Could not be confirmed online in this session; the value is a best estimate and must not be presented as verified."
+    },
+    "free_tier_regime": {
+      "note": "Accounts created on or after 2025-07-15 do not receive the legacy 12-month allowances; they receive Free Tier credits (up to US$200 over 6 months) plus the always-free allowances. Accounts created before that date keep the 12-month allowances for their first year. The model therefore applies always-free allowances by default and the 12-month allowances only with --legacy-free-tier.",
+      "source_url": "https://aws.amazon.com/free/",
+      "verification": "verified_secondary"
+    },
+    "tiering_note": "Where a dimension has volume tiers, 'usd' is the first-tier price and 'tiers' lists the full schedule as [upper_bound_of_tier, price]. At the 1k/10k/100k registrations-per-month tiers the project never leaves tier 1."
+  },
+  "prices": {
+    "lambda_request_arm": {
+      "service": "AWS Lambda", "dimension": "Requests (arm64)", "unit": "request", "usd": 2.0e-7,
+      "free_always": 1000000, "free_always_unit": "requests/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/lambda/pricing/",
+      "source_detail": "Price List AWSLambda version 20261014171944, usagetype APS1-Request-ARM: 'AWS Lambda - Total Requests for ARM - Asia Pacific (Singapore)' USD 0.0000002 per request. Free tier 1M requests/month: aws.amazon.com/free/serverless (secondary snippets).",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "US$0.20 per million requests, same as x86."
+    },
+    "lambda_gbs_arm": {
+      "service": "AWS Lambda", "dimension": "Duration (arm64), GB-seconds", "unit": "GB-second", "usd": 1.33334e-5,
+      "tiers": [[7500000000, 1.33334e-5], [18750000000, 1.20001e-5], [null, 1.06667e-5]],
+      "free_always": 400000, "free_always_unit": "GB-seconds/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/lambda/pricing/",
+      "source_detail": "Price List AWSLambda version 20261014171944, usagetype APS1-Lambda-GB-Second-ARM Tier-1 USD 0.0000133334 per GB-s (x86 is USD 0.0000166667).",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Billed per 1 ms; memory 512 MB (api, forwarder, sweep, notifier) and 1024 MB (worker) per app.yaml."
+    },
+    "http_api_request": {
+      "service": "Amazon API Gateway (HTTP API)", "dimension": "Requests", "unit": "request", "usd": 1.25e-6,
+      "tiers": [[300000000, 1.25e-6], [null, 1.13e-6]],
+      "free_always": 0, "free_12mo": 1000000, "free_12mo_unit": "HTTP API calls/month (legacy accounts only)",
+      "source_url": "https://aws.amazon.com/api-gateway/pricing/",
+      "source_detail": "Price List AmazonApiGateway version 20261013003044, usagetype APS1-ApiGatewayHttpRequest: '$1.25/million requests - API Gateway HTTP API (first 300 million)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "unverified",
+      "notes": "Requests are metered in 512 KB increments; all SeatRelay payloads are far below that. The 12-month allowance (1M HTTP API calls) was not confirmed by an official snippet in this session."
+    },
+    "sqs_request_standard": {
+      "service": "Amazon SQS", "dimension": "Standard queue requests", "unit": "request", "usd": 4.0e-7,
+      "tiers": [[100000000000, 4.0e-7], [200000000000, 3.5e-7], [null, 3.2e-7]],
+      "free_always": 1000000, "free_always_unit": "requests/month (shared between standard and FIFO)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/sqs/pricing/",
+      "source_detail": "Price List AWSQueueService version 20260911124607, usagetype APS1-Requests-Tier1: '$0.40 per million Amazon SQS standard requests in Tier1 in Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Every API action (Send, Receive, Delete, ChangeVisibility) is one request per 64 KB chunk. Used by expiry-delay queue and the two standard DLQs."
+    },
+    "sqs_request_fifo": {
+      "service": "Amazon SQS", "dimension": "FIFO queue requests", "unit": "request", "usd": 5.0e-7,
+      "tiers": [[100000000000, 5.0e-7], [200000000000, 4.6e-7], [null, 4.2e-7]],
+      "free_always": 0, "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/sqs/pricing/",
+      "source_detail": "Price List AWSQueueService version 20260911124607, usagetype APS1-Requests-FIFO-Tier1: '$0.50 per million Amazon SQS FIFO requests in Tier1 in Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist",
+      "notes": "The 1M free requests/month are pooled under sqs_request_standard (the free tier covers all queue types); the model applies the pool to standard first, then FIFO. Used by commands.fifo and commands-dlq.fifo."
+    },
+    "ddb_rru_ondemand": {
+      "service": "Amazon DynamoDB", "dimension": "On-demand read request units", "unit": "RRU", "usd": 1.425e-7,
+      "free_always": 0, "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/dynamodb/pricing/on-demand/",
+      "source_detail": "Price List AmazonDynamoDB version 20260911124422, usagetype APS1-ReadRequestUnits: '$0.1425 per million read request units (Asia Pacific (Singapore))'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist",
+      "notes": "1 RRU = one strongly consistent read of up to 4 KB; eventually consistent = 0.5 RRU; transactional = 2 RRU. The DynamoDB free tier (25 WCU/25 RCU) applies to provisioned capacity only, so no request-unit allowance is modelled for PAY_PER_REQUEST."
+    },
+    "ddb_wru_ondemand": {
+      "service": "Amazon DynamoDB", "dimension": "On-demand write request units", "unit": "WRU", "usd": 7.1e-7,
+      "free_always": 0, "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/dynamodb/pricing/on-demand/",
+      "source_detail": "Price List AmazonDynamoDB version 20260911124422, usagetype APS1-WriteRequestUnits: '$0.71 per million write request units (Asia Pacific (Singapore))'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist",
+      "notes": "1 WRU = one write of up to 1 KB; TransactWriteItems consumes 2 WRU per 1 KB (the worker commit is transactional, plan §2.3). GSI1 (Projection ALL) doubles writes of items that carry GSI1 keys; the per-command WRU estimate in the model already includes this."
+    },
+    "ddb_storage_gb_month": {
+      "service": "Amazon DynamoDB", "dimension": "Table storage", "unit": "GB-month", "usd": 0.285,
+      "free_always": 25, "free_always_unit": "GB-month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/dynamodb/pricing/on-demand/",
+      "source_detail": "Price List AmazonDynamoDB version 20260911124422, usagetype APS1-TimedStorage-ByteHrs: '$0.00 per GB-Month of storage for first 25 free GB-Months' then '$0.285 per GB-Month'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_pricelist",
+      "notes": "The 25 GB allowance is encoded in the price list itself (first tier priced at 0)."
+    },
+    "ddb_streams_rru": {
+      "service": "Amazon DynamoDB Streams", "dimension": "Streams read request units (GetRecords)", "unit": "stream read request unit", "usd": 2.28e-7,
+      "free_always": 2500000, "free_always_unit": "stream read request units/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/dynamodb/pricing/on-demand/",
+      "source_detail": "Price List AmazonDynamoDB version 20260911124422, usagetype APS1-Streams-Requests: '$0.00 for 2.5 million DynamoDB Streams read request units for a month (free tier)' then '$0.000000228 per DynamoDB Streams read request unit'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_pricelist",
+      "notes": "GetRecords calls made by a Lambda event-source mapping (our notifier) are not charged according to the DynamoDB pricing page; that statement could not be re-verified online in this session, so the model counts stream RRUs at 0 by default and prices them only with --charge-stream-reads."
+    },
+    "ddb_pitr_gb_month": {
+      "service": "Amazon DynamoDB", "dimension": "Point-in-time recovery backup storage", "unit": "GB-month", "usd": 0.228,
+      "free_always": 0, "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/dynamodb/pricing/on-demand/",
+      "source_detail": "Price List AmazonDynamoDB version 20260911124422, usagetype APS1-TimedPITRStorage-ByteHrs: '$0.228 per GB-Month of storage used for DynamoDB PITR backup'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist",
+      "notes": "PITR is enabled on the table (app.yaml PointInTimeRecoveryEnabled: true); billed on table size, 35-day recovery window."
+    },
+    "ses_email_essentials": {
+      "service": "Amazon SES", "dimension": "Outbound e-mail, Essentials pricing plan", "unit": "email", "usd": 1.6e-4,
+      "tiers": [[10000000, 1.6e-4], [100000000, 1.4e-4], [null, 1.1e-4]],
+      "free_always": 0, "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/ses/pricing/",
+      "source_detail": "Price List AmazonSES version 20260911124507, usagetype APS1-Essentials-Outbound-Email: '$0.00016 per Count from 0 to 10,000,000'. Plans announced 2026-07-21: https://aws.amazon.com/about-aws/whats-new/2026/07/amazon-ses-pricing-plans/",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist",
+      "notes": "US$0.16 per 1,000. Accounts that start sending after 2026-07-21 begin on the Essentials plan, which is the SeatRelay case, so this is the default e-mail price in the model. The SES 12-month free tier (3,000 message charges/month) is closed to new customers since 2026-07-21 (verified_secondary)."
+    },
+    "ses_email_alacarte": {
+      "service": "Amazon SES", "dimension": "Outbound e-mail, a-la-carte (legacy pay-as-you-go)", "unit": "email", "usd": 1.0e-4,
+      "free_always": 0, "free_12mo": 3000, "free_12mo_unit": "message charges/month (accounts that started SES before 2026-07-21 only)",
+      "source_url": "https://aws.amazon.com/ses/pricing/",
+      "source_detail": "Price List AmazonSES version 20260911124507, usagetype APS1-Recipients (operation Send): 'USD0.0001 per Count for Recipients:Send in Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "US$0.10 per 1,000; used only as a sensitivity (--ses-alacarte). Attachments are billed separately at US$0.12/GB; SeatRelay sends none."
+    },
+    "cloudfront_dto_gb_asia": {
+      "service": "Amazon CloudFront", "dimension": "Data transfer out to internet, Asia Pacific edge locations", "unit": "GB", "usd": 0.120,
+      "tiers": [[10240, 0.120], [51200, 0.100], [153600, 0.095], [512000, 0.090], [1048576, 0.080], [5242880, 0.070], [null, 0.060]],
+      "free_always": 1024, "free_always_unit": "GB/month (global, all edge locations)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudfront/pricing/",
+      "source_detail": "Price List AmazonCloudFront version 20261003000426 (global file), usagetype AP-DataTransfer-Out-Bytes, fromLocation 'Asia Pacific' toLocation 'External': '$0.120 per GB - first 10 TB / month'. Free 1 TB/month: aws.amazon.com/cloudfront/pricing (official snippet) and https://aws.amazon.com/blogs/aws/aws-free-tier-data-transfer-expansion-100-gb-from-regions-and-1-tb-from-amazon-cloudfront-per-month/",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "PriceClass_200 includes Singapore (web.yaml); Asia Pacific is the most expensive class the SPA will be served from. Origin fetches from S3 to CloudFront are free."
+    },
+    "cloudfront_https_request_asia": {
+      "service": "Amazon CloudFront", "dimension": "HTTPS requests, Asia Pacific edge locations", "unit": "request", "usd": 1.2e-6,
+      "free_always": 10000000, "free_always_unit": "requests/month (HTTP or HTTPS, global)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudfront/pricing/",
+      "source_detail": "Price List AmazonCloudFront version 20261003000426 (global file), usagetype AP-Requests-Tier2-HTTPS, location 'Asia Pacific': '$0.012 per 10,000 HTTPS Requests'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "The distribution redirects HTTP to HTTPS, so all billable requests are HTTPS."
+    },
+    "s3_storage_gb_month": {
+      "service": "Amazon S3", "dimension": "S3 Standard storage", "unit": "GB-month", "usd": 0.025,
+      "free_always": 0, "free_12mo": 5, "free_12mo_unit": "GB-month (legacy accounts only)",
+      "source_url": "https://aws.amazon.com/s3/pricing/",
+      "source_detail": "Price List AmazonS3 version 20261015173540, usagetype APS1-TimedStorage-ByteHrs: '$0.025 per GB - first 50 TB / month of storage used'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Only the SPA build (~10 MB) lives in S3; the SAM deployment bucket is similar in size."
+    },
+    "s3_put_request": {
+      "service": "Amazon S3", "dimension": "PUT, COPY, POST, LIST requests", "unit": "request", "usd": 5.0e-6,
+      "free_always": 0, "free_12mo": 2000, "free_12mo_unit": "PUT requests/month (legacy accounts only)",
+      "source_url": "https://aws.amazon.com/s3/pricing/",
+      "source_detail": "Price List AmazonS3 version 20261015173540, usagetype APS1-Requests-Tier1: '$0.005 per 1,000 PUT, COPY, POST, or LIST requests'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": ""
+    },
+    "s3_get_request": {
+      "service": "Amazon S3", "dimension": "GET and all other requests", "unit": "request", "usd": 4.0e-7,
+      "free_always": 0, "free_12mo": 20000, "free_12mo_unit": "GET requests/month (legacy accounts only)",
+      "source_url": "https://aws.amazon.com/s3/pricing/",
+      "source_detail": "Price List AmazonS3 version 20261015173540, usagetype APS1-Requests-Tier2: '$0.004 per 10,000 GET and all other requests'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Only CloudFront cache misses reach S3."
+    },
+    "cw_custom_metric_month": {
+      "service": "Amazon CloudWatch", "dimension": "Custom metrics (EMF), per metric per month", "unit": "metric-month", "usd": 0.30,
+      "tiers": [[10000, 0.30], [250000, 0.10], [1000000, 0.05], [null, 0.02]],
+      "free_always": 10, "free_always_unit": "custom metrics/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-CW:MetricMonitorUsage: '$0.30 per metric-month for the first 10,000 metrics - Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Each unique metric-name x dimension-set is one metric, hence the low-cardinality rule in plan §2.4 (only Service/Stage dimensions)."
+    },
+    "cw_alarm_month": {
+      "service": "Amazon CloudWatch", "dimension": "Standard-resolution alarm, per alarm-metric per month", "unit": "alarm-month", "usd": 0.10,
+      "free_always": 10, "free_always_unit": "alarms/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-CW:AlarmMonitorUsage: '$0.10 per alarm metric month (standard resolution) - Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "app.yaml declares 7 alarms per stage."
+    },
+    "cw_dashboard_month": {
+      "service": "Amazon CloudWatch", "dimension": "Dashboard, per dashboard per month", "unit": "dashboard-month", "usd": 3.00,
+      "free_always": 3, "free_always_unit": "dashboards/month (up to 50 metrics each)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Not present in the Price List API files (neither ap-southeast-1 nor us-east-1). US$3.00 per dashboard-month and 3 free dashboards are the figures quoted by third-party summaries of aws.amazon.com/cloudwatch/pricing (e.g. cloudzero.com/blog/cloudwatch-pricing).",
+      "retrieved": "2026-10-16", "verification": "unverified", "free_tier_verification": "verified_secondary",
+      "notes": "Best estimate; the official page was not reachable from the build environment. Immaterial for the project (1 dashboard per stage, within the 3 free)."
+    },
+    "cw_logs_ingest_gb": {
+      "service": "Amazon CloudWatch Logs", "dimension": "Log data ingested (Standard log class)", "unit": "GB", "usd": 0.70,
+      "free_always": 5, "free_always_unit": "GB/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-DataProcessing-Bytes (PutLogEvents): '$0.70 per GB custom log data ingested in Standard log class - Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Singapore is priced above us-east-1 (US$0.50). Lambda function logs and the HTTP API access log both land here."
+    },
+    "cw_logs_storage_gb_month": {
+      "service": "Amazon CloudWatch Logs", "dimension": "Log storage (archived)", "unit": "GB-month", "usd": 0.03,
+      "free_always": 5, "free_always_unit": "GB-month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-TimedStorage-ByteHrs: '$0.03 per GB-mo of log storage - Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "All log groups have RetentionInDays 14 (app.yaml), so average stored volume is about 14/30 of monthly ingestion."
+    },
+    "cw_api_request": {
+      "service": "Amazon CloudWatch", "dimension": "API requests (GetMetricData, PutMetricData, ...)", "unit": "request", "usd": 1.0e-5,
+      "free_always": 1000000, "free_always_unit": "API requests/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
+      "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-CW:Requests: '$0.01 per 1,000 requests'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
+      "notes": "Dashboard refreshes and the experiment scripts' metric fetches; EMF metrics are ingested through logs, not this API."
+    },
+    "xray_trace_recorded": {
+      "service": "AWS X-Ray", "dimension": "Traces recorded", "unit": "trace", "usd": 5.0e-6,
+      "free_always": 100000, "free_always_unit": "traces recorded/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/xray/pricing/",
+      "source_detail": "Price List AWSXRay version 20260911124622, usagetype APS1-XRay-TracesStored: 'AWS X-Ray - Total Traces Stored - Asia Pacific (Singapore)' USD 0.000005. Free 100,000 recorded + 1,000,000 retrieved/scanned: aws.amazon.com/cloudwatch/pricing (official snippet).",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "Tracing: Active on every function (app.yaml Globals). Default sampling rule records 1 request/s plus 5% of the rest; the model conservatively records one trace per sampled invocation with a configurable sampling fraction."
+    },
+    "xray_trace_retrieved": {
+      "service": "AWS X-Ray", "dimension": "Traces retrieved or scanned", "unit": "trace", "usd": 5.0e-7,
+      "free_always": 1000000, "free_always_unit": "traces retrieved+scanned/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/xray/pricing/",
+      "source_detail": "Price List AWSXRay version 20260911124622, usagetype APS1-XRay-TracesAccessed (operations XRay-Traces-Retrieved / XRay-Traces-Scanned): USD 0.0000005 per trace.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "Only console/experiment look-ups; a small fixed quantity in the model."
+    },
+    "eventbridge_scheduler_invocation": {
+      "service": "Amazon EventBridge Scheduler", "dimension": "Scheduled invocations", "unit": "invocation", "usd": 1.25e-6,
+      "free_always": 14000000, "free_always_unit": "invocations/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/eventbridge/pricing/",
+      "source_detail": "Price List AWSEvents version 20260924163903, usagetype APS1-ScheduledInvocation: '$0 for the first 14 million scheduled invocations' then '$1.25 per million scheduled invocations in Asia Pacific (Singapore)'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_pricelist",
+      "notes": "The sweep schedule (rate(5 minutes), ScheduleV2) makes 8,640 invocations in a 30-day month."
+    },
+    "cognito_mau_essentials": {
+      "service": "Amazon Cognito user pools", "dimension": "Monthly active users, Essentials tier", "unit": "MAU", "usd": 0.015,
+      "free_always": 10000, "free_always_unit": "MAU/month (Lite or Essentials; no free tier on Plus)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cognito/pricing/",
+      "source_detail": "Price List AmazonCognito version 20260925193108, usagetype APS1-CognitoEssentialsMAU: 'Cognito Essentials ap-southeast-1 tier 1 pricing' USD 0.015 per MAU. 10,000 free MAU: aws.amazon.com/cognito/pricing (official snippet: 'Amazon Cognito Essentials and Lite have a free tier ... that doesn't expire').",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "auth.yaml does not set UserPoolTier, so the pool is created on the default Essentials tier."
+    },
+    "cognito_mau_lite": {
+      "service": "Amazon Cognito user pools", "dimension": "Monthly active users, Lite tier", "unit": "MAU", "usd": 0.0055,
+      "tiers": [[90000, 0.0055], [990000, 0.0046], [9990000, 0.00325], [null, 0.0025]],
+      "free_always": 10000, "free_always_unit": "MAU/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/cognito/pricing/",
+      "source_detail": "Price List AmazonCognito version 20260925193108, usagetype APS1-CognitoLiteMAU: tier 1 USD 0.0055 (first 90,000 after the free 10,000), tier 2 USD 0.0046, tier 3 USD 0.00325, tier 4 USD 0.0025.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "Sensitivity option (--cognito-lite): Lite lacks managed login branding v2 and passwordless, neither of which SeatRelay uses."
+    },
+    "data_transfer_out_gb": {
+      "service": "AWS data transfer", "dimension": "Data transfer out from ap-southeast-1 to the internet (API Gateway responses)", "unit": "GB", "usd": 0.120,
+      "tiers": [[10240, 0.120], [51200, 0.085], [153600, 0.082], [null, 0.080]],
+      "free_always": 100, "free_always_unit": "GB/month (global, all regions, since 2021-12-01)", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/ec2/pricing/on-demand/",
+      "source_detail": "Price List AWSDataTransfer version 20260916132208, usagetype APS1-DataTransfer-Out-Bytes: '$0.120 per GB - first 10 TB / month data transfer out beyond the global free tier'. 100 GB free: https://aws.amazon.com/blogs/aws/aws-free-tier-data-transfer-expansion-100-gb-from-regions-and-1-tb-from-amazon-cloudfront-per-month/",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_official_snippet",
+      "notes": "Data transfer in is free. Lambda-to-DynamoDB/SQS traffic stays inside the region and is free."
+    },
+    "sns_email_notification": {
+      "service": "Amazon SNS", "dimension": "E-mail notifications (alarm topic)", "unit": "notification", "usd": 2.0e-5,
+      "free_always": 1000, "free_always_unit": "e-mail notifications/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/sns/pricing/",
+      "source_detail": "Price List AmazonSNS version 20260915151944, usagetype APS1-DeliveryAttempts-SMTP: 'First 1,000 Amazon SNS Email/Email-JSON Notifications per month are free' then '$2.00 per 100,000'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_pricelist",
+      "notes": "Alarm notifications only; a few per month."
+    },
+    "sns_api_request": {
+      "service": "Amazon SNS", "dimension": "API requests (Publish)", "unit": "request", "usd": 5.0e-7,
+      "free_always": 1000000, "free_always_unit": "requests/month", "free_12mo": 0,
+      "source_url": "https://aws.amazon.com/sns/pricing/",
+      "source_detail": "Price List AmazonSNS version 20260915151944, usagetype APS1-Requests-Tier1: 'First 1,000,000 Amazon SNS API Requests per month are free' then '$0.50 per 1,000,000'.",
+      "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_pricelist",
+      "notes": ""
+    }
+  },
+  "sla_reference": {
+    "note": "Published AWS Service Level Agreements (monthly uptime commitment) used for the availability discussion in docs/COST.md. Values are from memory of aws.amazon.com/<service>/sla and were not re-fetched in this session.",
+    "verification": "unverified",
+    "lambda": 0.9995, "api_gateway": 0.9995, "dynamodb": 0.9999, "sqs": 0.999, "cloudfront": 0.999, "cognito": 0.999, "ses": 0.999,
+    "source_url": "https://aws.amazon.com/legal/service-level-agreements/"
+  }
+}
