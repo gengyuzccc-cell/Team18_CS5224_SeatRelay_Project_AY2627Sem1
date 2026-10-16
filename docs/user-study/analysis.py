@@ -103,6 +103,13 @@ def fmt_p(p) -> str:
     return f"{p:.3f}"
 
 
+def p_label(p) -> str:
+    """'p = 0.008', 'p < 0.001' or 'p = n/a'."""
+    if p is None or p != p:
+        return "p = n/a"
+    return "p < 0.001" if p < 0.001 else f"p = {p:.3f}"
+
+
 def md_table(header: list[str], rows: list[list[str]]) -> str:
     out = ["| " + " | ".join(header) + " |", "|" + "|".join(["---"] * len(header)) + "|"]
     for r in rows:
@@ -465,7 +472,7 @@ def section_time(session: pd.DataFrame) -> tuple[str, dict]:
         if impr == impr:
             flag = "meets target" if impr >= TARGET_IMPROVEMENT_PCT else "below target"
         rows.append([label, str(n), fmt(med_sr, 0), fmt(med_ctrl, 0), fmt(impr, 0, " %"),
-                     fmt(float(rel), 0, " %"), f"W={fmt(wt['W'], 1)}, p={fmt_p(wt['p'])}",
+                     fmt(float(rel), 0, " %"), f"W = {fmt(wt['W'], 1)}, {p_label(wt['p'])}",
                      "; ".join(x for x in [wt["note"], flag] if x)])
     lines.append(md_table(["Scope", "n participants", "median total SR", "median total CTRL", "improvement",
                            "median rel. improvement", "Wilcoxon", "note"], rows))
@@ -600,8 +607,8 @@ def chart_time(pairs: dict, out: Path) -> Path | None:
         for x, cond in [(0, "CTRL"), (1, "SR")]:
             med = float(w[cond].median())
             ax.plot([x - 0.22, x + 0.22], [med, med], color=COLOR[cond], linewidth=2.5, zorder=3)
-            ax.annotate(f"{med:.0f} s", (x, med), xytext=(0, 6), textcoords="offset points",
-                        ha="center", fontsize=8, color=INK)
+            ax.annotate(f"{med:.0f} s", (x + 0.24, med), xytext=(3, -3), textcoords="offset points",
+                        ha="left", fontsize=8, color=INK)
         ax.axhline(TIME_CAP_S, color=GRID, linestyle="--", linewidth=1)
         ax.set_xticks([0, 1], [CONDITION_LABEL["CTRL"], CONDITION_LABEL["SR"]])
         ax.set_xlim(-0.5, 1.5)
@@ -618,18 +625,19 @@ def chart_time(pairs: dict, out: Path) -> Path | None:
 
 
 def chart_sus(sus_out: dict, out: Path) -> Path | None:
-    data = [sus_out.get(c, np.array([])) for c in CONDITIONS]
-    if all(len(d) == 0 for d in data):
+    order = ["CTRL", "SR"]
+    pos = {"CTRL": 0, "SR": 1}
+    data = {c: np.asarray(sus_out.get(c, np.array([])), dtype=float) for c in order}
+    if all(len(d) == 0 for d in data.values()):
         warn("chart sus-boxplot.png skipped: no SUS rows")
         return None
     fig, ax = plt.subplots(figsize=(5.2, 4.2))
     fig.patch.set_facecolor(SURFACE)
     style_axes(ax)
-    positions = [0, 1]
-    plotted = [(p, d, c) for p, d, c in zip(positions, data, CONDITIONS) if len(d)]
-    bp = ax.boxplot([d for _, d, _ in plotted], positions=[p for p, _, _ in plotted], widths=0.45,
-                    patch_artist=True, showfliers=False, medianprops={"color": INK, "linewidth": 1.5})
-    for patch, (_, _, cond) in zip(bp["boxes"], plotted):
+    plotted = [c for c in order if len(data[c])]
+    bp = ax.boxplot([data[c] for c in plotted], positions=[pos[c] for c in plotted], widths=0.45,
+                    patch_artist=True, showfliers=False, medianprops={"color": INK, "linewidth": 1.5}, zorder=2)
+    for patch, cond in zip(bp["boxes"], plotted):
         patch.set(facecolor=COLOR[cond], alpha=0.25, edgecolor=COLOR[cond], linewidth=1.2)
     for key in ["whiskers", "caps"]:
         for line in bp[key]:
@@ -637,25 +645,27 @@ def chart_sus(sus_out: dict, out: Path) -> Path | None:
     paired = sus_out.get("_paired")
     if paired is not None and len(paired):
         for _, r in paired.iterrows():
-            ax.plot([1, 0], [r["SR"], r["CTRL"]], color=INK_SECONDARY, alpha=0.3, linewidth=1, zorder=1)
+            ax.plot([pos["CTRL"], pos["SR"]], [r["CTRL"], r["SR"]], color=INK_SECONDARY, alpha=0.3,
+                    linewidth=1, zorder=1)
     rng = np.random.default_rng(1)
-    for p, d, cond in plotted:
-        ax.scatter(p + rng.uniform(-0.08, 0.08, len(d)), d, s=26, color=COLOR[cond], edgecolor=SURFACE,
+    for cond in plotted:
+        d = data[cond]
+        ax.scatter(pos[cond] + rng.uniform(-0.08, 0.08, len(d)), d, s=26, color=COLOR[cond], edgecolor=SURFACE,
                    linewidth=1, zorder=3, label=f"{CONDITION_LABEL[cond]} (n = {len(d)})")
-        ax.annotate(f"mean {np.mean(d):.1f}", (p, float(np.max(d))), xytext=(0, 8), textcoords="offset points",
-                    ha="center", fontsize=8, color=INK)
+        ax.annotate(f"mean {np.mean(d):.1f}", (pos[cond], float(np.max(d))), xytext=(0, 8),
+                    textcoords="offset points", ha="center", fontsize=8, color=INK)
     ax.axhline(TARGET_SUS, color=COLOR["SR"], linestyle="--", linewidth=1)
-    ax.annotate(f"target {TARGET_SUS:.0f}", (1.45, TARGET_SUS), xytext=(0, 3), textcoords="offset points",
-                ha="right", fontsize=8, color=INK_SECONDARY)
+    ax.annotate(f"target {TARGET_SUS:.0f}", (-0.45, TARGET_SUS), xytext=(0, 3), textcoords="offset points",
+                ha="left", fontsize=8, color=INK_SECONDARY)
     ax.axhline(SUS_PUBLISHED_MEAN, color=INK_SECONDARY, linestyle=":", linewidth=1)
-    ax.annotate(f"published mean {SUS_PUBLISHED_MEAN:.0f}", (1.45, SUS_PUBLISHED_MEAN), xytext=(0, -10),
-                textcoords="offset points", ha="right", fontsize=8, color=INK_SECONDARY)
-    ax.set_xticks(positions, [CONDITION_LABEL[c] for c in CONDITIONS])
+    ax.annotate(f"published mean {SUS_PUBLISHED_MEAN:.0f}", (-0.45, SUS_PUBLISHED_MEAN), xytext=(0, -10),
+                textcoords="offset points", ha="left", fontsize=8, color=INK_SECONDARY)
+    ax.set_xticks([pos[c] for c in order], [CONDITION_LABEL[c] for c in order])
     ax.set_xlim(-0.5, 1.5)
     ax.set_ylim(0, 105)
     ax.set_ylabel("SUS score (0–100)")
     ax.set_title("SUS per condition (lines join the same participant)", fontsize=10)
-    ax.legend(frameon=False, fontsize=8, loc="lower left")
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
     fig.tight_layout()
     path = out / "sus-boxplot.png"
     fig.savefig(path, dpi=160, facecolor=SURFACE)
@@ -685,14 +695,15 @@ def chart_completion(table: dict, out: Path) -> Path | None:
             ax.annotate(f"{b:.0f}%\nn={n}" if n else "n=0", (xi, b + e), xytext=(0, 3), textcoords="offset points",
                         ha="center", fontsize=7, color=INK)
     ax.axhline(TARGET_COMPLETION * 100, color=INK_SECONDARY, linestyle="--", linewidth=1)
-    ax.annotate("target 90 %", (len(tasks) - 0.5, TARGET_COMPLETION * 100), xytext=(0, 3), textcoords="offset points",
-                ha="right", fontsize=8, color=INK_SECONDARY)
+    ax.annotate(f"target {TARGET_COMPLETION:.0%}", (-0.6, TARGET_COMPLETION * 100), xytext=(0, 3),
+                textcoords="offset points", ha="left", fontsize=8, color=INK_SECONDARY)
     ax.set_xticks(x, [TASK_LABEL.get(t, t).replace(" ", "\n", 1) for t in tasks], fontsize=8)
+    ax.set_xlim(-0.6, len(tasks) - 0.4)
     ax.set_ylim(0, 118)
     ax.set_ylabel("completion rate (%)")
     ax.set_title("Task completion per condition (solid = unassisted, light = assisted)", fontsize=10)
-    ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper left")
-    fig.tight_layout()
+    fig.legend(frameon=False, fontsize=8, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 0.0))
+    fig.tight_layout(rect=(0, 0.07, 1, 1))
     path = out / "completion-bars.png"
     fig.savefig(path, dpi=160, facecolor=SURFACE)
     plt.close(fig)
