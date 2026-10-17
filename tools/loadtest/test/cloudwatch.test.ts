@@ -37,7 +37,11 @@ describe('CloudWatch round metrics', () => {
       Metric: {
         Namespace: 'SeatRelay',
         MetricName: 'CommandSettledLatency',
-        Dimensions: [{ Name: 'service', Value: 'worker' }],
+        // the deployed worker emits service + stage; service alone is a different, empty series
+        Dimensions: [
+          { Name: 'service', Value: 'worker' },
+          { Name: 'stage', Value: 'dev' },
+        ],
       },
       Stat: 'p95',
       Period: 60,

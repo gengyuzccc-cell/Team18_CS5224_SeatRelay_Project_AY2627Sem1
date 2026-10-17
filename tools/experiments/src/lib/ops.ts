@@ -538,8 +538,10 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
     async metricsSince(baseline, names) {
       const end = new Date();
       // EMF datapoints carry the invocation's timestamp; widen the window by a minute each side.
+      // The deployed stacks emit every SeatRelay metric with `service` + `stage`; a query on
+      // `service` alone reads a different, empty series (and a "0" there would be vacuous).
       const result: MetricsResult = await getMetricData(
-        seatRelayQueries(names),
+        seatRelayQueries(names, undefined, { stage: options.stage }),
         {
           start: new Date(baseline.at.getTime() - 60_000),
           end: new Date(end.getTime() + 60_000),

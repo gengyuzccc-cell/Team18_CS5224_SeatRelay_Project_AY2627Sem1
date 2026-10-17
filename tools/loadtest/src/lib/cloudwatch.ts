@@ -9,7 +9,7 @@ import type { RunRow } from './k6summary';
 /**
  * Server-side evidence for one measured round (plan §3 step 15): SQS depth and age of the
  * oldest message of the stage's commands FIFO, and the worker's `CommandSettledLatency`
- * (EMF, namespace SeatRelay, dimension `service=worker`) over the round window.
+ * (EMF, namespace SeatRelay, dimensions `service=worker` and `stage=<stage>`) over the round window.
  *
  * CloudWatch keeps these metrics at one-minute resolution and ingests them 1–3 minutes late,
  * so `run-matrix` (a) starts every k6 run so that its measured phase begins on a minute
@@ -57,6 +57,12 @@ export function roundMetricQueries(
   period = 60,
 ): MetricDataQuery[] {
   const queue = { Name: 'QueueName', Value: commandsQueueName(stage) };
+  // The worker's EMF metrics carry `service` and `stage` (services/aws/src/lib/metrics.ts); a query
+  // on `service` alone addresses a different series that the deployed stacks no longer write.
+  const workerDims = [
+    { Name: 'service', Value: service },
+    { Name: 'stage', Value: stage },
+  ];
   return [
     {
       Id: 'sqsDepth',
@@ -88,7 +94,7 @@ export function roundMetricQueries(
         Metric: {
           Namespace: METRICS_NAMESPACE,
           MetricName: 'CommandSettledLatency',
-          Dimensions: [{ Name: 'service', Value: service }],
+          Dimensions: workerDims,
         },
         Period: period,
         Stat: 'p95',
@@ -100,7 +106,7 @@ export function roundMetricQueries(
         Metric: {
           Namespace: METRICS_NAMESPACE,
           MetricName: 'CommandSettledLatency',
-          Dimensions: [{ Name: 'service', Value: service }],
+          Dimensions: workerDims,
         },
         Period: period,
         Stat: 'SampleCount',

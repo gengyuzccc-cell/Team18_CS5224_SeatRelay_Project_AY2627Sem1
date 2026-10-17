@@ -240,6 +240,11 @@ describe('CloudWatch fetcher', () => {
     });
   });
 
+  it('adds the stage dimension when asked (deployed stacks emit service + stage)', () => {
+    const [query] = seatRelayQueries(['SweepLateExpiries'], ['Sum'], { stage: 'dev' });
+    expect(query?.dimensions).toEqual({ service: 'worker', stage: 'dev' });
+  });
+
   it('merges paginated GetMetricData results and totals the series', async () => {
     const sent: GetMetricDataCommand[] = [];
     const client = {
