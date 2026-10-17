@@ -6,6 +6,7 @@ import {
   createDockerStatsSampler,
   DOCKER_STATS_CSV_HEADER,
   dockerStatsCsvLine,
+  dockerStatsPreflight,
   parseDockerStatsLine,
   parseSize,
 } from '../src/lib/dockerStats';
@@ -77,5 +78,47 @@ describe('docker stats parsing', () => {
     expect(lines[0]).toBe(DOCKER_STATS_CSV_HEADER);
     expect(lines).toHaveLength(calls + 1);
     expect(lines[1]).toContain('seatrelay-local-server-1');
+  });
+
+  it('never runs two docker stats calls at once (slow calls skip ticks)', async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seatrelay-stats-'));
+    dirs.push(dir);
+    let running = 0;
+    let maxRunning = 0;
+    const sampler = createDockerStatsSampler({
+      outFile: path.join(dir, 'docker-stats.csv'),
+      intervalMs: 5,
+      exec: async () => {
+        running += 1;
+        maxRunning = Math.max(maxRunning, running);
+        await new Promise((resolve) => setTimeout(resolve, 25));
+        running -= 1;
+        return `${LINE}\n`;
+      },
+    });
+    sampler.start();
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    await sampler.stop();
+    expect(maxRunning).toBe(1);
+    expect(sampler.skipped).toBeGreaterThan(0);
+    expect(sampler.samples).toBeGreaterThanOrEqual(2);
+  });
+
+  it('preflight reports a missing daemon once, or the matching containers', async () => {
+    const down = await dockerStatsPreflight(undefined, async () => {
+      throw new Error(
+        'Command failed: docker stats --no-stream --format {{json .}}\nCannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?\n',
+      );
+    });
+    expect(down).toEqual({
+      ok: false,
+      reason:
+        'Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?',
+    });
+    const up = await dockerStatsPreflight(
+      undefined,
+      async () => `${LINE}\n${LINE.replace('seatrelay-local-server-1', 'other')}\n`,
+    );
+    expect(up).toEqual({ ok: true, containers: ['seatrelay-local-server-1'] });
   });
 });

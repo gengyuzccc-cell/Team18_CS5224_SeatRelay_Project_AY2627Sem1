@@ -88,6 +88,54 @@ export interface K6RunConfig {
   pollTimeoutMs?: number;
 }
 
+/** Rough wall-clock length of a matrix: per run warm-up + measured + graceful stop + pause. */
+export function estimateMatrixMs(
+  spec: MatrixSpec,
+  pauseMs: number,
+  perRunOverheadMs = 15_000,
+): number {
+  const runs = spec.scenarios.length * spec.vus.length * spec.rounds;
+  const perRun = durationToMs(spec.warmup) + durationToMs(spec.duration) + perRunOverheadMs;
+  return runs * perRun + Math.max(0, runs - 1) * pauseMs;
+}
+
+export interface TokenCacheCheck {
+  users: number;
+  /** Earliest `expiresAt` among the accounts the largest VU level uses. */
+  firstExpiry?: string;
+  problems: string[];
+}
+
+/**
+ * Before a matrix starts: every VU needs its own account, and the tokens must outlive the
+ * whole matrix (k6 `setup()` aborts a run whose tokens expire within a minute).
+ */
+export function checkTokenCacheForMatrix(
+  users: readonly { expiresAt: string }[],
+  maxVus: number,
+  matrixEndsAt: number,
+): TokenCacheCheck {
+  const problems: string[] = [];
+  if (users.length < maxVus) {
+    problems.push(`${users.length} accounts for ${maxVus} VUs (one account per VU is needed)`);
+  }
+  const expiries = users
+    .slice(0, Math.max(maxVus, 1))
+    .map((user) => user.expiresAt)
+    .sort();
+  const firstExpiry = expiries[0];
+  if (firstExpiry !== undefined && Date.parse(firstExpiry) - 60_000 < matrixEndsAt) {
+    problems.push(
+      `tokens expire from ${firstExpiry}, before the matrix ends (~${new Date(matrixEndsAt).toISOString()})`,
+    );
+  }
+  return {
+    users: users.length,
+    ...(firstExpiry === undefined ? {} : { firstExpiry }),
+    problems,
+  };
+}
+
 /** Environment variables one k6 run reads (`scripts/lib.js` CONFIG). */
 export function k6Env(cell: MatrixCell, config: K6RunConfig): Record<string, string> {
   return {

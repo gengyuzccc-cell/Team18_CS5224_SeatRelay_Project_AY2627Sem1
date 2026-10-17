@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import {
   assertCognitoAdminCredentials,
+  COGNITO_ADMIN_HINT,
   cognitoUserProvider,
   resolveCognitoIds,
 } from './lib/cognito';
@@ -106,7 +107,11 @@ runMain(async () => {
   });
   log('cognito resolved', { ...ids });
   if (create) {
-    await assertCognitoAdminCredentials(ids.region);
+    await assertCognitoAdminCredentials(
+      ids.region,
+      undefined,
+      `${COGNITO_ADMIN_HINT} To only mint tokens for accounts that already exist, pass --no-create (with --pool-id and --client-id no AWS call is made at all).`,
+    );
   }
   const provider = cognitoUserProvider(ids);
 

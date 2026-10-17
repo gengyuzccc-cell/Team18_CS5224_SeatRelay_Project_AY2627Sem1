@@ -1,7 +1,7 @@
 import type { CreateWorkshopInput, RegistrationSummary } from '@seatrelay/contracts';
 import type { ApiClient } from './api';
 import { DAY_MS, HOUR_MS, isoFromNow } from './cli';
-import { findOrCreateOrg, registerAny, type SeedLogger } from './seed';
+import { cancelOrgWorkshops, findOrCreateOrg, registerAny, type SeedLogger } from './seed';
 import { provisionUsers, type ProvisionedUser, type UserProvider, type UserSpec } from './users';
 
 /**
@@ -58,6 +58,12 @@ export interface SeedDemoOptions {
   title: string;
   holdSeconds: number;
   startsInDays: number;
+  /**
+   * Leave earlier workshops with the same title in the demo organisation open. By default they
+   * are cancelled (CANCEL_WORKSHOP), so re-running the preset gives one clean demo workshop and
+   * the participants' "My registrations" pages show only it as live.
+   */
+  keepPrevious?: boolean;
   log?: SeedLogger;
   now?: number;
 }
@@ -75,6 +81,7 @@ export interface DemoParticipantResult {
 export interface SeedDemoSummary {
   orgId: string;
   workshopId: string;
+  /** Session state after the participants registered. */
   sessions: {
     key: string;
     id: string;
@@ -82,7 +89,11 @@ export interface SeedDemoSummary {
     capacity: number;
     startsAt: string;
     free: number;
+    held: number;
+    queueLength: number;
   }[];
+  /** Earlier demo workshops (same title) cancelled by this run. */
+  cancelledWorkshops: { id: string; title: string }[];
   holdSeconds: number;
   organiser: ProvisionedUser;
   participants: DemoParticipantResult[];
@@ -125,6 +136,13 @@ export async function seedDemo(options: SeedDemoOptions): Promise<SeedDemoSummar
 
   const organiserClient = options.api.withToken(organiserUser.idToken);
   const { organization } = await findOrCreateOrg(organiserClient, options.orgName, log);
+  const cancelled =
+    options.keepPrevious === true
+      ? []
+      : await cancelOrgWorkshops(organiserClient, organization.id, {
+          keep: (workshop) => workshop.title !== options.title,
+          log,
+        });
   const created = await organiserClient.createWorkshop(organization.id, demoWorkshopBody(options));
   const sessionIds = created.sessions.map((session) => session.id);
   const keyOf = (id: string): string => `S${sessionIds.indexOf(id) + 1}`;
@@ -157,17 +175,21 @@ export async function seedDemo(options: SeedDemoOptions): Promise<SeedDemoSummar
   }
 
   const verify = await organiserClient.verify(organization.id, created.workshop.id);
+  const final = await organiserClient.getWorkshop(created.workshop.id);
   return {
     orgId: organization.id,
     workshopId: created.workshop.id,
-    sessions: created.sessions.map((session, i) => ({
-      key: `S${i + 1}`,
+    sessions: final.sessions.map((session) => ({
+      key: keyOf(session.id),
       id: session.id,
       title: session.title,
       capacity: session.capacity,
       startsAt: session.startsAt,
       free: session.free,
+      held: session.held,
+      queueLength: session.queueLength,
     })),
+    cancelledWorkshops: cancelled.map((workshop) => ({ id: workshop.id, title: workshop.title })),
     holdSeconds: options.holdSeconds,
     organiser: organiserUser,
     participants,

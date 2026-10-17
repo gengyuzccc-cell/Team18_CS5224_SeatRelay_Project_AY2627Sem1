@@ -138,6 +138,7 @@ runMain(async () => {
       ),
       `Accounts: ${summary.accounts.participant} (no registration), ${summary.accounts.organiser}, ${summary.accounts.registrants.length} registrants — password ${password}`,
       `verify: ${summary.verify.map((v) => `${v.code} ${v.ok ? 'ok' : 'VIOLATIONS'}`).join(', ')}`,
+      `Persona notifications marked read: ${summary.personaNotificationsMarkedRead} (earlier rounds stay listed under "Past"; the API cannot delete them)`,
     ];
     process.stdout.write(`${lines.join('\n')}\n`);
   }

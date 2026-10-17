@@ -12,6 +12,7 @@ import {
   log,
   parseCli,
   parseTarget,
+  readTokenCache,
   REPO_ROOT,
   resolveTarget,
   resolveUserPath,
@@ -21,7 +22,11 @@ import {
   tokenCachePath,
 } from '@seatrelay/scripts';
 import { createCloudWatchClient, fetchRoundMetrics, type MetricDataClient } from './lib/cloudwatch';
-import { createDockerStatsSampler, type DockerStatsSampler } from './lib/dockerStats';
+import {
+  createDockerStatsSampler,
+  dockerStatsPreflight,
+  type DockerStatsSampler,
+} from './lib/dockerStats';
 import { isK6Summary, parseK6Summary, type RunRow } from './lib/k6summary';
 import {
   buildMatrix,
@@ -30,7 +35,9 @@ import {
   DEFAULT_SCENARIOS,
   DEFAULT_VUS,
   DEFAULT_WARMUP,
+  checkTokenCacheForMatrix,
   durationToMs,
+  estimateMatrixMs,
   k6Args,
   k6Env,
   mergeRows,
@@ -91,12 +98,14 @@ function parseList(value: string | undefined, fallback: string[]): string[] {
     .filter((item) => item.length > 0);
 }
 
+/** Short HEAD commit, with `-dirty` when tracked files differ from it (traceability). */
 function gitCommit(): string | undefined {
   try {
-    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-    }).trim();
+    const run = (args: string[]): string =>
+      execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+    const head = run(['rev-parse', '--short', 'HEAD']);
+    const dirty = run(['status', '--porcelain', '--untracked-files=no']).length > 0;
+    return dirty ? `${head}-dirty` : head;
   } catch {
     return undefined;
   }
@@ -237,6 +246,27 @@ runMain(async () => {
       hint: `pnpm --filter @seatrelay/loadtest prepare-scenario -- --target ${targetName}`,
     });
   }
+  const estimatedMs = estimateMatrixMs(spec, pauseMs);
+  const tokenCheck = checkTokenCacheForMatrix(
+    readTokenCache(tokenCache).users,
+    Math.max(...spec.vus),
+    Date.now() + estimatedMs,
+  );
+  if (tokenCheck.problems.length > 0) {
+    throw new CliError(`token cache ${tokenCache}: ${tokenCheck.problems.join('; ')}`, {
+      hint:
+        targetName === 'local'
+          ? `pnpm --filter @seatrelay/scripts get-tokens-keycloak -- --count ${Math.max(...spec.vus) + 10} --prefix loaduser`
+          : `pnpm --filter @seatrelay/scripts create-test-users -- --count ${Math.max(...spec.vus) + 10} --password '…' --stage ${stage}`,
+    });
+  }
+  log('matrix', {
+    runs: cells.length,
+    estimatedMinutes: Math.round(estimatedMs / 60_000),
+    accounts: tokenCheck.users,
+    firstTokenExpiry: tokenCheck.firstExpiry,
+    outDir,
+  });
   fs.mkdirSync(summaryDir, { recursive: true });
   fs.mkdirSync(logsDir, { recursive: true });
 
@@ -257,7 +287,11 @@ runMain(async () => {
   }
 
   let sampler: DockerStatsSampler | undefined;
-  if (dockerStats) {
+  const preflight = dockerStats ? await dockerStatsPreflight() : undefined;
+  if (preflight !== undefined && !preflight.ok) {
+    notes.push(`docker stats not sampled: ${preflight.reason}`);
+    log('docker stats skipped', { reason: preflight.reason });
+  } else if (dockerStats) {
     sampler = createDockerStatsSampler({
       outFile: path.join(outDir, 'docker-stats.csv'),
       onError: (error) =>

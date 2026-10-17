@@ -142,7 +142,39 @@ export interface DockerStatsSampler {
   sampleOnce(): Promise<DockerStatsRow[]>;
   readonly samples: number;
   readonly errors: number;
+  /** Ticks skipped because the previous `docker stats` call was still running. */
+  readonly skipped: number;
   readonly outFile: string;
+}
+
+/**
+ * One `docker stats` call before sampling starts: returns why sampling cannot work (daemon
+ * down, docker missing) or which containers match, so callers fail fast instead of logging an
+ * error every 2 s for the whole run.
+ */
+export async function dockerStatsPreflight(
+  filter: (containerName: string) => boolean = (name) => name.startsWith(DEFAULT_CONTAINER_PREFIX),
+  exec: () => Promise<string> = dockerStatsOnce,
+): Promise<{ ok: true; containers: string[] } | { ok: false; reason: string }> {
+  let stdout: string;
+  try {
+    stdout = await exec();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const reason =
+      message
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0 && !line.startsWith('Command failed'))
+        .join(' ') || message;
+    return { ok: false, reason };
+  }
+  const containers = stdout
+    .split('\n')
+    .map((line) => parseDockerStatsLine(line, ''))
+    .filter((row): row is DockerStatsRow => row !== undefined && filter(row.container))
+    .map((row) => row.container);
+  return { ok: true, containers };
 }
 
 export function createDockerStatsSampler(options: DockerStatsSamplerOptions): DockerStatsSampler {
@@ -152,8 +184,10 @@ export function createDockerStatsSampler(options: DockerStatsSamplerOptions): Do
   const now = options.now ?? (() => new Date());
   let timer: NodeJS.Timeout | undefined;
   let inflight: Promise<unknown> = Promise.resolve();
+  let busy = false;
   let samples = 0;
   let errors = 0;
+  let skipped = 0;
   let headerWritten = false;
 
   function ensureHeader(): void {
@@ -184,11 +218,21 @@ export function createDockerStatsSampler(options: DockerStatsSamplerOptions): Do
     return rows;
   }
 
+  /** `docker stats --no-stream` itself takes ~2 s: never run two at once, skip the tick. */
   function tick(): void {
-    inflight = sampleOnce().catch((error: unknown) => {
-      errors += 1;
-      options.onError?.(error);
-    });
+    if (busy) {
+      skipped += 1;
+      return;
+    }
+    busy = true;
+    inflight = sampleOnce()
+      .catch((error: unknown) => {
+        errors += 1;
+        options.onError?.(error);
+      })
+      .finally(() => {
+        busy = false;
+      });
   }
 
   return {
@@ -197,6 +241,9 @@ export function createDockerStatsSampler(options: DockerStatsSamplerOptions): Do
     },
     get errors() {
       return errors;
+    },
+    get skipped() {
+      return skipped;
     },
     outFile: options.outFile,
     start() {

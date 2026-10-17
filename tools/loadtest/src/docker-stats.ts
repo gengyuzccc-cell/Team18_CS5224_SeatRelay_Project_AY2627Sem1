@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import path from 'node:path';
 import {
+  CliError,
   intOption,
   log,
   parseCli,
@@ -9,7 +10,11 @@ import {
   runMain,
   stringOption,
 } from '@seatrelay/scripts';
-import { createDockerStatsSampler, DEFAULT_CONTAINER_PREFIX } from './lib/dockerStats';
+import {
+  createDockerStatsSampler,
+  DEFAULT_CONTAINER_PREFIX,
+  dockerStatsPreflight,
+} from './lib/dockerStats';
 import { durationToMs } from './lib/matrix';
 
 const USAGE = `
@@ -46,10 +51,22 @@ runMain(async () => {
       ? path.join(RESULTS_DIR, 'loadtest', date, 'docker-stats.csv')
       : resolveUserPath(outArg);
   const prefix = stringOption(values, 'prefix', DEFAULT_CONTAINER_PREFIX) as string;
+  const filter = (name: string): boolean => name.startsWith(prefix);
+  const preflight = await dockerStatsPreflight(filter);
+  if (!preflight.ok) {
+    throw new CliError(`docker stats is not available: ${preflight.reason}`, {
+      hint: 'Start Docker and the local stack first: docker compose -f services/local/docker-compose.yml up -d',
+    });
+  }
+  if (preflight.containers.length === 0) {
+    log(`warning: no running container matches ${prefix}*; sampling anyway (it may start later)`);
+  } else {
+    log('containers', { containers: preflight.containers });
+  }
   const sampler = createDockerStatsSampler({
     outFile,
     intervalMs: intOption(values, 'interval', 2000),
-    filter: (name) => name.startsWith(prefix),
+    filter,
     onError: (error) =>
       log('sample failed', { error: error instanceof Error ? error.message : String(error) }),
   });
@@ -66,7 +83,7 @@ runMain(async () => {
     }
   });
   await sampler.stop();
-  log('stopped', { samples: sampler.samples, errors: sampler.errors });
+  log('stopped', { samples: sampler.samples, errors: sampler.errors, skipped: sampler.skipped });
   process.stdout.write(
     `${JSON.stringify({ outFile, samples: sampler.samples, errors: sampler.errors })}\n`,
   );

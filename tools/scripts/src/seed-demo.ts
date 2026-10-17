@@ -23,6 +23,8 @@ Options
   --org-name NAME        organisation name (default "SeatRelay Demo"; reused when it exists)
   --title TITLE          workshop title (default "Demo workshop")
   --starts-in-days D     first session starts in D days (default 3)
+  --keep-previous        leave earlier workshops with the same title open (default: cancel
+                         them, so a re-run yields one clean demo workshop)
   --pool-id / --client-id   Cognito ids (default: outputs of stack seatrelay-auth)
   --dry-run              print the plan only
 
@@ -42,6 +44,7 @@ runMain(async () => {
       'org-name': { type: 'string' },
       title: { type: 'string' },
       'starts-in-days': { type: 'string' },
+      'keep-previous': { type: 'boolean' },
       'pool-id': { type: 'string' },
       'client-id': { type: 'string' },
       'dry-run': { type: 'boolean' },
@@ -108,6 +111,7 @@ runMain(async () => {
     organiser,
     participants,
     ...preset,
+    keepPrevious: values['keep-previous'] === true,
     log,
   });
   process.stdout.write(

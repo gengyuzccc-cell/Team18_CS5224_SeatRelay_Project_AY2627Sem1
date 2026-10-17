@@ -125,6 +125,13 @@ describe('seedStudy against the in-memory service', () => {
       ['QUEUED', 'OFFERED', 'CONFIRMED'].includes(r.registration.status),
     );
     expect(live).toEqual([]);
+    // T1's offer notice and the reset's WORKSHOP_CANCELLED notices are no longer unread.
+    expect(second.personaNotificationsMarkedRead).toBeGreaterThanOrEqual(3);
+    const { notifications } = await jordan.myNotifications();
+    expect(notifications.map((n) => n.kind)).toEqual(
+      expect.arrayContaining(['OFFER', 'WORKSHOP_CANCELLED']),
+    );
+    expect(notifications.filter((n) => n.readAt === undefined)).toEqual([]);
   });
 
   it('organiser A: Mei Lin cancels → Hui Min is offered Monday (O2), Samuel is first for Wednesday (O3)', async () => {

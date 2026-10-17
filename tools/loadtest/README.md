@@ -2,7 +2,8 @@
 
 Plan §3 step 15 / §4 "Performance": two k6 scenarios, run at 10 / 25 / 50 VUs with a warm-up
 and three measured rounds each, against the dev stage or the local compose stack with the
-same scripts. Results land in `results/loadtest/<date>-<target>/` (raw CSV + summary.md).
+same scripts. Results land in `results/loadtest/<date>/` (raw CSV + summary.md; one directory
+per day collects every target and invocation).
 
 ```
 scripts/cross-workshop.js   load spread over 10 workshops (VU v → workshop v mod 10)
@@ -36,12 +37,21 @@ One k6 run = one `(VUS, ROUND)` pair: a `ramping-vus` scenario ramping 0 → VUS
 `OUT_DIR/<scenario>-<vus>-<round>.json` (k6 summary + a `seatrelay` block with the run
 parameters) and prints a compact text summary.
 
-Environment read by the scripts: `TARGET` (local|dev, default local), `TARGET_API`
-(default `http://localhost:3000`), `TOKEN_CACHE` (default `../.token-cache.<target>.json`
-relative to the script), `SCENARIO_FILE` (default `../.scenario.<target>.json`) or
-`WORKSHOP_IDS='["id",…]'`, `VUS`, `ROUND`, `WARMUP`, `DURATION`, `OUT_DIR`
-(default `results/loadtest`, must exist — k6 cannot create directories), `POLL_TIMEOUT_MS`
-(30000), `THINK_TIME_S` (0).
+Environment read by the k6 scripts:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `TARGET` | `local` | name used for the default cache / scenario file and the summary tags |
+| `TARGET_API` | `http://localhost:3000` | API base URL |
+| `TOKEN_CACHE` | `../.token-cache.<TARGET>.json` | token cache; relative paths are resolved from `scripts/` (k6 `open()`) |
+| `SCENARIO_FILE` | `../.scenario.<TARGET>.json` | written by `prepare-scenario` |
+| `WORKSHOP_IDS` | – | overrides the scenario file: JSON array `'["id1","id2"]'` or `id1,id2` |
+| `WORKSHOP_COUNT` | all | use only the first N workshops (e.g. cross-workshop over 5 of the 10) |
+| `VUS`, `ROUND` | `10`, `1` | plateau VUs and the round label of the output file |
+| `WARMUP`, `DURATION` | `30s`, `60s` | warm-up ramp and measured plateau |
+| `OUT_DIR` | `results/loadtest` | where `handleSummary` writes `<scenario>-<vus>-<round>.json`, relative to the **current directory**; it must exist (k6 cannot create directories and only logs an error when it is missing) |
+| `POLL_TIMEOUT_MS` | `30000` | give up polling one command (counted in `settle_timeouts`) |
+| `THINK_TIME_S` | `0` | pause between iterations |
 
 `setup()` aborts with a clear message when the token cache is missing/expired, has fewer
 users than VUs (every VU needs its own account, otherwise REGISTER is rejected with
@@ -57,9 +67,10 @@ pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loadus
 # 2. workshops (10 for cross-workshop + 1 for hotspot, capacity 1000, hold 60 s)
 pnpm --filter @seatrelay/loadtest prepare-scenario -- --target local        # or --target dev
 
-# 3a. one run by hand
+# 3a. one run by hand (from the repository root; OUT_DIR must exist)
 mkdir -p results/loadtest
 TARGET=local VUS=10 ROUND=1 k6 run tools/loadtest/scripts/hotspot.js
+TARGET=local VUS=2 ROUND=1 WARMUP=5s DURATION=15s k6 run tools/loadtest/scripts/hotspot.js   # 20 s smoke
 
 # 3b. the whole matrix (2 scenarios × 10/25/50 VUs × 3 rounds, ~30 min)
 pnpm --filter @seatrelay/loadtest run-matrix -- --target local
@@ -75,17 +86,28 @@ install) takes the organiser token from the token cache (`organiser@example.com`
 `run-matrix` options: `--scenarios`, `--vus`, `--rounds`, `--warmup`, `--duration`, `--pause`
 (15 s between runs so queues drain), `--out`, `--date`, `--k6`, `--token-cache`,
 `--scenario-file`, `--no-docker-stats`, `--no-cloudwatch`, `--stage`, `--dry-run` (prints the
-18 k6 command lines). It writes after every run, so a partial matrix still has its rows.
+18 k6 command lines). Before the first run it checks that the token cache has one account per
+VU of the largest level and that the tokens outlive the estimated matrix (~35 min for the
+default matrix), and that `docker stats` works (local; otherwise a note and no sampling). It
+writes after every run, so a partial matrix still has its rows. Relative path options are
+resolved against the directory the command was typed in.
 
-### Output (`results/loadtest/<date>-<target>/`)
+### Output (`results/loadtest/<date>/`)
+
+One directory per day. Every invocation merges its rows into `runs.json` (a re-run of the
+same target / scenario / VUs / round replaces the older row) and rebuilds `raw.csv` and
+`summary.md` from all of them, so the local and the dev matrix of the same day end up side by
+side and a failed run can be repeated alone (`--scenarios hotspot --vus 50 --rounds 1` replaces
+round 1 of that level).
 
 | File | Content |
 | --- | --- |
-| `raw.csv` | one row per run: scenario, VUs, round, timestamps, iterations, http_reqs, error rate, p50/p95 of read / 202 / poll / settle (client) / settle (server), polls per command, rejected, timeouts, k6 threshold result, SQS depth max, oldest message age max, CloudWatch `CommandSettledLatency` p95 and sample count |
-| `summary.md` | per scenario a table of every run and a per-level table (median of the rounds) checked against the plan §4 targets; notes (e.g. CloudWatch skipped) |
-| `summaries/*.json` | the k6 `handleSummary` files |
-| `logs/*.log` | k6 output per run |
-| `docker-stats.csv` | local only: `ts, container, cpuPercent, memUsageMiB, memLimitMiB, memPercent, netInputBytes, netOutputBytes, blockInputBytes, blockOutputBytes, pids` every 2 s for the `seatrelay-local-*` containers during the whole matrix |
+| `raw.csv` | one row per run: scenario, target, VUs, round, timestamps (start, start of the measured phase, end), warm-up / duration, git commit (`-dirty` when tracked files differed from HEAD), iterations, http_reqs, error rate, p50/p95 of read / 202 / poll / settle (client) / settle (server), polls per command, rejected, timeouts, k6 threshold result, SQS depth max, oldest message age max, CloudWatch `CommandSettledLatency` p95 and sample count, k6 exit note |
+| `summary.md` | per target and scenario a table of every run and a per-level table (median of the rounds) checked against the plan §4 targets; the target's API and notes (e.g. CloudWatch skipped) |
+| `runs.json` | the accumulated rows + API/notes per target (source of the two files above) |
+| `k6/<target>/*.json` | the k6 `handleSummary` files (`<scenario>-<vus>-<round>.json`) |
+| `logs/<target>/*.log` | k6 output per run |
+| `docker-stats.csv` | local only: `ts, container, cpuPercent, memUsageMiB, memLimitMiB, memPercent, netInputBytes, netOutputBytes, blockInputBytes, blockOutputBytes, pids` every 2 s for the `seatrelay-local-*` containers while the matrix runs (appended; join on each run's start/end) |
 
 CloudWatch (`--target dev`, needs credentials; skipped with a note otherwise): for each run's
 measured window `GetMetricData` of `AWS/SQS ApproximateNumberOfMessagesVisible` /
@@ -93,7 +115,21 @@ measured window `GetMetricData` of `AWS/SQS ApproximateNumberOfMessagesVisible` 
 `SeatRelay CommandSettledLatency` (p95 and SampleCount, dimension `service=worker`, the
 Powertools service name of the worker function).
 
-`docker-stats` standalone: `pnpm --filter @seatrelay/loadtest docker-stats -- --out results/loadtest/x/docker-stats.csv --duration 2m`.
+`docker-stats` standalone (when running k6 by hand): `pnpm --filter @seatrelay/loadtest
+docker-stats -- [--out FILE] [--interval 2000] [--prefix seatrelay-local-] [--duration 2m]`
+appends to `results/loadtest/<date>/docker-stats.csv` until Ctrl-C or `--duration`. It exits
+at once with a clear message when Docker is not reachable and warns when no
+`seatrelay-local-*` container is running. A sample is skipped rather than overlapped when the
+previous `docker stats` call (≈ 2 s itself) is still running.
+
+### Node tooling environment
+
+| Variable | Used by | Meaning |
+| --- | --- | --- |
+| `TARGET_API` | prepare-scenario, run-matrix | API base URL (`--api` wins; default per target / `ApiUrl` of `seatrelay-app-<stage>`) |
+| `K6_BIN` | run-matrix | k6 binary (`--k6` wins; default `k6` on PATH) |
+| `AWS_REGION` / `AWS_DEFAULT_REGION`, `AWS_PROFILE`, … | run-matrix (dev), prepare-scenario (dev) | stack lookup and CloudWatch; without credentials the CloudWatch columns are skipped with a note |
+| `KEYCLOAK_*`, `COGNITO_*` | prepare-scenario | identity provider of the organiser account (see `tools/scripts/README.md`) |
 
 ## Checks
 

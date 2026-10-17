@@ -65,8 +65,27 @@ export interface SeedStudySummary {
   accounts: { password: string; organiser: string; participant: string; registrants: string[] };
   users: ProvisionedUser[];
   verify: { code: string; ok: boolean }[];
+  /**
+   * Unread in-app notifications of the two personas that the reset marked read (previous
+   * rounds' offers, and the WORKSHOP_CANCELLED notices the reset itself causes). The API cannot
+   * delete notifications or archived registrations: the personas' "Past" lists keep them.
+   */
+  personaNotificationsMarkedRead: number;
   /** Differences between the dashboard and the table; empty when the seed is exact. */
   problems: string[];
+}
+
+/** Marks every unread notification of the caller read; returns how many. */
+export async function markAllNotificationsRead(client: ApiClient): Promise<number> {
+  const { notifications } = await client.myNotifications();
+  let marked = 0;
+  for (const notification of notifications) {
+    if (notification.readAt === undefined) {
+      await client.markNotificationRead(notification.id);
+      marked += 1;
+    }
+  }
+  return marked;
 }
 
 export function studyCreateBody(workshop: StudyWorkshopSpec): CreateWorkshopInput {
@@ -290,6 +309,18 @@ export async function seedStudy(options: SeedStudyOptions): Promise<SeedStudySum
     }
   }
 
+  // Last, so the WORKSHOP_CANCELLED notices of the reset are already stored.
+  let personaNotificationsMarkedRead = 0;
+  for (const persona of [jordan, riley]) {
+    const user = byName.get(persona.name ?? persona.email);
+    if (user !== undefined) {
+      personaNotificationsMarkedRead += await markAllNotificationsRead(
+        options.api.withToken(user.idToken),
+      );
+    }
+  }
+  log('persona notifications marked read', { count: personaNotificationsMarkedRead });
+
   return {
     track: options.track,
     dataset: options.dataset,
@@ -306,6 +337,7 @@ export async function seedStudy(options: SeedStudyOptions): Promise<SeedStudySum
     },
     users,
     verify,
+    personaNotificationsMarkedRead,
     problems,
   };
 }

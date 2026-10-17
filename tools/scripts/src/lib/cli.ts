@@ -159,6 +159,12 @@ const OPERATIONAL_ERRORS = new Set([
 
 /** Runs a CLI main; CliErrors print `error: message` (+ hint), anything else its stack. */
 export function runMain(main: () => Promise<void>): void {
+  // `… | head`: the reader went away; stop quietly instead of an unhandled EPIPE.
+  process.stdout.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EPIPE') {
+      process.exit(0);
+    }
+  });
   main().then(
     () => {
       process.exitCode ??= 0;

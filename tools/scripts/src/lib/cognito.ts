@@ -172,17 +172,20 @@ async function ensureUserUnchecked(
  * token minting. Check once, before the first account, that credentials resolve, so a missing
  * configuration fails fast instead of once per user deep inside the SDK.
  */
+export const COGNITO_ADMIN_HINT =
+  'Creating Cognito accounts (AdminCreateUser / AdminSetUserPassword) needs AWS credentials of ' +
+  'the deploying account; only minting tokens for existing accounts needs none.';
+
 export async function assertCognitoAdminCredentials(
   region: string,
   client: CredentialsBearer = new CognitoIdentityProviderClient({ region }),
+  hint: string = COGNITO_ADMIN_HINT,
 ): Promise<void> {
   try {
     await assertAwsCredentials(client);
   } catch (error) {
     if (error instanceof CliError) {
-      throw new CliError(error.message, {
-        hint: 'Creating Cognito accounts needs admin credentials. To only mint tokens for existing accounts (no credentials needed) pass --no-create with --pool-id and --client-id.',
-      });
+      throw new CliError(error.message, { hint });
     }
     throw error;
   }

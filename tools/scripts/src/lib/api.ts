@@ -11,6 +11,7 @@ import type {
   MeView,
   MyRegistrationListView,
   NotificationListView,
+  NotificationView,
   Organization,
   VerifyView,
   WorkshopListView,
@@ -279,6 +280,13 @@ export class ApiClient {
 
   myNotifications(): Promise<NotificationListView> {
     return this.get<NotificationListView>('/me/notifications');
+  }
+
+  markNotificationRead(notificationId: string): Promise<NotificationView> {
+    return this.post<NotificationView>(
+      `/me/notifications/${encodeURIComponent(notificationId)}/read`,
+      {},
+    );
   }
 
   postCommand(wsId: string, body: CommandBody): Promise<CommandAcceptedView> {

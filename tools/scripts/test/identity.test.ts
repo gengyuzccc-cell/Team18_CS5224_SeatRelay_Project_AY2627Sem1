@@ -153,7 +153,7 @@ describe('Cognito', () => {
           },
         },
       }),
-    ).rejects.toMatchObject({ name: 'CliError', hint: expect.stringContaining('--no-create') });
+    ).rejects.toMatchObject({ name: 'CliError', hint: expect.stringContaining('AdminCreateUser') });
   });
 
   it('InitiateAuth is an unsigned JSON POST with the X-Amz-Target header', async () => {

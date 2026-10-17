@@ -6,8 +6,10 @@ import { parseK6Summary, type RunRow } from '../src/lib/k6summary';
 import {
   aggregateByLevel,
   buildMatrix,
+  checkTokenCacheForMatrix,
   CSV_COLUMNS,
   durationToMs,
+  estimateMatrixMs,
   k6Args,
   k6Env,
   mergeRows,
@@ -58,6 +60,22 @@ describe('matrix', () => {
       'cross-workshop-25-1',
     ]);
     expect(cells[17]).toEqual({ scenario: 'hotspot', vus: 50, round: 3, name: 'hotspot-50-3' });
+  });
+
+  it('estimates the matrix length and checks the token cache covers it', () => {
+    // 18 runs × (30 s + 60 s + 15 s) + 17 pauses × 15 s
+    expect(estimateMatrixMs(spec, 15_000)).toBe(18 * 105_000 + 17 * 15_000);
+    const now = Date.parse('2026-10-17T07:00:00.000Z');
+    const ends = now + estimateMatrixMs(spec, 15_000);
+    const users = (n: number, expiresAt: string) =>
+      Array.from({ length: n }, () => ({ expiresAt }));
+    expect(
+      checkTokenCacheForMatrix(users(60, '2026-10-17T08:00:00.000Z'), 50, ends).problems,
+    ).toEqual([]);
+    const short = checkTokenCacheForMatrix(users(4, '2026-10-17T07:20:00.000Z'), 50, ends);
+    expect(short.problems).toHaveLength(2);
+    expect(short.problems[0]).toContain('4 accounts for 50 VUs');
+    expect(short.problems[1]).toContain('before the matrix ends');
   });
 
   it('parses k6-style durations', () => {
