@@ -1,0 +1,12 @@
+
+seatrelay cross-workshop  target=local vus=10 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1313 (measured 1027)
+  http_reqs ............. 7470   failed 0.00 %
+  read_ms   p50 / p95 ... 4.9 ms / 10.8 ms
+  command_ms (202) ...... 4.5 ms / 9.0 ms
+  poll_ms ............... 2.0 ms / 4.5 ms
+  settle_ms (client) .... 210.0 ms / 415.0 ms
+  server_settle_ms ...... 179.0 ms / 280.0 ms
+  polls per command avg . 1.39
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed

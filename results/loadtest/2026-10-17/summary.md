@@ -54,3 +54,31 @@ Per level (median of the rounds; errors = worst round):
 | 10 | 3 | 284 | 300 | 780 | 120 | 0.00 % | met |
 | 25 | 3 | 292 | 306 | 7398 | 6791 | 0.47 % | NOT met |
 | 50 | 3 | 307 | 305 | 28644 | 28788 | 8.01 % | NOT met |
+
+## Target `local`
+
+- API: `http://localhost:3000`
+- Runs: 9 (scenarios `cross-workshop` × VUs 10/25/50 × rounds 1/2/3); warm-up `30s`, measured `60s` per run; commit `410622a-dirty`.
+- Note: docker-stats.csv: `docker stats` of the seatrelay-local-* containers every 2 s while the matrix runs (join on startedAt/endedAt of each run).
+
+### local · cross-workshop
+
+| VUs | round | attempts | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW settle p95 / samples (window) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 10 | 1 | 1 | 5 / 11 | 4 / 10 | 5 | 208 / 411 | 222 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 10 | 2 | 1 | 6 / 12 | 5 / 11 | 5 | 210 / 414 | 250 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 10 | 3 | 1 | 5 / 11 | 5 / 9 | 5 | 210 / 415 | 280 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 25 | 1 | 1 | 6 / 17 | 5 / 14 | 7 | 214 / 426 | 346 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 25 | 2 | 1 | 5 / 13 | 5 / 11 | 5 | 212 / 423 | 365 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 25 | 3 | 1 | 6 / 18 | 5 / 15 | 7 | 215 / 433 | 387 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 50 | 1 | 1 | 5 / 13 | 5 / 10 | 5 | 2230 / 6296 | 6213 | 0.00 % | 0 | 0 | FAIL (settle_ms p(95)<5000) | – | – | – / – |
+| 50 | 2 | 1 | 5 / 14 | 5 / 11 | 5 | 2035 / 2840 | 2663 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 50 | 3 | 1 | 5 / 11 | 4 / 10 | 5 | 2028 / 2875 | 2807 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+
+Per level (median of the rounds; errors = worst round):
+
+| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
+|---|---|---|---|---|---|---|---|
+| 10 | 3 | 11 | 10 | 414 | 250 | 0.00 % | met |
+| 25 | 3 | 17 | 14 | 426 | 365 | 0.00 % | met |
+| 50 | 3 | 13 | 10 | 2875 | 2807 | 0.00 % | met |

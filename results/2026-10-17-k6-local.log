@@ -4,3 +4,130 @@
 
 [15:49:45] matrix {"runId":"20261017T154945Z","runs":18,"estimatedMinutes":36,"accounts":60,"firstTokenExpiry":"2026-10-17T16:49:35.000Z","outDir":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17"}
 [15:49:47] run 1/18 {"scenario":"cross-workshop","vus":10,"round":1,"name":"cross-workshop-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-10-1.log"}
+
+seatrelay cross-workshop  target=local vus=10 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1564 (measured 1259)
+  http_reqs ............. 8209   failed 0.00 %
+  read_ms   p50 / p95 ... 4.9 ms / 10.8 ms
+  command_ms (202) ...... 4.3 ms / 9.8 ms
+  poll_ms ............... 2.1 ms / 4.8 ms
+  settle_ms (client) .... 208.0 ms / 411.0 ms
+  server_settle_ms ...... 138.0 ms / 222.0 ms
+  polls per command avg . 1.13
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[15:51:22] run finished {"name":"cross-workshop-10-1","exitCode":0,"readP95":10.776107599999996,"commandP95":9.755777900000005,"settleP95":411,"errors":0,"thresholdsOk":true}
+[15:51:37] run 2/18 {"scenario":"cross-workshop","vus":10,"round":2,"name":"cross-workshop-10-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-10-2.log"}
+
+seatrelay cross-workshop  target=local vus=10 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1413 (measured 1138)
+  http_reqs ............. 7754   failed 0.00 %
+  read_ms   p50 / p95 ... 5.5 ms / 12.2 ms
+  command_ms (202) ...... 4.8 ms / 10.5 ms
+  poll_ms ............... 2.2 ms / 5.2 ms
+  settle_ms (client) .... 210.0 ms / 414.0 ms
+  server_settle_ms ...... 157.0 ms / 250.0 ms
+  polls per command avg . 1.25
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[15:53:08] run finished {"name":"cross-workshop-10-2","exitCode":0,"readP95":12.186169699999999,"commandP95":10.5217605,"settleP95":414,"errors":0,"thresholdsOk":true}
+[15:53:23] run 3/18 {"scenario":"cross-workshop","vus":10,"round":3,"name":"cross-workshop-10-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-10-3.log"}
+
+seatrelay cross-workshop  target=local vus=10 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1313 (measured 1027)
+  http_reqs ............. 7470   failed 0.00 %
+  read_ms   p50 / p95 ... 4.9 ms / 10.8 ms
+  command_ms (202) ...... 4.5 ms / 9.0 ms
+  poll_ms ............... 2.0 ms / 4.5 ms
+  settle_ms (client) .... 210.0 ms / 415.0 ms
+  server_settle_ms ...... 179.0 ms / 280.0 ms
+  polls per command avg . 1.39
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[15:54:54] run finished {"name":"cross-workshop-10-3","exitCode":0,"readP95":10.834536199999995,"commandP95":9.042699149999999,"settleP95":415,"errors":0,"thresholdsOk":true}
+[15:55:09] run 4/18 {"scenario":"cross-workshop","vus":25,"round":1,"name":"cross-workshop-25-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-25-1.log"}
+
+seatrelay cross-workshop  target=local vus=25 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3035 (measured 2422)
+  http_reqs ............. 17941   failed 0.00 %
+  read_ms   p50 / p95 ... 6.1 ms / 17.1 ms
+  command_ms (202) ...... 5.2 ms / 14.4 ms
+  poll_ms ............... 2.2 ms / 7.0 ms
+  settle_ms (client) .... 214.0 ms / 426.0 ms
+  server_settle_ms ...... 186.0 ms / 345.8 ms
+  polls per command avg . 1.45
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[15:56:40] run finished {"name":"cross-workshop-25-1","exitCode":0,"readP95":17.1321253,"commandP95":14.364166549999998,"settleP95":426,"errors":0,"thresholdsOk":true}
+[15:56:55] run 5/18 {"scenario":"cross-workshop","vus":25,"round":2,"name":"cross-workshop-25-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-25-2.log"}
+
+seatrelay cross-workshop  target=local vus=25 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3131 (measured 2508)
+  http_reqs ............. 18303   failed 0.00 %
+  read_ms   p50 / p95 ... 5.5 ms / 13.4 ms
+  command_ms (202) ...... 4.8 ms / 11.4 ms
+  poll_ms ............... 2.0 ms / 5.3 ms
+  settle_ms (client) .... 212.0 ms / 423.0 ms
+  server_settle_ms ...... 180.0 ms / 365.0 ms
+  polls per command avg . 1.42
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[15:58:26] run finished {"name":"cross-workshop-25-2","exitCode":0,"readP95":13.433198700000002,"commandP95":11.3943575,"settleP95":423,"errors":0,"thresholdsOk":true}
+[15:58:41] run 6/18 {"scenario":"cross-workshop","vus":25,"round":3,"name":"cross-workshop-25-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-25-3.log"}
+
+seatrelay cross-workshop  target=local vus=25 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3037 (measured 2430)
+  http_reqs ............. 17974   failed 0.00 %
+  read_ms   p50 / p95 ... 6.3 ms / 17.8 ms
+  command_ms (202) ...... 5.4 ms / 14.9 ms
+  poll_ms ............... 2.2 ms / 6.9 ms
+  settle_ms (client) .... 215.0 ms / 433.0 ms
+  server_settle_ms ...... 182.0 ms / 387.1 ms
+  polls per command avg . 1.46
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:00:12] run finished {"name":"cross-workshop-25-3","exitCode":0,"readP95":17.80835039999999,"commandP95":14.902189050000002,"settleP95":433,"errors":0,"thresholdsOk":true}
+[16:00:27] run 7/18 {"scenario":"cross-workshop","vus":50,"round":1,"name":"cross-workshop-50-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-50-1.log"}
+
+seatrelay cross-workshop  target=local vus=50 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1121 (measured 461)
+  http_reqs ............. 22195   failed 0.00 %
+  read_ms   p50 / p95 ... 5.4 ms / 12.8 ms
+  command_ms (202) ...... 4.6 ms / 10.2 ms
+  poll_ms ............... 1.7 ms / 5.0 ms
+  settle_ms (client) .... 2230.0 ms / 6295.9 ms
+  server_settle_ms ...... 2058.0 ms / 6212.8 ms
+  polls per command avg . 14.67
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T16:02:01Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[16:02:01] run finished {"name":"cross-workshop-50-1","exitCode":99,"readP95":12.814367,"commandP95":10.195490049999997,"settleP95":6295.9,"errors":0,"thresholdsOk":false}
+[16:02:16] run 8/18 {"scenario":"cross-workshop","vus":50,"round":2,"name":"cross-workshop-50-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-50-2.log"}
+
+seatrelay cross-workshop  target=local vus=50 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1082 (measured 735)
+  http_reqs ............. 22256   failed 0.00 %
+  read_ms   p50 / p95 ... 5.1 ms / 14.2 ms
+  command_ms (202) ...... 4.8 ms / 11.1 ms
+  poll_ms ............... 1.8 ms / 5.4 ms
+  settle_ms (client) .... 2035.0 ms / 2840.0 ms
+  server_settle_ms ...... 1895.5 ms / 2662.6 ms
+  polls per command avg . 10.20
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:03:52] run finished {"name":"cross-workshop-50-2","exitCode":0,"readP95":14.219290399999993,"commandP95":11.120294399999995,"settleP95":2840,"errors":0,"thresholdsOk":true}
+[16:04:07] run 9/18 {"scenario":"cross-workshop","vus":50,"round":3,"name":"cross-workshop-50-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-50-3.log"}
+
+seatrelay cross-workshop  target=local vus=50 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1104 (measured 741)
+  http_reqs ............. 22266   failed 0.00 %
+  read_ms   p50 / p95 ... 4.8 ms / 11.0 ms
+  command_ms (202) ...... 4.3 ms / 9.6 ms
+  poll_ms ............... 1.8 ms / 5.3 ms
+  settle_ms (client) .... 2028.0 ms / 2875.0 ms
+  server_settle_ms ...... 1870.0 ms / 2806.9 ms
+  polls per command avg . 10.05
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:05:41] run finished {"name":"cross-workshop-50-3","exitCode":0,"readP95":11.015672,"commandP95":9.569149850000002,"settleP95":2875,"errors":0,"thresholdsOk":true}
+[16:05:56] run 10/18 {"scenario":"hotspot","vus":10,"round":1,"name":"hotspot-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-10-1.log"}
