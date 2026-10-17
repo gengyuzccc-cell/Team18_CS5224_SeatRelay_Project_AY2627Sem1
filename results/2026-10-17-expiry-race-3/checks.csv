@@ -1,0 +1,28 @@
+run,scenario,step,ok,expected,actual
+1,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,APPLIED acceptedAt 2026-10-17T15:45:37.959Z settledAt 2026-10-17T15:45:38.060Z
+1,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+1,early,ACCEPT at expiresAt − 200 ms succeeds,true,APPLIED,"APPLIED; arrived -151 ms, settled -50 ms relative to expiresAt (worker pickup 101 ms)"
+2,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,APPLIED acceptedAt 2026-10-17T15:45:38.555Z settledAt 2026-10-17T15:45:38.587Z
+2,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+2,early,ACCEPT at expiresAt − 200 ms succeeds,true,APPLIED,"APPLIED; arrived -150 ms, settled -118 ms relative to expiresAt (worker pickup 32 ms)"
+1,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 282 ms
+1,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 246 ms after expiresAt; the ACCEPT's own tick-first pass relayed the seat (timer tick not processed yet)
+1,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:45:38.459Z
+2,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 338 ms
+2,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 254 ms after expiresAt; the ACCEPT's own tick-first pass relayed the seat (timer tick not processed yet)
+2,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:45:39.052Z
+3,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,APPLIED acceptedAt 2026-10-17T15:45:40.468Z settledAt 2026-10-17T15:45:40.496Z
+3,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+3,early,ACCEPT at expiresAt − 200 ms succeeds,true,APPLIED,"APPLIED; arrived -148 ms, settled -120 ms relative to expiresAt (worker pickup 28 ms)"
+3,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 100 ms
+3,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 252 ms after expiresAt; timer tick processed before the ACCEPT arrived
+3,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:45:40.926Z
+1,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 5431eefc-6500-4985-8f51-1dc0ac7ce4e0, dedup manual#fd777884-d15a-475e-ae27-cf98fbc8cb70#2b3515d7-bf5f-460c-95c1-9ebf73b1e31c)"
+1,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+1,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+2,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 3fa462c2-9ddb-41de-ae3a-f17fe93c99e2, dedup manual#35b56a47-3b55-4126-951f-af622b51d29c#ce514b85-7831-4920-8929-0c1d4a34f3b5)"
+2,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+2,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+3,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 0a4d428b-0d6c-436c-8951-aafc70ae9be7, dedup manual#66ad5c6b-2ab1-43ae-b2e1-80d02cf902a6#a78e6965-c9fd-4b6f-9e0f-2b8b8656182e)"
+3,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+3,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"

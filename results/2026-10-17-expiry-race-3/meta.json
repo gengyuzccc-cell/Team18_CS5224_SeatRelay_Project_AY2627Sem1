@@ -1,0 +1,81 @@
+{
+  "runId": "871f00c7-ba16-4f7d-b227-3ac795788986",
+  "name": "expiry-race",
+  "tableRow": "Expiry race (plan §4, Table 3; tick-first, §1.2)",
+  "criterion": "ACCEPT at expiresAt − 200 ms succeeds (a trial whose queue latency exceeds the margin is inconclusive under tick-first and repeated); ACCEPT at expiresAt + 200 ms is REJECTED(OFFER_EXPIRED) regardless of timer arrival; a late TICK has no effect on a newer offer",
+  "startedAt": "2026-10-17T15:44:31.558Z",
+  "finishedAt": "2026-10-17T15:46:05.409Z",
+  "durationMs": 93851,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "775b4880529d9b5a996a2811655e0b1984ca26ef",
+    "short": "775b4880529d",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 60,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 4,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "marginMs": 200,
+    "earlyAttempts": 3,
+    "clockOffset": {
+      "offsetMs": 65,
+      "rttMs": 228,
+      "samples": 9
+    },
+    "run1.late.workshopId": "5431eefc-6500-4985-8f51-1dc0ac7ce4e0",
+    "run1.early1.workshopId": "08ee23af-7eb8-4d4d-82f7-55eb439bd8b3",
+    "run2.late.workshopId": "3fa462c2-9ddb-41de-ae3a-f17fe93c99e2",
+    "run2.early1.workshopId": "85aca58d-9b51-4656-af25-206cbb040b11",
+    "run2.early1.sendCorrectionMs": 0,
+    "run1.early1.sendCorrectionMs": 0,
+    "run3.early1.workshopId": "44e43e8a-b489-4823-a668-ac108ecead09",
+    "run3.late.workshopId": "0a4d428b-0d6c-436c-8951-aafc70ae9be7",
+    "run3.early1.sendCorrectionMs": 0
+  },
+  "checks": {
+    "total": 27,
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "clockOffset": {
+    "offsetMs": 65,
+    "rttMs": 228,
+    "samples": 9
+  },
+  "orders": {
+    "the ACCEPT's own tick-first pass relayed the seat (timer tick not processed yet)": 2,
+    "timer tick processed before the ACCEPT arrived": 1
+  },
+  "lateTicks": 3,
+  "earlyAttempts": 3,
+  "earlyInconclusive": 0,
+  "pickupMs": {
+    "count": 6,
+    "min": 28,
+    "max": 101,
+    "mean": 58.666666666666664,
+    "p50": 41,
+    "p95": 101,
+    "p99": 101,
+    "stdev": 28.686039965266882
+  }
+}

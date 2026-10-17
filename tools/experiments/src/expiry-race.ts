@@ -93,7 +93,19 @@ interface LateTickRow extends CsvRow {
 const statusOf = (outcome: SendOutcome): string =>
   outcome.ok ? `${outcome.settled.record.status}${outcome.settled.record.reason === undefined ? '' : `(${outcome.settled.record.reason})`}` : `ERROR ${errorText(outcome.error)}`;
 
-/** Sends `input` so that it reaches the API at `targetServerMs` (server clock). */
+/** How long before the send instant the connection is re-used once, so the timed request does not pay a handshake. */
+const CONNECTION_WARMUP_LEAD_MS = 1500;
+
+/**
+ * Sends `input` so that it reaches the API at `targetServerMs` (server clock).
+ *
+ * The one-way delay is estimated from `GET /health` (rtt / 2), but the timed request is sent after
+ * waiting for most of the hold, by which time the idle keep-alive connection may have been closed:
+ * a fresh TCP + TLS handshake would add about two round trips (≈ 0.5 s from a client far from the
+ * region). A `GET /health` shortly before the send keeps the connection warm. `correctionMs` is the
+ * remaining systematic error observed in earlier attempts (arrival − target), subtracted from the
+ * send instant.
+ */
 async function sendAt(
   account: Account,
   wsId: string,
@@ -101,8 +113,11 @@ async function sendAt(
   targetServerMs: number,
   clock: ClockOffset,
   timeoutMs: number,
+  correctionMs = 0,
 ): Promise<{ outcome: SendOutcome; sentAtServerEst: number }> {
-  const sendClientMs = targetServerMs - clock.offsetMs - clock.rttMs / 2;
+  const sendClientMs = targetServerMs - clock.offsetMs - clock.rttMs / 2 - correctionMs;
+  await sleepUntil(sendClientMs - CONNECTION_WARMUP_LEAD_MS);
+  await account.client.health().catch(() => undefined);
   await sleepUntil(sendClientMs);
   const sentAtServerEst = Date.now() + clock.offsetMs;
   return { outcome: await trySend(account, wsId, input, timeoutMs), sentAtServerEst };
@@ -169,6 +184,8 @@ async function earlyTrials(
 ): Promise<TrialRow[]> {
   const timeout = ctx.options.settleTimeoutMs;
   const rows: TrialRow[] = [];
+  // Systematic arrival error (ms) learnt from inconclusive attempts that reached the API late.
+  let correctionMs = 0;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const ws = await createWorkshop(organiser, orgId, {
       title: `Expiry race early r${run}${attempt > 1 ? ` a${attempt}` : ''} (${ctx.runId.slice(0, 8)})`,
@@ -183,8 +200,12 @@ async function earlyTrials(
       throw new Error(`early setup failed: A ${reg.record.status}${reg.record.reason ? `(${reg.record.reason})` : ''}`);
     }
     const expiresAtMs = Date.parse(offer.expiresAt);
-    ctx.log(`run ${run} early attempt ${attempt}: offer expires at ${offer.expiresAt}; ACCEPT due at expiresAt − ${marginMs} ms`);
-    const sent = await sendAt(A, ws.wsId, { type: 'ACCEPT_OFFER', offerId: offer.id }, expiresAtMs - marginMs, clock, timeout);
+    ctx.log(
+      `run ${run} early attempt ${attempt}: offer expires at ${offer.expiresAt}; ACCEPT due at expiresAt − ${marginMs} ms` +
+        (correctionMs > 0 ? ` (send ${correctionMs} ms earlier, learnt from the previous attempt)` : ''),
+    );
+    ctx.param(`run${run}.early${attempt}.sendCorrectionMs`, correctionMs);
+    const sent = await sendAt(A, ws.wsId, { type: 'ACCEPT_OFFER', offerId: offer.id }, expiresAtMs - marginMs, clock, timeout, correctionMs);
     const verdict = classifyEarly(sent.outcome.ok ? sent.outcome.settled.record : undefined, expiresAtMs);
     const row = trialRow(run, 'early', attempt, ws.wsId, offer, marginMs, sent, 'n/a', verdict);
     rows.push(row);
@@ -203,14 +224,23 @@ async function earlyTrials(
       });
       return rows;
     }
+    const arrivedLate = row.arrivalOffsetMs !== undefined && row.arrivalOffsetMs >= 0;
+    if (arrivedLate) {
+      // The request itself reached the API after expiresAt: learn the error for the next attempt.
+      correctionMs += Math.ceil((row.arrivalOffsetMs as number) + marginMs);
+    }
     ctx.log(
-      `run ${run} early attempt ${attempt} INCONCLUSIVE: ${statusOf(sent.outcome)}; ${timing}: the worker processed the ACCEPT after expiresAt (queue latency > ${marginMs} ms margin)${attempt < maxAttempts ? '; repeating with a fresh workshop' : ''}`,
+      `run ${run} early attempt ${attempt} INCONCLUSIVE: ${statusOf(sent.outcome)}; ${timing}: ` +
+        (arrivedLate
+          ? `the ACCEPT reached the API after expiresAt (send timing missed by ${(row.arrivalOffsetMs as number) + marginMs} ms)`
+          : `the worker processed the ACCEPT after expiresAt (queue latency > ${marginMs} ms margin)`) +
+        (attempt < maxAttempts ? '; repeating with a fresh workshop' : ''),
     );
   }
   ctx.check({
     run, scenario: 'early', step: `ACCEPT at expiresAt − ${marginMs} ms succeeds (a conclusive trial within ${maxAttempts} attempts)`,
     ok: false, expected: 'APPLIED in one of the attempts',
-    actual: `all ${maxAttempts} attempts processed after expiresAt (worker pickup ${rows.map((row) => row.pickupMs ?? '?').join(' / ')} ms > ${marginMs} ms margin)`,
+    actual: `all ${maxAttempts} attempts processed after expiresAt (arrival ${rows.map((row) => row.arrivalOffsetMs ?? '?').join(' / ')} ms, worker pickup ${rows.map((row) => row.pickupMs ?? '?').join(' / ')} ms, relative to expiresAt; margin ${marginMs} ms)`,
   });
   return rows;
 }
