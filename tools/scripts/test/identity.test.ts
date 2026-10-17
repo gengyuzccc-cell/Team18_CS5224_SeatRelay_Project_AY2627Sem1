@@ -20,7 +20,16 @@ import {
   keycloakPasswordGrant,
   keycloakUserProvider,
 } from '../src/lib/keycloak';
-import { generatedUserSpecs, nameFromEmail, provisionUsers, splitName } from '../src/lib/users';
+import { CliError } from '../src/lib/cli';
+import {
+  DEFAULT_PASSWORD,
+  generatedUserSpecs,
+  nameFromEmail,
+  provisionUsers,
+  splitName,
+  TEST_PASSWORD_ENV,
+  testPassword,
+} from '../src/lib/users';
 
 const cognito = mockClient(CognitoIdentityProviderClient);
 
@@ -60,6 +69,22 @@ describe('user specs', () => {
     expect(specs[0]?.name).toBe('Loaduser 1');
     expect(nameFromEmail('study.jordan@example.com')).toBe('Study Jordan');
     expect(splitName('Mei Lin Chua')).toEqual({ firstName: 'Mei Lin', lastName: 'Chua' });
+  });
+});
+
+describe('testPassword', () => {
+  it('uses --password first, the realm default on local and the environment on AWS stages', () => {
+    expect(testPassword('dev', 'explicit-1', {})).toBe('explicit-1');
+    expect(testPassword('local', undefined, { [TEST_PASSWORD_ENV]: 'private-1' })).toBe(DEFAULT_PASSWORD);
+    expect(testPassword('dev', undefined, { [TEST_PASSWORD_ENV]: 'private-1' })).toBe('private-1');
+    expect(testPassword('pilot', undefined, { [TEST_PASSWORD_ENV]: 'private-2' })).toBe('private-2');
+  });
+
+  it('refuses an AWS stage without a password, or with the public default', () => {
+    expect(() => testPassword('dev', undefined, {})).toThrow(CliError);
+    expect(() => testPassword('pilot', undefined, { [TEST_PASSWORD_ENV]: '' })).toThrow(CliError);
+    expect(() => testPassword('dev', DEFAULT_PASSWORD, {})).toThrow(/public/);
+    expect(() => testPassword('dev', undefined, { [TEST_PASSWORD_ENV]: DEFAULT_PASSWORD })).toThrow(/public/);
   });
 });
 

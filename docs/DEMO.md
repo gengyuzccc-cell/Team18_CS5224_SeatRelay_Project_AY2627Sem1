@@ -31,11 +31,16 @@ staged walkthrough of section 9. The screens and wording below follow what that 
 
 | Who / what | Plan A (dev, `https://d2ni5e1z674t04.cloudfront.net`) | Plan B (local, `http://localhost:8081`) | Where on screen |
 |---|---|---|---|
-| **O**: organiser | `demo.organiser@example.com` / `Passw0rd!` (created by `seed-demo`) | `organiser@example.com` / `Passw0rd!` | Browser 1 (Chrome, normal window), left half |
-| **A**: participant "Demo 1" | `demo-1@example.com` / `Passw0rd!` | same | Browser 2 (Firefox, normal window), top right |
-| **B**: participant "Demo 2" | `demo-2@example.com` / `Passw0rd!` | same | Browser 2, **private window** (separate storage), bottom right |
+| **O**: organiser | `demo.organiser@example.com` / `$SEATRELAY_TEST_PASSWORD` (created by `seed-demo`) | `organiser@example.com` / `Passw0rd!` | Browser 1 (Chrome, normal window), left half |
+| **A**: participant "Demo 1" | `demo-1@example.com` / `$SEATRELAY_TEST_PASSWORD` | same | Browser 2 (Firefox, normal window), top right |
+| **B**: participant "Demo 2" | `demo-2@example.com` / `$SEATRELAY_TEST_PASSWORD` | same | Browser 2, **private window** (separate storage), bottom right |
 | **C**: participant "Demo 3" | `demo-3@example.com`, terminal only (fault injection) | same | Terminal, large font, on a second desktop |
 | Background participants (preset) | `demo.p1`, `demo.p2`, `demo.p3@example.com` | `alice@`, `bob@`, `carol@example.com` | only visible on the dashboard |
+
+Plan A passwords: the repository is public, so the dev accounts do not use the documented local
+password. Before rehearsing, the operator exports a private `SEATRELAY_TEST_PASSWORD` (shared within
+the team, never committed) and runs `tools/scripts/bin/reset-test-passwords.sh`, which sets it on
+every test account; `seed-demo` and `create-test-users` then use the same variable.
 
 Why two browsers: the SPA keeps the signed-in user in `localStorage`, so one browser profile is one
 account. A private window has its own storage and its own identity-provider cookies, so it counts as
@@ -98,7 +103,7 @@ Session B with capacity 1 each.
 2. Create the demo accounts and tokens:
    ```bash
    # Plan A (needs AWS credentials; no e-mail is sent)
-   pnpm --filter @seatrelay/scripts create-test-users -- --count 3 --prefix demo --password 'Passw0rd!' --stage dev
+   pnpm --filter @seatrelay/scripts create-test-users -- --count 3 --prefix demo --stage dev   # password: $SEATRELAY_TEST_PASSWORD
    # Plan B
    pnpm --filter @seatrelay/scripts get-tokens-keycloak -- --count 3 --prefix demo
    ```
@@ -122,7 +127,7 @@ for q in commands-dlq.fifo expiry-delay-dlq notify-dlq; do
     --queue-url "$(aws sqs get-queue-url --queue-name seatrelay-dev-$q --query QueueUrl --output text)"
 done                                                                              # 0 0 0
 # Refresh C's token (dev ID tokens last 12 h, local ones 60 min)
-pnpm --filter @seatrelay/scripts create-test-users -- --count 3 --prefix demo --password 'Passw0rd!' --stage dev
+pnpm --filter @seatrelay/scripts create-test-users -- --count 3 --prefix demo --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 ```
 
 Plan B: `pnpm local:up`, wait until `docker compose -f services/local/docker-compose.yml ps` shows

@@ -65,7 +65,7 @@ tools/experiments appends to the same cache) are not checked: k6 never uses them
 ```bash
 # 1. accounts + tokens (one per VU; 60 covers the 50-VU level)
 pnpm --filter @seatrelay/scripts get-tokens-keycloak -- --count 60 --prefix loaduser          # local
-pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --password 'Passw0rd!' --stage dev
+pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 
 # 2. workshops (10 for cross-workshop + 1 for hotspot, capacity 1000, hold 60 s)
 pnpm --filter @seatrelay/loadtest prepare-scenario -- --target local        # or --target dev

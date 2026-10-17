@@ -4,7 +4,7 @@ import {
   ApiClient,
   CliError,
   DAY_MS,
-  DEFAULT_PASSWORD,
+  testPassword,
   HOUR_MS,
   findCachedUser,
   findOrCreateOrg,
@@ -48,7 +48,8 @@ Options
   --organiser-email E    organiser account (default organiser@example.com on local,
                          loadtest.organiser@example.com otherwise). Its token is taken from the
                          token cache when present, otherwise minted (account created if missing)
-  --password PASS        password for minting/creating the organiser (default Passw0rd!)
+  --password PASS        password for minting/creating the organiser (default
+                         $SEATRELAY_TEST_PASSWORD; Passw0rd! on the local stack only)
   --org-name NAME        organisation (default "SeatRelay loadtest"; reused when it exists)
   --token-cache FILE     token cache (default tools/loadtest/.token-cache.<target>.json)
   --scenario-file FILE   output (default tools/loadtest/.scenario.<target>.json)
@@ -92,7 +93,7 @@ runMain(async () => {
   const holdSeconds = intOption(values, 'hold', 60);
   const sessionsPerWorkshop = intOption(values, 'sessions', 2);
   const startsInDays = intOption(values, 'starts-in-days', 7);
-  const password = stringOption(values, 'password', DEFAULT_PASSWORD) as string;
+  const password = testPassword(targetName, stringOption(values, 'password'));
   const organiserEmail =
     stringOption(values, 'organiser-email') ??
     (targetName === 'local' ? 'organiser@example.com' : 'loadtest.organiser@example.com');

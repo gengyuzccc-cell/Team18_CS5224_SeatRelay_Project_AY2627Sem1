@@ -76,9 +76,14 @@ aws cloudformation describe-stacks --stack-name seatrelay-app-dev \
 API=$(aws cloudformation describe-stacks --stack-name seatrelay-app-dev \
   --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text); curl -s "$API/health"
 # 60 Cognito test accounts (no e-mail sent) + token cache tools/loadtest/.token-cache.dev.json (ID tokens valid 12 h)
-pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --password 'Passw0rd!' --stage dev
+pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 ```
 
+- **Test-account password.** The repository is public, so on dev and pilot every tool takes the
+  test accounts' password from `SEATRELAY_TEST_PASSWORD` (or `--password`) and refuses the local
+  stack's documented default. Export a private value before running anything; to move existing
+  accounts to it, run `tools/scripts/bin/reset-test-passwords.sh` (it also signs them out), then
+  delete `tools/loadtest/.token-cache.*.json`. Never write the password into the repository.
 - **Accounts.** The organiser `loaduser-organiser@example.com` and the outsider
   `loaduser-outsider@example.com` are created by the harness on first use. This is a signed Cognito
   admin call, so it needs the credentials.

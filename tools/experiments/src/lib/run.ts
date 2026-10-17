@@ -3,7 +3,7 @@ import path from 'node:path';
 import {
   ApiClient,
   CliError,
-  DEFAULT_PASSWORD,
+  testPassword,
   RESULTS_DIR,
   REPO_ROOT,
   intOption,
@@ -83,7 +83,8 @@ Common options
   --organiser EMAIL      organiser account (default organiser@example.com on local, else
                          <prefix>-organiser@<domain>)
   --outsider EMAIL       organiser of another organisation (default <prefix>-outsider@<domain>)
-  --password PASS        password of accounts that must be created / signed in (default Passw0rd!)
+  --password PASS        password of accounts that must be created / signed in (default
+                         $SEATRELAY_TEST_PASSWORD; Passw0rd! on the local stack only)
   --cache FILE           ID token cache (default tools/loadtest/.token-cache.<target>.json)
   --no-create            never create missing accounts (tokens must be cached or sign-in must work)
   --faults auto|on|off   use _fault flags (auto = on for local and dev, off for pilot)
@@ -340,7 +341,7 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
     const options: CommonValues = {
       runs,
       holdSeconds,
-      password: stringOption(values, 'password', DEFAULT_PASSWORD) as string,
+      password: testPassword(target.name, stringOption(values, 'password')),
       cacheFile: tokenCachePath(target.name, stringOption(values, 'cache')),
       create: values['no-create'] !== true,
       faults: faultsFlag === 'on' || (faultsFlag === 'auto' && ops.faultFlagsExpected()),

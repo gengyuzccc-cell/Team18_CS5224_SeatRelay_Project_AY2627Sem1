@@ -13,7 +13,7 @@ import {
   type StudyWorkshopExpectation,
 } from './lib/study';
 import { parseTarget, resolveTarget, userProviderFor } from './lib/targets';
-import { DEFAULT_PASSWORD } from './lib/users';
+import { testPassword } from './lib/users';
 
 const USAGE = `
 seed-study — reset the SeatRelay state of one user-study round (tasks-participant.md §1 /
@@ -27,7 +27,8 @@ Options
   --dataset A|B                                                           (required)
   --target NAME          local (compose stack) or dev|pilot; --stage is an alias (default local)
   --api URL              API base URL (default per target; TARGET_API also works)
-  --password PASS        password of every study account (default Passw0rd!)
+  --password PASS        password of every study account (default $SEATRELAY_TEST_PASSWORD;
+                         Passw0rd! on the local stack only)
   --org-name NAME        study organisation (default "NUS Data Club", owned by study.riley@)
   --concurrency N        parallel account provisioning (default 4)
   --pool-id / --client-id   Cognito ids (default: outputs of stack seatrelay-auth)
@@ -63,7 +64,7 @@ runMain(async () => {
   const track = enumOption(values, 'track', STUDY_TRACKS, 'participant');
   const dataset = enumOption(values, 'dataset', STUDY_DATASETS, 'A');
   const targetName = parseTarget(stringOption(values, 'target') ?? stringOption(values, 'stage'));
-  const password = stringOption(values, 'password', DEFAULT_PASSWORD) as string;
+  const password = testPassword(targetName, stringOption(values, 'password'));
   const orgName = stringOption(values, 'org-name', STUDY_ORG_NAME) as string;
 
   if (values['dry-run'] === true) {

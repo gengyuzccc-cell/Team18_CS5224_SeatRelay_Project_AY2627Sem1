@@ -96,7 +96,7 @@ pnpm --filter @seatrelay/scripts seed-demo -- --target local
 pnpm --filter @seatrelay/scripts seed-study -- --track participant --dataset A --target local
 
 # dev stage (credentials configured)
-pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --password 'Passw0rd!' --stage dev
+pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 pnpm --filter @seatrelay/scripts seed-demo -- --target dev
 pnpm --filter @seatrelay/scripts seed-study -- --track organiser --dataset B --target dev
 ```
@@ -107,7 +107,7 @@ pnpm --filter @seatrelay/scripts seed-study -- --track organiser --dataset B --t
    `study.jordan@example.com` (participant persona, never registered) and one
    `first.last@example.com` account per dummy registrant (`Mei Lin Chua` →
    `meilin.chua@example.com`, the convention of `control-condition-setup.md` §5) exist with
-   `--password` (default `Passw0rd!`). The facilitator plays Mei Lin / Farah with that password.
+   `--password` (default `$SEATRELAY_TEST_PASSWORD` on dev/pilot, `Passw0rd!` on the local stack). The facilitator plays Mei Lin / Farah with that password.
 2. Every OPEN/CLOSED workshop of the study organisation is cancelled (`CANCEL_WORKSHOP`): the
    previous round's W1/W2/W3 and anything a participant created in O1. This also ends every
    registration of the personas (Jordan's T1/T2 registrations, the registrant Mei Lin / Farah

@@ -1,4 +1,4 @@
-import { mapWithConcurrency } from './cli';
+import { CliError, mapWithConcurrency } from './cli';
 import type { TokenCacheUser } from './tokenCache';
 
 /**
@@ -8,7 +8,37 @@ import type { TokenCacheUser } from './tokenCache';
  * participant must be a real account.
  */
 
+/** Password of the local stack's realm users (services/local/keycloak/realm-export.json). */
 export const DEFAULT_PASSWORD = 'Passw0rd!';
+
+/** Environment variable holding the test accounts' password on the AWS stages. */
+export const TEST_PASSWORD_ENV = 'SEATRELAY_TEST_PASSWORD';
+
+/**
+ * Password of the test accounts of `target`: `--password` when given; otherwise DEFAULT_PASSWORD
+ * on the local stack (its realm users, and services/local/scripts/smoke.sh, use it) and
+ * $SEATRELAY_TEST_PASSWORD on an AWS stage. The repository is public, so an AWS stage refuses
+ * the documented default: a script would otherwise sign in with, or reset accounts to, a password
+ * anyone can read.
+ */
+export function testPassword(
+  target: string,
+  explicit?: string,
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): string {
+  const password = explicit ?? (target === 'local' ? DEFAULT_PASSWORD : env[TEST_PASSWORD_ENV]);
+  if (password === undefined || password === '') {
+    throw new CliError(`no test-account password for target ${target}`, {
+      hint: `export ${TEST_PASSWORD_ENV}=<private password> (or pass --password); the default is for the local stack only`,
+    });
+  }
+  if (target !== 'local' && password === DEFAULT_PASSWORD) {
+    throw new CliError(`the documented default password is public; it is refused for target ${target}`, {
+      hint: `choose a private password in ${TEST_PASSWORD_ENV} and reset the accounts with tools/scripts/bin/reset-test-passwords.sh`,
+    });
+  }
+  return password;
+}
 
 export interface UserSpec {
   email: string;

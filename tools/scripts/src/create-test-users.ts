@@ -5,7 +5,7 @@ import {
   cognitoUserProvider,
   resolveCognitoIds,
 } from './lib/cognito';
-import { fail, intOption, log, parseCli, requireString, runMain, stringOption } from './lib/cli';
+import { fail, intOption, log, parseCli, runMain, stringOption } from './lib/cli';
 import {
   mergeTokenCache,
   readTokenCache,
@@ -13,18 +13,19 @@ import {
   writeTokenCache,
   type TokenCache,
 } from './lib/tokenCache';
-import { generatedUserSpecs, provisionUsers, toCacheUser } from './lib/users';
+import { generatedUserSpecs, provisionUsers, testPassword, toCacheUser } from './lib/users';
 
 const USAGE = `
 create-test-users — Cognito test accounts + ID token cache for k6 / experiments (plan §3 step 14)
 
-  pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --password 'Passw0rd!' [options]
+  SEATRELAY_TEST_PASSWORD=<private> pnpm --filter @seatrelay/scripts create-test-users -- --count 60 [options]
 
 Options
   --count N            number of accounts (required)
   --prefix NAME        e-mail local-part prefix (default loaduser): loaduser-1@…, loaduser-2@…
   --domain DOMAIN      e-mail domain (default example.com)
-  --password PASS      permanent password for every account (required; Cognito policy applies)
+  --password PASS      permanent password for every account (default $SEATRELAY_TEST_PASSWORD;
+                       Cognito policy applies; the public local default is refused here)
   --stage STAGE        stage of the token cache file (default dev; --target is an alias)
   --pool-id ID         Cognito user pool id (default: output UserPoolId of stack seatrelay-auth)
   --client-id ID       tooling app client id (default: output ToolingClientId of seatrelay-auth)
@@ -62,8 +63,8 @@ runMain(async () => {
   if (count < 1) {
     fail('--count must be ≥ 1', USAGE.trim());
   }
-  const password = requireString(values, 'password');
   const stage = stringOption(values, 'stage') ?? stringOption(values, 'target') ?? 'dev';
+  const password = testPassword(stage, stringOption(values, 'password'));
   const specs = generatedUserSpecs({
     count,
     prefix: stringOption(values, 'prefix', 'loaduser') as string,

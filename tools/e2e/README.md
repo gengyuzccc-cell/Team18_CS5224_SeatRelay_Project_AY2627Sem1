@@ -29,7 +29,7 @@ pnpm --filter @seatrelay/e2e walkthrough      # full run against dev, about 5 mi
 |---|---|---|
 | `--web <url>` / `E2E_WEB_URL` | `https://d2ni5e1z674t04.cloudfront.net` | SPA to drive; API and hosted UI come from its `/env.js` |
 | `--stage <name>` / `E2E_STAGE` | `dev` | must match `stage` in `/env.js` |
-| `--prefix <p>` / `E2E_PREFIX` | `walkthrough` | accounts `<p>-{organiser,alice,bob,carol}@example.com`; password `E2E_PASSWORD` (default `Passw0rd!`) |
+| `--prefix <p>` / `E2E_PREFIX` | `walkthrough` | accounts `<p>-{organiser,alice,bob,carol}@example.com`; password `E2E_PASSWORD` or `SEATRELAY_TEST_PASSWORD` (required; never the public local default) |
 | `--headed` | off | show the browser windows |
 | `--no-video` | video on | skip the recordings and the cut |
 | `--no-publish` | publish on | keep screenshots and video in `out/` only |

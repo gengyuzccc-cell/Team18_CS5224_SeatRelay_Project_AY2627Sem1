@@ -76,6 +76,18 @@ interface Options {
   maxVideoMb: number;
 }
 
+/**
+ * The walkthrough accounts' password (tools/e2e/bin/ensure-users.sh sets it): E2E_PASSWORD or
+ * SEATRELAY_TEST_PASSWORD. The repository is public, so the local stack's default is refused.
+ */
+function walkthroughPassword(env: NodeJS.ProcessEnv = process.env): string {
+  const password = env.E2E_PASSWORD || env.SEATRELAY_TEST_PASSWORD;
+  if (!password || password === 'Passw0rd!') {
+    throw new Error('set SEATRELAY_TEST_PASSWORD (or E2E_PASSWORD) to the private password of the walkthrough accounts');
+  }
+  return password;
+}
+
 function parseArgs(argv: readonly string[]): Options {
   const value = (flag: string): string | undefined => {
     const index = argv.indexOf(flag);
@@ -102,7 +114,7 @@ function parseArgs(argv: readonly string[]): Options {
     web,
     stage: value('--stage') ?? process.env.E2E_STAGE ?? 'dev',
     prefix: value('--prefix') ?? process.env.E2E_PREFIX ?? 'walkthrough',
-    password: process.env.E2E_PASSWORD ?? 'Passw0rd!',
+    password: walkthroughPassword(),
     headed: has('--headed'),
     video: !has('--no-video'),
     publish: !has('--no-publish'),

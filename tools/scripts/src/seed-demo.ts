@@ -3,7 +3,7 @@ import { ApiClient } from './lib/api';
 import { CliError, intOption, log, parseCli, runMain, stringOption } from './lib/cli';
 import { demoParticipants, demoWorkshopBody, seedDemo } from './lib/seedDemo';
 import { parseTarget, resolveTarget, userProviderFor } from './lib/targets';
-import { DEFAULT_PASSWORD, type UserSpec } from './lib/users';
+import { testPassword, type UserSpec } from './lib/users';
 
 const USAGE = `
 seed-demo — organisation + demo workshop (3 sessions, capacity 2/2/1) + N registered participants
@@ -18,7 +18,8 @@ Options
                          demo.organiser@example.com otherwise); created when missing
   --participants X       N (demo.p1@… … demo.pN@…) or a comma-separated e-mail list
                          (default alice@,bob@,carol@example.com on local; 3 otherwise)
-  --password PASS        password for accounts that must be created (default Passw0rd!)
+  --password PASS        password for accounts that must be created (default
+                         $SEATRELAY_TEST_PASSWORD; Passw0rd! on the local stack only)
   --hold SECONDS         holdSeconds of the workshop (default 60; minimum 30)
   --org-name NAME        organisation name (default "SeatRelay Demo"; reused when it exists)
   --title TITLE          workshop title (default "Demo workshop")
@@ -52,7 +53,7 @@ runMain(async () => {
     USAGE,
   );
   const targetName = parseTarget(stringOption(values, 'target'));
-  const password = stringOption(values, 'password', DEFAULT_PASSWORD) as string;
+  const password = testPassword(targetName, stringOption(values, 'password'));
   const organiserEmail =
     stringOption(values, 'organiser-email') ??
     (targetName === 'local' ? 'organiser@example.com' : 'demo.organiser@example.com');

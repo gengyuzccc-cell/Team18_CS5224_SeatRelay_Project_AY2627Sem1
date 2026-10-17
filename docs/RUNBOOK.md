@@ -77,7 +77,7 @@ allows sign-up and sign-in; CloudWatch dashboard `seatrelay-dev`, alarms and the
 ### 1.4 Test users and tokens (experiments)
 
 ```bash
-pnpm --filter @seatrelay/scripts exec tsx src/create-test-users.ts --count 60 --prefix loaduser --password 'Passw0rd!' --stage dev
+pnpm --filter @seatrelay/scripts exec tsx src/create-test-users.ts --count 60 --prefix loaduser --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 ```
 
 Users are created with `--message-action SUPPRESS` (no e-mail) and a permanent password; the script
