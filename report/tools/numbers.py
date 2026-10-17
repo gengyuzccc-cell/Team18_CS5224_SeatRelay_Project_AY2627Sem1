@@ -516,6 +516,11 @@ def section_expiry_race(book: Book, runs, target: str) -> None:
     book.num("ExpiryRaceEarlyAttempts", None if early is None else len(early), 0, src_of(run, "raw.csv", "variant = early (rows)"), "early ACCEPT attempts")
     book.num("ExpiryRaceEarlyApplied", count(early, lambda f: f["verdict"].eq("PASS")), 0, src_of(run, "raw.csv", "variant = early, verdict = PASS"), "early ACCEPTs applied")
     book.num("ExpiryRaceEarlyInconclusive", count(early, lambda f: f["verdict"].eq("INCONCLUSIVE")), 0, src_of(run, "raw.csv", "variant = early, verdict = INCONCLUSIVE"), "early ACCEPTs delayed past expiresAt by the queue (repeated)")
+    arrived_late = None
+    if early is not None and "arrivalOffsetMs" in early.columns:
+        arrived_late = sum(1 for v in (to_float(x) for x in early["arrivalOffsetMs"].tolist()) if v is not None and v > 0)
+    book.num("ExpiryRaceEarlyArrivedLate", arrived_late, 0, src_of(run, "raw.csv", "variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt)"),
+             "early ACCEPTs that reached the API after expiresAt (client send timing)")
     book.num("ExpiryRaceLateTrials", None if late is None else len(late), 0, src_of(run, "raw.csv", "variant = late (rows)"), "late ACCEPT trials")
     book.num("ExpiryRaceLateRejected", count(late, lambda f: f["status"].eq("REJECTED") & f["reason"].eq("OFFER_EXPIRED")), 0,
              src_of(run, "raw.csv", "variant = late, status REJECTED, reason OFFER_EXPIRED"), "late ACCEPTs rejected OFFER_EXPIRED")
@@ -665,6 +670,7 @@ def section_loadtest(book: Book, results: Path) -> None:
                   f"{src}: every scenario x VU level has {db.LOADTEST_ROUNDS} active rounds", f"{target}: k6 matrix complete",
                   f"k6 matrix ({target}): {done} of {len(db.LOADTEST_LEVELS)} levels have all {db.LOADTEST_ROUNDS} rounds")
     combos = list(PERF_DEFAULT)
+    measured = {}  # (target, scenario, vus) -> {suffix: value} for levels with all rounds
     if frame is not None:
         for key in frame[["target", "scenario", "vus"]].drop_duplicates().itertuples(index=False):
             item = (str(key.target), str(key.scenario), int(key.vus))
@@ -709,12 +715,42 @@ def section_loadtest(book: Book, results: Path) -> None:
                             why = f"k6 {scenario} at {vus} VUs on {target}: settle p95 above the client budget in most rounds"
             book.num(f"{name}{suffix}", value, digits, f"{src}: target={target}, scenario={scenario}, vus={vus}, {column or 'rows'} ({how} over active rounds; quoted once {db.LOADTEST_ROUNDS} rounds exist)",
                      f"{target} {scenario} {vus} VUs: {desc}", why)
+            if complete:
+                measured.setdefault((target, scenario, vus), {})[suffix] = value
         unsettled = None
         if rows is not None and complete and "settleP95" in rows.columns:
             unsettled = sum(1 for n, t in zip((to_float(x) for x in rows["settleP95"].tolist()), timeouts or [0] * len(rows))
                             if (n is None or n <= 0) and t > 0)
         book.num(f"{name}UnsettledRounds", unsettled, 0, f"{src}: target={target}, scenario={scenario}, vus={vus}, rounds with settleP95 = 0 and settleTimeouts > 0",
                  f"{target} {scenario} {vus} VUs: rounds in which no command settled within the client budget (counted as +inf in the median)", reason)
+    # Verdict per target against plan §4 Performance: reads and 202 p95 < 1 s, settle p95 < 5 s
+    # (client and server), HTTP errors < 1 % (worst round). A level whose settle p95 is censored
+    # (value None after all rounds exist) counts as not met.
+    def level_met(values: dict) -> bool:
+        limits = (("ReadPNinetyFiveMs", 1000), ("AcceptPNinetyFiveMs", 1000), ("SettlePNinetyFiveMs", 5000),
+                  ("ServerSettlePNinetyFiveMs", 5000), ("ErrorPct", 1.0))
+        return all(values.get(key) is not None and float(values[key]) < limit for key, limit in limits)
+
+    for target in ("dev", "local"):
+        levels = [(s, v) for s, v in db.LOADTEST_LEVELS]
+        have_all = all((target, s, v) in measured for s, v in levels)
+        met = {(s, v): level_met(measured[(target, s, v)]) for s, v in levels if (target, s, v) in measured}
+        reason = f"k6 matrix ({target}) not complete"
+        tsrc = f"{src}: target={target}, every scenario x VU level (medians of the rounds, errors = worst round)"
+        book.text(f"Perf{camel(target)}Verdict", ("PASS" if all(met.values()) else "FAIL") if have_all else None, tsrc,
+                  f"{target}: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %", reason)
+        book.num(f"Perf{camel(target)}LevelsMet", sum(met.values()) if have_all else None, 0, tsrc, f"{target}: levels that meet every Performance target", reason)
+        book.num(f"Perf{camel(target)}Levels", len(levels) if have_all else None, 0, tsrc, f"{target}: levels in the matrix", reason)
+        # largest VU count at which both scenarios meet every target (0 if none)
+        ok_vus = [v for v in sorted({v for _, v in levels}) if all(met.get((s, v)) for s, _ in levels if _ == v)]
+        top = 0
+        for v in sorted({v for _, v in levels}):
+            if v in ok_vus:
+                top = v
+            else:
+                break
+        book.num(f"Perf{camel(target)}MaxVUsMet", top if have_all else None, 0, tsrc,
+                 f"{target}: largest VU level up to which both scenarios meet every target", reason)
     stats = db.read_csv(date_dir / "docker-stats.csv", book.notes) if date_dir else None
     cpu = mem = None
     if stats is not None and {"ts", "cpuPercent", "memUsageMiB"}.issubset(stats.columns):

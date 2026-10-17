@@ -1,0 +1,6 @@
+
+> @seatrelay/loadtest@0.1.0 run-matrix /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/loadtest
+> tsx src/run-matrix.ts -- --target local
+
+[15:49:45] matrix {"runId":"20261017T154945Z","runs":18,"estimatedMinutes":36,"accounts":60,"firstTokenExpiry":"2026-10-17T16:49:35.000Z","outDir":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17"}
+[15:49:47] run 1/18 {"scenario":"cross-workshop","vus":10,"round":1,"name":"cross-workshop-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/cross-workshop-10-1.log"}
