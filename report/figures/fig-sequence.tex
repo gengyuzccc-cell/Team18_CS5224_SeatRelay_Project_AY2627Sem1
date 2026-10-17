@@ -1,0 +1,88 @@
+% Fig. 3 (plan §7.1): request sequences, two compact diagrams side by side.
+% (a) command path: 202 -> poll -> settled; (b) expiry relay: offer -> timer -> tick -> backfill.
+% Source of truth: docs/ARCHITECTURE.md §3.2 (Figure B) and §5.3 (Figure C); latency
+% definitions from ARCHITECTURE.md §3 ("Latency definitions used everywhere").
+% Needs \input{figures/tikz-setup}. Size: about 15.9 cm x 5.6 cm. Not drawn to time scale.
+%
+% Suggested caption:
+%   Request sequences (not to scale). (a) A command is accepted (202) as soon as its CMD record
+%   is written and it is enqueued; the browser polls GET /commands/{id} (300, 500, 1000, 2000 ms
+%   back-off) until the worker's transaction has settled it. Server settle latency =
+%   settledAt - acceptedAt, both stored on the CMD record; the client-observed latency adds at
+%   most one poll interval. (b) Each offer schedules its own timer on the standard delay queue;
+%   at expiresAt the forwarder moves the TICK into the workshop's FIFO group, and the worker
+%   expires the offer (tick-first) and relays the seat in the same decision. Backfill latency =
+%   reallocatedAt - releasedAt, where releasedAt = expiresAt for an expiry.
+\begin{tikzpicture}[x=1cm, y=1cm]
+  \def\lifeline#1#2{\draw[srMuted!70, line width=0.4pt, dash pattern=on 1.6pt off 1.2pt] (#1,-0.28) -- (#1,#2);}
+  \def\head#1#2#3#4{\node[#3, minimum height=0.48cm, minimum width=1.05cm, inner ysep=1pt] at (#1,#2) {#4};}
+  \def\msg#1#2#3#4{\draw[sr/flow] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
+  \def\rmsg#1#2#3#4{\draw[sr/reply] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
+  \def\amsg#1#2#3#4{\draw[sr/async] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
+  \def\actbar#1#2#3#4{\fill[#4] (#1-0.065,#2) rectangle (#1+0.065,#3);}
+  \def\swatch#1#2#3{\fill[#3] (#1,#2-0.07) rectangle (#1+0.22,#2+0.07);}
+  \def\note#1#2#3#4{\node[sr/base, fill=white, minimum height=0.34cm, inner ysep=1pt, #3] at (#1,#2) {#4};}
+
+  % ===================================================== (a) command path
+  \begin{scope}
+    \def\C{0.50}\def\A{2.00}\def\D{3.55}\def\Q{5.05}\def\W{6.55}
+    \node[sr/lbl, anchor=west, font=\srfontb] at (-0.05,0.55) {(a) command: 202 $\to$ poll $\to$ settled};
+    \foreach \x in {\C,\A,\D,\Q,\W} {\lifeline{\x}{-4.62}}
+    \actbar{\C}{-0.62}{-3.95}{srBlue!45}
+    \actbar{\D}{-1.00}{-2.70}{srGreen!70}
+    \actbar{\W}{-2.20}{-2.70}{srOrange!45}
+    \head{\C}{0}{sr/client}{Client}
+    \head{\A}{0}{sr/compute}{API}
+    \head{\D}{0}{sr/data}{CMD table}
+    \head{\Q}{0}{sr/queue}{FIFO}
+    \head{\W}{0}{sr/compute}{worker}
+    \msg{\C}{\A}{-0.62}{POST}
+    \msg{\A}{\D}{-1.00}{put ACCEPTED}
+    \node[sr/note, anchor=north west] at (\D+0.08,-1.03) {acceptedAt};
+    \draw[sr/flow] (\A,-1.46) -- node[sr/lbl, below=0.2pt, pos=0.80] {SendMessage} (\Q,-1.46);
+    \rmsg{\A}{\C}{-1.82}{202 + href}
+    \msg{\C}{\A}{-2.24}{GET (poll)}
+    \msg{\Q}{\W}{-2.20}{deliver}
+    \rmsg{\A}{\C}{-2.64}{ACCEPTED}
+    \msg{\W}{\D}{-2.70}{commit: APPLIED}
+    \node[sr/note, anchor=north west] at (\D+0.06,-2.74) {settledAt};
+    \msg{\C}{\A}{-3.16}{GET (poll)}
+    \msg{\A}{\D}{-3.56}{consistent get}
+    \rmsg{\A}{\C}{-3.95}{APPLIED}
+    % legend: latency definitions
+    \swatch{-0.05}{-5.00}{srBlue!45}
+    \node[sr/lbl, anchor=west] at (0.22,-5.00) {client-observed: POST $\to$ terminal poll response};
+    \swatch{-0.05}{-5.35}{srGreen!70}
+    \node[sr/lbl, anchor=west] at (0.22,-5.35) {server settle $=$ settledAt $-$ acceptedAt (CMD record)};
+  \end{scope}
+
+  % ===================================================== (b) expiry relay
+  \begin{scope}[xshift=7.75cm]
+    \def\WA{0.62}\def\D{2.25}\def\F{3.85}\def\Q{5.30}\def\WB{6.80}
+    \node[sr/lbl, anchor=west, font=\srfontb] at (-0.05,0.55) {(b) offer $\to$ timer $\to$ tick $\to$ backfill};
+    \foreach \x in {\WA,\D,\F,\Q,\WB} {\lifeline{\x}{-4.62}}
+    \actbar{\WB}{-2.52}{-3.62}{srOrange!70}
+    \head{\WA}{0}{sr/compute}{worker}
+    \head{\D}{0}{sr/queue}{expiry-delay}
+    \head{\F}{0}{sr/compute}{forwarder}
+    \head{\Q}{0}{sr/queue}{FIFO}
+    \head{\WB}{0}{sr/compute}{worker}
+    \note{\WA-0.55}{-0.62}{anchor=west}{decide(): offer O to A}
+    \amsg{\WA}{\D}{-1.14}{TICK(O)}
+    \node[sr/note, anchor=north] at ($(\WA,-1.16)!0.5!(\D,-1.16)$) {delay $= \mathit{hold}$};
+    \note{\WA-0.55}{-1.72}{anchor=west}{commit offer O}
+    % the hold elapses (break)
+    \node[sr/note, fill=white, inner sep=1.2pt] at (3.70,-2.17) {$\cdots$ hold elapses (60\,s in the experiments, default 900\,s) $\cdots$};
+    \draw[srMuted, line width=0.4pt, dash pattern=on 3pt off 1.5pt] (-0.05,-2.52) -- (7.30,-2.52);
+    \node[sr/note, anchor=south east, inner sep=0.6pt] at (7.30,-2.50) {expiresAt $=$ releasedAt};
+    \amsg{\D}{\F}{-2.86}{TICK due}
+    \amsg{\F}{\Q}{-3.20}{TICK, group}
+    \amsg{\Q}{\WB}{-3.50}{deliver}
+    \note{\WB+0.10}{-3.90}{anchor=east, align=right}{tick-first: O expired;\\O2 offered to B at reallocatedAt}
+    \amsg{\WB}{\D}{-4.50}{TICK(O2) for the next hold}
+    % legend
+    \swatch{-0.05}{-5.00}{srOrange!70}
+    \node[sr/lbl, anchor=west] at (0.22,-5.00) {backfill latency $=$ reallocatedAt $-$ releasedAt};
+    \node[sr/lbl, anchor=west] at (0.22,-5.35) {a late or duplicate TICK finds nothing due (no-op)};
+  \end{scope}
+\end{tikzpicture}

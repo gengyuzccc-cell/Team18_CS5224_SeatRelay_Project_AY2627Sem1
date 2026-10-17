@@ -1,0 +1,16 @@
+% Visible placeholder for data that does not exist yet (academic-integrity rule: no number is
+% invented; a missing measurement is shown, not hidden). Load in the preamble before
+% generated/numbers.tex:   \input{generated/pending}  \input{generated/numbers}
+%
+% \pending{what is missing} prints a red bold "[PENDING: what is missing]" in the PDF, writes
+% "SEATRELAY-PENDING: what is missing" to the log, and counts the uses; the count is written to
+% the log at the end of the run ("SEATRELAY-PENDING-COUNT: n"). The submission build must find
+% zero "[PENDING" strings in the PDF text (pdftotext) before Final.pdf is handed in.
+% Written by report/tools/numbers.py (regenerated on every run; edit the script, not this file).
+\usepackage{xcolor}
+\newcounter{srpending}
+\DeclareRobustCommand{\pending}[1]{%
+  \stepcounter{srpending}%
+  \typeout{SEATRELAY-PENDING: \detokenize{#1}}%
+  \textcolor{red}{\textbf{[PENDING: #1]}}}
+\AtEndDocument{\typeout{SEATRELAY-PENDING-COUNT: \arabic{srpending}}}

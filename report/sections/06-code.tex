@@ -1,0 +1,42 @@
+% Final §6 -- Code explanation and public URL (plan §7.1: 0.6 pages). Condensed from README.md.
+\section{Code explanation}\label{sec:code}
+The code, infrastructure templates, experiment scripts, raw results and this report's sources are
+public at \url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}
+(\code{README.md} is the long form of this section). It is a pnpm workspace in TypeScript (Node.js
+22): \code{packages/contracts} (zod schemas shared by all layers), \code{packages/core} (the pure
+engine), \code{packages/service} (API routes, worker protocol, sweep), \code{services/aws} (SAM
+templates, five Lambda handlers, DynamoDB/SQS/SES adapters), \code{services/local} (the on-prem
+reference: Fastify, PostgreSQL, Keycloak, Mailpit, nginx), \code{apps/web} (React SPA),
+\code{tools/experiments}, \code{tools/loadtest} (k6), \code{tools/replay}, \code{results/} (raw
+outputs; the only source of reported numbers) and \code{report/}.
+
+{\footnotesize
+\begin{verbatim}
+corepack enable && pnpm install --frozen-lockfile
+pnpm lint && pnpm typecheck && pnpm test                       # all packages, as in CI
+STAGE=dev ALARM_EMAIL=<e-mail> tools/scripts/bin/deploy-all.sh  # bundles, sam deploy, SPA upload
+pnpm local:up                                                  # on-prem reference (Docker Compose)
+TARGET=dev tools/experiments/bin/run-table3.sh                 # Table 3 experiments x 3 runs, then k6
+pnpm replay --seeds 1000 --out results/<date>-replay           # mechanism comparison
+python3 tools/experiments/cost/model.py                        # cost model -> results/cost/
+python3 -I report/tools/numbers.py && ./report/build.sh -t Final -m 10   # numbers file, this PDF
+\end{verbatim}}
+
+\begin{table}[h]
+\centering\footnotesize
+\caption{Where the main claims are implemented (paths relative to the repository root).}\label{tab:code}
+\begin{tabularx}{\textwidth}{@{}P{4.6cm}L@{}}
+\toprule
+Claim & Implementation\\
+\midrule
+Tick-first decision, R1--R7, invariants & \code{packages/core/src/\{decide,tick,apply,allocate,drain,invariants\}.ts}\\
+Idempotent intake (C3); transaction with version lock & \code{packages/service/src/api/routes/commands.ts}; \code{services/aws/src/adapters/dynamo/store.ts}\\
+Worker protocol, retries, fault injection & \code{packages/service/src/worker/processCommand.ts}; \code{services/aws/src/handlers/worker.ts}\\
+Per-offer timers and forwarder & \code{services/aws/src/adapters/sqs.ts}; \code{services/aws/src/handlers/expiryForwarder.ts}\\
+Sweep safety net & \code{packages/service/src/worker/sweep.ts}; \code{services/aws/templates/app.yaml}\\
+Polling back-off (browser) & \code{apps/web/src/commands/\{backoff,pollCommand,commandRunner\}.ts}\\
+Access control (C7) & \code{packages/service/src/api/context.ts}\\
+Experiments, replay, cost, report numbers & \code{tools/experiments/src/*.ts}; \code{tools/replay}; \code{tools/experiments/cost/model.py}; \code{report/tools/numbers.py}\\
+\bottomrule
+\end{tabularx}
+\end{table}

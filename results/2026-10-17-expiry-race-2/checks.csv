@@ -1,0 +1,34 @@
+run,scenario,step,ok,expected,actual
+1,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) acceptedAt 2026-10-17T15:08:29.110Z settledAt 2026-10-17T15:08:29.161Z
+1,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+2,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) acceptedAt 2026-10-17T15:08:30.221Z settledAt 2026-10-17T15:08:30.259Z
+1,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 126 ms
+1,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 660 ms after expiresAt; timer tick processed before the ACCEPT arrived
+1,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:08:29.896Z
+2,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 76 ms
+2,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 208 ms after expiresAt; timer tick processed before the ACCEPT arrived
+2,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:08:30.243Z
+2,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+3,early,attempt 1: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,APPLIED acceptedAt 2026-10-17T15:08:31.798Z settledAt 2026-10-17T15:08:31.845Z
+3,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+3,early,ACCEPT at expiresAt − 200 ms succeeds,true,APPLIED,"APPLIED; arrived -195 ms, settled -148 ms relative to expiresAt (worker pickup 47 ms)"
+3,late,the expired seat is relayed to the next in queue,true,"C OFFERED, EXPIRED backfill record relayed",C OFFERED@S1; EXPIRED record latency 64 ms
+3,late,ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED,true,REJECTED(OFFER_EXPIRED),REJECTED(OFFER_EXPIRED); arrived 205 ms after expiresAt; timer tick processed before the ACCEPT arrived
+3,late,outcome consistent with the server clock,true,OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T15:08:32.179Z
+1,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group ee4f3976-1e50-4e3f-b599-ac2e41c34d98, dedup manual#3d2991c6-103a-43b2-9542-3eab44cd6b52#0c9b1538-fdc3-4620-9c77-a8c8dfa1293e)"
+1,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+2,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 08e21246-f896-4342-9933-e46766d0512a, dedup manual#f472b9fd-f567-44e6-90dc-1b9425b8afe4#f8214369-1c5c-452e-81dd-fd7b06af071e)"
+2,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+2,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+1,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+3,late tick,stale TICK has no effect on the newer offer,true,"newer offer unchanged, no new backfill record, workshop version unchanged (no commit)","offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group de8324a8-5cea-4f80-ac57-c4be8375f293, dedup manual#fb0e0b8a-c96e-4692-a714-f27cbea941d3#35f26a70-cedd-4ec3-9df1-e5e3a415f5d3)"
+3,late tick,the newer offer can still be accepted,true,APPLIED,APPLIED
+3,late,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+2,early,attempt 2: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,APPLIED acceptedAt 2026-10-17T15:09:31.854Z settledAt 2026-10-17T15:09:31.885Z
+1,early,attempt 2: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) acceptedAt 2026-10-17T15:09:31.458Z settledAt 2026-10-17T15:09:31.497Z
+2,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+2,early,ACCEPT at expiresAt − 200 ms succeeds,true,APPLIED,"APPLIED; arrived -197 ms, settled -166 ms relative to expiresAt (worker pickup 31 ms); attempt 2 (1 inconclusive before)"
+1,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+1,early,attempt 3: outcome consistent with the server clock,true,APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt,REJECTED(OFFER_EXPIRED) acceptedAt 2026-10-17T15:10:34.061Z settledAt 2026-10-17T15:10:34.111Z
+1,early,verify,true,verify ok,"verify ok, overCapacity 0, doubleHolds 0"
+1,early,ACCEPT at expiresAt − 200 ms succeeds (a conclusive trial within 3 attempts),false,APPLIED in one of the attempts,all 3 attempts processed after expiresAt (worker pickup 51 / 39 / 50 ms > 200 ms margin)

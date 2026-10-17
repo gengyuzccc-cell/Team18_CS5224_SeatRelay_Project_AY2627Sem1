@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "accessed": "2026-10-17",
+    "note": "Cited counts of docs/market-sizing.md section 2 that are not own counts. Quotes, URLs and verification levels: report/sources.md section 4. Counts given as 'more than X' or 'X+' enter as X, so every sum is a lower bound. The own counts (NTU directory, library calendars) are computed by count.py from the captures in results/market/<date>/raw/."
+  },
+  "cited": {
+    "nus_student_orgs": {"value": 200, "key": "nus-osa-getstarted", "quote": "NUS has more than 200 official student organisations.", "verification": "official excerpt"},
+    "smu_student_orgs": {"value": 150, "key": "smu-osl-2022", "quote": "out of the 150+ student organizations in SMU, more than 90 are overseen by OSL", "verification": "official excerpt (2022 page)"},
+    "smu_student_orgs_fetched": {"value": 95, "key": "smu-cb-2025", "quote": "21 + 32 + 22 + 6 + 14 clubs of the five constituent bodies (2025 orientation page)", "verification": "fetched + own count"},
+    "sutd_student_groups": {"value": 80, "key": "sutd-fifth-row", "quote": "There are over 80 student groups on campus", "verification": "fetched"},
+    "sit_student_orgs": {"value": 150, "key": "sit-find-your-tribe", "quote": "more than 150 student clubs, chapters and interest groups", "verification": "official excerpt"},
+    "cet_training_providers": {"value": 700, "key": "ssg-credit-progress-2016", "quote": "provided by over 700 training providers (end of 2016)", "verification": "official excerpt (old)"}
+  },
+  "price_sgd_per_year": {"value": 120, "source": "organiser plan, S$10 per month (Final report section 2; plan section 1.1)"}
+}

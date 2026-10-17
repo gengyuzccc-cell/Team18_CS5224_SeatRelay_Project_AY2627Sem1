@@ -1,0 +1,121 @@
+% SeatRelay -- CS5224 Group 18 -- Final report.
+% Build:  ./report/build.sh -t Final -m 10   (latexmk + biber; checks pages, overfull boxes,
+% undefined references and placeholders). Every measured number is a macro from
+% generated/numbers.tex (written by tools/numbers.py from results/); a macro without data prints a
+% visible [PENDING: ...] marker. External facts are cited from references.bib (sources.md).
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{lmodern}               % typewriter (scalable)
+\usepackage{mathptmx}              % Times text and maths
+\usepackage[scaled=0.92]{helvet}   % sans for the diagrams
+\usepackage[english]{babel}
+\usepackage{csquotes}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs,tabularx,array}
+\usepackage{relsize}
+\usepackage{enumitem}
+\usepackage[font=small,labelfont=bf,skip=3pt]{caption}
+\usepackage{titlesec}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\usepackage[backend=biber,style=numeric-comp,sorting=none,maxbibnames=1,minbibnames=1,
+  giveninits=true,isbn=false,doi=true,eprint=false,urldate=iso,seconds=true]{biblatex}
+\addbibresource{references.bib}
+
+\input{figures/tikz-setup}
+\input{generated/pending}
+\input{generated/numbers.tex}
+
+% ---------------------------------------------------------------------------------------- layout
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{7pt plus 2pt minus 1pt}{3pt plus 1pt}
+\titlespacing*{\subsection}{0pt}{5pt plus 2pt minus 1pt}{2pt plus 1pt}
+\titlespacing*{\paragraph}{0pt}{3pt plus 1pt}{0.6em}
+\setlength{\parskip}{0pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlist{nosep,leftmargin=1.2em}
+\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{4pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.85}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+\urlstyle{same}
+\setlength{\emergencystretch}{1.5em}
+
+% bibliography: compact
+\renewcommand*{\bibfont}{\scriptsize}
+\setlength{\biblabelsep}{0.4em}
+\setlength{\bibitemsep}{0pt}
+\DefineBibliographyStrings{english}{urlseen={accessed}}
+% Every cited web page has urldate 2026-10-17 (references.bib); the date is stated once in the
+% note above the list. Re-check this if an entry with another access date is cited.
+\AtEveryBibitem{\clearfield{note}\clearlist{organization}\clearfield{urlyear}\clearfield{urlmonth}\clearfield{urlday}}
+\defbibnote{webdate}{\scriptsize All web pages were accessed on 2026-10-17.}
+\DeclareFieldFormat{url}{\url{#1}}
+\DeclareFieldFormat{urldate}{(accessed #1)}
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburlucpenalty}{8000}
+\setcounter{biburllcpenalty}{7000}
+
+% ------------------------------------------------------------------------------ report helpers
+% \IfPending{\Macro}{text while the data does not exist}{text with the data}: the generated macro
+% of a measurement that has not been made expands to \pending{...}; this test lets a table cell
+% show one placeholder instead of one per number.
+\makeatletter
+\def\sr@ifpending#1\pending#2\sr@end{%
+  \if\relax\detokenize{#1}\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\newcommand{\IfPending}[1]{\expandafter\sr@ifpending#1\pending\sr@end}
+\makeatother
+% \resultfig{file}{height}{what is missing}: a generated chart if report/tools/make_figures.py has
+% drawn it, otherwise a frame of the chart's final size with a visible placeholder.
+\newcommand{\resultfig}[3]{%
+  \IfFileExists{figures/generated/#1.pdf}%
+    {\includegraphics[width=\textwidth]{figures/generated/#1}}%
+    {\fbox{\parbox[c][\dimexpr#2-2\fboxsep-2\fboxrule\relax][c]{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}%
+      {\centering\small\pending{#3}\par}}}}
+\newif\ifloadtest
+\IfFileExists{figures/generated/loadtest-p95.pdf}{\loadtesttrue}{\loadtestfalse}
+\newcommand{\code}[1]{\texttt{\smaller #1}}   % one size step below the surrounding text
+\newcommand{\sd}{S\$}
+\newcommand{\usd}{US\$}
+
+\begin{document}
+
+% ---------------------------------------------------------------------------------- title block
+\begin{center}
+{\LARGE\bfseries SeatRelay: Unified Registration and Timed-Hold Seat Relay\\[2pt] for Multi-Session Workshops\par}
+\vspace{4pt}
+{\large CS5224 Cloud Computing \textemdash{} Group 18 \textemdash{} Final Report\par}
+\vspace{3pt}
+{\small \pending{team member names and student numbers}\par}
+\vspace{2pt}
+{\small Public repository: \url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}\par}
+\end{center}
+\vspace{-2pt}
+\suppressfloats[t]
+
+\input{sections/01-motivation}
+\input{sections/02-business}
+\input{sections/03-architecture}
+\input{sections/04-evaluation}
+\input{sections/05-conclusion}
+\input{sections/06-code}
+\input{sections/07-declaration}
+
+{\small\printbibliography[heading=bibnumbered,title={References},prenote=webdate]}
+
+\end{document}

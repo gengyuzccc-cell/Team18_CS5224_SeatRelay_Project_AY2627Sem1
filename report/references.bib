@@ -1,0 +1,724 @@
+% SeatRelay (CS5224 Group 18) bibliography.
+%
+% Format: biblatex fields (use \usepackage[backend=biber]{biblatex}); web pages are @online with
+% url + urldate. Every entry below was opened on its urldate, or is a published paper whose DOI
+% was checked against the Crossref API on 2026-10-17. report/sources.md lists, per key, what claim
+% the entry supports and how it was verified (direct fetch, official-page excerpt only, or own count).
+% Keys are stable: other files cite them, so add new keys instead of renaming old ones.
+
+% ---------------------------------------------------------------------------------------------
+% AWS documentation relied on by the design (services/aws, docs/ARCHITECTURE.md)
+% ---------------------------------------------------------------------------------------------
+
+@online{aws-sqs-fifo,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SQS} {FIFO} queues},
+  organization = {Amazon Simple Queue Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queues.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-sqs-fifo-terms,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SQS} {FIFO} queue key terms},
+  organization = {Amazon Simple Queue Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-key-terms.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-sqs-exactly-once,
+  author       = {{Amazon Web Services}},
+  title        = {Exactly-once processing in {Amazon} {SQS}},
+  organization = {Amazon Simple Queue Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-sqs-timers,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SQS} message timers},
+  organization = {Amazon Simple Queue Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-timers.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-sqs-delay-queues,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SQS} delay queues},
+  organization = {Amazon Simple Queue Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-delay-queues.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-sqs,
+  author       = {{Amazon Web Services}},
+  title        = {Using {Lambda} with {Amazon} {SQS}},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-sqs-errors,
+  author       = {{Amazon Web Services}},
+  title        = {Handling errors for an {SQS} event source in {Lambda}},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-sqs-scaling,
+  author       = {{Amazon Web Services}},
+  title        = {Configuring scaling behavior for {SQS} event source mappings},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-scaling.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ddb-transactwriteitems,
+  author       = {{Amazon Web Services}},
+  title        = {{TransactWriteItems}},
+  organization = {Amazon DynamoDB API Reference},
+  url          = {https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_TransactWriteItems.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ddb-transactions,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {DynamoDB} transactions: How it works},
+  organization = {Amazon DynamoDB Developer Guide},
+  url          = {https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ddb-pitr,
+  author       = {{Amazon Web Services}},
+  title        = {Point-in-time recovery for {DynamoDB}},
+  organization = {Amazon DynamoDB Developer Guide},
+  url          = {https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Point-in-time-recovery.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ddb-pitr-howitworks,
+  author       = {{Amazon Web Services}},
+  title        = {Point-in-time recovery: how it works},
+  organization = {Amazon DynamoDB Developer Guide},
+  url          = {https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery_Howitworks.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ddb-streams-lambda,
+  author       = {{Amazon Web Services}},
+  title        = {{DynamoDB} Streams and {AWS} {Lambda} triggers},
+  organization = {Amazon DynamoDB Developer Guide},
+  url          = {https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.Lambda.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-event-filtering,
+  author       = {{Amazon Web Services}},
+  title        = {Control which events {Lambda} sends to your {Event} {Function}},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/invocation-eventfiltering.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-ddb-filtering,
+  author       = {{Amazon Web Services}},
+  title        = {Using event filtering with a {DynamoDB} event source},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/with-ddb-filtering.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-lambda-ddb-partial-batch,
+  author       = {{Amazon Web Services}},
+  title        = {Configuring partial batch response with {DynamoDB} and {Lambda}},
+  organization = {AWS Lambda Developer Guide},
+  url          = {https://docs.aws.amazon.com/lambda/latest/dg/services-ddb-batchfailurereporting.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-eventbridge-scheduler,
+  author       = {{Amazon Web Services}},
+  title        = {What is {Amazon} {EventBridge} {Scheduler}?},
+  organization = {Amazon EventBridge Scheduler User Guide},
+  url          = {https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-eventbridge-scheduler-types,
+  author       = {{Amazon Web Services}},
+  title        = {Schedule types in {EventBridge} {Scheduler}},
+  organization = {Amazon EventBridge Scheduler User Guide},
+  url          = {https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-cognito-quotas,
+  author       = {{Amazon Web Services}},
+  title        = {Quotas in {Amazon} {Cognito}},
+  organization = {Amazon Cognito Developer Guide},
+  url          = {https://docs.aws.amazon.com/cognito/latest/developerguide/quotas.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-cognito-email,
+  author       = {{Amazon Web Services}},
+  title        = {Email settings for {Amazon} {Cognito} user pools},
+  organization = {Amazon Cognito Developer Guide},
+  url          = {https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-email.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ses-production-access,
+  author       = {{Amazon Web Services}},
+  title        = {Request production access (moving out of the {Amazon} {SES} sandbox)},
+  organization = {Amazon Simple Email Service Developer Guide},
+  url          = {https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-apigw-jwt,
+  author       = {{Amazon Web Services}},
+  title        = {Control access to {HTTP} {APIs} with {JWT} authorizers in {API} {Gateway}},
+  organization = {Amazon API Gateway Developer Guide},
+  url          = {https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-apigw-cors,
+  author       = {{Amazon Web Services}},
+  title        = {Configure {CORS} for {HTTP} {APIs} in {API} {Gateway}},
+  organization = {Amazon API Gateway Developer Guide},
+  url          = {https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-cloudfront-oac,
+  author       = {{Amazon Web Services}},
+  title        = {Restrict access to an {Amazon} {S3} origin},
+  organization = {Amazon CloudFront Developer Guide},
+  url          = {https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-restricting-access-to-s3.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-budgets-costtypes,
+  author       = {{Amazon Web Services}},
+  title        = {{CostTypes}},
+  organization = {AWS Billing and Cost Management API Reference},
+  url          = {https://docs.aws.amazon.com/aws-cost-management/latest/APIReference/API_budgets_CostTypes.html},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-cfn-budgets-costtypes,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS::Budgets::Budget} {CostTypes}},
+  organization = {AWS CloudFormation Template Reference},
+  url          = {https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-budgets-budget-costtypes.html},
+  urldate      = {2026-10-17},
+}
+
+% ---------------------------------------------------------------------------------------------
+% AWS pricing sources behind tools/experiments/cost/pricing.json (prices read 2026-10-16 from the
+% Price List bulk API; the human pricing pages below were re-opened on 2026-10-17)
+% ---------------------------------------------------------------------------------------------
+
+@online{aws-pricelist-bulk-api,
+  author       = {{Amazon Web Services}},
+  title        = {Getting price list files using the {AWS} {Price} {List} {Bulk} {API}},
+  organization = {AWS Billing and Cost Management User Guide},
+  url          = {https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-the-aws-price-list-bulk-api.html},
+  urldate      = {2026-10-17},
+}
+
+% verification: Machine-readable; per-service ap-southeast-1 offer files named in pricing.json
+@online{aws-pricelist-index,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS} {Price} {List} bulk {API} offer index},
+  url          = {https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json},
+  urldate      = {2026-10-16},
+}
+
+@online{aws-pricing-lambda,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS} {Lambda} pricing},
+  url          = {https://aws.amazon.com/lambda/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-apigw,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {API} {Gateway} pricing},
+  url          = {https://aws.amazon.com/api-gateway/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-sqs,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SQS} pricing},
+  url          = {https://aws.amazon.com/sqs/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-dynamodb,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {DynamoDB} pricing for on-demand capacity},
+  url          = {https://aws.amazon.com/dynamodb/pricing/on-demand/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-ses,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SES} pricing},
+  url          = {https://aws.amazon.com/ses/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-ses-pricing-plans-2026,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SES} introduces pricing plans},
+  organization = {AWS What's New},
+  date         = {2026-07},
+  url          = {https://aws.amazon.com/about-aws/whats-new/2026/07/amazon-ses-pricing-plans/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-cloudfront,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {CloudFront} pricing},
+  url          = {https://aws.amazon.com/cloudfront/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-s3,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {S3} pricing},
+  url          = {https://aws.amazon.com/s3/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-cloudwatch,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {CloudWatch} pricing},
+  url          = {https://aws.amazon.com/cloudwatch/pricing/},
+  urldate      = {2026-10-17},
+}
+
+% verification: On 2026-10-17 this URL redirected to the CloudWatch application-observability page; unit prices were taken from the Price List API
+@online{aws-pricing-xray,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS} {X-Ray} pricing},
+  url          = {https://aws.amazon.com/xray/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-eventbridge,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {EventBridge} pricing},
+  url          = {https://aws.amazon.com/eventbridge/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-cognito,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {Cognito} pricing},
+  url          = {https://aws.amazon.com/cognito/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-sns,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {SNS} pricing},
+  url          = {https://aws.amazon.com/sns/pricing/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-pricing-ec2-dt,
+  author       = {{Amazon Web Services}},
+  title        = {Amazon {EC2} on-demand pricing (data transfer section)},
+  url          = {https://aws.amazon.com/ec2/pricing/on-demand/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-free-tier,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS} {Free} {Tier}},
+  url          = {https://aws.amazon.com/free/},
+  urldate      = {2026-10-17},
+}
+
+@online{aws-sla,
+  author       = {{Amazon Web Services}},
+  title        = {{AWS} service level agreements},
+  url          = {https://aws.amazon.com/legal/service-level-agreements/},
+  urldate      = {2026-10-17},
+}
+
+% ---------------------------------------------------------------------------------------------
+% Evaluation methods and tools
+% ---------------------------------------------------------------------------------------------
+
+% verification: The DOI resolves to the CRC Press edition, whose Crossref record gives pp.~207--212
+@incollection{brooke1996sus,
+  author    = {Brooke, John},
+  title     = {{SUS}: A ``Quick and Dirty'' Usability Scale},
+  booktitle = {Usability Evaluation in Industry},
+  editor    = {Jordan, Patrick W. and Thomas, B. and Weerdmeester, Bernard A. and McClelland, Ian L.},
+  publisher = {Taylor \& Francis},
+  location  = {London},
+  year      = {1996},
+  pages     = {189--194},
+  doi       = {10.1201/9781498710411-35},
+}
+
+@article{bangor2008sus,
+  author  = {Bangor, Aaron and Kortum, Philip T. and Miller, James T.},
+  title   = {An Empirical Evaluation of the {System} {Usability} {Scale}},
+  journal = {International Journal of Human--Computer Interaction},
+  volume  = {24},
+  number  = {6},
+  pages   = {574--594},
+  year    = {2008},
+  doi     = {10.1080/10447310802205776},
+}
+
+% verification: No DOI. The journal site has migrated; the PDF URL returned HTTP 404 on 2026-10-17
+@article{bangor2009sus,
+  author  = {Bangor, Aaron and Kortum, Philip and Miller, James},
+  title   = {Determining What Individual {SUS} Scores Mean: Adding an Adjective Rating Scale},
+  journal = {Journal of Usability Studies},
+  volume  = {4},
+  number  = {3},
+  pages   = {114--123},
+  year    = {2009},
+  url     = {https://uxpajournal.org/wp-content/uploads/sites/7/pdf/JUS_Bangor_May2009.pdf},
+}
+
+@article{lewis2018sus,
+  author  = {Lewis, James R.},
+  title   = {The {System} {Usability} {Scale}: Past, Present, and Future},
+  journal = {International Journal of Human--Computer Interaction},
+  volume  = {34},
+  number  = {7},
+  pages   = {577--590},
+  year    = {2018},
+  doi     = {10.1080/10447318.2018.1455307},
+}
+
+@article{wilcoxon1945,
+  author  = {Wilcoxon, Frank},
+  title   = {Individual Comparisons by Ranking Methods},
+  journal = {Biometrics Bulletin},
+  volume  = {1},
+  number  = {6},
+  pages   = {80--83},
+  year    = {1945},
+  doi     = {10.2307/3001968},
+}
+
+@article{virtanen2020scipy,
+  author  = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and Haberland, Matt and Reddy, Tyler and others},
+  title   = {{SciPy} 1.0: Fundamental Algorithms for Scientific Computing in {Python}},
+  journal = {Nature Methods},
+  volume  = {17},
+  number  = {3},
+  pages   = {261--272},
+  year    = {2020},
+  doi     = {10.1038/s41592-019-0686-2},
+}
+
+@inproceedings{claessen2000quickcheck,
+  author    = {Claessen, Koen and Hughes, John},
+  title     = {{QuickCheck}: A Lightweight Tool for Random Testing of {Haskell} Programs},
+  booktitle = {Proceedings of the Fifth {ACM} {SIGPLAN} International Conference on Functional Programming ({ICFP} '00)},
+  publisher = {ACM},
+  year      = {2000},
+  pages     = {268--279},
+  doi       = {10.1145/351240.351266},
+}
+
+@online{fastcheck,
+  author  = {Dubien, Nicolas},
+  title   = {fast-check: Property based testing for {JavaScript} and {TypeScript}},
+  version = {3.23.2},
+  url     = {https://fast-check.dev/},
+  urldate = {2026-10-17},
+}
+
+@online{k6,
+  author       = {{Grafana Labs}},
+  title        = {Grafana k6 documentation},
+  url          = {https://grafana.com/docs/k6/latest/},
+  urldate      = {2026-10-17},
+}
+
+% ---------------------------------------------------------------------------------------------
+% Market sizing (docs/market-sizing.md). Verification level per key: report/sources.md
+% ---------------------------------------------------------------------------------------------
+
+@online{moe-au,
+  author  = {{Ministry of Education, Singapore}},
+  title   = {Autonomous universities},
+  date    = {2026-03-05},
+  url     = {https://www.moe.gov.sg/post-secondary/overview/autonomous-universities},
+  urldate = {2026-10-17},
+}
+
+@online{moe-psei,
+  author  = {{Ministry of Education, Singapore}},
+  title   = {Overview of post-secondary education institutions ({PSEI})},
+  date    = {2026-01-23},
+  url     = {https://www.moe.gov.sg/post-secondary/overview},
+  urldate = {2026-10-17},
+}
+
+% verification: Direct fetch blocked by bot protection; statement read from the search-engine excerpt of this page
+@online{nus-osa-getstarted,
+  author  = {{NUS Office of Student Affairs}},
+  title   = {Get started (student leader resources)},
+  url     = {https://osa.nus.edu.sg/experience-communities/leadership/student-leader-resources/get-started/},
+  urldate = {2026-10-17},
+}
+
+% verification: Direct fetch blocked by bot protection; statement read from the search-engine excerpt of this page
+@online{nus-nusync,
+  author  = {{NUS Office of Student Affairs}},
+  title   = {Get {NUSync}},
+  url     = {https://osa.nus.edu.sg/experience-communities/leadership/student-leader-resources/get-nusync/},
+  urldate = {2026-10-17},
+}
+
+@online{ntu-clubs-societies,
+  author  = {{Nanyang Technological University}},
+  title   = {Clubs \& societies},
+  url     = {https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies},
+  urldate = {2026-10-17},
+}
+
+@online{ntu-special-interest-clubs,
+  author  = {{Nanyang Technological University}},
+  title   = {Special interest clubs},
+  url     = {https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies/special-interest-clubs},
+  urldate = {2026-10-17},
+}
+
+@online{ntu-su-council,
+  author  = {{Nanyang Technological University}},
+  title   = {Students' {Union} {Council}},
+  url     = {https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies/ntu-students-union-council},
+  urldate = {2026-10-17},
+}
+
+% verification: Direct fetch returned HTTP 403; statement read from the search-engine excerpt of this page
+@online{smu-osl-2022,
+  author  = {{Singapore Management University}},
+  title   = {Office of {Student} {Life} ({OSL}) -- Freshmen Orientation 2022},
+  url     = {https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl},
+  urldate = {2026-10-17},
+}
+
+@online{smu-cb-2025,
+  author  = {{Singapore Management University}},
+  title   = {{CCA} constituent bodies \& {ICON} -- Freshmen Orientation 2025},
+  url     = {https://orientation.smu.edu.sg/2025/cca-constituent-bodies-icon},
+  urldate = {2026-10-17},
+}
+
+@online{sutd-fifth-row,
+  author  = {{Singapore University of Technology and Design}},
+  title   = {Student organisations and {Fifth} {Row}},
+  date    = {2026-09-25},
+  url     = {https://www.sutd.edu.sg/campus-life/student-life/student-organisations-fifth-row/},
+  urldate = {2026-10-17},
+}
+
+% verification: Direct fetch blocked by bot protection; statement read from the search-engine excerpt of this page
+@online{sit-find-your-tribe,
+  author  = {{Singapore Institute of Technology}},
+  title   = {Find your tribe},
+  url     = {https://www.singaporetech.edu.sg/life-at-sit/find-your-tribe},
+  urldate = {2026-10-17},
+}
+
+% verification: Direct fetch blocked by bot protection; statement read from the search-engine excerpt of this page
+@online{sit-life,
+  author  = {{Singapore Institute of Technology}},
+  title   = {{Life@SIT}},
+  url     = {https://www.singaporetech.edu.sg/life-at-sit},
+  urldate = {2026-10-17},
+}
+
+@online{ssg-yir-2024,
+  author  = {{SkillsFuture Singapore}},
+  title   = {{SkillsFuture} Year-in-Review 2024: Learners shift to more career-relevant training with the {SkillsFuture} {Level-Up} {Programme}},
+  date    = {2025-04-09},
+  url     = {https://www.swda.gov.sg/home/newsroom/skillsfuture-year-in-review-2024},
+  urldate = {2026-10-17},
+}
+
+@online{ssg-10th-anniversary-2026,
+  author  = {{SkillsFuture Singapore}},
+  title   = {More than 1 in 2 eligible {Singaporeans} aged 30--75 utilised {SkillsFuture} {Credit} as the {SkillsFuture} movement marked its 10th anniversary},
+  date    = {2026-02-09},
+  url     = {https://www.swda.gov.sg/home/newsroom/more-than-1-in-2-eligible-singaporeans-aged-30-75-utilised-skillsfuture-credit-as-the-skillsfuture-movement-marked-its-10th-anniversary},
+  urldate = {2026-10-17},
+}
+
+@report{ssg-ar-fy2425,
+  author      = {{SkillsFuture Singapore}},
+  title       = {Annual Report {FY2024/25}},
+  type        = {Annual report},
+  institution = {SkillsFuture Singapore},
+  date        = {2025-08},
+  url         = {https://isomer-user-content.by.gov.sg/41/719a22ec-2e40-49f8-8d3a-1469f90efdd3/SSG%20Annual%20Report%20FY24-25.pdf},
+  urldate     = {2026-10-17},
+}
+
+@online{moe-pq-2018-ssg-courses,
+  author  = {{Ministry of Education, Singapore}},
+  title   = {Approval and rejection of {SkillsFuture} courses (parliamentary reply)},
+  date    = {2018-11-20},
+  url     = {https://www.moe.gov.sg/news/parliamentary-replies/20181120-approval-and-rejection-of-skillsfuture-courses},
+  urldate = {2026-10-17},
+}
+
+% verification: The page now renders client-side only; the provider count was read from the search-engine excerpt
+@online{ssg-credit-progress-2016,
+  author  = {{SkillsFuture Singapore}},
+  title   = {Steady progress in implementation of {SkillsFuture} {Credit}},
+  url     = {https://www.skillsfuture.gov.sg/newsroom/steady-progress-in-implementation-of-skillsfuture-credit},
+  urldate = {2026-10-17},
+}
+
+@online{nus-libcal,
+  author  = {{NUS Libraries}},
+  title   = {{NUS} {Libraries} events calendar ({LibCal})},
+  url     = {https://nus.libcal.com/calendar},
+  urldate = {2026-10-17},
+}
+
+@online{smu-libcal,
+  author  = {{SMU Libraries}},
+  title   = {{SMU} {Libraries} events calendar ({LibCal})},
+  url     = {https://smu-sg.libcal.com/calendar},
+  urldate = {2026-10-17},
+}
+
+% ---------------------------------------------------------------------------------------------
+% Competitor scan (Final section 1)
+% ---------------------------------------------------------------------------------------------
+
+@online{eventbrite-waitlist,
+  author  = {{Eventbrite}},
+  title   = {How to set up an event waitlist},
+  url     = {https://www.eventbrite.com/help/en-us/articles/811539/how-to-set-up-an-event-waitlist/},
+  urldate = {2026-10-17},
+}
+
+@online{eventbrite-waitlist-feature,
+  author  = {{Eventbrite}},
+  title   = {Event waitlist management for sold-out events},
+  url     = {https://www.eventbrite.com/features/waitlist/},
+  urldate = {2026-10-17},
+}
+
+@online{eventbrite-multidate,
+  author  = {{Eventbrite}},
+  title   = {Create multiple date or recurring events},
+  url     = {https://www.eventbrite.com/help/en-us/articles/256014/create-multiple-date-or-recurring-events/},
+  urldate = {2026-10-17},
+}
+
+@online{eventbrite-pricing-sg,
+  author  = {{Eventbrite}},
+  title   = {Eventbrite pricing and features for organisers ({Singapore})},
+  url     = {https://www.eventbrite.sg/organizer/pricing/},
+  urldate = {2026-10-17},
+}
+
+@online{luma-waitlist,
+  author  = {{Luma}},
+  title   = {Waitlist},
+  url     = {https://help.luma.com/p/waitlist},
+  urldate = {2026-10-17},
+}
+
+@online{luma-multisession,
+  author  = {{Luma}},
+  title   = {Multi-session / recurring events},
+  url     = {https://help.luma.com/p/multi-session-recurring-events},
+  urldate = {2026-10-17},
+}
+
+@online{luma-pricing,
+  author  = {{Luma}},
+  title   = {Pricing},
+  url     = {https://luma.com/pricing},
+  urldate = {2026-10-17},
+}
+
+@online{google-forms-responses,
+  author  = {{Google}},
+  title   = {View \& manage form responses},
+  organization = {Google Docs Editors Help},
+  url     = {https://support.google.com/docs/answer/139706?hl=en},
+  urldate = {2026-10-17},
+}
+
+@online{ms-forms-settings,
+  author  = {{Microsoft}},
+  title   = {Adjust your form or quiz settings in {Microsoft} {Forms}},
+  organization = {Microsoft Support},
+  url     = {https://support.microsoft.com/en-us/forms/adjust-your-form-or-quiz-settings-in-microsoft-forms},
+  urldate = {2026-10-17},
+}
+
+@online{signupgenius-waitlist,
+  author  = {{SignUpGenius}},
+  title   = {How to use the {SignUpGenius} waitlist feature},
+  url     = {https://www.signupgenius.com/blog/waitlist-feature},
+  urldate = {2026-10-17},
+}
+
+@online{signupgenius-pricing,
+  author  = {{SignUpGenius}},
+  title   = {Pricing},
+  url     = {https://www.signupgenius.com/pricing},
+  urldate = {2026-10-17},
+}
+
+@online{calendly-group,
+  author  = {{Calendly}},
+  title   = {Group event type overview},
+  date    = {2026-10-13},
+  url     = {https://calendly.com/help/group-event-type-overview},
+  urldate = {2026-10-17},
+}
+
+@online{calendly-pricing,
+  author  = {{Calendly}},
+  title   = {Pricing},
+  url     = {https://calendly.com/pricing},
+  urldate = {2026-10-17},
+}
+
+@online{peatix-pricing-sg,
+  author  = {{Peatix}},
+  title   = {Pricing and features ({Singapore})},
+  url     = {https://services.peatix.com/en/sg},
+  urldate = {2026-10-17},
+}
+
+@online{peatix-waitlist,
+  author  = {{Peatix}},
+  title   = {Can {I} create a waiting list?},
+  url     = {https://help-organizer.peatix.com/en/support/solutions/articles/44002027169-can-i-create-a-waiting-list-},
+  urldate = {2026-10-17},
+}
+
+@online{peatix-recurring,
+  author  = {{Peatix}},
+  title   = {How to create recurring events},
+  url     = {https://help-organizer.peatix.com/en/support/solutions/articles/44002645658-about-recurring-events},
+  urldate = {2026-10-17},
+}

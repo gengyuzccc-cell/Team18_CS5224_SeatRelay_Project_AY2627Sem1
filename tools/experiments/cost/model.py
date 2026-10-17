@@ -92,7 +92,7 @@ class Workload:
     sqs_idle_polling_fifo: float = 5 * 3 * 60 * 24 * DAYS_PER_MONTH  # 5 pollers x 20 s long poll
     sqs_idle_polling_standard: float = 5 * 3 * 60 * 24 * DAYS_PER_MONTH
     dashboards: float = 1.0
-    alarms: float = 7.0
+    alarms: float = 9.0  # app.yaml: 9 AWS::CloudWatch::Alarm resources per stage
     custom_metrics: float = 8.0  # 7 metric names x {service} dimension (+ a spare)
     cw_api_requests: float = 50_000.0  # dashboard refreshes, experiment metric fetches
     xray_traces_retrieved: float = 10_000.0
@@ -646,6 +646,30 @@ def main():
     L.append(f"{len(prices) - len(unverified)} of {len(prices)} unit prices were read from the AWS Price List API; "
              f"not verified from the price list: {', '.join(unverified) if unverified else 'none'}. "
              "Free-tier allowances and on-prem inputs carry their own verification field in the JSON files.\n")
+    used = len(next(iter(detail_tables.values()))) if detail_tables else 0
+    L.append(f"Dimensions priced per tier (section 5): {used} of the {len(prices)} pricing.json entries; the others are "
+             "alternatives switched off by the options above.\n")
+
+    L.append("## 9. On-premise inputs (onprem.json)\n")
+    srv, el, net, lab, fxd = onprem["server"], onprem["electricity"], onprem["network"], onprem["labour"], onprem["fx"]
+    pw, b2 = onprem["power"], onprem["backup"]["object_storage"]
+    inputs = [
+        ("server price (S$, incl. GST)", srv["price_sgd"], srv["model"], srv["source_url"], srv["verification"]),
+        ("amortisation (years)", years, "straight-line, zero residual", "docs/COST.md", "method"),
+        ("server capacity (registrations/month)", srv["capacity_registrations_per_month"], "one machine", "onprem.json server.capacity_note", "assumption"),
+        ("power at load (W)", pw["load_w"], "review of the same model", pw["source_url"], pw["verification"]),
+        ("electricity tariff (S cents/kWh, incl. GST)", el["tariff_cents_per_kwh_incl_gst"], el["quarter"], el["source_url"], el["verification"]),
+        ("business fibre line (S$/month)", net["dedicated_line"]["monthly_sgd"], net["dedicated_line"]["plan"], net["dedicated_line"]["source_url"], net["dedicated_line"]["verification"]),
+        ("off-site backup (US$/GB-month)", b2["usd_per_gb_month"], b2["provider"], b2["source_url"], b2["verification"]),
+        ("operations labour (hours/month)", lab["hours_per_month"], "fully amortised view only", "onprem.json labour.notes", lab["verification"]),
+        ("labour rate (S$/hour)", lab["sgd_per_hour"], "fully loaded", "onprem.json labour.notes", lab["verification"]),
+        ("exchange rate (S$ per US$)", fxd["sgd_per_usd"], f"as of {fxd['as_of']}", fxd["source_url"], fxd["verification"]),
+    ]
+    L.append("| input | value | detail | source | verification |\n|---|---|---|---|---|")
+    for name, value, detail, url, ver in inputs:
+        shown = f"{int(value):,}" if float(value).is_integer() else f"{value:g}"
+        L.append(f"| {name} | {shown} | {detail} | {url} | {ver} |")
+    L.append("")
     (out / "model-summary.md").write_text("\n".join(L))
 
     # ---- measured usage

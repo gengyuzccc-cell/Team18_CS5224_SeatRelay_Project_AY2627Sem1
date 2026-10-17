@@ -88,7 +88,7 @@ per-registration drivers are the `Workload` dataclass in `model.py` (also printe
 | Logs | 1.5 KB per invocation + 0.4 KB per API access-log line; retention 14 days | `LogRetentionDays: 14` |
 | X-Ray | 1 trace per sampled invocation, sampling fraction 1.0 | upper bound; the default rule samples 1 req/s + 5% |
 | Cognito | MAU = N / 3 | assumption from plan section 6 |
-| Fixed observability | 1 dashboard, 7 alarms, 8 custom metrics, 50,000 CloudWatch API requests | `app.yaml` |
+| Fixed observability | 1 dashboard, 9 alarms, 8 custom metrics, 50,000 CloudWatch API requests | `app.yaml` |
 
 ## 4. On-premise model
 
@@ -161,31 +161,31 @@ Monthly cost (USD):
 
 | registrations/month | cloud: list price | cloud: after free tier | cloud: after credits | on-prem: increment only (3-yr) | on-prem: increment only (4-yr) | on-prem: fully amortised (3-yr) | on-prem: fully amortised (4-yr) |
 |---|---|---|---|---|---|---|---|
-| 1,000 | 13.10 | 0.52 | 0.00 | 29.09 | 22.85 | 299.31 | 293.06 |
-| 10,000 | 65.64 | 4.86 | 0.00 | 32.03 | 25.79 | 302.25 | 296.00 |
-| 100,000 | 591.04 | 401.97 | 0.00 | 61.13 | 54.89 | 331.35 | 325.10 |
+| 1,000 | 13.30 | 0.52 | 0.00 | 29.09 | 22.85 | 299.31 | 293.06 |
+| 10,000 | 65.84 | 4.86 | 0.00 | 32.03 | 25.79 | 302.25 | 296.00 |
+| 100,000 | 591.24 | 401.97 | 0.00 | 61.13 | 54.89 | 331.35 | 325.10 |
 
 Unit cost per 1,000 registrations (USD; on-prem at 3-year amortisation):
 
 | registrations/month | cloud: list | cloud: after free tier | on-prem: increment only | on-prem: fully amortised |
 |---|---|---|---|---|
-| 1,000 | 13.10 | 0.52 | 29.09 | 299.31 |
-| 10,000 | 6.56 | 0.49 | 3.20 | 30.22 |
+| 1,000 | 13.30 | 0.52 | 29.09 | 299.31 |
+| 10,000 | 6.58 | 0.49 | 3.20 | 30.22 |
 | 100,000 | 5.91 | 4.02 | 0.61 | 3.31 |
 
 Crossover (registrations/month at which the cloud layer becomes more expensive than the on-prem view):
 
 | cloud layer | on-prem view | crossover registrations/month | USD/month at crossover |
 |---|---|---|---|
-| list price | increment only (3-yr) | 3,894 | 30.27 |
-| list price | fully amortised (3-yr) | 52,691 | 317.18 |
+| list price | increment only (3-yr) | 3,861 | 30.27 |
+| list price | fully amortised (3-yr) | 52,654 | 317.18 |
 | after free tier | increment only (3-yr) | 34,313 | 41.17 |
 | after free tier | fully amortised (3-yr) | 86,139 | 331.35 |
 
 What drives the numbers (section 4 of `model-summary.md`):
 
-- At 1,000 registrations/month the list price (US$13.10) is almost entirely fixed items: CloudWatch
-  dashboard + 8 custom metrics + 7 alarms (US$6.60, `pricing.json: cw_dashboard_month`,
+- At 1,000 registrations/month the list price (US$13.30) is almost entirely fixed items: CloudWatch
+  dashboard + 8 custom metrics + 9 alarms (US$6.80, `pricing.json: cw_dashboard_month`,
   `cw_custom_metric_month`, `cw_alarm_month`), Cognito MAU (US$5.00, `cognito_mau_essentials`) and the
   SQS long-poll floor (US$0.59). All of these sit inside always-free allowances, which is why the
   after-free-tier bill is US$0.52 (SES e-mail US$0.32 + DynamoDB US$0.06 + SQS US$0.12 + API Gateway US$0.02).
@@ -193,16 +193,16 @@ What drives the numbers (section 4 of `model-summary.md`):
   the 10,000 free MAU, i.e. 85% of the list price. The compute path is cheap: Lambda US$4.00,
   DynamoDB US$6.03, API Gateway US$2.19, SQS US$1.28, logs US$2.86, X-Ray US$11.65 (upper bound at 100%
   sampling), CloudFront US$23.97 (inside the 1 TB free), SES US$32.00. Switching the user pool to the
-  Lite tier (`--cognito-lite`, `pricing.json: cognito_mau_lite`) cuts the 100k list price to US$274 and
+  Lite tier (`--cognito-lite`, `pricing.json: cognito_mau_lite`) cuts the 100k list price to US$275 and
   moves the list-price crossover against the fully amortised view from 52.7k to 124k registrations/month.
-- Per 1,000 registrations the cloud list price falls from US$13.10 to US$5.91 as the fixed items are
+- Per 1,000 registrations the cloud list price falls from US$13.30 to US$5.91 as the fixed items are
   spread; the on-prem increment view falls from US$29.09 to US$0.61 because almost all of it is the
   machine's amortisation (US$24.97/month at 3 years).
 - The on-prem fully amortised view is flat at about US$300/month at every tier: labour (US$187.50) and
   the business line (US$84.38) are 91% of it, hardware is US$24.97 and electricity US$2.14-2.50 (8.8-10.3 kWh).
 - Sensitivities: the cheaper local server listing (`--server-price-sgd 438`, `onprem.json:
-  server.alternatives[0]`) with 4-year amortisation moves the list-vs-increment crossover from 3,894 to
-  1,793 registrations/month; pricing on-prem e-mail with Postmark Basic (`--email-postmark`) adds
+  server.alternatives[0]`) with 4-year amortisation moves the list-vs-increment crossover from 3,861 to
+  1,757 registrations/month; pricing on-prem e-mail with Postmark Basic (`--email-postmark`) adds
   US$15/month fixed and US$1.80 per extra 1,000 e-mails, which raises the increment view to US$43.77 at
   1k and US$386 at 100k; the legacy 12-month allowances (`--legacy-free-tier`) change the after-free-tier
   figures by less than US$1.30 at every tier.

@@ -1,0 +1,174 @@
+% Final §3 -- Architecture and implementation (plan §7.1: 2.5 pages).
+% Source of truth: docs/ARCHITECTURE.md (§1-§14) and the code it names; README.md §8 (claim -> code).
+\section{Architecture and implementation}\label{sec:architecture}
+
+\begin{figure}[t]
+  \centering\input{figures/fig-architecture}
+  \caption{Cloud architecture and request path. (1)~SPA from a private S3 bucket via CloudFront.
+  (2)~Sign-in on the Cognito hosted page. (3)~\code{POST /workshops/\{id\}/commands}
+  passes the JWT authorizer; (4)~\code{api} writes \code{CMD\#\{commandId\}} = ACCEPTED and
+  (5)~enqueues the command in the workshop's FIFO group, answering 202. (6)~The worker, the only
+  writer of a workshop, runs \code{decide()}, (7)~sends one TICK per new offer to the delay queue and
+  (8)~commits one transaction guarded by the workshop version. (9)~The browser polls
+  \code{GET /commands/\{id\}}. (10)~Due timers are forwarded into the FIFO group; (11)~a 5-minute
+  sweep re-ticks overdue workshops (safety net); (12)~notifications go out via Streams and SES.
+  Solid: requests; dotted: the 202 reply; dashed: queued messages; grey dotted: index query.}
+  \label{fig:arch}
+\end{figure}
+
+\subsection{Components and layering}
+SeatRelay runs in one AWS region (\code{ap-southeast-1}) as three CloudFormation stacks: identity
+(Cognito user pool, Simple Email Service (SES) identity, budgets), application (one per stage: \code{dev} for experiments,
+\code{pilot} for real users) and web (private S3 bucket behind CloudFront with origin access
+control~\cite{aws-cloudfront-oac}). Fig.~\ref{fig:arch} shows the application stack. Users sign in on the Cognito hosted page (authorization code flow with Proof Key for Code Exchange,
+PKCE), and the HTTP API validates the JSON Web Token's (JWT) signature, issuer and audience before
+any function runs~\cite{aws-apigw-jwt}. Five Lambda functions (arm64, Node.js~22) do the work:
+\code{api}, \code{worker}, \code{expiryForwarder}, \code{sweep} and \code{notifier}. Two Simple Queue
+Service (SQS) queues carry commands and timers: a first-in-first-out (FIFO) command queue and a
+standard delay queue. State lives in one DynamoDB table (on-demand capacity, point-in-time recovery
+(PITR), Streams, time-to-live (TTL)). We chose pay-per-request managed services because registration
+traffic is bursty (opening of registration, deadlines) and idle most of the time, so idle cost is
+close to zero (\S\ref{sec:business}), and because they run across AZs without servers to patch.
+
+All business rules are in a pure engine, \code{decide(snapshot, command, now)} in
+\code{packages/core}, which returns the writes, notifications, timers and backfill records of one
+decision and performs no I/O; thin adapters map its changes to DynamoDB items or PostgreSQL rows. The
+same engine runs in the cloud, in the on-prem reference and in the replay simulator
+(\S\ref{sec:mechanism}).
+
+\subsection{Write path, data model and the single-writer lock}\label{sec:writepath}
+Reads, organisation and workshop set-up and attendance are synchronous. Every change to a
+workshop's live state is a \emph{command} with a client-generated \code{commandId}. The API writes
+the command record \code{CMD\#\{commandId\}} with status ACCEPTED (conditional on absence; a repeat
+returns the existing record), enqueues the command on the FIFO queue with message group = workshop
+and deduplication id = \code{commandId}~\cite{aws-sqs-exactly-once}, and answers 202. If the
+enqueue fails, the record is deleted and the API answers 503, so no browser polls an orphan. SQS
+FIFO hands the messages of one group to the function one at a time and in
+order~\cite{aws-sqs-fifo-terms,aws-lambda-sqs-scaling}; each workshop therefore has exactly one
+serial writer, while different workshops are processed in parallel (worker concurrency 5).
+
+The table keeps a workshop in one partition \code{WS\#\{id\}}: the \emph{live} items that a decision
+needs under prefix \code{L\#} (workshop META item, sessions, live registrations and offers, pending
+backfills, a due-date marker) and settled \emph{history} under \code{H\#} (archived registrations
+and offers, backfill records, attendance). The worker reads only \code{L\#} with a strongly
+consistent query, so its snapshot is bounded by capacity and queue length, not by the workshop's
+age. It runs \code{decide()}: expire what is due (\S\ref{sec:timers}), apply the command or reject
+it with a deterministic reason, allocate free seats in queue order, and recompute the next due
+time. It then commits \emph{one} \code{TransactWriteItems}~\cite{aws-ddb-transactwriteitems} in
+which the META item is conditioned on \code{version = }the snapshot's version and incremented. This
+optimistic lock covers the whole workshop and is a second line of defence behind the single writer;
+a version conflict reloads and decides again (at most three times). The command record is
+conditioned on status ACCEPTED in the same transaction, so a command's effects and its settlement
+commit together or not at all, and a redelivered or duplicated command fails the condition and is
+acknowledged without effect (C3). A transaction holds at most 100 actions, so a decision is capped
+at 12 offers, 12 expiries and 90 items; remaining work continues as an internal REALLOCATE command.
+A deterministic rejection is a successful settlement (REJECTED) and never throws; an infrastructure
+error reports the failed message and all later ones of the batch for redelivery, as FIFO sources
+require~\cite{aws-lambda-sqs-errors}. They return after the 120\,s visibility timeout; three failed
+receives move a message to a dead-letter queue (DLQ) that raises an alarm. Command records expire
+after 30 days and notifications after 90 days (TTL).
+
+\subsection{Rules R1--R7 and constraints C1--C7}
+Table~\ref{tab:rules} maps each rule and constraint of the Preliminary report to its enforcement.
+Every rule and every rejection reason has a unit test, and a property-based
+test~\cite{claessen2000quickcheck,fastcheck} applies random command sequences with random clock
+jumps and checks the invariants after every step (\S\ref{sec:results}). Organisers can run the same
+invariant check on a live workshop from the dashboard (\code{verify}).
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Rules and constraints and where they are enforced (functions in \code{packages/core} unless
+stated; full map in \code{docs/ARCHITECTURE.md} \S9--10).}\label{tab:rules}
+\begin{tabularx}{\textwidth}{@{}l P{6.6cm} L@{}}
+\toprule
+ & Statement & Enforced by\\
+\midrule
+R1 & One live registration per account per workshop. & \code{register()} rejects ALREADY\_REGISTERED under the single writer and version lock; mirrored by a marker item per user.\\
+R2 & Queue order = FIFO arrival order = \code{seq} assigned by the worker. & \code{seq = META.seq + 1}, written only by the workshop's single writer.\\
+R3 & Allocate in \code{seq} order; offer the first acceptable session, in preference order, that has a free seat. & \code{allocate()}, \code{firstAllocatableSession()}.\\
+R4 & $\text{expiresAt} = \min(\text{now} + \text{holdSeconds}, \text{cutoffAt})$, cutoffAt = start $-$ 30\,min; no offer after cut-off. & \code{offerExpiry()}, \code{tickFirst()}; per-offer timers and the sweep (\S\ref{sec:timers}).\\
+R5 & Decline or expiry drops that session; back to QUEUED with the same \code{seq}, or ENDED if none is left. & \code{declineOffer()}, \code{expireOffer()}; \code{allocate()} in the same decision.\\
+R6 & Cancellation exits completely; the seat is relayed at once; re-registering gets a new \code{seq}. & \code{cancelRegistration()}; relay in the same transaction.\\
+R7 & Capacity below confirmed + held is rejected; an increase allocates at once; cancelling a session revokes its offers and re-queues its confirmed participants. & \code{setCapacity()}, \code{cancelSession()} and \code{drainCancellations()}.\\
+\midrule
+C1 & No over-capacity: confirmed + held $\leq$ capacity. & Offers only when free $> 0$; counters change only in \code{decide()} and commit atomically; \code{checkInvariants()}.\\
+C2 & At most one OFFERED or CONFIRMED seat per account per workshop. & R1 plus one current offer per registration; only QUEUED registrations receive offers.\\
+C3 & A command takes effect at most once. & Client \code{commandId}; conditional record; FIFO deduplication; record condition inside the effect transaction.\\
+C4 & \pending{C4 wording from the Preliminary report} & Candidates: per-workshop ordering (FIFO group, R2); cut-off (R4); notifications written in the state change's transaction; audit trail (command \code{acceptedAt}/\code{settledAt}, backfill records with latency, history items).\\
+C5 & Expiry is decided by server time when a command is processed; a late tick cannot invalidate a newer offer (reworded, \S\ref{sec:timers}). & \code{tickFirst()} before every command; ACCEPT checks \code{expiresAt}; ticks never expire an offer by id.\\
+C6 & \pending{C6 wording from the Preliminary report} & Same candidates as C4.\\
+C7 & Organiser actions only by members of the workshop's organisation. & Membership checks in the API (403/404) and again in the worker; command results visible only to issuer and organisers; OFFER\_NOT\_YOURS.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Responses to the TA's feedback}\label{sec:timers}
+\paragraph{(1) Market size.} Added in \S\ref{sec:motivation} (Table~\ref{tab:market}).
+
+\paragraph{(2) Per-offer timers instead of sweep-bounded expiry.}
+In the Preliminary design a periodic sweep expired offers, so the sweep interval bounded the
+backfill latency. Each offer now has its own timer (Fig.~\ref{fig:seq}b). SQS FIFO queues do not
+support timers on individual messages, and a message timer is at most 15
+minutes~\cite{aws-sqs-timers}. The worker therefore sends one TICK per new offer to a
+\emph{standard} delay queue with $\text{DelaySeconds} = \min(900, \lceil \text{expiresAt} -
+\text{now} \rceil)$, \emph{before} its commit (a timer whose commit fails finds nothing to expire).
+When the TICK becomes visible, the \code{expiryForwarder} moves it into the workshop's FIFO group
+(deduplication id \code{tick\#offerId\#expiresAt}), so expiries take the same ordered single-writer
+path as user commands; a TICK that is still early, as for holds longer than 15 minutes, goes back to
+the delay queue with the remaining delay. A TICK is only a wake-up call: every decision begins by
+expiring all offers with $\text{expiresAt} \leq \text{now}$ (\emph{tick-first}). Hence late or
+duplicate ticks are no-ops, an ACCEPT processed after \code{expiresAt} is rejected whether or not
+its timer has arrived, and a late tick cannot touch a newer offer; this is the reworded C5. The
+5-minute sweep stays as a safety net: each commit maintains the workshop's next due time on a sparse
+index, and the sweep enqueues a TICK for every workshop whose due time has passed (lost timers,
+session cut-offs, lost continuations). A metric counts expiries that only the sweep performed
+(\code{SweepLateExpiries}, expected 0). The sweep interval therefore no longer bounds the backfill
+latency, which is the delay-queue visibility (1\,s granularity) plus the forwarder, one FIFO
+enqueue and one decision; a relay caused by a decline or cancellation happens inside the releasing
+transaction. We considered one-time EventBridge Scheduler schedules per
+offer~\cite{aws-eventbridge-scheduler-types}, which have no 15-minute limit, but they add a service,
+a schedule to create and delete per offer and an execution role, while default holds (900\,s) fit
+one SQS timer and longer holds take extra hops.
+
+\paragraph{(3) How the browser learns that a 202 has settled: polling.}
+The 202 response carries \code{href} and \code{pollAfterMs} = 300 (Fig.~\ref{fig:seq}a). The browser
+polls \code{GET /commands/\{id\}}, a strongly consistent read, after 300, 500 and 1000\,ms and then
+every 2000\,ms; after 30\,s it polls every 5\,s and shows a \enquote{still processing} note. The
+terminal state is APPLIED with a result or REJECTED with a reason; the result contains the
+participant's registration summary (status, queue position, offer expiry), so the interface updates
+from the poll alone and separates \enquote{request received} from \enquote{seat confirmed}. A retry
+reuses the \code{commandId}. Changes caused by other people, such as an offer created by a backfill,
+reach the status page through a 10\,s refresh while a registration is QUEUED or OFFERED and the tab
+is visible. We did not use WebSockets: at pilot scale they would add an API type, a connection
+table and a failure path for little gain, and polling is bounded (about
+\CostAssumeReadsPerCommand{} reads per command in the cost model). We report the server settle
+latency (\code{settledAt} $-$ \code{acceptedAt}, both on the command record) separately from the
+client-observed latency, which includes up to one polling interval.
+
+\begin{figure}[t]
+  \centering\input{figures/fig-sequence}
+  \caption{Request sequences (not to scale). (a)~A command is accepted (202) once its record is
+  written and it is enqueued; the browser polls until the worker's transaction has settled it.
+  Server settle latency = \code{settledAt} $-$ \code{acceptedAt}; the client-observed latency adds
+  at most one poll interval. (b)~Each offer schedules its own timer; at \code{expiresAt} the forwarder
+  moves the TICK into the workshop's FIFO group, and the worker expires the offer (tick-first) and
+  relays the seat in the same decision. Backfill latency = \code{reallocatedAt} $-$
+  \code{releasedAt}, with \code{releasedAt} = \code{expiresAt} for an expiry.}
+  \label{fig:seq}
+\end{figure}
+
+\subsection{Availability, security and privacy}
+Within the region every managed service is multi-AZ, so an AZ failure needs no action. A worker
+crash delays only its own workshop until the message is redelivered (120\,s visibility timeout);
+other workshops continue. A region failure is not covered: recovery means restoring the table from
+PITR, which keeps recovery points for up to 35 days at per-second granularity~\cite{aws-ddb-pitr}
+with the latest restorable time typically five minutes in the past~\cite{aws-ddb-pitr-howitworks}
+(recovery point objective of about five minutes), and redeploying the stacks; we have not measured
+that recovery time and claim no recovery time objective. The actor of every command comes only from
+the verified token, all input is schema-validated, organiser rights are checked in the API and again
+in the worker (C7), and each function has its own least-privilege role (e.g.\ the sweep can only read the table, the
+forwarder cannot access it). The API is throttled per stage, cross-origin requests are admitted only
+from the SPA's origins, and the S3 bucket is private. We store only e-mail address and display name,
+never log raw request events, and keep logs for 14 days. E-mail goes through SES,
+which in its sandbox delivers only to verified addresses~\cite{aws-ses-production-access}; until
+production access is granted, pilot participants rely on in-app notifications.

@@ -1,0 +1,107 @@
+% Final §1 -- Motivation and business case (plan §7.1: 1.25 pages with the title block).
+% Market-sizing inputs: docs/market-sizing.md §2, §6 (keys in references.bib, notes in sources.md).
+\section{Motivation and business case}\label{sec:motivation}
+
+\paragraph{Problem.}
+Many workshops on campus and in continuing education and training (CET) run the same content in
+several sessions so that people with different timetables can attend. Registration is usually one
+form per session plus a spreadsheet. A participant who could attend two sessions registers for
+both to be safe; the organiser later has to find and release the duplicate seat by hand, and a seat
+freed by a dropout stays empty unless someone e-mails the next person on a waiting list. Duplicate
+holds block seats that other people want, and the reconciliation is manual work for the organiser.
+
+\paragraph{SeatRelay.}
+A participant registers \emph{once} per workshop with an ordered list of acceptable sessions and
+joins \emph{one} queue; an account holds at most one seat per workshop. A free seat is offered to
+the first queued person who accepts that session, and the offer is held for a time limit
+(\code{holdSeconds}, default 900\,s). A seat released by an expiry, a decline, a cancellation or a
+capacity increase is offered to the next person in the same decision (Fig.~\ref{fig:flow}). The
+organiser manages 2--5 sessions and sees, per session, capacity, confirmed and held seats, the queue,
+a backfill log with latencies, distinct participants served, attendance and a CSV export.
+Participants see their status and queue position and receive in-app and e-mail notifications.
+
+\begin{figure}[tb]
+  \centering\input{figures/fig-flow}
+  \caption{User flow. A participant registers once with the acceptable sessions in preference order
+  and joins one queue per workshop. The first queued participant who accepts a session with a free
+  seat receives an offer held for \code{holdSeconds}; accepting confirms the seat, declining or
+  letting it expire drops that session from the preference list (R5). Every released seat is offered
+  to the next queued participant in the same decision (backfill).}
+  \label{fig:flow}
+\end{figure}
+
+\paragraph{Evidence that repeated sessions occur.}
+On the NUS Libraries calendar from 1~Aug to 16~Oct 2026, 11 of the 37 workshop events were
+repeat sessions of two titles~\cite{nus-libcal}; on the SMU Libraries calendar in the same window,
+two titles ran twice among 44 events~\cite{smu-libcal} (our counts on the public calendars). Most
+titles on both calendars ran once, so calendars show that the situation exists but cannot estimate
+how often an organiser faces it. That share, $p$, has to come from organiser interviews.
+
+\paragraph{Market size.}
+We size the market bottom-up (Table~\ref{tab:market}): the number of organisers who could run
+multi-session sign-ups, times $p$, times the price $P$ of \sd120 per organiser-year
+(\S\ref{sec:business}). Singapore has six autonomous universities and five
+polytechnics~\cite{moe-au,moe-psei}; five of the universities list at least 693 student
+organisations, a lower bound because counts given as \enquote{more than $X$} enter as $X$ and the
+sixth university (SUSS) and the polytechnics are not counted. With $p = \text{\InterviewPEventWeightedPct}\,\%$ (event-weighted
+share of organisers' events with two or more equivalent sessions;
+\InterviewOrganisers{} organisers interviewed), the campus total addressable market is
+$\text{TAM} = 693 \times p \times \text{\sd}120 = \text{\sd}83{,}160\,p$ per year, and
+\sd167{,}160\,$p$ if the more than 700 CET training providers~\cite{ssg-credit-progress-2016} are
+included. The serviceable market applies the share $s$ of organisers who are not bound to a closed
+institutional system; the first-year obtainable market is NUS student organisations and pilot
+units. Even at $p = 1$ the campus market is at most \sd83{,}160 a year, so the business case rests
+on the time each organiser saves (\S\ref{sec:business}), not on market size.
+
+\begin{table}[t]
+\centering\small
+\caption{Bottom-up market sizing (counts accessed 2026-10-17; details and verification levels in
+\code{docs/market-sizing.md}).}\label{tab:market}
+\begin{tabularx}{\textwidth}{@{}P{5.6cm}P{1.75cm}P{3.1cm}L@{}}
+\toprule
+Population & Count & Source & Estimation basis\\
+\midrule
+Student organisations, five autonomous universities (NUS 200, NTU 113, SMU 150, SUTD 80, SIT 150)
+ & $\geq 693$ & \cite{nus-osa-getstarted,ntu-special-interest-clubs,ntu-su-council,ntu-clubs-societies,smu-osl-2022,sutd-fifth-row,sit-find-your-tribe}
+ & official counts as lower bounds; NTU counted by us from its directory pages\\
+CET training providers & $> 700$ (2016) & \cite{ssg-credit-progress-2016}
+ & latest official count found; reported separately\\
+Learners in SkillsFuture-supported training, 2025 & 606{,}000 & \cite{ssg-10th-anniversary-2026}
+ & demand context only\\
+Organisers with multi-session sign-ups & $693 \times p$ & organiser interviews
+ & $p$: \InterviewPEventWeightedPct\\
+Price $P$ per organiser & \sd120/year & \S\ref{sec:business} & \sd10 per month\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Competitors.}
+Table~\ref{tab:competitors} summarises the vendors' documentation. Eventbrite relays a released
+ticket automatically with a claim window, but its inventory and waitlist are per date or ticket
+type; no tool we scanned ties several acceptable sessions to one queue position with one seat per
+person, which is what removes duplicate holds.
+
+\begin{table}[t]
+\centering\footnotesize
+\caption{Competitor scan from vendor documentation read on 2026-10-17 (not our tests). n/d: not
+documented in the pages we could read.}\label{tab:competitors}
+\begin{tabularx}{\textwidth}{@{}P{2.45cm}P{3.0cm}P{2.2cm}P{2.6cm}P{2.3cm}L@{}}
+\toprule
+Tool & Several sessions & Waitlist & Timed relay & One seat across sessions & Organiser price\\
+\midrule
+Eventbrite~\cite{eventbrite-multidate,eventbrite-waitlist-feature,eventbrite-pricing-sg}
+ & recurring event; inventory per date & per ticket type or date & yes, with claim window & no (per date) & free events free; fees on paid tickets\\
+Luma~\cite{luma-multisession,luma-waitlist,luma-pricing}
+ & workaround: cloned events & yes & no (host approves) & no & free; 5\,\% on paid events\\
+SignUpGenius~\cite{signupgenius-waitlist,signupgenius-pricing}
+ & one slot per session & per slot (paid) & relay without a hold & n/d & \usd22.49/month (Gold, annual)\\
+Peatix~\cite{peatix-recurring,peatix-waitlist,peatix-pricing-sg}
+ & up to 50 dates & no automated waitlist & no & no & free events free; 4.9\,\% + \sd0.99/ticket\\
+Calendly group~\cite{calendly-group,calendly-pricing}
+ & slots with invitee limit & n/d & no & n/d & paid plans; \usd10/seat/month (annual)\\
+Google / MS Forms~\cite{google-forms-responses,ms-forms-settings}
+ & one form per session & no & no & manual / per form & pricing not checked\\
+\textbf{SeatRelay} & 2--5 sessions, one queue & yes & yes, timed hold & yes (C2) & free tier; \sd10/month\\
+\bottomrule
+\end{tabularx}
+\end{table}

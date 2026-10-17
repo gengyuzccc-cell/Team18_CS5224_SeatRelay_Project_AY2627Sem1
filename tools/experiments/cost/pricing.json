@@ -175,7 +175,7 @@
       "source_url": "https://aws.amazon.com/cloudwatch/pricing/",
       "source_detail": "Price List AmazonCloudWatch version 20261007115540, usagetype APS1-CW:AlarmMonitorUsage: '$0.10 per alarm metric month (standard resolution) - Asia Pacific (Singapore)'.",
       "retrieved": "2026-10-16", "verification": "verified_pricelist", "free_tier_verification": "verified_secondary",
-      "notes": "app.yaml declares 7 alarms per stage."
+      "notes": "app.yaml declares 9 alarms per stage."
     },
     "cw_dashboard_month": {
       "service": "Amazon CloudWatch", "dimension": "Dashboard, per dashboard per month", "unit": "dashboard-month", "usd": 3.00,

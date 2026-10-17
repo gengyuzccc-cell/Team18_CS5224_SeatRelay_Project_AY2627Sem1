@@ -1,0 +1,21 @@
+% Final §5 -- Conclusion and future work (plan §7.1: 0.4 pages).
+\section{Conclusion and future work}\label{sec:conclusion}
+SeatRelay replaces one form per session with one registration, one queue and a timed hold per
+workshop, and relays every released seat automatically. The cloud design serialises each workshop
+through one FIFO message group and commits every decision in one conditional DynamoDB transaction;
+on the deployed system the correctness, preference-order, repeat-execution, failure-recovery and
+access-control experiments met their targets, and no completed experiment found an invariant violation. Per-offer timers with
+tick-first semantics take the sweep interval off the backfill path, and the 202 protocol is settled
+by bounded polling. In simulation, one queue removed duplicate holds and served more distinct
+participants than per-session queues. The cloud build costs \usd\CostTierOneKCloudListUsd{} a month
+at list price for 1{,}000 registrations and is cheaper than a self-hosted machine that pays for its
+line and operations up to \CostCrossoverListFullRegs{} registrations a month.
+
+Open items are the HTTP 503 responses that failed the concurrency run and aborted the backfill run,
+the backfill and load-test measurements, the interviews that fix $p$ and the price, the user study and
+the pilot. Future work: (i)~batch several commands of one workshop per worker invocation with a
+shared snapshot to raise single-workshop throughput; (ii)~replace polling with server push only if
+the user study shows that the 10\,s status refresh is too slow; (iii)~enforce the plan limits and
+add self-service organisation sign-up; (iv)~a second region with table replication if an
+availability target beyond one region is required; (v)~the Cognito Lite tier, since Cognito
+dominates the cost at high volume.

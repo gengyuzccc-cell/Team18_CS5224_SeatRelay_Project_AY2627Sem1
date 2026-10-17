@@ -1,0 +1,80 @@
+% Fig. 2 (plan §7.1, updated for the Final report): cloud architecture of SeatRelay.
+% Source of truth: docs/ARCHITECTURE.md §1.2 (Figure A), §3–§7. Needs \input{figures/tikz-setup}.
+% Size: about 15.7 cm x 6.6 cm (fits 0.95\textwidth of A4 with 2 cm margins; height <= 7 cm).
+%
+% Suggested caption (the numbers are the circled step markers):
+%   Cloud architecture and request path. (1) CloudFront serves the SPA from a private S3 bucket
+%   (OAC). (2) Users sign in on the Cognito hosted UI (code + PKCE); the SPA sends the ID token.
+%   (3) POST /workshops/{id}/commands passes the HTTP API JWT authorizer. (4) The api Lambda
+%   writes CMD#{commandId} = ACCEPTED with a conditional Put and (5) enqueues the command on
+%   commands.fifo (message group = workshopId), answering 202. (6) The worker, the only writer
+%   of a workshop, reads the live items with a consistent Query and runs decide() (tick-first);
+%   (7) it sends one TICK per new offer to the expiry-delay queue (DelaySeconds <= 900 s)
+%   before (8) committing one TransactWriteItems guarded by the META version. (9) The browser
+%   polls GET /commands/{id} (consistent read) until the command is APPLIED or REJECTED.
+%   (10) A due timer is moved by the expiryForwarder into the workshop's FIFO group. (11) Every
+%   5 min a sweep queries the sparse DUE index and enqueues a TICK for overdue workshops
+%   (safety net, not on the latency path). (12) New notifications reach the notifier through
+%   DynamoDB Streams and are sent through SES. Solid arrows: requests; dotted black: the 202
+%   reply; dashed: queued messages and timers; dotted grey: the sweep's index query.
+\begin{tikzpicture}[x=1cm, y=1cm]
+  % ---------------------------------------------------------------- top band
+  \node[sr/client,  minimum width=2.40cm] (cf)    at (1.20,6.00)  {\textbf{CloudFront + S3}\\private bucket, OAC};
+  \node[sr/service, minimum width=1.90cm] (cog)   at (3.95,6.00)  {\textbf{Cognito}\\hosted UI};
+  \node[sr/service, minimum width=1.90cm] (eb)    at (6.55,6.00)  {\textbf{EventBridge}\\Scheduler, 5 min};
+  \node[sr/compute, minimum width=1.30cm] (sweep) at (8.75,6.00)  {\textbf{sweep}\\Lambda};
+  \node[sr/compute, minimum width=2.30cm] (fwd)   at (11.05,6.00) {\textbf{expiryForwarder}\\Lambda};
+  \node[sr/queue,   minimum width=2.90cm] (delay) at (14.25,6.00) {\textbf{SQS expiry-delay}\\standard queue, one\\timer per offer, $\le$\,900\,s};
+  % ---------------------------------------------------------------- request band
+  \node[sr/client,  minimum width=1.65cm] (spa)   at (0.825,3.55)  {\textbf{Browser}\\SPA (React)};
+  \node[sr/compute, minimum width=2.10cm] (gw)    at (5.82,3.55)  {\textbf{API Gateway}\\HTTP API\\JWT authorizer};
+  \node[sr/compute, minimum width=1.30cm] (api)   at (8.00,3.55)  {\textbf{api}\\Lambda};
+  \node[sr/queue,   minimum width=2.70cm] (fifo)  at (10.55,3.55) {\textbf{SQS FIFO}\\commands.fifo\\group = workshopId};
+  \node[sr/compute, minimum width=2.90cm] (wk)    at (14.25,3.55) {\textbf{worker} Lambda\\tick-first decide()\\TransactWriteItems};
+  % ---------------------------------------------------------------- data band
+  \node[sr/data, minimum width=9.50cm, minimum height=1.10cm] (ddb) at (10.95,1.30)
+    {\textbf{DynamoDB single table} (on-demand, PITR, TTL, Streams)\\
+     CMD\#$\{$id$\}$: command results \enspace$\cdot$\enspace WS\#$\{$id$\}$: META with version lock,\\
+     live L\# and history H\# items \enspace$\cdot$\enspace sparse DUE index (GSI1)};
+  \node[sr/compute, minimum width=1.60cm] (nt)    at (3.80,1.30)  {\textbf{notifier}\\Lambda};
+  \node[sr/service, minimum width=1.90cm] (ses)   at (0.95,1.30)  {\textbf{Amazon SES}\\e-mail};
+  % ---------------------------------------------------------------- operations strip
+  \node[sr/service, minimum width=15.70cm, minimum height=0.42cm, inner ysep=1pt, anchor=south west] (cw) at (0,0)
+    {\textbf{CloudWatch}: EMF metrics, dashboard, alarms $\to$ SNS
+     \enspace$\cdot$\enspace a DLQ behind every queue \enspace$\cdot$\enspace AWS Budgets (credits excluded)};
+
+  % ---------------------------------------------------------------- (1) static assets, (2) sign-in
+  \draw[sr/flow] (spa.north -| cf.south) -- node[sr/step, pos=0.45] {1} node[sr/lbl, left=5pt, pos=0.45] {assets} (cf.south);
+  \draw[sr/flow, {Stealth[length=3.6pt,width=2.8pt]}-{Stealth[length=3.6pt,width=2.8pt]}]
+    ($(spa.north east)+(-0.25,0)$) -- node[sr/step, pos=0.35] {2}
+    node[sr/lbl, pos=0.5, right=6pt, align=left] {sign in,\\ID token} ($(cog.south west)+(0.40,0)$);
+  % ---------------------------------------------------------------- (3) POST, 202, (9) poll
+  \draw[sr/flow]  (spa.east |- 0,3.92) -- node[sr/step, pos=0.07] {3} node[sr/lbl, above, pos=0.58] {POST \ldots/commands} (gw.west |- 0,3.92);
+  \draw[sr/reply] (gw.west |- 0,3.55) -- node[sr/lbl, above, pos=0.5] {202 Accepted} (spa.east |- 0,3.55);
+  \draw[sr/flow]  (spa.east |- 0,3.18) -- node[sr/step, pos=0.07] {9} node[sr/lbl, above, pos=0.58] {GET /commands/$\{$id$\}$} (gw.west |- 0,3.18);
+  \node[sr/note, anchor=north] at ($(spa.east |- 0,3.02)!0.5!(gw.west |- 0,3.02)$) {poll 300\,$\to$\,2000\,ms until\\APPLIED or REJECTED};
+  % ---------------------------------------------------------------- (4) CMD record, (5) enqueue, (6) deliver
+  \draw[sr/flow] (gw) -- (api);
+  \draw[sr/flow] (api.south) -- node[sr/step, pos=0.32] {4} node[sr/lbl, left=3pt, pos=0.32, align=right] {CMD\#$\{$id$\}$\\put, get} (api.south |- ddb.north);
+  \draw[sr/flow] (api) -- node[sr/step] {5} (fifo);
+  \draw[sr/flow] (fifo) -- node[sr/step] {6} (wk);
+  % ---------------------------------------------------------------- worker reads and commits
+  \coordinate (wkR) at ($(wk.south)+(0.85,0)$);
+  \coordinate (wkL) at ($(wk.south)+(-0.85,0)$);
+  \coordinate (wkT) at ($(wk.north)+(0.75,0)$);
+  \draw[sr/flow] (wkR |- ddb.north) -- node[sr/lbl, left=1pt, pos=0.5, align=right] {Query L\#,\\consistent} (wkR);
+  \draw[sr/flow] (wkL) -- node[sr/step, pos=0.32] {8} node[sr/lbl, left=3pt, pos=0.32, align=right] {one transaction,\\META version $= v$} (wkL |- ddb.north);
+  % ---------------------------------------------------------------- (7) timer, (10) forward, (11) sweep
+  \draw[sr/async] (wkT) -- node[sr/step, pos=0.45] {7} node[sr/lbl, left=3pt, pos=0.45, align=right] {TICK per offer,\\before the commit} (wkT |- delay.south);
+  \draw[sr/async] (delay) -- node[sr/step] {10} (fwd);
+  \coordinate (fwdB) at ($(fwd.south)+(-0.05,0)$);
+  \draw[sr/async] (fwdB) -- node[sr/lbl, right=2pt, pos=0.45, align=left] {TICK,\\same group} (fwdB |- fifo.north);
+  \draw[sr/flow] (eb) -- (sweep);
+  \coordinate (swB) at ($(sweep.south)+(0.45,0)$);
+  \draw[sr/async] (swB) -- node[sr/step, pos=0.45] {11} node[sr/lbl, right=3pt, pos=0.45, align=left] {TICK if\\overdue} (swB |- fifo.north);
+  \coordinate (gap) at ($(api.east)!0.5!(fifo.west)$);
+  \draw[sr/aux] (gap |- sweep.south) -- node[sr/note, pos=0.22, left=1pt, align=right] {Query\\DUE index} (gap |- ddb.north);
+  % ---------------------------------------------------------------- (12) notifications
+  \draw[sr/flow] (ddb.west) -- node[sr/step] {12} node[sr/lbl, above=4pt] {Streams} (nt.east);
+  \draw[sr/flow] (nt) -- node[sr/lbl, above] {send} (ses);
+\end{tikzpicture}

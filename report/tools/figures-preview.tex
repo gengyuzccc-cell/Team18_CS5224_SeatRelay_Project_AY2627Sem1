@@ -1,0 +1,37 @@
+% Preview of the hand-drawn report figures on the target page geometry (A4, single column,
+% 2 cm margins). Prints each figure's size against the limits (width <= 0.95\textwidth,
+% architecture height <= 7 cm). Build from report/ so the \input paths match the Final report:
+%   cd report && latexmk -pdf -outdir=/tmp/figpreview tools/figures-preview.tex
+% Optional: pass a different base size with
+%   latexmk -pdf -outdir=/tmp/figpreview -usepretex='\def\basesize{11pt}' tools/figures-preview.tex
+\providecommand{\basesize}{10pt}
+\documentclass[a4paper,\basesize]{article}
+\usepackage[margin=2cm]{geometry}
+
+\input{figures/tikz-setup}
+\input{generated/pending}
+\pagestyle{empty}
+\newsavebox{\figbox}
+\newcommand{\figsize}[2]{%
+  \pgfmathsetmacro{\figw}{\wd#1/28.45274}%
+  \pgfmathsetmacro{\figh}{(\ht#1+\dp#1)/28.45274}%
+  \pgfmathsetmacro{\figmax}{0.95*\textwidth/28.45274}%
+  \par\noindent{\small\texttt{#2}: \figw\,cm $\times$ \figh\,cm
+  (limit width \figmax\,cm\ifdim\wd#1>0.95\textwidth\ \textbf{EXCEEDED}\fi)}\par}
+\begin{document}
+\noindent\rule{0.95\textwidth}{0.4pt}\par\smallskip
+
+\sbox{\figbox}{\input{figures/fig-architecture}}
+\begin{center}\usebox{\figbox}\end{center}
+\figsize{\figbox}{fig-architecture (height limit 7 cm)}
+
+\bigskip
+\sbox{\figbox}{\input{figures/fig-sequence}}
+\begin{center}\usebox{\figbox}\end{center}
+\figsize{\figbox}{fig-sequence}
+
+\bigskip
+\sbox{\figbox}{\input{figures/fig-flow}}
+\begin{center}\usebox{\figbox}\end{center}
+\figsize{\figbox}{fig-flow}
+\end{document}

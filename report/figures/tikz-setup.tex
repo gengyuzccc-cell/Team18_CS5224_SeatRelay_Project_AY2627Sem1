@@ -1,0 +1,56 @@
+% SeatRelay report: shared TikZ setup for the hand-drawn figures.
+%
+% Load once in the report preamble:   \input{figures/tikz-setup}
+% Then place a figure with
+%   \begin{figure}[t]\centering\input{figures/fig-architecture}\caption{...}\label{fig:arch}\end{figure}
+%
+% The figure files contain only a tikzpicture (no figure environment, no caption), so captions
+% and labels stay in the report text. All diagram text is set at a fixed 7 pt sans size, so the
+% figures have the same physical size whatever the document's base font size is. Widths are
+% checked against a single-column A4 layout with 2 cm margins (\textwidth = 17 cm): every
+% figure is at most 0.95\textwidth wide.
+%
+% Colours: the categorical slots of the validated palette used by the result charts
+% (report/tools/make_figures.py), as light tints for node fills. Identity never rests on colour
+% alone: every node names its service in text.
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,decorations.pathreplacing}
+
+\definecolor{srBlue}{HTML}{2A78D6}
+\definecolor{srOrange}{HTML}{EB6834}
+\definecolor{srGreen}{HTML}{1BAF7A}
+\definecolor{srYellow}{HTML}{EDA100}
+\definecolor{srPurple}{HTML}{6250D6}
+\definecolor{srInk}{HTML}{1F1F1D}
+\definecolor{srMuted}{HTML}{52514E}
+\definecolor{srGrid}{HTML}{D8D7D2}
+
+\newcommand{\srfont}{\sffamily\fontsize{7}{8.2}\selectfont}
+\newcommand{\srfontb}{\sffamily\bfseries\fontsize{7}{8.2}\selectfont}
+
+\tikzset{
+  sr/base/.style={draw=srInk!75, line width=0.5pt, rounded corners=1.6pt, align=center,
+    inner xsep=2.5pt, inner ysep=2pt, font=\srfont, text=srInk, minimum height=9.5mm},
+  % client and edge (browser, CloudFront, S3)
+  sr/client/.style={sr/base, fill=srBlue!10},
+  % identity, scheduling, operations (Cognito, EventBridge, CloudWatch, SES)
+  sr/service/.style={sr/base, fill=srPurple!8},
+  % compute (Lambda functions, API Gateway)
+  sr/compute/.style={sr/base, fill=srOrange!11},
+  % queues (SQS)
+  sr/queue/.style={sr/base, fill=srYellow!16},
+  % data (DynamoDB)
+  sr/data/.style={sr/base, fill=srGreen!11},
+  % numbered step marker, placed on a path: node[sr/step]{3}
+  sr/step/.style={circle, fill=srInk, text=white, font=\sffamily\bfseries\fontsize{6}{6}\selectfont,
+    inner sep=0pt, minimum size=8.4pt},
+  % arrows
+  sr/flow/.style={draw=srInk, line width=0.55pt, -{Stealth[length=3.6pt,width=2.8pt]}},
+  sr/async/.style={sr/flow, dash pattern=on 2.4pt off 1.4pt},
+  sr/reply/.style={sr/flow, densely dotted},
+  sr/aux/.style={draw=srMuted, line width=0.45pt, dotted, -{Stealth[length=3.2pt,width=2.6pt]}},
+  % arrow and annotation labels
+  sr/lbl/.style={font=\srfont, text=srInk, align=center, inner sep=1pt},
+  sr/note/.style={font=\srfont, text=srMuted, align=center, inner sep=1pt},
+}

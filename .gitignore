@@ -40,3 +40,7 @@ Thumbs.db
 !.vscode/extensions.json
 # experiments scratch (raw results ARE committed under results/)
 tools/experiments/.cache/
+report/*.build.log
+report/missfont.log
+report/ecsx*.log
+report/*.xdv
