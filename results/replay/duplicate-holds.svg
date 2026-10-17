@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="380" viewBox="0 0 760 380" role="img" aria-label="Duplicate holds per run">
+<rect x="0" y="0" width="760" height="380" fill="#fcfcfb"/>
+<text x="24" y="28" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" font-weight="600" fill="#0b0b0b">Duplicate holds per run</text>
+<text x="24" y="48" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">A user holding two or more OFFERED/CONFIRMED seats at once. 1000 seeds per mode; box p25–p75, line median, whiskers p5–p95, diamond mean, bar 95% bootstrap CI of the mean</text>
+<rect x="510" y="18" width="12" height="12" rx="2" fill="#2a78d6"/>
+<text x="528" y="29" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">UNIFIED (SeatRelay)</text>
+<rect x="640" y="18" width="12" height="12" rx="2" fill="#eb6834"/>
+<text x="658" y="29" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">PER_SESSION</text>
+<text x="24" y="80" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">Peak users holding ≥ 2 seats</text>
+<line x1="150.0" y1="90" x2="150.0" y2="182" stroke="#e1e0d9" stroke-width="1"/>
+<text x="150.0" y="198" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">0</text>
+<line x1="430.0" y1="90" x2="430.0" y2="182" stroke="#e1e0d9" stroke-width="1"/>
+<text x="430.0" y="198" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">5</text>
+<line x1="710.0" y1="90" x2="710.0" y2="182" stroke="#e1e0d9" stroke-width="1"/>
+<text x="710.0" y="198" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">10</text>
+<line x1="150" y1="182" x2="710" y2="182" stroke="#c3c2b7" stroke-width="1"/>
+<text x="710" y="212" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="end" fill="#898781">users</text>
+<text x="24" y="113" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">UNIFIED</text>
+<g><title>UNIFIED: n=1000, mean 0.00 [0.00, 0.00], median 0.00, p5 0.00, p25 0.00, p75 0.00, p95 0.00</title>
+<line x1="150.0" y1="109" x2="150.0" y2="109" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="103" x2="150.0" y2="115" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="103" x2="150.0" y2="115" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="150.0" y="100" width="2.0" height="18" rx="2" fill="#2a78d6" fill-opacity="0.22" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="100" x2="150.0" y2="118" stroke="#2a78d6" stroke-width="2"/>
+<path d="M 150.0 104 l 5 5 l -5 5 l -5 -5 z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<line x1="150.0" y1="124" x2="150.0" y2="124" stroke="#52514e" stroke-width="2"/>
+</g>
+<text x="718" y="113" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#52514e">0.00</text>
+<text x="24" y="159" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">PER_SESSION</text>
+<g><title>PER_SESSION: n=1000, mean 6.56 [6.34, 6.78], median 6.00, p5 2.00, p25 4.00, p75 8.00, p95 13.00</title>
+<line x1="262.0" y1="155" x2="710.0" y2="155" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="262.0" y1="149" x2="262.0" y2="161" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="710.0" y1="149" x2="710.0" y2="161" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="374.0" y="146" width="224.0" height="18" rx="2" fill="#eb6834" fill-opacity="0.22" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="486.0" y1="146" x2="486.0" y2="164" stroke="#eb6834" stroke-width="2"/>
+<path d="M 517.3 150 l 5 5 l -5 5 l -5 -5 z" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
+<line x1="505.3" y1="170" x2="529.4" y2="170" stroke="#52514e" stroke-width="2"/>
+</g>
+<text x="718" y="159" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#52514e">6.56</text>
+<text x="24" y="232" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">Extra seat-hours tied up by duplicate holds</text>
+<line x1="150.0" y1="242" x2="150.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="150.0" y="350" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">0</text>
+<line x1="336.7" y1="242" x2="336.7" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="336.7" y="350" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">500</text>
+<line x1="523.3" y1="242" x2="523.3" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="523.3" y="350" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">1000</text>
+<line x1="710.0" y1="242" x2="710.0" y2="334" stroke="#e1e0d9" stroke-width="1"/>
+<text x="710.0" y="350" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="middle" fill="#898781">1500</text>
+<line x1="150" y1="334" x2="710" y2="334" stroke="#c3c2b7" stroke-width="1"/>
+<text x="710" y="364" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" text-anchor="end" fill="#898781">seat-hours</text>
+<text x="24" y="265" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">UNIFIED</text>
+<g><title>UNIFIED: n=1000, mean 0.00 [0.00, 0.00], median 0.00, p5 0.00, p25 0.00, p75 0.00, p95 0.00</title>
+<line x1="150.0" y1="261" x2="150.0" y2="261" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="255" x2="150.0" y2="267" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="255" x2="150.0" y2="267" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="150.0" y="252" width="2.0" height="18" rx="2" fill="#2a78d6" fill-opacity="0.22" stroke="#2a78d6" stroke-width="1.5"/>
+<line x1="150.0" y1="252" x2="150.0" y2="270" stroke="#2a78d6" stroke-width="2"/>
+<path d="M 150.0 256 l 5 5 l -5 5 l -5 -5 z" fill="#2a78d6" stroke="#fcfcfb" stroke-width="1.5"/>
+<line x1="150.0" y1="276" x2="150.0" y2="276" stroke="#52514e" stroke-width="2"/>
+</g>
+<text x="718" y="265" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#52514e">0.00</text>
+<text x="24" y="311" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e">PER_SESSION</text>
+<g><title>PER_SESSION: n=1000, mean 518.67 [487.70, 548.82], median 369.15, p5 5.40, p25 157.80, p75 726.40, p95 1557.98</title>
+<line x1="152.0" y1="307" x2="710.0" y2="307" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="152.0" y1="301" x2="152.0" y2="313" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="710.0" y1="301" x2="710.0" y2="313" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="208.9" y="298" width="212.3" height="18" rx="2" fill="#eb6834" fill-opacity="0.22" stroke="#eb6834" stroke-width="1.5"/>
+<line x1="287.8" y1="298" x2="287.8" y2="316" stroke="#eb6834" stroke-width="2"/>
+<path d="M 343.6 302 l 5 5 l -5 5 l -5 -5 z" fill="#eb6834" stroke="#fcfcfb" stroke-width="1.5"/>
+<line x1="332.1" y1="322" x2="354.9" y2="322" stroke="#52514e" stroke-width="2"/>
+</g>
+<text x="718" y="311" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#52514e">518.67</text>
+</svg>

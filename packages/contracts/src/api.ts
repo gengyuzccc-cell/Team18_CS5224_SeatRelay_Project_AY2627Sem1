@@ -269,3 +269,27 @@ export type WorkshopListView = z.infer<typeof WorkshopListViewSchema>;
 
 export const OrganizationViewSchema = OrganizationSchema;
 export type OrganizationView = z.infer<typeof OrganizationViewSchema>;
+
+/* ---------- list / envelope views used by the service routes ---------- */
+
+/** GET /me/registrations */
+export const MyRegistrationListViewSchema = z.object({
+  registrations: z.array(MyRegistrationViewSchema),
+});
+export type MyRegistrationListView = z.infer<typeof MyRegistrationListViewSchema>;
+
+/** GET /me/notifications */
+export const NotificationListViewSchema = z.object({
+  notifications: z.array(NotificationViewSchema),
+});
+export type NotificationListView = z.infer<typeof NotificationListViewSchema>;
+
+/**
+ * 202 body of POST /workshops/{wsId}/commands: the `CommandAccepted` fields plus the record's
+ * current state, so an idempotent re-POST of an already settled command carries its outcome.
+ */
+export const CommandAcceptedViewSchema = CommandResultViewSchema.extend({
+  href: z.string().min(1),
+  pollAfterMs: z.number().int().min(0),
+});
+export type CommandAcceptedView = z.infer<typeof CommandAcceptedViewSchema>;

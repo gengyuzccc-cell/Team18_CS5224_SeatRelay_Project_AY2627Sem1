@@ -1,0 +1,3 @@
+id,date,role,org_type,events_per_year,share_multi_session,hours_per_event,tools,wtp_too_cheap,wtp_bargain,wtp_expensive,wtp_too_expensive,consent
+EXAMPLE-P,2026-10-17,participant,,9,0.33,0.5,google_forms;telegram,0,1,3,5,yes
+EXAMPLE-O,2026-10-18,organiser,student_club,12,0.25,6,google_forms;sheets;telegram,2,8,20,40,yes
