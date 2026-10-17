@@ -89,6 +89,18 @@
       {\centering\small\pending{#3}\par}}}}
 \newif\ifloadtest
 \IfFileExists{figures/generated/loadtest-p95.pdf}{\loadtesttrue}{\loadtestfalse}
+% Team members. Student numbers live only in the git-ignored team-ids.tex (\IdLiZongze ...) and
+% are printed only in the submission build (build.sh -s, jobname Final-submission, also
+% git-ignored): report/Final.pdf is tracked in the public repository and shows names only.
+% Without team-ids.tex the submission build also falls back to names only.
+\providecommand{\SRSubmission}{0}
+\newcommand{\memberNameOnly}[2]{#1}
+\newcommand{\memberWithId}[2]{#1 (#2)}
+\let\member\memberNameOnly
+\ifnum\SRSubmission=1
+  \InputIfFileExists{team-ids.tex}{\let\member\memberWithId}%
+    {\typeout{SEATRELAY: team-ids.tex not found; title block shows names only}}
+\fi
 \newcommand{\code}[1]{\texttt{\smaller #1}}   % one size step below the surrounding text
 \newcommand{\sd}{S\$}
 \newcommand{\usd}{US\$}
@@ -101,7 +113,8 @@
 \vspace{4pt}
 {\large CS5224 Cloud Computing \textemdash{} Group 18 \textemdash{} Final Report\par}
 \vspace{3pt}
-{\small \pending{team member names and student numbers}\par}
+{\small \member{LI ZONGZE}{\IdLiZongze}, \member{CHEN YANG}{\IdChenYang}, \member{LIN JIE}{\IdLinJie},
+\member{ZHU GENGYU}{\IdZhuGengyu}, \member{LIANG ZIHAN}{\IdLiangZihan}, \member{ZHANG TIANYI}{\IdZhangTianyi}\par}
 \vspace{2pt}
 {\small Public repository: \url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}\par}
 \end{center}

@@ -6,7 +6,7 @@
 Organisers pay; participants never pay or install anything. We propose two plans: a free tier with
 one open workshop at a time, and an organiser plan at \sd10 per organisation per month (\sd120 a
 year) with any number of open workshops and co-organisers. The prototype does not enforce plan
-limits; organisers already create their organisations themselves. The first channel is NUS student
+limits. The first channel is NUS student
 organisations and units that run repeated workshops, starting with the organiser of the planned
 pilot (\S\ref{sec:pilot}). The price is defensible if
 $h \cdot w \cdot k \geq P$, where $h$ is the coordination time saved per multi-session event, $w$
@@ -22,10 +22,13 @@ with one queue.
 Cloud cost is computed as usage $\times$ unit price for the \CostDimensionsUsed{} billable dimensions
 the stacks use in \code{ap-southeast-1}; \CostPricesVerified{} of the \CostPricesTotal{} entries of
 the price file (which also holds two switched-off alternatives) were read from the AWS Price List API
-on \CostPricingDate~\cite{aws-pricelist-bulk-api}. The layers are (1)~list
+on \CostPricingDate~\cite{aws-pricelist-bulk-api}; the main ones are on the API Gateway, Lambda and
+DynamoDB pricing pages~\cite{aws-pricing-apigw,aws-pricing-lambda,aws-pricing-dynamodb}. The layers are (1)~list
 price, (2)~after the always-free allowances~\cite{aws-free-tier}, and (3)~after credits, which is
 \usd0 while the account's credits last. Layer~3 is why billing tools show a net cost of zero; our
-budget alarms therefore exclude credits, whose inclusion is the default~\cite{aws-budgets-costtypes}.
+budget alarms therefore exclude credits, whose inclusion is the default~\cite{aws-budgets-costtypes}. Budget
+data are updated only up to three times a day~\cite{aws-budgets}, so, as planned, throttling, log
+retention and teardown, not the alarms, bound spend.
 Until measured usage is priced (\CostMeasuredListUsd), usage per registration is modelled from the
 design: \CostAssumeCommandsPerRegistration{} commands and \CostAssumeOffersPerRegistration{} offers
 per registration, \CostAssumeReadsPerCommand{} API reads per command including polling, and
@@ -48,8 +51,7 @@ with a UPS~\cite{onprem-ups} and a backup disk~\cite{onprem-disk}, amortised ove
 e-mail at the SES price; no labour. \emph{Fully amortised}: plus a business fibre line at
 \sd\CostOnpremLineSgd{} a month~\cite{onprem-m1-fibre}, an off-site backup copy~\cite{onprem-b2} and
 operations labour of \CostOnpremLabourHours{}\,h a month at \sd\CostOnpremLabourRateSgd/h, which is
-our assumption; \sd\CostFxSgdPerUsd{} = \usd1~\cite{onprem-fx}. \pending{re-run the cost model with
-the fibre and UPS prices re-checked on 2026-10-17 (report/sources.md)}. Load, retention and function
+our assumption; \sd\CostFxSgdPerUsd{} = \usd1~\cite{onprem-fx}. Load, retention and function
 are held equal in the model; availability is not: one machine has no failover, whereas the cloud
 services span several availability zones (AZs).
 

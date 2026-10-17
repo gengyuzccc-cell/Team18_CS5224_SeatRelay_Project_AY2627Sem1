@@ -18,7 +18,8 @@ Selection: for every Table 3 experiment the latest **complete** run directory
 Load test: the latest ``results/loadtest/<date>/raw.csv``; replay: the latest
 ``results/<date>-replay/`` else ``results/replay/``; cost: ``results/cost/``; user study:
 ``results/user-study/``; interviews: ``results/interviews/``; pilot: ``results/pilot/`` or the
-latest ``results/<date>-pilot/``.
+latest ``results/<date>-pilot/``. Staged pilot rehearsal (synthetic accounts, operational evidence
+only): the latest ``results/<date>-pilot-rehearsal/`` with target pilot.
 
 Percentiles of pooled samples are nearest-rank, as in tools/experiments (summary.md).
 
@@ -1283,9 +1284,149 @@ def section_pilot(book: Book, runs, results: Path) -> None:
              reason="pilot backfill log not yet exported (no reader: the CSV export has no backfill records)" if have else None)
 
 
+# ----------------------------------------------------------------------------- staged pilot rehearsal
+
+REHEARSAL_CAUSES = (("EXPIRED", "Expired"), ("DECLINED", "Declined"), ("CANCELLED_CONFIRMED", "CancelledConfirmed"),
+                    ("CAPACITY_UP", "CapacityUp"))
+
+
+def section_rehearsal(book: Book, runs) -> None:
+    """Staged pilot rehearsal (Prelim §5): synthetic accounts on the pilot stack, operational evidence
+    only. Never mixed with the live pilot (``section_pilot``) or the user study."""
+    run = db.latest_run(runs, "pilot-rehearsal", "pilot", book.notes)
+    book.section("rehearsal", "Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)",
+                 "staged pilot rehearsal not yet run", [run.describe() if run else "none"])
+    run_header(book, "Rehearsal", run, "staged pilot rehearsal")
+    complete = [r for r in runs.get("pilot-rehearsal", []) if r.complete and r.target == "pilot"]
+    book.num("RehearsalInvocations", len(complete) if complete else None, 0, "results/<date>-pilot-rehearsal[-<n>]/meta.json: complete runs with target pilot",
+             "staged rehearsal invocations on pilot (all complete run directories)")
+    book.num("RehearsalInvocationsPassed", sum(1 for r in complete if r.meta.get("ok")) if complete else None, 0,
+             "results/<date>-pilot-rehearsal[-<n>]/meta.json: ok = true", "staged rehearsal invocations with verdict PASS")
+    meta = run.meta if run else {}
+    book.num("RehearsalHoldSeconds", meta.get("holdSeconds"), 0, src_of(run, "meta.json", "holdSeconds"), "holdSeconds of the rehearsal workshop")
+    book.num("RehearsalParticipants", meta.get("participants"), 0, src_of(run, "meta.json", "participants"), "synthetic participant accounts")
+    mailbox = meta.get("mailbox")
+    book.text("RehearsalMailbox", {"simulator": "SES mailbox simulator", "example": "example.com (rejected by the SES sandbox)"}.get(mailbox, mailbox),
+              src_of(run, "meta.json", "mailbox"), "participant address type")
+    duration = meta.get("durationMs")
+    book.num("RehearsalDurationMin", None if duration is None else float(duration) / 60000.0, 1, src_of(run, "meta.json", "durationMs / 60000"), "wall-clock duration (min)")
+
+    raw = db.read_csv(run.path / "raw.csv", book.notes) if run else None
+    commands = raw[raw["kind"] == "command"] if raw is not None and "kind" in raw.columns else None
+    settled = commands[commands["status"].isin(["APPLIED", "REJECTED"])] if commands is not None else None
+    book.num("RehearsalCommands", None if settled is None else len(settled), 0, src_of(run, "raw.csv", "kind = command, status APPLIED/REJECTED (rows)"), "commands settled")
+    book.num("RehearsalCommandsApplied", None if settled is None else int((settled["status"] == "APPLIED").sum()), 0,
+             src_of(run, "raw.csv", "kind = command, status = APPLIED"), "commands applied")
+    book.num("RehearsalCommandsRejected", None if settled is None else int((settled["status"] == "REJECTED").sum()), 0,
+             src_of(run, "raw.csv", "kind = command, status = REJECTED"), "commands rejected")
+    http = raw[raw["kind"] == "http"] if raw is not None and "kind" in raw.columns else None
+    book.num("RehearsalOrganiserCalls", None if http is None else len(http), 0, src_of(run, "raw.csv", "kind = http (rows)"), "organiser attendance/export calls")
+    server = [] if settled is None else settled["serverSettleMs"].tolist()
+    client = [] if settled is None else settled["settleMs"].tolist()
+    for prefix, values, what in (("RehearsalSettleServer", server, "server settle latency settledAt - acceptedAt (ms)"),
+                                 ("RehearsalSettleClient", client, "client-observed settle latency (ms)")):
+        clean = [float(v) for v in values if not is_missing(to_float(v))]
+        source = src_of(run, "raw.csv", f"kind = command, {'serverSettleMs' if 'Server' in prefix else 'settleMs'} (nearest rank)")
+        book.num(f"{prefix}N", len(clean) if clean else None, 0, source, f"{what}: samples")
+        book.num(f"{prefix}PFiftyMs", db.nearest_rank(clean, 50) if clean else None, 0, source, f"{what}: p50")
+        book.num(f"{prefix}PNinetyFiveMs", db.nearest_rank(clean, 95) if clean else None, 0, source, f"{what}: p95")
+        book.num(f"{prefix}MaxMs", max(clean) if clean else None, 0, source, f"{what}: max")
+
+    backfills = db.read_csv(run.path / "backfills.csv", book.notes) if run else None
+    have_bf = backfills is not None and {"cause", "latencyMs"}.issubset(backfills.columns)
+    book.num("RehearsalBackfills", len(backfills) if have_bf else (0 if run else None), 0, src_of(run, "backfills.csv", "rows"), "backfill records")
+    for cause, name in REHEARSAL_CAUSES:
+        rows = backfills[backfills["cause"] == cause] if have_bf else None
+        latencies = [] if rows is None else [float(v) for v in rows["latencyMs"].tolist() if not is_missing(to_float(v))]
+        source = src_of(run, "backfills.csv", f"cause = {cause}")
+        book.num(f"RehearsalBackfill{name}N", None if not run else (0 if rows is None else len(rows)), 0, source, f"{cause} backfill records")
+        book.num(f"RehearsalBackfill{name}Relayed", None if not run else len(latencies), 0, f"{source}, latencyMs set", f"{cause} backfills relayed")
+        book.num(f"RehearsalBackfill{name}MinMs", min(latencies) if latencies else None, 0, f"{source}, latencyMs (min)", f"{cause} backfill latency, smallest (ms)",
+                 reason=None if not run else f"no relayed {cause} backfill in the rehearsal")
+        book.num(f"RehearsalBackfill{name}MaxMs", max(latencies) if latencies else None, 0, f"{source}, latencyMs (max)", f"{cause} backfill latency, largest (ms)",
+                 reason=None if not run else f"no relayed {cause} backfill in the rehearsal")
+        if cause == "EXPIRED":
+            book.num("RehearsalBackfillExpiredMaxS", max(latencies) / 1000.0 if latencies else None, 2, f"{source}, latencyMs (max) / 1000",
+                     "EXPIRED backfill latency, largest (s)", reason=None if not run else "no relayed EXPIRED backfill in the rehearsal")
+
+    notes = db.read_csv(run.path / "notifications.csv", book.notes) if run else None
+    source_kind = ((meta.get("notifications") or {}).get("source") or "")
+    column = "storedStatus" if source_kind.startswith("dynamodb") else "inAppStatus"
+    have_n = notes is not None and {column, "kind"}.issubset(notes.columns)
+    status = notes[column].fillna("").astype(str) if have_n else None
+    nsrc = f"notifications.csv ({column})"
+    book.num("RehearsalNotifications", len(notes) if have_n else None, 0, src_of(run, nsrc, "rows"), "notifications generated")
+    for value, name in (("SENT", "Sent"), ("FAILED", "Failed"), ("PENDING", "Pending"), ("SKIPPED", "Skipped")):
+        book.num(f"RehearsalNotifications{name}", int((status == value).sum()) if have_n else None, 0, src_of(run, nsrc, f"status = {value}"),
+                 f"notifications with status {value}")
+    for kind in ("OFFER", "CONFIRMED", "DECLINED", "EXPIRED"):
+        book.num(f"RehearsalNotifications{camel(kind.lower())}Kind", int((notes["kind"] == kind).sum()) if have_n else None, 0,
+                 src_of(run, "notifications.csv", f"kind = {kind}"), f"{kind} notifications")
+    mismatch = None
+    if have_n and {"inAppStatus", "storedStatus"}.issubset(notes.columns) and column == "storedStatus":
+        mismatch = int((notes["inAppStatus"].fillna("").astype(str) != notes["storedStatus"].fillna("").astype(str)).sum())
+    book.num("RehearsalNotificationsInAppMismatch", mismatch, 0, src_of(run, "notifications.csv", "inAppStatus != storedStatus"),
+             "notifications whose in-app status differs from the stored item", reason=None if not run else "stored Notification items not read (no AWS credentials)")
+    book.num("RehearsalInAppStatusMatches", meta.get("inAppStatusMatches"), 0, src_of(run, "meta.json", "inAppStatusMatches"),
+             "participants whose in-app registration status equals the organiser dashboard")
+
+    inv = db.read_csv(run.path / "invariants.csv", book.notes) if run else None
+    have_i = inv is not None and {"verifyOk", "overCapacity", "doubleHolds"}.issubset(inv.columns)
+    ok_col = inv["verifyOk"].astype(str).str.lower().isin(["true", "1"]) if have_i else None
+    held = None
+    if have_i:
+        held = "held" if bool(ok_col.all()) and int(inv["overCapacity"].sum()) == 0 and int(inv["doubleHolds"].sum()) == 0 else "violated"
+    book.text("RehearsalInvariants", held, src_of(run, "invariants.csv", "verifyOk all true, overCapacity and doubleHolds all 0"), "invariant result over all phases")
+    book.num("RehearsalInvariantReads", len(inv) if have_i else None, 0, src_of(run, "invariants.csv", "rows (one per phase)"), "invariant reads (after each phase)")
+    book.num("RehearsalVerifyFailures", int((~ok_col).sum()) if have_i else None, 0, src_of(run, "invariants.csv", "verifyOk = false"), "verify failures")
+    book.num("RehearsalOverCapacity", int(inv["overCapacity"].sum()) if have_i else None, 0, src_of(run, "invariants.csv", "overCapacity (sum)"), "over-capacity observations")
+    book.num("RehearsalDoubleHolds", int(inv["doubleHolds"].sum()) if have_i else None, 0, src_of(run, "invariants.csv", "doubleHolds (sum)"), "double holds")
+
+    final = meta.get("final") or {}
+    counts = final.get("counts") or {}
+    book.num("RehearsalDistinctServed", final.get("distinctParticipantsServed"), 0, src_of(run, "meta.json", "final.distinctParticipantsServed"), "distinct participants served (dashboard)")
+    seats = sum(s.get("capacity", 0) for s in final.get("sessions") or []) if final.get("sessions") else None
+    book.num("RehearsalSeats", seats, 0, src_of(run, "meta.json", "final.sessions[].capacity (sum)"), "seats at the end (after the capacity increase)")
+    book.num("RehearsalConfirmed", counts.get("confirmed"), 0, src_of(run, "meta.json", "final.counts.confirmed"), "confirmed at the end")
+    book.num("RehearsalQueuedAtEnd", counts.get("queued"), 0, src_of(run, "meta.json", "final.counts.queued"), "still queued at the end")
+    book.num("RehearsalAttended", counts.get("attended"), 0, src_of(run, "meta.json", "final.counts.attended"), "marked as attended")
+    book.num("RehearsalExportRows", meta.get("exportRows"), 0, src_of(run, "meta.json", "exportRows"), "rows of the organiser CSV export")
+    scripted = meta.get("scripted") or {}
+    for key, name in (("declines", "Declines"), ("expiries", "Expiries"), ("cancellations", "Cancellations"), ("capacityUp", "CapacityUp")):
+        book.num(f"RehearsalScripted{name}", scripted.get(key), 0, src_of(run, "meta.json", f"scripted.{key}"), f"scripted {key}")
+
+    dead = meta.get("deadLetters") or {}
+    for when, name in (("before", "Before"), ("after", "After")):
+        report = dead.get(when) or {}
+        book.num(f"RehearsalDlq{name}", report.get("total") if report.get("available") else None, 0, src_of(run, "meta.json", f"deadLetters.{when}.total"),
+                 f"messages in the pilot DLQs {when} the run", reason=None if not run else "DLQ depths not read")
+    alarms = meta.get("alarms") or {}
+    after = alarms.get("after")
+    transitions = alarms.get("transitions")
+    book.num("RehearsalAlarms", None if after is None else len(after), 0, src_of(run, "meta.json", "alarms.after (count)"), "pilot alarms",
+             reason=None if not run else "alarm states not read")
+    book.num("RehearsalAlarmsInAlarm", None if after is None else sum(1 for a in after if a.get("state") == "ALARM"), 0,
+             src_of(run, "meta.json", "alarms.after[].state = ALARM"), "pilot alarms in ALARM after the run", reason=None if not run else "alarm states not read")
+    book.num("RehearsalAlarmTransitionsToAlarm", None if transitions is None else sum(1 for t in transitions if "to ALARM" in (t.get("summary") or "")), 0,
+             src_of(run, "meta.json", "alarms.transitions (to ALARM)"), "alarm transitions to ALARM during the run", reason=None if not run else "alarm history not read")
+    lam = meta.get("lambda") or {}
+    book.num("RehearsalLambdaConcurrentMax", lam.get("accountConcurrentMax"), 0, src_of(run, "meta.json", "lambda.accountConcurrentMax"),
+             "account Lambda ConcurrentExecutions, max of 1-minute maxima", reason=None if not run else "CloudWatch not read")
+    custom = meta.get("customMetrics") or {}
+    # A zero is only evidence when the series was readable: an earlier version of the script read
+    # the `service`-only series, which the stage-dimensioned deployment leaves empty.
+    readable = ((custom.get("CommandSettledLatency") or {}).get("samples") or 0) > 0
+    book.num("RehearsalSweepLateExpiries", (custom.get("SweepLateExpiries") or {}).get("sum") if readable else None, 0,
+             src_of(run, "meta.json", "customMetrics.SweepLateExpiries.sum (only when customMetrics.CommandSettledLatency.samples > 0)"),
+             "SweepLateExpiries in the run window", reason=None if not run else "SeatRelay custom metric series not read (CloudWatch unavailable or wrong dimensions)")
+    book.num("RehearsalCloudWatchSettleSamples", (custom.get("CommandSettledLatency") or {}).get("samples") if readable else None, 0,
+             src_of(run, "meta.json", "customMetrics.CommandSettledLatency.samples"), "CommandSettledLatency samples in CloudWatch (stage series) for the run window",
+             reason=None if not run else "SeatRelay custom metric series not read (CloudWatch unavailable or wrong dimensions)")
+
+
 # ============================================================================ output
 
-HEADER = r"""% SeatRelay report numbers -- GENERATED by report/tools/report_numbers.py from results/.
+HEADER =r"""% SeatRelay report numbers -- GENERATED by report/tools/report_numbers.py from results/.
 % Do not edit by hand: re-run  python3 -I report/tools/report_numbers.py  after results/ changes.
 % Load in the preamble after generated/pending.tex:
 %   \input{generated/pending}
@@ -1376,6 +1517,9 @@ A macro without data expands to `\\pending{<what is missing>}`; the submission b
   statistics functions of `docs/user-study/analysis.py` (needs scipy).
 * **Interviews**: `results/interviews/interviews.csv` (EXAMPLE rows dropped).
 * **Pilot**: organiser CSV exports in `results/pilot/` (or the latest `results/<date>-pilot/`).
+* **Staged pilot rehearsal**: the latest complete `results/<date>-pilot-rehearsal[-<n>]/` with target `pilot`
+  (`raw.csv`, `backfills.csv`, `notifications.csv`, `invariants.csv`, `meta.json`). Synthetic accounts:
+  operational evidence only, never user evidence and never mixed with the live pilot numbers.
 
 ## Naming scheme
 
@@ -1383,7 +1527,7 @@ A macro without data expands to `\\pending{<what is missing>}`; the submission b
 
 | Part | Values |
 |---|---|
-| Area | `Smoke`, `Correctness`, `PrefOrder`, `Core` (property test), `Concurrency`, `Repeat`, `ExpiryRace`, `Failure`, `Access`, `Backfill`, `Series` (the Table 3 series as a whole), `TimerPath`, `Perf`, `Cost`, `Replay`, `Market`, `Study`, `Interview`, `Pilot` |
+| Area | `Smoke`, `Correctness`, `PrefOrder`, `Core` (property test), `Concurrency`, `Repeat`, `ExpiryRace`, `Failure`, `Access`, `Backfill`, `Series` (the Table 3 series as a whole), `TimerPath`, `Perf`, `Cost`, `Replay`, `Market`, `Study`, `Interview`, `Pilot` (live pilot), `Rehearsal` (staged pilot rehearsal, synthetic accounts) |
 | Run metadata | `Verdict` (PASS/FAIL), `RunId` (8 chars), `Date`, `Commit` (7 chars), `Runs`, `RunsPassed`, `ChecksPassed`, `ChecksTotal` |
 | Percentiles | `PFifty`, `PNinetyFive`, `PNinetyNine`; also `Max`, `Mean`, `Median`, `N` (sample count) |
 | Numbers in names | spelled out: VU levels `VUTen`, `VUTwentyFive`, `VUFifty`; cost tiers `OneK`, `TenK`, `HundredK` (registrations/month) |
@@ -1454,6 +1598,7 @@ def main(argv=None) -> int:
     section_market(book, results)
     section_interviews(book, results)
     section_pilot(book, runs, results)
+    section_rehearsal(book, runs)
 
     notes = sorted(set(book.notes))
     write_numbers(book, out)

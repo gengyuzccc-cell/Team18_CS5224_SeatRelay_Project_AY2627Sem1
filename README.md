@@ -35,13 +35,14 @@ pnpm workspace (Node 22, TypeScript, ESM). Dependency direction: `contracts` ←
 | `services/aws` | `@seatrelay/aws` | SAM templates (`auth`, `app`, `web`), five Lambda handlers, DynamoDB / SQS / SES adapters, esbuild bundler |
 | `services/local` | `@seatrelay/local` | on-prem reference: Fastify + PostgreSQL + Keycloak + Mailpit + nginx (Docker Compose), same `service` and `core` code |
 | `apps/web` | `@seatrelay/web` | React SPA (Vite); one build for CloudFront and for the local nginx; OIDC code + PKCE; command polling |
+| `tools/e2e` | `@seatrelay/e2e` | Playwright walkthrough of the deployed SPA (hosted-UI sign-in, polling, dashboard) by four staged accounts; writes `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and `results/<date>-web-walkthrough-<stage>/` |
 | `tools/experiments` | `@seatrelay/experiments` | one script per Table 3 row plus `smoke`; `bin/run-table3.sh`; `analysis/plot_results.py`; `cost/` (prices, on-prem inputs, `model.py`) |
 | `tools/loadtest` | `@seatrelay/loadtest` | k6 scenarios `cross-workshop` and `hotspot`, `prepare-scenario`, `run-matrix` |
 | `tools/replay` | `@seatrelay/replay` | mechanism comparison: the same arrivals replayed through the real engine in UNIFIED and PER_SESSION mode, 1,000 seeds |
 | `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, and the Bash deploy / web publish / teardown / cost-snapshot scripts |
 | `docs/` | | architecture, conventions, runbook, experiments, cost, demo, market sizing, interview and user-study packages, talk notes |
 | `results/` | | raw outputs of every run (the only source of report numbers), see section 9 |
-| `report/` | | Final report sources, `report/build.sh` (page and placeholder checks), `report/tools/report_numbers.py` (numbers file generator) |
+| `report/` | | Final report sources, `report/build.sh` (page and placeholder checks; `-s` builds the git-ignored Canvas copy with student numbers), `report/tools/report_numbers.py` (numbers file generator) |
 | `.github/workflows/ci.yml` | | CI: lint, typecheck, tests (with core coverage), web and Lambda builds, `pnpm audit`, `sam validate --lint` |
 
 Each package has its own README with module tables and environment variables; an index is in

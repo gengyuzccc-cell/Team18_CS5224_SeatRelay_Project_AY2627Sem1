@@ -508,9 +508,9 @@
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- dev: k6 matrix complete
 \newcommand{\PerfDevMatrixComplete}{complete}
 % results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds -- local: VU levels of the matrix with all rounds recorded
-\newcommand{\PerfLocalLevelsComplete}{2}
+\newcommand{\PerfLocalLevelsComplete}{6}
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- local: k6 matrix complete
-\newcommand{\PerfLocalMatrixComplete}{\pending{k6 matrix (local): 2 of 6 levels have all 3 rounds}}
+\newcommand{\PerfLocalMatrixComplete}{complete}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: read p95 (GET /workshops), median of rounds (ms)
 \newcommand{\PerfDevCrossVUTenReadPNinetyFiveMs}{290}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
@@ -656,77 +656,77 @@
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 -- local cross-workshop 25 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfLocalCrossVUTwentyFiveUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyReadPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyReadPNinetyFiveMs}{13}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs}{10}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftySettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftySettlePNinetyFiveMs}{2{,}875}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs}{2{,}807}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalCrossVUFiftyErrorPct}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalCrossVUFiftyQueueAgeMaxS}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyQueueAgeMaxS}{\pending{k6 cross-workshop at 50 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rows (count over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: rounds aggregated
-\newcommand{\PerfLocalCrossVUFiftyRounds}{2}
+\newcommand{\PerfLocalCrossVUFiftyRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- local cross-workshop 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalCrossVUFiftyUnsettledRounds}{\pending{k6 cross-workshop at 50 VUs on local: 2 of 3 rounds recorded}}
+\newcommand{\PerfLocalCrossVUFiftyUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTenReadPNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenReadPNinetyFiveMs}{11}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTenAcceptPNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenAcceptPNinetyFiveMs}{9}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTenSettlePNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenSettlePNinetyFiveMs}{413}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTenServerSettlePNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenServerSettlePNinetyFiveMs}{236}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalHotspotVUTenErrorPct}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalHotspotVUTenQueueAgeMaxS}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenQueueAgeMaxS}{\pending{k6 hotspot at 10 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, rows (count over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: rounds aggregated
-\newcommand{\PerfLocalHotspotVUTenRounds}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 -- local hotspot 10 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalHotspotVUTenUnsettledRounds}{\pending{k6 hotspot at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTenUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTwentyFiveReadPNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveReadPNinetyFiveMs}{16}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTwentyFiveAcceptPNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveAcceptPNinetyFiveMs}{12}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTwentyFiveSettlePNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveSettlePNinetyFiveMs}{424}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTwentyFiveServerSettlePNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveServerSettlePNinetyFiveMs}{368}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalHotspotVUTwentyFiveErrorPct}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalHotspotVUTwentyFiveQueueAgeMaxS}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveQueueAgeMaxS}{\pending{k6 hotspot at 25 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, rows (count over active rounds; quoted once 3 rounds exist) -- local hotspot 25 VUs: rounds aggregated
-\newcommand{\PerfLocalHotspotVUTwentyFiveRounds}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 -- local hotspot 25 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalHotspotVUTwentyFiveUnsettledRounds}{\pending{k6 hotspot at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUTwentyFiveUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUFiftyReadPNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyReadPNinetyFiveMs}{12}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUFiftyAcceptPNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyAcceptPNinetyFiveMs}{10}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUFiftySettlePNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftySettlePNinetyFiveMs}{2{,}879}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUFiftyServerSettlePNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyServerSettlePNinetyFiveMs}{2{,}784}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalHotspotVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalHotspotVUFiftyErrorPct}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalHotspotVUFiftyQueueAgeMaxS}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyQueueAgeMaxS}{\pending{k6 hotspot at 50 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rows (count over active rounds; quoted once 3 rounds exist) -- local hotspot 50 VUs: rounds aggregated
-\newcommand{\PerfLocalHotspotVUFiftyRounds}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- local hotspot 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalHotspotVUFiftyUnsettledRounds}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalHotspotVUFiftyUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
 \newcommand{\PerfDevVerdict}{FAIL}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: levels that meet every Performance target
@@ -736,17 +736,17 @@
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: largest VU level up to which both scenarios meet every target
 \newcommand{\PerfDevMaxVUsMet}{10}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
-\newcommand{\PerfLocalVerdict}{\pending{k6 matrix (local) not complete}}
+\newcommand{\PerfLocalVerdict}{PASS}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: levels that meet every Performance target
-\newcommand{\PerfLocalLevelsMet}{\pending{k6 matrix (local) not complete}}
+\newcommand{\PerfLocalLevelsMet}{6}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: levels in the matrix
-\newcommand{\PerfLocalLevels}{\pending{k6 matrix (local) not complete}}
+\newcommand{\PerfLocalLevels}{6}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: largest VU level up to which both scenarios meet every target
-\newcommand{\PerfLocalMaxVUsMet}{\pending{k6 matrix (local) not complete}}
+\newcommand{\PerfLocalMaxVUsMet}{50}
 % results/loadtest/2026-10-17/docker-stats.csv: cpuPercent summed over containers per sample (max) -- on-prem stack peak CPU (% of one core)
-\newcommand{\PerfLocalCpuPeakPct}{\pending{local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds)}}
+\newcommand{\PerfLocalCpuPeakPct}{217}
 % results/loadtest/2026-10-17/docker-stats.csv: memUsageMiB summed over containers per sample (max) -- on-prem stack peak memory (MiB)
-\newcommand{\PerfLocalMemPeakMiB}{\pending{local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds)}}
+\newcommand{\PerfLocalMemPeakMiB}{1{,}294}
 
 % ==============================================================================================
 % Cost model (cloud three layers vs on-prem)
@@ -2377,3 +2377,164 @@
 \newcommand{\PilotAttended}{\pending{pilot not yet run}}
 % results/pilot: dashboard backfill log -- backfills during the pilot
 \newcommand{\PilotBackfills}{\pending{pilot not yet run}}
+
+% ==============================================================================================
+% Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)
+%   source: runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-10-17T16:51:30.226Z, commit b8b8f3ae3480 (dirty)
+% ==============================================================================================
+% results/2026-10-17-pilot-rehearsal-3/meta.json: ok -- staged pilot rehearsal: verdict (PASS/FAIL)
+\newcommand{\RehearsalVerdict}{PASS}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: runId (first 8 characters) -- staged pilot rehearsal: run id
+\newcommand{\RehearsalRunId}{60453144}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: startedAt (UTC date) -- staged pilot rehearsal: date of the run
+\newcommand{\RehearsalDate}{2026-10-17}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: commit.hash (7 characters) -- staged pilot rehearsal: commit of the code under test
+\newcommand{\RehearsalCommit}{b8b8f3a}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: runs -- staged pilot rehearsal: repetitions in the invocation
+\newcommand{\RehearsalRuns}{1}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: checks.passed -- staged pilot rehearsal: checks passed
+\newcommand{\RehearsalChecksPassed}{85}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: checks.total -- staged pilot rehearsal: checks in total
+\newcommand{\RehearsalChecksTotal}{85}
+% results/2026-10-17-pilot-rehearsal-3/checks.csv: runs whose check rows are all ok -- staged pilot rehearsal: runs with every check passed
+\newcommand{\RehearsalRunsPassed}{1}
+% results/<date>-pilot-rehearsal[-<n>]/meta.json: complete runs with target pilot -- staged rehearsal invocations on pilot (all complete run directories)
+\newcommand{\RehearsalInvocations}{3}
+% results/<date>-pilot-rehearsal[-<n>]/meta.json: ok = true -- staged rehearsal invocations with verdict PASS
+\newcommand{\RehearsalInvocationsPassed}{3}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: holdSeconds -- holdSeconds of the rehearsal workshop
+\newcommand{\RehearsalHoldSeconds}{120}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: participants -- synthetic participant accounts
+\newcommand{\RehearsalParticipants}{20}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: mailbox -- participant address type
+\newcommand{\RehearsalMailbox}{SES mailbox simulator}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: durationMs / 60000 -- wall-clock duration (min)
+\newcommand{\RehearsalDurationMin}{4.8}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status APPLIED/REJECTED (rows) -- commands settled
+\newcommand{\RehearsalCommands}{43}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status = APPLIED -- commands applied
+\newcommand{\RehearsalCommandsApplied}{43}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status = REJECTED -- commands rejected
+\newcommand{\RehearsalCommandsRejected}{0}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = http (rows) -- organiser attendance/export calls
+\newcommand{\RehearsalOrganiserCalls}{6}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) -- server settle latency settledAt - acceptedAt (ms): samples
+\newcommand{\RehearsalSettleServerN}{43}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) -- server settle latency settledAt - acceptedAt (ms): p50
+\newcommand{\RehearsalSettleServerPFiftyMs}{45}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) -- server settle latency settledAt - acceptedAt (ms): p95
+\newcommand{\RehearsalSettleServerPNinetyFiveMs}{110}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) -- server settle latency settledAt - acceptedAt (ms): max
+\newcommand{\RehearsalSettleServerMaxMs}{279}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) -- client-observed settle latency (ms): samples
+\newcommand{\RehearsalSettleClientN}{43}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) -- client-observed settle latency (ms): p50
+\newcommand{\RehearsalSettleClientPFiftyMs}{793}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) -- client-observed settle latency (ms): p95
+\newcommand{\RehearsalSettleClientPNinetyFiveMs}{830}
+% results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) -- client-observed settle latency (ms): max
+\newcommand{\RehearsalSettleClientMaxMs}{905}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: rows -- backfill records
+\newcommand{\RehearsalBackfills}{9}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED -- EXPIRED backfill records
+\newcommand{\RehearsalBackfillExpiredN}{2}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs set -- EXPIRED backfills relayed
+\newcommand{\RehearsalBackfillExpiredRelayed}{2}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (min) -- EXPIRED backfill latency, smallest (ms)
+\newcommand{\RehearsalBackfillExpiredMinMs}{72}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (max) -- EXPIRED backfill latency, largest (ms)
+\newcommand{\RehearsalBackfillExpiredMaxMs}{74}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (max) / 1000 -- EXPIRED backfill latency, largest (s)
+\newcommand{\RehearsalBackfillExpiredMaxS}{0.07}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED -- DECLINED backfill records
+\newcommand{\RehearsalBackfillDeclinedN}{3}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs set -- DECLINED backfills relayed
+\newcommand{\RehearsalBackfillDeclinedRelayed}{3}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs (min) -- DECLINED backfill latency, smallest (ms)
+\newcommand{\RehearsalBackfillDeclinedMinMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs (max) -- DECLINED backfill latency, largest (ms)
+\newcommand{\RehearsalBackfillDeclinedMaxMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED -- CANCELLED_CONFIRMED backfill records
+\newcommand{\RehearsalBackfillCancelledConfirmedN}{3}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs set -- CANCELLED_CONFIRMED backfills relayed
+\newcommand{\RehearsalBackfillCancelledConfirmedRelayed}{3}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (min) -- CANCELLED_CONFIRMED backfill latency, smallest (ms)
+\newcommand{\RehearsalBackfillCancelledConfirmedMinMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (max) -- CANCELLED_CONFIRMED backfill latency, largest (ms)
+\newcommand{\RehearsalBackfillCancelledConfirmedMaxMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP -- CAPACITY_UP backfill records
+\newcommand{\RehearsalBackfillCapacityUpN}{1}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs set -- CAPACITY_UP backfills relayed
+\newcommand{\RehearsalBackfillCapacityUpRelayed}{1}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs (min) -- CAPACITY_UP backfill latency, smallest (ms)
+\newcommand{\RehearsalBackfillCapacityUpMinMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs (max) -- CAPACITY_UP backfill latency, largest (ms)
+\newcommand{\RehearsalBackfillCapacityUpMaxMs}{0}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): rows -- notifications generated
+\newcommand{\RehearsalNotifications}{42}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = SENT -- notifications with status SENT
+\newcommand{\RehearsalNotificationsSent}{42}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = FAILED -- notifications with status FAILED
+\newcommand{\RehearsalNotificationsFailed}{0}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = PENDING -- notifications with status PENDING
+\newcommand{\RehearsalNotificationsPending}{0}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = SKIPPED -- notifications with status SKIPPED
+\newcommand{\RehearsalNotificationsSkipped}{0}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = OFFER -- OFFER notifications
+\newcommand{\RehearsalNotificationsOfferKind}{21}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = CONFIRMED -- CONFIRMED notifications
+\newcommand{\RehearsalNotificationsConfirmedKind}{16}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = DECLINED -- DECLINED notifications
+\newcommand{\RehearsalNotificationsDeclinedKind}{3}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = EXPIRED -- EXPIRED notifications
+\newcommand{\RehearsalNotificationsExpiredKind}{2}
+% results/2026-10-17-pilot-rehearsal-3/notifications.csv: inAppStatus != storedStatus -- notifications whose in-app status differs from the stored item
+\newcommand{\RehearsalNotificationsInAppMismatch}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: inAppStatusMatches -- participants whose in-app registration status equals the organiser dashboard
+\newcommand{\RehearsalInAppStatusMatches}{20}
+% results/2026-10-17-pilot-rehearsal-3/invariants.csv: verifyOk all true, overCapacity and doubleHolds all 0 -- invariant result over all phases
+\newcommand{\RehearsalInvariants}{held}
+% results/2026-10-17-pilot-rehearsal-3/invariants.csv: rows (one per phase) -- invariant reads (after each phase)
+\newcommand{\RehearsalInvariantReads}{8}
+% results/2026-10-17-pilot-rehearsal-3/invariants.csv: verifyOk = false -- verify failures
+\newcommand{\RehearsalVerifyFailures}{0}
+% results/2026-10-17-pilot-rehearsal-3/invariants.csv: overCapacity (sum) -- over-capacity observations
+\newcommand{\RehearsalOverCapacity}{0}
+% results/2026-10-17-pilot-rehearsal-3/invariants.csv: doubleHolds (sum) -- double holds
+\newcommand{\RehearsalDoubleHolds}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: final.distinctParticipantsServed -- distinct participants served (dashboard)
+\newcommand{\RehearsalDistinctServed}{13}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: final.sessions[].capacity (sum) -- seats at the end (after the capacity increase)
+\newcommand{\RehearsalSeats}{13}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.confirmed -- confirmed at the end
+\newcommand{\RehearsalConfirmed}{13}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.queued -- still queued at the end
+\newcommand{\RehearsalQueuedAtEnd}{2}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.attended -- marked as attended
+\newcommand{\RehearsalAttended}{5}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: exportRows -- rows of the organiser CSV export
+\newcommand{\RehearsalExportRows}{20}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.declines -- scripted declines
+\newcommand{\RehearsalScriptedDeclines}{3}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.expiries -- scripted expiries
+\newcommand{\RehearsalScriptedExpiries}{2}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.cancellations -- scripted cancellations
+\newcommand{\RehearsalScriptedCancellations}{3}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.capacityUp -- scripted capacityUp
+\newcommand{\RehearsalScriptedCapacityUp}{1}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: deadLetters.before.total -- messages in the pilot DLQs before the run
+\newcommand{\RehearsalDlqBefore}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: deadLetters.after.total -- messages in the pilot DLQs after the run
+\newcommand{\RehearsalDlqAfter}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.after (count) -- pilot alarms
+\newcommand{\RehearsalAlarms}{9}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.after[].state = ALARM -- pilot alarms in ALARM after the run
+\newcommand{\RehearsalAlarmsInAlarm}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.transitions (to ALARM) -- alarm transitions to ALARM during the run
+\newcommand{\RehearsalAlarmTransitionsToAlarm}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: lambda.accountConcurrentMax -- account Lambda ConcurrentExecutions, max of 1-minute maxima
+\newcommand{\RehearsalLambdaConcurrentMax}{3}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: customMetrics.SweepLateExpiries.sum (only when customMetrics.CommandSettledLatency.samples > 0) -- SweepLateExpiries in the run window
+\newcommand{\RehearsalSweepLateExpiries}{0}
+% results/2026-10-17-pilot-rehearsal-3/meta.json: customMetrics.CommandSettledLatency.samples -- CommandSettledLatency samples in CloudWatch (stage series) for the run window
+\newcommand{\RehearsalCloudWatchSettleSamples}{43}

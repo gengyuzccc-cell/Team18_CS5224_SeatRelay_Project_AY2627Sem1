@@ -120,6 +120,15 @@ commit). The package also contains `analysis/plot_results.py` for the latency pl
 (the price list, the on-prem assumptions and `model.py`, the cloud vs on-prem cost model). The
 procedures and the report traceability rules are in [EXPERIMENTS.md](EXPERIMENTS.md).
 
+**[`@seatrelay/e2e`](../tools/e2e/README.md)** (`tools/e2e`).
+The real-browser walkthrough of a deployed stage (dev by default). Four staged accounts (organiser,
+Alice, Bob, Carol) sign in through the Cognito hosted UI in separate Chromium contexts and play
+demo beats D1–D4: register with ranked preferences, the offer countdown, accept, a cancellation
+backfill seen on the next person's page, an expiry backfill, and the dashboard checks (attendance,
+CSV export, verify). Every visible state is asserted. A passing run writes the slide screenshots
+(`docs/demo/screenshots/`), the captioned backup video (`docs/demo/backup-demo.mp4`) and
+`results/<date>-web-walkthrough-<stage>/`. This is operational evidence, not user evidence.
+
 **[`@seatrelay/scripts`](../tools/scripts/README.md)** (`tools/scripts`).
 The operational scripts:
 - `create-test-users` (Cognito accounts without e-mail, plus a token cache);

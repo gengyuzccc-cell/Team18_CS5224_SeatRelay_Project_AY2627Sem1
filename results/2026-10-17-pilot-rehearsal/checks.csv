@@ -1,0 +1,85 @@
+scenario,step,ok,expected,actual,run,detail,ms
+setup,SES mailbox-simulator address accepted as Cognito username and seen by the API,true,success+rehearsal-01@simulator.amazonses.com,"token email success+rehearsal-01@simulator.amazonses.com, GET /me email success+rehearsal-01@simulator.amazonses.com",1,,
+setup,"workshop created (UNIFIED, 2 sessions)",true,"UNIFIED, hold 120, capacities 6/6","UNIFIED, hold 120, capacities 6/6",1,workshop a47de269-358d-4946-8e47-c95018d0734c,
+1 register,001 P01 REGISTER S1,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,1673
+1 register,002 P02 REGISTER S1,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,871
+1 register,003 P03 REGISTER S2,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,815
+1 register,004 P04 REGISTER S2,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,852
+1 register,005 P05 REGISTER S2>S1,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,911
+1 register,006 P06 REGISTER S1,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,844
+1 register,007 P07 REGISTER S1,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,845
+1 register,008 P08 REGISTER S1,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,799
+1 register,009 P09 REGISTER S2>S1,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,833
+1 register,010 P10 REGISTER S1>S2,true,APPLIED OFFERED@S1,APPLIED OFFERED@S1 offersCreated=1,1,,803
+1 register,011 P11 REGISTER S2,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,804
+1 register,012 P12 REGISTER S1,true,APPLIED QUEUED#1,APPLIED QUEUED#1 offersCreated=0,1,,796
+1 register,013 P13 REGISTER S2>S1,true,APPLIED OFFERED@S2,APPLIED OFFERED@S2 offersCreated=1,1,,801
+1 register,014 P14 REGISTER S2,true,APPLIED QUEUED#2,APPLIED QUEUED#2 offersCreated=0,1,,797
+1 register,015 P15 REGISTER S1,true,APPLIED QUEUED#3,APPLIED QUEUED#3 offersCreated=0,1,,808
+1 register,016 P16 REGISTER S1>S2,true,APPLIED QUEUED#4,APPLIED QUEUED#4 offersCreated=0,1,,849
+1 register,017 P17 REGISTER S1>S2,true,APPLIED QUEUED#5,APPLIED QUEUED#5 offersCreated=0,1,,814
+1 register,018 P18 REGISTER S2,true,APPLIED QUEUED#6,APPLIED QUEUED#6 offersCreated=0,1,,792
+1 register,019 P19 REGISTER S1,true,APPLIED QUEUED#7,APPLIED QUEUED#7 offersCreated=0,1,,798
+1 register,020 P20 REGISTER S2,true,APPLIED QUEUED#8,APPLIED QUEUED#8 offersCreated=0,1,,791
+1 register,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+2 respond,021 P01 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,815
+2 respond,023 P03 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,799
+2 respond,024 P04 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,805
+2 respond,025 P05 DECLINE_OFFER S2,true,APPLIED QUEUED or OFFERED@S1,APPLIED QUEUED#1 offersCreated=1,1,,809
+2 respond,027 P07 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,796
+2 respond,028 P08 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,822
+2 respond,029 P09 DECLINE_OFFER S2,true,APPLIED QUEUED or OFFERED@S1,APPLIED QUEUED#2 offersCreated=1,1,,806
+2 respond,030 P10 DECLINE_OFFER S1,true,APPLIED QUEUED or OFFERED@S2,APPLIED QUEUED#2 offersCreated=1,1,,796
+2 respond,031 P11 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,816
+2 respond,032 P13 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,832
+2 respond,033 P14 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,803
+2 respond,034 P16 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,810
+2 respond,035 P05 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,799
+2 respond,"scripted behaviour reached (declines, unanswered holds)",true,"3 declines, 2 unanswered","3 declines, 2 unanswered",1,,
+2 respond,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+3 expiry,every unanswered offer expired and its seat was relayed,true,"2 EXPIRED backfill records, reallocated","S1 105 ms, S1 77 ms",1,waited 41 s,
+3 expiry,"P02 sees the expiry in ""my registrations""",true,ENDED(NO_ACCEPTABLE_SESSION),ENDED(NO_ACCEPTABLE_SESSION),1,,
+3 expiry,"P06 sees the expiry in ""my registrations""",true,ENDED(NO_ACCEPTABLE_SESSION),ENDED(NO_ACCEPTABLE_SESSION),1,,
+3 expiry,037 P09 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,843
+3 expiry,038 P12 ACCEPT_OFFER S1,true,APPLIED CONFIRMED@S1,APPLIED CONFIRMED@S1 offersCreated=0,1,,825
+3 expiry,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+4 capacity,039 organiser SET_CAPACITY S2 6→7,true,APPLIED offersCreated=1,APPLIED offersCreated=1,1,,803
+4 capacity,040 P10 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,791
+4 capacity,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+5 cancel,041 P16 CANCEL_REGISTRATION (confirmed S2),true,APPLIED CANCELLED offersCreated=1,APPLIED CANCELLED offersCreated=1,1,,803
+5 cancel,042 P17 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,798
+5 cancel,043 P14 CANCEL_REGISTRATION (confirmed S2),true,APPLIED CANCELLED offersCreated=1,APPLIED CANCELLED offersCreated=1,1,,793
+5 cancel,044 P18 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,826
+5 cancel,045 P03 CANCEL_REGISTRATION (confirmed S2),true,APPLIED CANCELLED offersCreated=1,APPLIED CANCELLED offersCreated=1,1,,801
+5 cancel,046 P20 ACCEPT_OFFER S2,true,APPLIED CONFIRMED@S2,APPLIED CONFIRMED@S2 offersCreated=0,1,,874
+5 cancel,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+6 attendance,PUT attendance P11,true,200 attended=true,"200 {""workshopId"":""a47de269-358d-4946-8e47-c95018d0734c"",""userId"":""69ea156c-b041-706",1,,345
+6 attendance,PUT attendance P05,true,200 attended=true,"200 {""workshopId"":""a47de269-358d-4946-8e47-c95018d0734c"",""userId"":""c97a15fc-5011-70d",1,,323
+6 attendance,PUT attendance P12,true,200 attended=true,"200 {""workshopId"":""a47de269-358d-4946-8e47-c95018d0734c"",""userId"":""493ae55c-80a1-704",1,,292
+6 attendance,PUT attendance P20,true,200 attended=true,"200 {""workshopId"":""a47de269-358d-4946-8e47-c95018d0734c"",""userId"":""c95a457c-0071-703",1,,321
+6 attendance,PUT attendance P01,true,200 attended=true,"200 {""workshopId"":""a47de269-358d-4946-8e47-c95018d0734c"",""userId"":""99ca857c-c081-701",1,,282
+6 attendance,dashboard counts.attended,true,5,5,1,,
+6 attendance,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+7 export,GET export.csv,true,text/csv,text/csv; charset=utf-8,1,,368
+7 export,one row per registration (every participant registered once),true,20,20,1,,
+7 export,every row is a rehearsal account,true,20,20,1,,
+7 export,CONFIRMED rows = dashboard confirmed,true,13,13,1,,
+7 export,attended rows = dashboard attended,true,5,5,1,,
+7 export,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,
+8 final,every participant's in-app registration status matches the organiser dashboard (C6),true,20 matches,20 matches,1,,
+8 final,DECLINED backfill records = declines applied,true,3,3,1,,
+8 final,EXPIRED backfill records = unanswered offers,true,2,2,1,,
+8 final,CANCELLED_CONFIRMED backfill records = cancellations applied,true,3,3,1,,
+8 final,decline / cancellation / capacity backfills relayed in the same settlement (latencyMs 0),true,latencyMs 0,"DECLINED 0, DECLINED 0, DECLINED 0, CAPACITY_UP 0, CANCELLED_CONFIRMED 0, CANCELLED_CONFIRMED 0, CANCELLED_CONFIRMED 0",1,,
+8 final,expiry-driven backfill within the Table 3 target (≤ 120 s),true,≤ 120000 ms each,"105 ms, 77 ms",1,,
+8 final,no released seat left unrelayed while someone acceptable is queued,true,pending backfills only where nobody acceptable is queued,none pending,1,,
+8 final,no offer left open at the end of the rehearsal,true,0 OFFERED,0 OFFERED,1,,
+8 final,"notifications by kind match the events (OFFER = offers made, CONFIRMED = accepts, DECLINED = declines, EXPIRED = expiries)",true,"OFFER 21, CONFIRMED 16, DECLINED 3, EXPIRED 2","OFFER 21, CONFIRMED 16, DECLINED 3, EXPIRED 2",1,,
+8 final,every notification left PENDING within 240 s (DynamoDB Notification items),true,0 PENDING,0 PENDING of 42,1,,
+8 final,SES accepted every e-mail to the mailbox simulator (SENT),true,SENT 42,SENT 42,1,,
+8 final,"in-app notification list (GET /me/notifications) = stored Notification items, same status (C6 readable)",true,42 identical,42 identical,1,,
+8 final,dead-letter queues unchanged,true,total 0,"total 0 {""commands-dlq"":0,""expiry-delay-dlq"":0,""notify-dlq"":0}",1,,
+8 final,"no seatrelay-pilot-* alarm in ALARM, none entered ALARM during the run",true,"0 in ALARM, 0 transitions to ALARM","0 in ALARM (9 alarms), 0 transitions to ALARM",1,,
+8 final,SweepLateExpiries = 0 in the window (the timer path relayed every expiry),true,0,0,1,,
+8 final,no Lambda errors or throttles on seatrelay-pilot-*,true,"0 errors, 0 throttles","0 errors, 0 throttles",1,,
+8 final,"invariants after the phase (verify, over-capacity, double holds)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,,

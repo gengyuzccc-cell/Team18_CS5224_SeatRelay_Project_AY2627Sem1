@@ -3,7 +3,8 @@
 Source: `PreliminaryReport_Group18.pdf` (5 pages, submitted 28 Sep 2026; kept by the team, not in this
 public repository because it carries student numbers). Quoted wording below is verbatim; the right-hand
 columns record where the Final report and the code answer each item. Student numbers live only in the
-git-ignored `report/team-ids.tex` (see `report/README.md`).
+git-ignored `report/team-ids.tex`, printed only by the submission build `./report/build.sh -t Final -m 10 -s`
+(git-ignored `report/Final-submission.pdf`; see `docs/SUBMISSION-CHECKLIST.md`).
 
 Team (Group 18): LI ZONGZE, CHEN YANG, LIN JIE, ZHU GENGYU, LIANG ZIHAN, ZHANG TIANYI.
 Work lines (Prelim §4): product and front end; allocation logic and API; AWS and monitoring; data and the local

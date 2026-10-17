@@ -1,0 +1,20 @@
+{
+  "name": "@seatrelay/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Real-browser walkthrough of a deployed SeatRelay stage (Cognito hosted UI, polling UX, organiser dashboard): assertions, screenshots and the backup demo video",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "ensure-users": "bash bin/ensure-users.sh",
+    "walkthrough": "tsx src/walkthrough.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "playwright": "1.56.1",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}

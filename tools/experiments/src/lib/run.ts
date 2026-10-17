@@ -152,6 +152,11 @@ export interface ExperimentSpec<O extends CliOptions> {
   tableRow: string;
   /** Pass criterion as stated in plan §4. */
   criterion: string;
+  /**
+   * A statement printed in bold directly under the summary title and stored in meta.json, for
+   * caveats every reader must see first (e.g. "staged rehearsal, not user evidence").
+   */
+  banner?: string;
   usage: string;
   /** `--hold` default (60 when omitted: the expiry-driven experiments). */
   defaultHoldSeconds?: number;
@@ -393,6 +398,7 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       name: spec.name,
       tableRow: spec.tableRow,
       criterion: spec.criterion,
+      ...(spec.banner === undefined ? {} : { banner: spec.banner }),
       startedAt: ctx.startedAt.toISOString(),
       finishedAt: finishedAt.toISOString(),
       durationMs: finishedAt.getTime() - ctx.startedAt.getTime(),
@@ -437,6 +443,7 @@ function renderSummary<O extends CliOptions>(
   const lines = [
     `# ${spec.name} — ${spec.tableRow}`,
     '',
+    ...(spec.banner === undefined ? [] : [`**${spec.banner}**`, '']),
     `- Verdict: **${ok ? 'PASS' : 'FAIL'}** (${ctx.checks.length - failed.length}/${ctx.checks.length} checks passed${ctx.skipped.length === 0 ? '' : `; ${ctx.skipped.length} step(s) not checked on this target, see "Skipped on this target"`})`,
     `- Pass criterion (plan §4): ${spec.criterion}`,
     `- Run id: \`${ctx.runId}\`, started ${ctx.startedAt.toISOString()}, finished ${finishedAt.toISOString()} (${Math.round((finishedAt.getTime() - ctx.startedAt.getTime()) / 1000)} s)`,

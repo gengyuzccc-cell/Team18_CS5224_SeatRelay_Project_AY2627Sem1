@@ -1,0 +1,435 @@
+% SeatRelay -- CS5224 Group 18 -- presentation slides (15 min talk + 10 min Q&A; plan §7.2).
+% Build:  cd report && latexmk -pdf Slides.tex
+%         (or ./report/build.sh -t Slides -m 30: same build plus the overfull/undefined/placeholder
+%         checks; it reports FAIL while any [PENDING: ...] marker is still on a slide).
+% Page: 13.333 in x 7.5 in, the standard 16:9 presentation page, so the point sizes below are what
+% a projector shows: body text 20 pt (class option), slide titles 30 pt, footer 13 pt.
+% Numbers: every measured value is a macro of generated/numbers.tex, the same file the Final report
+% uses, so a slide and the report always show the same digits; a measurement that does not exist
+% yet prints a red [PENDING: ...] marker. Figures: the report's TikZ files (figures/*.tex) and
+% charts (figures/generated/*.pdf), and the staged walkthrough screenshots in docs/demo/screenshots.
+% Speaker notes: docs/walkthrough/part-1.md ... part-6.md (parts 1-6 = the six members in the
+% order of the title block; the footer tag of every slide names its speaker).
+% Names only, no student numbers: this PDF is tracked in the public repository.
+\documentclass[t,20pt]{beamer}
+\geometry{papersize={13.333in,7.5in}}
+\setbeamersize{text margin left=0.6in,text margin right=0.6in}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{tgheros}
+\usepackage{textcomp}
+\usepackage{booktabs,tabularx,array}
+\usepackage[export]{adjustbox}
+\usepackage{xurl}
+
+\input{figures/tikz-setup}
+\input{generated/pending}
+\input{generated/numbers.tex}
+
+\definecolor{srRed}{HTML}{C8372D}
+\definecolor{srPaleBlue}{HTML}{EEF4FC}
+
+% ------------------------------------------------------------------------------------- helpers
+% \IfPending{\Macro}{text while the data does not exist}{text with the data} (as in Final.tex).
+\makeatletter
+\def\sr@ifpending#1\pending#2\sr@end{%
+  \if\relax\detokenize{#1}\relax\expandafter\@firstoftwo\else\expandafter\@secondoftwo\fi}
+\newcommand{\IfPending}[1]{\expandafter\sr@ifpending#1\pending\sr@end}
+\makeatother
+\newcommand{\sd}{S\$}
+\newcommand{\usd}{US\$}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\hl}[1]{\textbf{\color{srBlue}#1}}
+\newcommand{\mute}[1]{{\color{srMuted}#1}}
+% speaker of the following slides (footer tag)
+\newcommand{\srspeaker}{}
+\newcommand{\speaker}[1]{\renewcommand{\srspeaker}{#1}}
+% verdict badge from a verdict macro (PASS / FAIL / anything else in grey)
+\newcommand{\badge}[2]{\tikz[baseline=(b.base)]\node[fill=#1, text=white, rounded corners=3pt,
+  inner xsep=5pt, inner ysep=2.5pt, minimum width=1.0in, font=\bfseries](b){#2};}
+\newcommand{\verdict}[1]{\IfPending{#1}{\badge{srMuted}{open}}{%
+  \ifnum\pdfstrcmp{#1}{PASS}=0 \badge{srGreen}{PASS}%
+  \else\ifnum\pdfstrcmp{#1}{FAIL}=0 \badge{srRed}{FAIL}%
+  \else\badge{srMuted}{#1}\fi\fi}}
+% one Table-3 row as a one-line tile: verdict, aspect, key value
+\newcommand{\tile}[3]{\parbox[t]{5.95in}{\verdict{#1}\hspace{0.45em}\textbf{#2}\hspace{0.45em}#3}}
+% source line at the bottom of the content area
+\newcommand{\source}[1]{\par\vfill{\fontsize{13}{15}\selectfont\color{srMuted}#1\par}\vspace{0.06in}}
+% per-slide layout helpers (defined here: a frame body cannot define macros with parameters)
+\newcommand{\stat}[2]{\begin{minipage}[t]{3.85in}%
+    {\fontsize{40}{46}\selectfont\bfseries\color{srBlue}#1\par}\vspace{0.06in}#2\end{minipage}}
+\newcommand{\rid}[1]{\textbf{\color{srBlue}#1}\enspace}
+\newcommand{\beat}[2]{\textbf{\color{srBlue}#1}\enspace #2\par\vspace{0.10in}}
+\newcommand{\side}[2]{\begin{minipage}[c]{3.7in}\raggedright\textbf{#1}\par\vspace{0.06in}#2\end{minipage}}
+\newcommand{\role}[2]{\parbox[t]{5.95in}{\textbf{#1}\enspace\mute{#2}}}
+\newcommand{\chap}[3]{\textbf{\color{srBlue}#1}\enspace\code{#2}\enspace #3\par\vspace{0.06in}}
+\newcommand{\fm}[2]{\textbf{#1}\enspace\textrightarrow\enspace #2\par\vspace{0.12in}}
+\newcommand{\key}[2]{\code{#1}\enspace\textrightarrow\enspace #2\par\vspace{0.12in}}
+% the report's TikZ figures at a given width (their text is a fixed 7 pt, so it scales with them)
+\newcommand{\tikzfig}[2]{\resizebox{#1}{!}{\input{figures/#2}}}
+% a region of a staged-walkthrough screenshot (1440 x 900 px; trim = left bottom right top, in px)
+\newcommand{\shot}[3]{\adjustbox{trim=#1, clip, width=#2, cfbox=srGrid 0.8pt 0pt}{%
+  \includegraphics{../docs/demo/screenshots/#3}}}
+
+% ----------------------------------------------------------------------------- theme (minimal)
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{normal text}{fg=srInk,bg=white}
+\setbeamercolor{structure}{fg=srBlue}
+\setbeamercolor{alerted text}{fg=srRed}
+\setbeamerfont{frametitle}{size=\fontsize{30}{36},series=\bfseries}
+\setbeamertemplate{frametitle}{%
+  \vbox to 1.0in{\vspace*{0.32in}%
+    \hbox{\usebeamerfont{frametitle}\color{srInk}\insertframetitle}%
+    \vspace{0.07in}\hbox{\color{srBlue}\rule{1.0in}{3pt}}\vfill}}
+\setbeamertemplate{itemize item}{\raisebox{0.14em}{\color{srBlue}\rule{0.40em}{0.40em}}}
+\setbeamertemplate{itemize/enumerate body begin}{\setlength{\itemsep}{0.30em}}
+\setlength{\leftmargini}{1.0em}
+\makeatletter
+\newcommand{\srpagelabel}{%
+  \ifbeamer@inappendix Backup B\insertframenumberinappendix
+  \else\insertframenumber\,/\,\insertmainframenumber\fi}
+\makeatother
+\newcommand{\srfootfont}{\fontsize{13}{15}\selectfont}
+\setbeamertemplate{footline}{%
+  \leavevmode\hbox to\paperwidth{\hspace*{0.6in}%
+    \parbox[b]{4.4in}{\raggedright\srfootfont
+      \ifx\srspeaker\empty\else
+        \tikz[baseline=(t.base)]\node[fill=srBlue!10, text=srBlue!75!black, rounded corners=3pt,
+          inner xsep=6pt, inner ysep=2.5pt](t){Speaker: \textbf{\srspeaker}};\fi}%
+    \hfill\parbox[b]{3.0in}{\centering\srfootfont\color{srMuted}SeatRelay \textperiodcentered{} CS5224 Group 18}%
+    \hfill\parbox[b]{4.4in}{\raggedleft\srfootfont\color{srMuted}\srpagelabel}%
+    \hspace*{0.6in}}\vspace*{0.22in}}
+
+\title{SeatRelay}
+\hypersetup{pdftitle={SeatRelay: CS5224 Group 18 presentation}, pdfauthor={CS5224 Group 18}}
+
+\begin{document}
+
+% =============================================================================== Part 1
+\speaker{LI ZONGZE}
+\begin{frame}
+  \vspace*{0.95in}
+  {\fontsize{60}{66}\selectfont\bfseries SeatRelay\par}
+  \vspace{0.12in}
+  {\fontsize{28}{34}\selectfont Unified registration and timed-hold seat relay\\
+   for multi-session workshops\par}
+  \vspace{0.18in}{\color{srBlue}\rule{1.6in}{4pt}}\par\vspace{0.30in}
+  CS5224 Cloud Computing \textperiodcentered{} Group 18 \textperiodcentered{} AY2026/27 Semester 1\par
+  \vspace{0.14in}
+  \textbf{LI ZONGZE \textperiodcentered{} CHEN YANG \textperiodcentered{} LIN JIE \textperiodcentered{}
+    ZHU GENGYU \textperiodcentered{} LIANG ZIHAN \textperiodcentered{} ZHANG TIANYI}\par
+  \vspace{0.14in}
+  \mute{\url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}}\par
+\end{frame}
+
+\begin{frame}{Problem: one form per session wastes seats}
+  \begin{itemize}
+    \item Students book two sessions ``to be safe'': one person, two seats
+    \item A dropout's seat stays empty unless someone e-mails the waitlist
+    \item \hl{SeatRelay:} one registration, ranked sessions, one queue, a timed hold
+  \end{itemize}
+  \vspace{0.40in}
+  \stat{$\geq$\,\MarketStudentOrgs}{student organisations\\at five universities}\hfill
+  \stat{\MarketNusLibcalRepeatEvents{} of \MarketNusLibcalWorkshops}{NUS Libraries workshop\\events were repeats}\hfill
+  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{\pending{interviews}}{\InterviewPEventWeightedPct\,\%}}
+  \source{Bottom-up sizing, lower bounds: market = organisations $\times$ $p$ (share with multi-session
+    sign-ups) $\times$ \sd\MarketPriceSgd{} a year. NUS Libraries calendar \MarketLibcalFrom{} to
+    \MarketLibcalTo. Final report \S1, Table 1; \code{results/market/}.}
+\end{frame}
+
+\begin{frame}{Business model: organisers pay, participants never do}
+  \begin{itemize}
+    \setlength{\itemsep}{0.42em}
+    \item Free tier: one open workshop \textperiodcentered{} organiser plan: \hl{\sd10 a month} (\sd120 a year)
+    \item Worth it if hours saved per event $\times$ value of an hour $\times$ events a year $\geq$ \sd120
+    \item Hours saved and willingness to pay: \IfPending{\InterviewHoursMedian}{\pending{organiser interviews}}{median \InterviewHoursMedian{} h per event; bargain at \sd\InterviewWtpBargainMedian/month}
+    \item Simulation: forms leave \hl{\ReplayDupConfirmedPerSessionMean} duplicate confirmed seats per workshop, one queue \ReplayDupConfirmedUnifiedMean
+    \item Eventbrite relays a ticket, but per date; no tool ties sessions to one queue place
+    \item First users: NUS student organisations, starting with our pilot organiser
+  \end{itemize}
+  \source{Competitor scan from vendor documentation (Luma, Eventbrite, Humanitix, SignUpGenius,
+    Peatix, forms + spreadsheet): Final report Table 2. Simulation: \ReplaySeeds{} workshops,
+    \code{results/replay/}.}
+\end{frame}
+
+% =============================================================================== Part 2
+\speaker{CHEN YANG}
+\begin{frame}{Mechanism: one registration, one queue, one seat}
+  \centering\tikzfig{0.80\textwidth}{fig-flow}\par
+  \vspace{0.16in}\raggedright
+  \begin{tabular}{@{}p{5.95in}@{\hspace{0.23in}}p{5.95in}@{}}
+    \rid{R1}At most one hold or seat per workshop & \rid{R5}Decline or expiry drops only that session\\
+    \rid{R2}Queue order = server's acceptance order & \rid{R6}Cancel leaves the whole workshop\\
+    \rid{R3}Most-preferred listed session with a seat & \rid{R7}A confirmed seat is never reassigned\\
+    \rid{R4}Hold 15 min by default, never past cut-off & \\
+  \end{tabular}\par\vspace{0.10in}
+  \rid{C1}never over capacity \textperiodcentered{} \rid{C2}never two seats at once \textperiodcentered{} \rid{C3}a repeat never applies twice\par
+  \rid{C5}expiry by server time; stale ticks do nothing \textperiodcentered{} \rid{C7}own organisation only\par
+  \source{Rules and constraints as worded in the Preliminary report (Final report Table 4); refinements:
+    R2 = FIFO enqueue order, R4 \code{holdSeconds} per workshop, C5 tick semantics. Figure: Final report Fig.~1.}
+\end{frame}
+
+% =============================================================================== Part 3
+\speaker{LIN JIE}
+\begin{frame}{Architecture: serverless, one writer per workshop}
+  \centering\tikzfig{0.86\textwidth}{fig-architecture}\par
+  \vspace{0.12in}\raggedright
+  Three CloudFormation stacks in \code{ap-southeast-1}; pay-per-request services across AZs\par
+  Numbers follow one write \textperiodcentered{} $\ast$ new since the Preliminary report \textperiodcentered{} grey: safety net\par
+  \source{Final report Fig.~2; \code{docs/ARCHITECTURE.md} \S1.2; templates in \code{services/aws/templates/}.}
+\end{frame}
+
+\begin{frame}{Request path: 202 at once, then poll until settled}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{6.0in}
+      \adjustbox{trim=0pt 0pt {\width-7.55cm} 0pt, clip, width=5.7in}{\input{figures/fig-sequence}}
+    \end{column}
+    \begin{column}{5.9in}
+      \vspace{0.30in}
+      \begin{itemize}
+        \setlength{\itemsep}{0.45em}
+        \item 202 once the command is recorded
+        \item Browser polls: 0.3, 0.5, 1 s, then every 2 s
+        \item The answer carries the new status
+        \item FIFO group = workshop: a single writer
+        \item One transaction per decision (C4)
+        \item Version guard: a repeat is a no-op (C3)
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \source{Smoke run on dev (n = \SmokeSettleClientN, one run): server settle p50 \SmokeSettleServerPFiftyMs\,ms,
+    client-observed p50 \SmokeSettleClientPFiftyMs\,ms. Final report Fig.~3a, \S3.2, \S3.4;
+    \code{results/2026-10-17-smoke/}.}
+\end{frame}
+
+\begin{frame}{Timers: one per offer; the sweep is only a safety net}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{6.0in}
+      \adjustbox{trim={7.45cm} 0pt 0pt 0pt, clip, width=5.7in}{\input{figures/fig-sequence}}
+    \end{column}
+    \begin{column}{5.9in}
+      \vspace{0.30in}
+      \begin{itemize}
+        \setlength{\itemsep}{0.45em}
+        \item One SQS delay timer per offer
+        \item Forwarder puts the tick in the FIFO group
+        \item Tick-first: expire what is due, then relay
+        \item Late or duplicate tick: a no-op (C5)
+        \item Cancel or decline: relayed at once
+        \item 5-min sweep: a counted safety net
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \source{SQS message timers are at most 900\,s; longer holds hop through the forwarder. Final report
+    Fig.~3b and \S3.4 (response to the TA's feedback 2).}
+\end{frame}
+
+% =============================================================================== Part 4 (demo)
+\speaker{ZHU GENGYU \textperiodcentered{} operator LIANG ZIHAN}
+\begin{frame}{Live demo on the dev stage}
+  \vspace{0.10in}
+  \beat{D1}{Register for Session 3, then 1 \textrightarrow{} seat offered \textrightarrow{} accept}
+  \beat{D2}{Demo 2 queues; Demo 1 cancels \textrightarrow{} seat relayed in the same transaction}
+  \beat{D5a}{Crash the worker right after its commit (fault flag, dev only)}
+  \beat{D3}{60\,s hold runs out \textrightarrow{} the timer relays the seat, nobody clicks}
+  \beat{D5b}{Redelivered after 120\,s: settled once \textperiodcentered{} \textbf{\color{srBlue}D4}\enspace Verify invariants}
+  \vspace{0.16in}
+  \tikz\node[fill=srPaleBlue, draw=srBlue!40, rounded corners=4pt, inner sep=9pt, text width=11.85in]
+    {\textbf{Backup:} staged recording \code{docs/demo/backup-demo.mp4}, chapters on slide B1};
+  \source{Plan A: \url{https://d2ni5e1z674t04.cloudfront.net} (dev). Plan B: local Docker stack, same
+    code. Plan C: the recording. Click path and fallback: \code{docs/DEMO.md} \S5--6. Values on screen
+    are demo values, not measurements.}
+\end{frame}
+
+% =============================================================================== Part 5
+\speaker{LIANG ZIHAN}
+\begin{frame}{System results against the Preliminary report's Table 3}
+  \vspace{0.06in}
+  \tile{\CorrectnessVerdict}{Core correctness}{\CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks}\hfill
+  \tile{\FailureVerdict}{Failure recovery}{\FailureBeforeCommitSettleMedianS\,s median}\par\vspace{0.20in}
+  \tile{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable}\hfill
+  \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} refused}\par\vspace{0.20in}
+  \tile{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyTransportErrors{} HTTP 503s}\hfill
+  \tile{\PerfDevVerdict}{Performance}{met up to \PerfDevMaxVUsMet{} users}\par\vspace{0.20in}
+  \tile{\RepeatVerdict}{Repeat execution}{\RepeatProbesPassed/\RepeatProbes{} probes}\hfill
+  \tile{\BackfillVerdict}{Backfill latency}{\IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{p95 \BackfillExpiredPNinetyFiveS\,s}}\par\vspace{0.20in}
+  \tile{\ExpiryRaceVerdict}{Expiry race}{\ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks{} stale ticks inert}\hfill
+  \tile{MODEL}{Cost}{\usd\CostUnitOneKCloudListUsd{} \textrightarrow{} \CostUnitHundredKCloudListUsd{} per 1k}\par\vspace{0.34in}
+  \SeriesPassed{} of \SeriesExperiments{} experiments pass; no \code{verify} call found a violation
+  \source{Dev stage, 3 runs per experiment; failures are reported as failures (HTTP 503s under the
+    account's Lambda concurrency quota of 10; re-runs pending). Failure recovery on dev without
+    e-mail. Final report Table 5; \code{results/2026-10-17-*/}.}
+\end{frame}
+
+\begin{frame}{Latency, backfill and the mechanism comparison}
+  \includegraphics[width=8.2in,valign=c]{figures/generated/loadtest-p95}\hfill
+  \side{Load test on dev}{all targets met only at \PerfDevMaxVUsMet{} users}\par\vspace{0.02in}
+  \includegraphics[width=8.2in,valign=c]{figures/generated/replay-comparison}\hfill
+  \side{Simulation}{duplicate holds \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean}\par
+  \vspace{0.10in}
+  \textbf{Backfill p95} \IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{\BackfillExpiredPNinetyFiveS\,s}
+  \textperiodcentered{} so far \TimerPathRelaysN{} timer relays, $\leq$\,\TimerPathRelayMaxMs\,ms
+  \textperiodcentered{} cancel \SmokeCancelBackfillMs\,ms
+  \source{(a) 10 workshops, (b) one hot workshop; median of \PerfRoundsPerLevel{} rounds; targets 1\,s
+    and 5\,s. Replay: \ReplaySeeds{} simulated workshops, one queue vs per-session forms; distinct people
+    served \ReplayDistinctUnifiedMean{} vs \ReplayDistinctPerSessionMean. Final report Figs.~4 and 6.}
+\end{frame}
+
+\begin{frame}{Cost: cloud vs one on-prem machine (US\$ a month)}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{6.45in}
+      \vspace{0.12in}
+      \renewcommand{\arraystretch}{1.18}
+      \begin{tabular}{@{}l r r r@{}}
+        \toprule
+        Registrations a month & 1k & 10k & 100k\\
+        \midrule
+        Cloud, list price & \CostTierOneKCloudListUsd & \CostTierTenKCloudListUsd & \CostTierHundredKCloudListUsd\\
+        Cloud, after free tier & \CostTierOneKCloudAfterFreeUsd & \CostTierTenKCloudAfterFreeUsd & \CostTierHundredKCloudAfterFreeUsd\\
+        On-prem, hardware only & \CostTierOneKOnpremIncrementThreeYearUsd & \CostTierTenKOnpremIncrementThreeYearUsd & \CostTierHundredKOnpremIncrementThreeYearUsd\\
+        On-prem, fully costed & \CostTierOneKOnpremFullThreeYearUsd & \CostTierTenKOnpremFullThreeYearUsd & \CostTierHundredKOnpremFullThreeYearUsd\\
+        \bottomrule
+      \end{tabular}\par\vspace{0.30in}
+      Cloud dearer above \hl{\CostCrossoverListIncrementRegs} / \hl{\CostCrossoverListFullRegs} a month
+    \end{column}
+    \begin{column}{5.45in}
+      \includegraphics[width=5.45in]{figures/generated/cost-crossover}
+    \end{column}
+  \end{columns}
+  \source{Modelled usage $\times$ Singapore list prices (\CostPricesVerified{} of \CostPricesTotal{}
+    from the AWS Price List API); after credits \usd\CostTierOneKCloudAfterCreditsUsd. On-prem: one
+    mini-PC, \CostAmortisationYears-year amortisation; fully costed adds a business line and labour; no
+    failover. Final report Table 3.}
+\end{frame}
+
+% =============================================================================== Part 6
+\speaker{ZHANG TIANYI}
+\begin{frame}{User study and pilot: what has been measured}
+  \vspace{0.06in}
+  \textbf{Independent users} \mute{(Preliminary report \S5)}\par\vspace{0.08in}
+  \begin{itemize}
+    \item User study, 12 non-team students: \IfPending{\StudyParticipants}{\pending{not yet run}}{n = \StudyParticipants, completion \StudyCompletionSRPct\,\%, SUS \StudySusSRMean}
+    \item Interviews: \IfPending{\InterviewN}{\pending{not yet done}}{n = \InterviewN}
+      \textperiodcentered{} live pilot: \IfPending{\PilotWorkshops}{\pending{not yet run}}{\PilotRegistrations{} registrations, \PilotBackfills{} backfills}
+  \end{itemize}
+  \vspace{0.36in}
+  \textbf{Staged rehearsal on the pilot stage} \mute{(synthetic accounts, scripted: not user evidence)}\par\vspace{0.08in}
+  \begin{itemize}
+    \item \RehearsalParticipants{} synthetic participants; \RehearsalCommandsApplied/\RehearsalCommands{} commands applied; \RehearsalBackfills{} seats relayed
+    \item \RehearsalNotificationsSent{} e-mails to the SES mailbox simulator; invariants held in all \RehearsalInvariantReads{} phases
+  \end{itemize}
+  \source{Targets: completion $\geq$\,90\,\%, paired task time $-$25\,\%, SUS $\geq$\,75. Rehearsal run
+    \code{\RehearsalRunId}, \RehearsalDate, \RehearsalChecksPassed/\RehearsalChecksTotal{} checks;
+    \code{results/2026-10-17-pilot-rehearsal-3/}.}
+\end{frame}
+
+\begin{frame}{Limitations, future work, AI use and roles}
+  \vspace{0.06in}
+  \textbf{Limits:} one writer per workshop \textperiodcentered{} HTTP 503s \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
+  \textbf{Next:} batch commands per workshop \textperiodcentered{} SES production \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
+  \textbf{AI use:} an AI coding assistant generated the code and drafts; we set and reviewed\par\vspace{0.34in}
+  \role{LI ZONGZE}{product, front end}\hfill\role{CHEN YANG}{allocation logic, API}\par\vspace{0.10in}
+  \role{LIN JIE}{AWS, monitoring}\hfill\role{ZHU GENGYU}{data, on-prem reference}\par\vspace{0.10in}
+  \role{LIANG ZIHAN}{user research, evaluation}\hfill\role{ZHANG TIANYI}{dashboard, QA, docs}\par
+  \source{AI use in full: Final report, AI usage declaration (where, how, what each member learned).
+    Roles as in that declaration: \pending{each member to confirm}.}
+\end{frame}
+
+\begin{frame}{Thank you. Questions?}
+  \vspace{0.30in}
+  {\fontsize{26}{32}\selectfont Code, raw results and report sources:\par}
+  \vspace{0.10in}
+  \hl{\url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}}\par
+  \vspace{0.32in}
+  Every number on these slides comes from \code{results/} via \code{report/generated/numbers.tex}\par
+  \vspace{0.32in}
+  \mute{LI ZONGZE \textperiodcentered{} CHEN YANG \textperiodcentered{} LIN JIE \textperiodcentered{}
+    ZHU GENGYU \textperiodcentered{} LIANG ZIHAN \textperiodcentered{} ZHANG TIANYI}\par
+  \source{Backup slides follow: B1 demo recording, B2--B6 demo states, B7 failure modes, B8 data model.}
+\end{frame}
+
+% =============================================================================== backup
+\appendix
+\speaker{ZHU GENGYU \textperiodcentered{} LIANG ZIHAN}
+\begin{frame}{Backup: demo recording (staged)}
+  \vspace{0.06in}
+  \code{docs/demo/backup-demo.mp4}: 2:43, silent, captions say who acts\par\vspace{0.10in}
+  Staged on dev: synthetic accounts, scripted clicks; not user evidence\par\vspace{0.30in}
+  \chap{D1}{0:37}{Alice registers, Session 2 first \textrightarrow{} offer \textrightarrow{} accept}
+  \chap{D2}{1:03}{Bob queues; Alice cancels \textrightarrow{} Bob's offer (1:27)}
+  \chap{D3}{1:33}{Carol queues; Bob's 60\,s hold expires \textrightarrow{} Carol's offer (2:09)}
+  \chap{D4}{2:16}{Backfill log, attendance, CSV export, verify invariants (2:23)}
+  \source{Chapter list: \code{docs/demo/backup-demo-chapters.txt}. The recording has no fault
+    injection (D5 is a terminal step; see B6). Recorded by \code{tools/e2e} on 2026-10-17.}
+\end{frame}
+
+% #1 title, #2/#5 trims, #3/#6 files, #4/#7 captions, #8 note
+\newcommand{\shotslide}[8]{%
+  \begin{frame}{#1}
+    \vspace{0.10in}
+    \parbox[t]{5.95in}{\shot{#2}{5.95in}{#3}\par\vspace{0.12in}#4}\hfill
+    \parbox[t]{5.95in}{\shot{#5}{5.95in}{#6}\par\vspace{0.12in}#7}
+    \source{Staged walkthrough on dev, 2026-10-17: synthetic accounts named ``(staged)'', scripted
+      clicks; \code{docs/demo/screenshots/}. #8}
+  \end{frame}}
+
+\shotslide{Backup D1: register \textrightarrow{} offer}
+  {170 0 10 445}{11-request-received.png}{202 back at once; the page polls}
+  {170 0 10 445}{12-offer-countdown.png}{First choice held, countdown running}
+  {Alice ticks Session 1, then moves Session 2 to the top.}
+
+\shotslide{Backup D2: cancellation \textrightarrow{} instant backfill}
+  {170 130 170 435}{17-offer-after-cancellation.png}{Bob: the cancelled seat is held for him}
+  {170 80 170 485}{19-dashboard-queue-offer.png}{Organiser: Carol queued behind Bob's offer}
+  {Bob's page shows the offer on its 10\,s refresh, without a reload; the relay is logged with 0\,ms.}
+
+\shotslide{Backup D3: the hold expires \textrightarrow{} automatic backfill}
+  {170 175 170 440}{20-offer-expiring.png}{Bob's 60\,s hold, last seconds}
+  {170 175 170 440}{22-offer-after-expiry.png}{Carol: relayed by the timer}
+  {Nobody acted between the two screens.}
+
+\shotslide{Backup D4: backfill log and verify invariants}
+  {170 105 170 515}{24-dashboard-backfill-log.png}{Both relays with their latency}
+  {170 540 170 80}{26-dashboard-verify-ok.png}{All invariants hold}
+  {Dashboard values in a demo are demo values, not measurements.}
+
+\begin{frame}{Backup D5: crash after commit, applied once}
+  \vspace{0.06in}
+  No screenshot: a terminal step. What the experiments recorded on dev:\par\vspace{0.20in}
+  \begin{itemize}
+    \setlength{\itemsep}{0.40em}
+    \item Repeat execution: \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes, redelivery acknowledged
+    \item Failure recovery: after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s)
+    \item Before commit: \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} settled on redelivery (median \FailureBeforeCommitSettleMedianS\,s)
+    \item Dead letters: \FailureDeadLetters; one command record each, one effect
+  \end{itemize}
+  \source{Fault flags (\code{\_fault: AFTER\_COMMIT}) are honoured only on dev. Redelivery waits for the
+    120\,s SQS visibility timeout. \code{results/2026-10-17-repeat-execution/}, \code{-failure-recovery/}.}
+\end{frame}
+
+\speaker{LIN JIE}
+\begin{frame}{Backup: failure modes and what happens}
+  \vspace{0.06in}
+  \fm{Worker crash before commit}{nothing written; redelivered after 120\,s}
+  \fm{Worker crash after commit}{redelivery finds the command settled: no-op}
+  \fm{Timer lost or late}{next command expires it; else the sweep within 5 min}
+  \fm{Poison message}{after 3 receives to the DLQ, alarm; the group moves on}
+  \fm{SES or notifier down}{stream retries; seats unaffected (C6)}
+  \fm{Region failure}{not covered: one region, PITR restore untested}
+  \source{\code{docs/ARCHITECTURE.md} \S12; alarms and redrive: \code{docs/RUNBOOK.md}.}
+\end{frame}
+
+\begin{frame}{Backup: one partition per workshop, one transaction per decision}
+  \vspace{0.06in}
+  \key{WS\#\{id\} / L\#META}{seq, version (the lock), holdSeconds, next due time}
+  \key{WS\#\{id\} / L\#S\#\{session\}}{capacity, confirmed, held, cut-off}
+  \key{WS\#\{id\} / L\#R\#\{seq\}}{live registration: QUEUED, OFFERED, CONFIRMED}
+  \key{WS\#\{id\} / L\#U\#\{user\}}{uniqueness marker: one registration per account (R1)}
+  \key{WS\#\{id\} / H\#...}{settled history, backfill records, attendance}
+  \key{CMD\#\{commandId\}}{ACCEPTED \textrightarrow{} APPLIED or REJECTED, in the same transaction}
+  \source{One \code{TransactWriteItems} per decision ($\leq$\,100 actions; the engine budgets 90), META
+    conditioned on its version. \code{docs/ARCHITECTURE.md} \S8.}
+\end{frame}
+
+\end{document}

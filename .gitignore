@@ -47,3 +47,13 @@ report/*.xdv
 
 # student numbers stay out of the public repository (see report/README.md)
 report/team-ids.tex
+
+# submission build of the report (student numbers; see report/build.sh -s)
+report/*-submission.pdf
+
+# built PDFs carry student numbers; they are delivered directly, not published
+report/Final.pdf
+report/Slides.pdf
+report/*.nav
+report/*.snm
+report/*.vrb

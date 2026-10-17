@@ -11,23 +11,51 @@
   availability is not equalised between the two builds.
 \item \emph{Experiments:} the \code{dev} stage, a 60\,s hold for expiry experiments and synthetic
   accounts; the mechanism comparison uses an assumed behaviour model and ideal timers.
-\item \emph{Operations:} one AWS region; until SES production access is granted, e-mail reaches only
-  verified addresses and participants rely on in-app notifications.
+\item \emph{Operations:} one AWS region; SES sandbox until production access is granted (in-app
+  notifications for unverified addresses).
 \end{itemize}
 
 \section*{AI usage declaration}
-\emph{Where.} The application code, infrastructure-as-code templates, tests, experiment and
-load-test scripts, analysis and cost-model scripts, the market page captures and counts, the
-competitor scan, the documentation, and the drafts of this report and the slides were generated
-with Claude Code, an AI coding assistant. \emph{How.} The team set the scope, rules, constraints and
-acceptance targets in the Preliminary report and the execution plan, directed the work step by step,
-and reviewed the generated code, documents and figures. The team created and owns the AWS account
-and the repository. The deployment, experiment, load-test, replay and cost-model scripts were run by
-the assistant in a development session, at the team's request and with the team's AWS credentials;
-the assistant also did the desk research for \S\ref{sec:motivation}. The team is responsible for the
-interviews, the user study and the pilot. \pending{name of the team member who checked every
-reported number against results/}. The assistant did not type or alter any measured value: every
-experimental, simulation and own-count number in this report is produced by a script from a raw file
-in \code{results/}, external figures are cited, and data that does not exist yet is marked as
-pending. \emph{What we learned.} \pending{member learning paragraphs: one ``what I learned''
-paragraph of at most 50 words per team member, written by that member}
+\emph{Where} (as promised in the Preliminary report). The implementation code (engine, API and Lambda handlers, on-prem server, React SPA), the
+infrastructure-as-code templates, the tests, the experiment, load-test, replay, analysis and
+cost-model scripts, the market captures and counts, the competitor scan and other desk research, the
+documentation, and the first drafts of this
+report and the slides were generated with an AI coding assistant (Claude Code) working from the
+team's Preliminary report and execution plan; earlier, as the Preliminary report declared, AI
+helped compare topics, locate vendor documentation, discuss architecture options and draft prose.
+\emph{How.} The team planned the work and set the scope,
+rules, constraints and acceptance targets, reviewed the generated code, documents and figures, owns
+the AWS account and the repository, and approved each deployment; the assistant ran the deployment,
+experiment, load-test, replay and cost scripts with the team's credentials. The team runs the interviews, the user study and the pilot, and checks every reported
+number against \code{results/} before submission (\pending{name of the member who did the check}).
+No measured value was typed by hand: every measured, simulated and own-count number is written by
+a script from a raw file in \code{results/}, external facts are cited, and missing data are marked
+pending. \emph{What we learned} (first drafted by the assistant from each member's work line and the
+project record; each member confirmed or rewrote their own: \pending{confirmation by each member,
+docs/ai-declaration-drafts.md}).
+
+{\footnotesize
+\noindent\textbf{LI ZONGZE} (product, front end). A 202 response is not a result. I learned to build
+the interface around three states (request received, queued with a position, seat confirmed), to
+poll with back-off rather than add WebSockets, and to check generated code against the rules before
+accepting it.
+\textbf{CHEN YANG} (allocation logic, API). I learned that DynamoDB allows 100 actions per
+transaction, so a decision is capped (12 offers, 12 expiries) and continues as a follow-up command,
+and that judging expiry by server time at processing makes a late or duplicate timer harmless to
+newer offers.
+\textbf{LIN JIE} (AWS, monitoring). During the load tests we found that the account's Lambda
+concurrency quota was 10, shared by every function of both stages; I learned to check service quotas
+before measuring. A second stage failed to deploy because SAM gave both stages' sweep schedules the
+same name.
+\textbf{ZHU GENGYU} (data, local reference). Running our engine on PostgreSQL showed me that a fair
+cloud versus on-premise comparison needs equal load, retention and function, and that labour and the
+network line, not hardware, dominate a small self-hosted service. Two prices I used had changed a day
+later.
+\textbf{LIANG ZIHAN} (user research, evaluation tooling). Timing an expiry race at $\pm$200\,ms
+taught me that network delay is part of the experiment: an \enquote{early} probe arrived late and was
+rightly rejected, so the harness calibrates send times. Preparing the study, I learned to report the
+real sample, whatever its size.
+\textbf{ZHANG TIANYI} (organiser dashboard, QA, documentation). SES production access was denied
+while our sender address was still unverified, so pilot participants rely on in-app notifications; I
+learned to plan such approvals early. In QA I learned to report failed experiments as failures and
+to give organisers a one-click invariant check.\par}

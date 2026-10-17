@@ -22,6 +22,8 @@ speaks; the live demo takes about 5½ minutes). It covers:
 
 **Rehearsal record.** The flow below was rehearsed against the local stack through the API on
 2026-10-17. The outputs are in the appendix; they are rehearsal values, not report measurements.
+Beats D1–D4 were then played in a real browser against the deployed dev stack by the automated,
+staged walkthrough of section 9. The screens and wording below follow what that run showed.
 
 ---
 
@@ -95,9 +97,11 @@ Session B with capacity 1 each.
    # Plan B
    pnpm --filter @seatrelay/scripts get-tokens-keycloak -- --count 3 --prefix demo
    ```
-3. Sign in once with A and B in their browsers (hosted UI, e-mail + password) and accept any
-   browser prompts. Set browser zoom to 125 %. Turn off OS notifications. Use a dark terminal theme
-   with an 18 pt font.
+3. Sign in once with A and B in their browsers and accept any browser prompts. **Sign in** sends
+   you to Cognito's classic hosted page, *Sign in with your email and password*: fields **Email**
+   and **Password**, button **Sign in**; afterwards you land back on the page you started from, with
+   the account's name in the top bar. Set browser zoom to 125 %. Turn off OS notifications. Use a
+   dark terminal theme with an 18 pt font.
 4. Record the fallback video (section 6) during the second rehearsal.
 
 ### T−30 min
@@ -136,14 +140,18 @@ echo "organiser: $WEB/org/$ORG/workshops/$WS"; echo "participants: $WEB/workshop
 Seed no earlier than 45 minutes before the slot. The preset offers expire 60 minutes after seeding.
 If the slot slips, re-seed: it takes 15 seconds, and the URLs change.
 
-1. **Window O (organiser).** Open the organiser URL: the dashboard of *Demo workshop*. Then create
-   the expiry workshop:
-   1. Click **Organiser** → *SeatRelay Demo* → **Create a workshop**.
-   2. Step 1: title `Expiry demo`, mode *Unified*, hold seconds `60` → **Next**.
-   3. Step 2: *Session A* tomorrow 10:00, capacity 1; *Session B* tomorrow 14:00, capacity 1
-      → **Next**.
-   4. Step 3: **Create workshop**.
-   5. Open its dashboard in a second tab and copy its **Share link (public page)**.
+1. **Window O (organiser).** Tab 1: open the organiser URL, the dashboard of *Demo workshop*. Tab 2:
+   create the expiry workshop.
+   1. Click **Organiser** in the top bar. On the *SeatRelay Demo* card, click **Workshops**. The
+      *Create a workshop* wizard is the card below the workshop list; it is not a button.
+   2. Step 1 (*Basics*): **Title** `Expiry demo`, **Mode** *UNIFIED — one queue, ranked
+      preferences, one seat per person* (the default), **Hold time (seconds)** `60` → **Next**.
+   3. Step 2 (*Sessions*): the wizard starts with two rows named *Session 1* and *Session 2*, with
+      capacity 10, starting at the next full hour at least 26 h and 50 h ahead. Rename them to
+      *Session A* (tomorrow 10:00, capacity 1) and *Session B* (tomorrow 14:00, capacity 1) →
+      **Next**.
+   4. Step 3 (*Review*): **Create workshop**. The tab goes straight to the new dashboard.
+   5. In its *Actions* card, copy the **Share link (public page)**.
 2. **Window A** (Firefox, signed in as Demo 1). Tab 1: the participant URL (*Demo workshop*).
    Tab 2: the *Expiry demo* public page.
 3. **Window B** (Firefox private window, signed in as Demo 2). The same two tabs.
@@ -200,30 +208,38 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   one seat each. Demo 1 can attend Session 3 or Session 1, and prefers Session 3."
 - **Do:** In **Register**, tick *Session 3*, then *Session 1*. The tick order sets the rank; show the
   ▲/▼ buttons once. Click **Register (2 sessions)**.
-- **Expect:** *Request received, waiting for the outcome…*, then the toast *Registration applied*.
-  The status card shows *A seat in Session 1 is held for you — confirm within 59:5x.*
+- **Expect:** the button turns into *Processing…* with *Request received, waiting for the outcome…*
+  next to it (and a toast *Request received*). Then the toast reads *Registration applied — A seat in
+  Session 1 is held for you — confirm within 59:59.* The **My status** card (badge *Offered*) reads
+  *A seat in **Session 1** (‹date›) is held for you. Confirm within 59:5x (until ‹time›)*, with
+  **Accept seat**, **Decline** and **Cancel registration**.
 - **Say:** "Two distinct moments: the request was accepted immediately, a 202, and the browser polled
   until the seat was decided. Session 3 was full, so the engine went straight to her second choice.
   One registration, one queue, never two seats."
 - **Do:** **Accept seat**.
-- **Expect:** *Accept applied — Your seat in Session 1 is confirmed.*
+- **Expect:** toast *Accept applied — Your seat in Session 1 is confirmed.* The card reads *Seat
+  confirmed in **Session 1** · starts ‹date›*; the only action left is **Cancel my seat**.
 - **Do (Window O):** **Refresh**. *Session 1* now shows confirmed 1, held 1, free 0, and Demo 1 is
   in *Confirmed (1)*.
 
 ### D2 (1:00–2:00): second person cancels → instant backfill (Windows B, A, O)
 
 - **Do (Window B):** Tick only *Session 1* → **Register (1 session)**.
-- **Expect:** *You are queued at position 1.* In the sessions table, Session 1 shows 0 free and 1
-  in the queue.
+- **Expect:** toast *Registration applied — You are queued at position 1.*; the card reads *Queued at
+  position **1**.* In the sessions table, Session 1 shows *Free* 0 and *Waiting* 1.
 - **Say:** "Session 1 is full; Demo 2 waits first in line. Now Demo 1's plans change."
 - **Do (Window A):** **Cancel my seat** → *Release your seat?* **Yes, cancel**.
 - **Expect (A):** *Cancellation applied — Your registration is cancelled.* The page shows the
   registration form again.
-- **Expect (B):** Within 10 s (the status page refreshes while you are queued; or press F5): *A seat
-  in Session 1 is held for you — confirm within 59:5x.*
+- **Expect (B):** Within 10 s (the status page refreshes while you are queued; or press F5) the card
+  switches to *Offered*: *A seat in **Session 1** (‹date›) is held for you. Confirm within 59:5x.*
+  B gets no toast: toasts only report commands sent from that window. (Browser walkthroughs on dev,
+  2026-10-17: 6–7 s after the cancellation.)
 - **Do (Window B):** **Accept seat** → *Your seat in Session 1 is confirmed.*
 - **Do (Window O):** **Refresh**. The **Backfill log** shows *Session 1 · confirmed seat cancelled ·
-  latency 0 ms*. The header reads *1/1 reallocated*.
+  latency 0 ms*. The header reads *1/1 reallocated · p50 0 ms · p95 0 ms · max 0 ms*. The *New
+  holder* column shows the first 8 characters of the user id, not the name; Demo 2's name is in
+  *Offered*.
 - **Say:** "The cancellation and the hand-over to the next person are one transaction: zero
   milliseconds, nobody had to email anyone."
 
@@ -268,19 +284,25 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
     person.
   - A late or duplicate tick finds nothing to do. The five-minute sweep is only a safety net; it is
     not what makes this fast."
+- At 00:00 A's countdown reads *expired*. **Accept seat** stays enabled, because the server decides.
+  The page refreshes once at zero. On dev the timer usually relays the seat within a second, so A's
+  card often disappears about 1 s after 00:00 (browser walkthrough 2026-10-17: 0.95 s).
 - **Do (Window A), optional, at 00:00 while the Accept button is still visible:** **Accept seat**.
-- **Expect:** *Accept rejected — The offer expired before your answer arrived.* At the next refresh,
-  A's page shows the registration form again. Her registration has ended; *My registrations* lists
-  it under *Past* as *Your registration ended: none of your acceptable sessions could still be
-  joined.*
+  Skip this if the card is already gone.
+- **Expect:** *Accept rejected — The offer expired before your answer arrived.* At the next refresh
+  A's page shows the registration form again, **with no message on the page itself**. Her
+  registration has ended. The reason is in **Notifications** (*Offer expired: Session A … your
+  registration has ended*) and in **My registrations** under *Past*: *ended: none of your acceptable
+  sessions could still be joined · ‹date›*.
   - If A's click arrives before the timer, A's own command performs the expiry (tick-first). The
     outcome is the same.
-- **Expect (Window B):** within a few seconds after 00:00 (refresh if the 10 s auto-refresh has not
-  fired yet): *A seat in Session A is held for you — confirm within 00:5x.* **Accept seat** →
-  confirmed.
-- **Do (Window O, tab 2):** **Refresh**. The **Backfill log** shows *Session A · offer expired ·
-  latency ≈ 1–3 s* (released at `expiresAt`, re-allocated when the tick was processed).
-- **Say:** "Nobody pressed anything: the seat moved on by itself, in about a second or two."
+- **Expect (Window B):** within 10 s after 00:00 (the auto-refresh; press F5 to see it at once) the
+  card reads *A seat in **Session A** (‹date›) is held for you. Confirm within 00:5x.* **Accept
+  seat** → confirmed.
+- **Do (Window O, tab 2):** **Refresh**. The **Backfill log** shows *Session A · offer expired* with
+  a latency of a few hundred milliseconds to a few seconds (released at `expiresAt`, re-allocated
+  when the tick was processed; three browser walkthroughs on dev, 2026-10-17: 103–189 ms).
+- **Say:** "Nobody pressed anything: the seat moved on by itself, within a second or two."
 
 ### D5b (4:30–5:00): exactly-once, proven (terminal + Window O)
 
@@ -318,8 +340,9 @@ At least 120 s must have passed since D5a. If not, do D4 first and come back.
 ### D4 (5:00–5:30): verify invariants (Window O)
 
 - **Do:** On *Demo workshop*, click **Verify invariants**; then on *Expiry demo*.
-- **Expect:** *All invariants hold — checked … — C1 no over-capacity, C2 no double holds, and the
-  other engine invariants.* *Demo workshop* stats: Queued 0, Offered 4, Confirmed 1, Distinct served
+- **Expect:** a green banner *All invariants hold — checked ‹date, time› — C1 no over-capacity, C2 no
+  double holds, and the other engine invariants.*; the button now reads *OK — verify again*. *Demo
+  workshop* stats: Queued 0, Offered 4, Confirmed 1, Distinct served
   1, Backfills 1/1. Sessions:
 
   | Session | Confirmed | Held | Free |
@@ -339,8 +362,8 @@ At least 120 s must have passed since D5a. If not, do D4 first and come back.
 | Level | When | What |
 |---|---|---|
 | **Plan B: local stack** | Before the slot: AWS health check fails or campus Wi-Fi blocks AWS, but the laptop runs Docker. | Same script against `http://localhost:8081` / `http://localhost:3000`. Seed with `--target local`. The D5 redelivery takes about 1 s, so D5b can follow D5a directly. Mention "this is our on-prem reference deployment, same code". |
-| **Plan C: recorded video** | Before the slot: neither A nor B is ready. During the demo: a step has not settled after 15 s, or an error banner appears, or sign-in breaks. | Say "let me show you this step from our recording" and jump to the chapter of the failing beat. Do not debug live. Afterwards, return to the slides. |
-| **Plan D: screenshots** | Video playback fails. | Backup slides with one screenshot per expected state (D1–D5 "Expect" lines). |
+| **Plan C: recorded video** | Before the slot: neither A nor B is ready. During the demo: a step has not settled after 15 s, or an error banner appears, or sign-in breaks. | Say "let me show you this step from our recording" and jump to the chapter of the failing beat. Do not debug live. Afterwards, return to the slides. Primary: the narrated OBS recording below. Backup if that is missing: `docs/demo/backup-demo.mp4` (section 9). |
+| **Plan D: screenshots** | Video playback fails. | Backup slides with one screenshot per expected state (D1–D4 "Expect" lines), taken from `docs/demo/screenshots/` (section 9). D5 has no screenshot, since it is a terminal step. |
 
 Recording the video (second rehearsal, 11/12):
 
@@ -349,8 +372,10 @@ Recording the video (second rehearsal, 11/12):
 - Export MP4 (H.264, ≤ 200 MB).
 - Write down the chapter timestamps: D1, D2, D5a, D3, D5b, D4. Keep the list next to the
   presenter's notes.
-- Store three copies: the presenting laptop's desktop, the team drive, a USB stick. Keep the video
-  out of git: it is large, and the repository holds the scripts that reproduce it.
+- Store three copies: the presenting laptop's desktop, the team drive, a USB stick. Keep this
+  recording out of git: it is large, and the repository holds the scripts that reproduce it. The
+  small silent cut `docs/demo/backup-demo.mp4` (≤ 25 MB, section 9) is the one video in the
+  repository.
 - Link it from a hidden backup slide right after the demo slide.
 
 Network fallback: test a phone hotspot during setup. Cognito's hosted UI and the API both work
@@ -382,11 +407,59 @@ over it.
 | Symptom | Likely cause | Action (≤ 10 s, otherwise Plan C) |
 |---|---|---|
 | A status card does not change after the other window acted | auto-refresh runs every 10 s and only while the tab is visible | press F5 in that window |
+| After an offer expired, that participant's card vanished and the empty registration form is back, with no message | expected: the page shows only live registrations; the reason is under **Notifications** and **My registrations → Past** | say "her registration ended because the hold ran out" and open **Notifications** if asked |
+| The counters on a confirmed participant's page (*Free*, *Waiting*) look stale | the page refreshes itself only while the registration is queued or offered | **Refresh** button or F5 |
 | "Still processing — the server has your request; we keep checking every 5 s." | worker backlog, or the workshop's group is waiting for the D5 redelivery | if it is *Demo workshop* between D5a and D5b: expected; say so. Otherwise switch to the video |
 | Sign-in page appears | token or session expired | sign in again (password manager); if it fails, Plan C |
 | `"status": "ACCEPTED"` stays on the D5a poll | queue slow | poll again after 2 s; the redelivery is unaffected |
 | D5a returns `"_fault"` silently ignored (settles without a crash, no `deliveryAttempt 1` log line) | stack deployed with `AllowFaultFlags=false` | show the idempotent re-POST only; explain the flag; play the D5 chapter of the video |
 | Verify shows a violation | should not happen; possibly `NO_STARVATION` while a continuation is queued | wait 5 s and verify again; if it persists, say so honestly and take a screenshot for the bug report |
+
+---
+
+## 9. Automated browser walkthrough, screenshots and backup video
+
+`tools/e2e` (`pnpm --filter @seatrelay/e2e walkthrough`, about 5 minutes; see its README) plays
+D1–D4 in a real Chromium against the deployed **dev** SPA. It runs on a fresh workshop that it
+creates through the wizard: hold 60 s, Sessions 1–3 with capacities 2 / 1 / 1. It uses its own
+accounts, `walkthrough-{organiser,alice,bob,carol}@example.com`, whose display names end in
+"(staged)"; `pnpm --filter @seatrelay/e2e ensure-users` creates them. Every participant signs in
+through the hosted UI like a person. Every expected state is asserted, and a mismatch stops the run
+with a screenshot of each window. There is no fault injection: D5 stays a terminal step.
+
+| Demo beat | Walkthrough equivalent |
+|---|---|
+| D1 | Alice ticks Session 1, then Session 2, moves Session 2 up with ▲, registers → *Request received* → offer with countdown → accepts |
+| D2 | Bob registers for Session 2 only → queued at 1; Alice cancels → Bob's page shows the offer on its 10 s refresh, without a reload |
+| D3 | Carol queues for Session 2 behind Bob's offer; Bob lets the 60 s hold run out → Carol's page shows the relayed seat → she accepts |
+| D4 | Dashboard: counters, queue, offers, backfill log with latency, distinct served, attendance tick, CSV export, **Verify invariants** |
+| (extra) | *My registrations → Past* for Alice and Bob, Bob's notifications, Alice signs out (hosted UI `/logout`, then the hosted UI asks for the password again) |
+
+Outputs, overwritten only by a passing run:
+
+- `docs/demo/screenshots/NN-name.png`: one per key screen, 1440×900, light theme. Its `README.md`
+  lists what each one shows. Use these for the slides and for Plan D. Every screen shows the
+  signed-in name, "… (staged)", and the workshop is called *Cloud Computing Workshop (staged demo)*.
+- `docs/demo/backup-demo.mp4` (H.264, 1280 px wide, silent, caption bar with who acts and what
+  happens, "Staged walkthrough" label, long waits sped up and marked) and
+  `docs/demo/backup-demo-chapters.txt`. This is the Plan C backup when the narrated OBS recording is
+  missing. It is labelled as a staged recording, so say so when you play it.
+- `results/<date>-web-walkthrough-dev[-n]/summary.md`: what was checked and observed (staged, not
+  user evidence).
+
+Observed in the published run (dev, 2026-10-17, 45 checks passed, evidence
+`results/2026-10-17-web-walkthrough-dev/`):
+
+- All four sign-ins used the authorization code flow with PKCE (S256) through the hosted UI. Each
+  returned to the page it started from, with no `code`/`state` left in the address bar. Sign-out
+  cleared the stored user, and the hosted UI asked for the password again.
+- Register: 1.8 s from the click (*Sending…*) to the offer card. The 202 came back in 0.4–0.8 s;
+  the first poll, about 0.3 s later, already saw every command settled.
+- Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 6 s later, on
+  its 10 s refresh.
+- Expiry backfill: latency 179 ms on the dashboard (103–189 ms over three runs). Carol's page
+  showed the relayed offer 7 s after `expiresAt`.
+- 0 API responses ≥ 400, 0 browser console errors.
 
 ---
 

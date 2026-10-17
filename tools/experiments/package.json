@@ -19,6 +19,7 @@
     "failure-recovery": "tsx src/failure-recovery.ts",
     "access-control": "tsx src/access-control.ts",
     "backfill": "tsx src/backfill.ts",
+    "pilot-rehearsal": "tsx src/pilot-rehearsal.ts",
     "fixture": "tsx test/helpers/serve-memory.ts",
     "plot": "python3 analysis/plot_results.py"
   },

@@ -190,7 +190,7 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
               onChange={(event) => setBasics({ ...basics, description: event.target.value })}
             />
           </div>
-          <div className="field-row">
+          <div className="field-row field-row-top">
             <div className="field">
               <label className="field-label" htmlFor="ws-mode">
                 Mode

@@ -1,49 +1,38 @@
-% Fig. 1 (plan §7.1): user flow of SeatRelay (participant states, backfill, organiser view).
-% NOTE FOR THE TEAM: this is a redrawn stand-in. If you still have the source of Fig. 1 of the
-% Preliminary report, use that figure instead (plan §7.1 says "Fig 1 flow (reuse)") and delete
-% this file; only adapt its wording to the tick-first expiry and the polling protocol.
-% Source of truth: docs/ARCHITECTURE.md §1 (overview), §9 (rules R1–R7).
-% Needs \input{figures/tikz-setup}. Size: about 15.7 cm x 4.2 cm.
-%
-% Suggested caption:
-%   User flow. A participant registers once with the acceptable sessions in preference order and
-%   joins one queue per workshop. The first queued participant who accepts a session with a free
-%   seat receives an offer that is held for holdSeconds; accepting confirms the seat, declining or
-%   letting it expire drops that session from the preference list (R5). Every released seat is
-%   offered to the next queued participant in the same decision (backfill). Organisers follow
-%   seats, queue, backfills and distinct participants served on a live dashboard.
-\begin{tikzpicture}[x=1cm, y=1cm]
-  % ---------------------------------------------------------------- participant states
-  \node[sr/client,  minimum width=2.35cm] (reg)  at (1.175,3.00) {\textbf{Register once}\\acceptable sessions,\\ranked};
-  \node[sr/queue,   minimum width=1.90cm] (que)  at (4.60,3.00)  {\textbf{QUEUED}\\one queue per\\workshop};
-  \node[sr/compute, minimum width=1.90cm] (off)  at (8.95,3.00)  {\textbf{OFFERED}\\seat held for\\holdSeconds};
-  \node[sr/data,    minimum width=1.80cm] (con)  at (12.00,3.00) {\textbf{CONFIRMED}\\one seat per\\participant};
-  \node[sr/service, minimum width=1.75cm, minimum height=0.60cm] (can) at (14.675,3.38) {\textbf{CANCELLED}};
-  \node[sr/service, minimum width=1.75cm, minimum height=0.60cm] (end) at (14.675,2.45) {\textbf{ENDED}};
+% Fig. 1: participant flow and seat state machine. Redrawn after Figure 1 of the Preliminary report
+% (same states, transitions, backfill path and invariant callout); the only update is that the hold
+% is the workshop's holdSeconds (default 900 s = 15 min, never past the cut-off, R4).
+% Source of truth: docs/ARCHITECTURE.md §9 (rules R1–R7). Needs \input{figures/tikz-setup}.
+% Size: about 15.6 cm x 3.7 cm.
+\begin{tikzpicture}[x=1cm, y=1cm, every node/.append style={}]
+  % ---------------------------------------------------------------- states
+  \tikzset{sr/state/.style={minimum height=8mm}}
+  \node[sr/base, sr/state, fill=white, minimum width=2.55cm] (sel) at (1.275,1.95) {Select acceptable\\sessions + preference};
+  \node[sr/client, sr/state, minimum width=2.10cm] (que) at (5.05,1.95)  {\textbf{Queued}};
+  \node[sr/client, sr/state, minimum width=2.30cm] (off) at (9.10,1.95)  {\textbf{Offered}\\hold $\leq$ 15\,min (default)};
+  \node[sr/base, sr/state, fill=srGrid!45, minimum width=2.30cm] (con) at (13.55,1.95) {\textbf{Confirmed}};
+  \node[sr/base, fill=srGrid!45, minimum width=10.20cm, minimum height=0.50cm] (can) at (9.30,3.00)
+    {\textbf{Cancelled} \textemdash{} leaves the whole workshop; re-registering re-enters the queue at the back};
 
-  \draw[sr/flow] (reg) -- node[sr/lbl, above=1pt] {register} (que);
-  \draw[sr/flow] (que) -- node[sr/lbl, above=1pt, align=center] {free seat in an\\acceptable session} (off);
+  % ---------------------------------------------------------------- transitions
+  \draw[sr/flow] (sel) -- (que);
+  \draw[sr/flow] (que) -- node[sr/lbl, above=1pt] {seat free} node[sr/lbl, below=1pt] {by preference} (off);
   \draw[sr/flow] (off) -- node[sr/lbl, above=1pt] {accept} (con);
-  \draw[sr/flow] (con.east |- can.west) -- node[sr/lbl, above=1pt] {cancel} (can.west);
-  % cancel from QUEUED or OFFERED (R6): one line from each, joined above the boxes
-  \draw[sr/flow] (que.north) -- ++(0,0.32) coordinate (cq) -| node[sr/lbl, pos=0.25, above=0pt] {cancel (from QUEUED or OFFERED)} (can.north);
-  \draw[draw=srInk, line width=0.55pt] (off.north) -- (off.north |- cq);
-  % decline or expiry: R5
-  \draw[sr/flow] (off.south west) .. controls +(-0.4,-0.65) and +(0.6,-0.65) ..
-    node[sr/lbl, below=1pt, align=center] {decline or expire:\\that session dropped (R5)} (que.south east);
-  \draw[sr/flow] (off.south east) .. controls +(0.6,-0.65) and +(-1.4,0) ..
-    node[sr/lbl, pos=0.5, below=1pt, align=center] {no acceptable session left} (end.west);
+  % cancel from any live state (R6)
+  \draw[sr/async] (que.north) -- (que.north |- can.south);
+  \draw[sr/async] (off.north) -- (off.north |- can.south);
+  \draw[sr/async] (con.north) -- (con.north |- can.south);
+  % decline or expire (R5)
+  \draw[sr/flow] ($(off.south)+(0.35,0)$) -- ++(0,-0.28) -| node[sr/lbl, pos=0.25, below=1pt]
+    {decline or expire: drop that session only, keep the rest;\\with none left the registration ends} ($(que.south)+(0.55,0)$);
+  % backfill: released seat returns to the queue (dashed blue)
+  \draw[sr/flow, draw=srBlue, dash pattern=on 2.4pt off 1.4pt] ($(con.south)$) -- ++(0,-1.20) coordinate (bfr) -|
+    ($(que.south)+(-0.80,0)$);
+  \node[sr/lbl, text=srBlue, anchor=south east] at ($(bfr)+(-0.12,0.02)$) {released seat returns to the queue (backfill)};
 
-  % ---------------------------------------------------------------- backfill and organiser
-  \node[sr/base, fill=srYellow!8, dash pattern=on 2pt off 1.2pt, minimum width=9.6cm, minimum height=0.5cm, anchor=west] (bf) at (3.65,0.95)
-    {\textbf{Backfill}: a seat released by an expiry, a decline, a cancellation or a capacity increase\\
-     is offered to the next queued participant who accepts that session, in the same decision};
-  \coordinate (bfu) at ($(off.south)+(0.30,0)$);
-  \draw[sr/async] (bfu |- bf.north) -- node[sr/lbl, right=1pt, pos=0.45] {offer} (bfu);
-  \node[sr/service, minimum width=2.35cm] (org) at (1.175,0.95) {\textbf{Organiser}\\2--5 sessions,\\capacity, hold time};
-  \draw[sr/flow] (org) -- node[sr/lbl, above=1pt] {capacity} (bf);
-  \node[sr/data, text width=15.2cm, minimum height=0.5cm, anchor=north west, inner ysep=1.5pt] (dash) at (0,0.05)
-    {\textbf{Live dashboard}: seats per session (capacity, confirmed, held, free) \enspace$\cdot$\enspace queue \enspace$\cdot$\enspace backfill log with latency
-     \enspace$\cdot$\enspace distinct participants served \enspace$\cdot$\enspace attendance \enspace$\cdot$\enspace CSV export \enspace$\cdot$\enspace verify invariants};
-  \draw[sr/flow] (org.south) -- (org.south |- dash.north);
+  % ---------------------------------------------------------------- invariant callout
+  \node[sr/base, fill=srYellow!10, dash pattern=on 2pt off 1.2pt, text width=15.3cm, minimum height=0.5cm,
+        anchor=north west, inner ysep=1.5pt, align=left] (inv) at (0,0.18)
+    {\textbf{Invariants enforced inside the allocation transaction:} one verified account holds at most \emph{one}
+     pending hold or confirmed seat per workshop \enspace$\bullet$\enspace confirmed + unreleased holds $\leq$ session
+     capacity \enspace$\bullet$\enspace no new allocation within 30\,min of session start};
 \end{tikzpicture}

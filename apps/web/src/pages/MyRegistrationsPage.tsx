@@ -4,6 +4,7 @@ import { RequireAuth } from '../auth/RequireAuth';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
 import { StatusCard } from '../components/StatusCard';
+import { pastStatusText } from '../commands/copy';
 import { formatDateTime } from '../util/time';
 
 function RegistrationsList() {
@@ -67,11 +68,8 @@ function RegistrationsList() {
                   {entry.workshop.title}
                 </Link>
                 <span>
-                  {entry.registration.status.toLowerCase()}
-                  {entry.registration.endReason !== undefined
-                    ? ` (${entry.registration.endReason.toLowerCase().replace(/_/g, ' ')})`
-                    : ''}{' '}
-                  · {formatDateTime(entry.registration.updatedAt)}
+                  {pastStatusText(entry.registration)} ·{' '}
+                  {formatDateTime(entry.registration.updatedAt)}
                 </span>
               </li>
             ))}

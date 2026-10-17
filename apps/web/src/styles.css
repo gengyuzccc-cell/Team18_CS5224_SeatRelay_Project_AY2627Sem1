@@ -446,6 +446,11 @@ th[scope='row'] {
   gap: 0.75rem;
   align-items: flex-end;
 }
+/* Rows whose fields carry help text under the input: align the labels and inputs at the top,
+   otherwise the help text pushes the neighbouring field's input down. */
+.field-row.field-row-top {
+  align-items: flex-start;
+}
 .field-label {
   font-weight: 600;
   font-size: 0.9rem;
@@ -566,6 +571,13 @@ textarea {
   gap: 0.35rem;
   line-height: 1.2;
   white-space: nowrap;
+}
+/* A button placed directly in a column flex container keeps its own width instead of being
+   stretched across the container (align-items defaults to stretch); centred panels keep theirs. */
+.stack > .btn,
+.stack-tight > .btn,
+.card:not(.panel-center) > .btn {
+  align-self: flex-start;
 }
 .btn:disabled {
   opacity: 0.55;

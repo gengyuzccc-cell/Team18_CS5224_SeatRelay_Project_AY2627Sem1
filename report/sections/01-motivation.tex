@@ -12,21 +12,27 @@ holds block seats that other people want, and the reconciliation is manual work 
 
 \paragraph{SeatRelay.}
 A participant registers \emph{once} per workshop with an ordered list of acceptable sessions and
-joins \emph{one} queue; an account holds at most one seat per workshop. A free seat is offered to
-the first queued person who accepts that session, and the offer is held for a time limit
-(\code{holdSeconds}, default 900\,s). A seat released by an expiry, a decline, a cancellation or a
-capacity increase is offered to the next person in the same decision (Fig.~\ref{fig:flow}). The
-organiser manages 2--5 sessions and sees, per session, capacity, confirmed and held seats, the queue,
-a backfill log with latencies, distinct participants served, attendance and a CSV export.
-Participants see their status and queue position and receive in-app and e-mail notifications.
+joins \emph{one} queue; an account holds at most one seat per workshop (Fig.~\ref{fig:flow}). A free
+seat is offered to the first queued person who accepts that session and held for \code{holdSeconds}
+(default 900\,s); a seat released by an expiry, a decline, a cancellation or a capacity increase goes
+to the next person in the same decision. Organisers manage 2--5 sessions and see per-session seats,
+the queue, a backfill log with latencies, distinct participants served, attendance and a CSV export;
+participants see their status and queue position and get in-app and e-mail notifications.
+
+\paragraph{Hypotheses.}
+As in the Preliminary report, these are stated as hypotheses, not findings. (H1)~unified
+registration reduces the participant effort needed to register and track a waitlist; (H2)~the
+cross-session constraint removes the capacity waste caused by one account holding seats in several
+sessions at once; (H3)~automatic backfill reduces the organiser's manual handling of cancellations
+and offers. We make no claim about attendance rates, satisfaction or paying customers
+(verdicts: \S\ref{sec:hypotheses}).
 
 \begin{figure}[tb]
   \centering\input{figures/fig-flow}
-  \caption{User flow. A participant registers once with the acceptable sessions in preference order
-  and joins one queue per workshop. The first queued participant who accepts a session with a free
-  seat receives an offer held for \code{holdSeconds}; accepting confirms the seat, declining or
-  letting it expire drops that session from the preference list (R5). Every released seat is offered
-  to the next queued participant in the same decision (backfill).}
+  \caption{Participant flow and seat state machine (Figure~1 of the Preliminary report, kept). Dashed
+  blue marks the backfill path that returns a released seat to the queue; the callout lists the
+  invariants the allocation transaction enforces. The hold is \code{holdSeconds} per workshop
+  (default 900\,s) and never extends past the cut-off (R4).}
   \label{fig:flow}
 \end{figure}
 
@@ -36,10 +42,9 @@ of the \MarketNusLibcalWorkshops{} events tagged Workshop were repeats of \Marke
 titles (a library tour \MarketNusLibcalRepeatTitleOneEvents{} times, an orientation workshop
 \MarketNusLibcalRepeatTitleTwoEvents{} times)~\cite{nus-libcal}; on the SMU Libraries calendar in the
 same window, \MarketSmuLibcalRepeatTitles{} titles ran twice among \MarketSmuLibcalEvents{}
-events~\cite{smu-libcal}. These are our counts of the public calendars, captured and counted by a
-script (\code{results/market/}). Most titles ran once, so calendars show that the situation exists but
-cannot estimate how often an organiser faces it. That share, $p$, has to come from organiser
-interviews.
+events~\cite{smu-libcal}. These are our script's counts of the public calendars
+(\code{results/market/}). Most titles ran once, so calendars show that the situation exists but not
+how often an organiser faces it; that share, $p$, must come from organiser interviews.
 
 \paragraph{Market size.}
 We size the market bottom-up (Table~\ref{tab:market}): the number of organisers who could run
@@ -58,13 +63,12 @@ serviceable market is $\text{SAM} = s \cdot \text{TAM}$, with $s$ the share of o
 a closed institutional system; the first-year obtainable market, NUS student organisations at
 adoption share $a$, is $\text{SOM} = \text{\MarketNusOrgs} \times p \times a \times
 \text{\sd\MarketPriceSgd} \leq \text{\sd\MarketSomNusMaxSgd}$ a year (\pending{$s$ from the organiser
-interviews; the team's assumed adoption share $a$}). We dropped a regional (ASEAN) bound because we found no citable count. Even
-at $p = 1$ the counted campus market is only about \sd\MarketTamCampusSgd{} a year (more with SUSS
+interviews; the team's assumed adoption share $a$}). Even at $p = 1$ the counted campus market is only about \sd\MarketTamCampusSgd{} a year (more with SUSS
 and the polytechnics, but of the same order), so the business case rests on the time each organiser
 saves (\S\ref{sec:business}), not on market size.
 
 \begin{table}[t]
-\centering\small
+\centering\footnotesize
 \caption{Bottom-up market sizing (counts accessed \MarketDate; own counts from the captures in
 \code{results/market/}; verification levels in \code{docs/market-sizing.md}).}\label{tab:market}
 \begin{tabularx}{\textwidth}{@{}P{5.6cm}P{1.75cm}P{3.1cm}L@{}}
@@ -84,31 +88,36 @@ Price $P$ per organiser & \sd\MarketPriceSgd/year & \S\ref{sec:business} & \sd10
 \end{table}
 
 \paragraph{Competitors.}
-Table~\ref{tab:competitors} summarises the vendors' documentation. Eventbrite relays a released
-ticket automatically with a claim window, but its inventory and waitlist are per date or ticket
-type; no tool we scanned ties several acceptable sessions to one queue position with one seat per
-person, which is what removes duplicate holds.
+Table~\ref{tab:competitors} compares the services of the Preliminary report's Table~1 (Luma,
+Eventbrite, Humanitix, per-session forms plus a spreadsheet) and two more, from vendor documentation.
+Eventbrite relays a released ticket automatically with a claim window. Humanitix e-mails an offer to
+the first waitlisted guest and then to the next every 30 minutes while tickets remain; the interval
+cannot be changed and \enquote{tickets are not reserved}~\cite{humanitix-waitlist}, so the
+Preliminary report's \enquote{host-configured offer time limit} is not supported by that page and is
+withdrawn. In every tool the waitlist belongs to one date, ticket type or slot; none ties several
+acceptable sessions to one queue position with one seat per person, which is what removes duplicate
+holds.
 
 \begin{table}[t]
 \centering\footnotesize
 \caption{Competitor scan from vendor documentation read on 2026-10-17 (not our tests). n/d: not
 documented in the pages we could read.}\label{tab:competitors}
-\begin{tabularx}{\textwidth}{@{}P{2.45cm}P{3.0cm}P{2.2cm}P{2.6cm}P{2.3cm}L@{}}
+\begin{tabularx}{\textwidth}{@{}P{2.45cm}P{3.0cm}P{2.2cm}P{2.75cm}P{2.15cm}L@{}}
 \toprule
 Tool & Several sessions & Waitlist & Timed relay & One seat across sessions & Organiser price\\
 \midrule
-Eventbrite~\cite{eventbrite-multidate,eventbrite-waitlist,eventbrite-waitlist-feature,eventbrite-pricing-sg}
- & recurring event; inventory per date & per ticket type or date & yes, with claim window & no (per date) & free events free; fees on paid tickets\\
 Luma~\cite{luma-multisession,luma-waitlist,luma-pricing}
  & workaround: cloned events & yes & no (host approves) & no & free; 5\,\% on paid events\\
+Eventbrite~\cite{eventbrite-multidate,eventbrite-waitlist,eventbrite-waitlist-feature,eventbrite-pricing-sg}
+ & recurring event; inventory per date & per ticket type or date & yes, with claim window & no (per date) & free events free; fees on paid tickets\\
+Humanitix~\cite{humanitix-recurring,humanitix-waitlist,humanitix-fees}
+ & recurring event; buyer picks one date & per ticket type or event & next guest every 30\,min; no hold & n/d & free events free; 5\,\% + \usd1.29/paid ticket\\
+Per-session forms + spreadsheet~\cite{google-forms-responses,ms-forms-settings}
+ & one form per session & no & no & organiser reconciles by hand & pricing not checked\\
 SignUpGenius~\cite{signupgenius-waitlist,signupgenius-pricing}
  & one slot per session & per slot (paid) & relay without a hold & n/d & \usd22.49/month (Gold, annual)\\
 Peatix~\cite{peatix-recurring,peatix-waitlist,peatix-pricing-sg}
  & up to 50 dates & no automated waitlist & no & no & free events free; 4.9\,\% + \sd0.99/ticket\\
-Calendly group~\cite{calendly-group,calendly-pricing}
- & slots with invitee limit & n/d & no & n/d & paid plans; \usd10/seat/month (annual)\\
-Google / MS Forms~\cite{google-forms-responses,ms-forms-settings}
- & one form per session & no & no & manual / per form & pricing not checked\\
 \textbf{SeatRelay} & 2--5 sessions, one queue & yes & yes, timed hold & yes (C2) & free tier; \sd10/month\\
 \bottomrule
 \end{tabularx}

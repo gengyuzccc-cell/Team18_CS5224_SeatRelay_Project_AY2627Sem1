@@ -4,72 +4,75 @@
 \section{Evaluation}\label{sec:evaluation}
 
 \subsection{Method}
-Commands went through the \code{dev} stage's public API as the browser sends them: client
-\code{commandId}, POST, 202, then polling with the back-off of \S\ref{sec:timers}. Crashes were
-injected with \code{\_fault} flags that only \code{dev} honours, stale TICKs were sent directly to
-the FIFO queue, and the notifier outage was simulated by setting its reserved concurrency to 0. On
-\code{dev} e-mail is disabled, so the notifier records each notification as SKIPPED without sending
-it. Each script asserts its checks, calls \code{verify} after its scenario steps and writes
-\code{results/<date>-<experiment>/}; each experiment ran 3 times in one invocation, and the latest
-complete run is quoted. Expiry experiments use $\text{holdSeconds} = 60$ so that a sample does not
-take 15 minutes. The acceptance smoke test passed before the series
-(\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The \SeriesExperiments{}
-quoted runs recorded \SeriesCommitCount{} commits (\code{\SeriesCommits}); \SeriesDirtyRuns{} runs had
-uncommitted changes in the working tree: \pending{confirm that the dev Lambda code was not redeployed between
-these commits and that only results/ and docs/ were uncommitted, or re-run from a clean checkout}.
-Run ids and commits of every number are listed in \code{report/generated/numbers.tex}.
+Commands went through the \code{dev} stage's public API as the browser sends them (client
+\code{commandId}, POST, 202, polling as in \S\ref{sec:timers}). Crashes were injected with
+\code{\_fault} flags that only \code{dev} honours, stale TICKs were sent directly to the FIFO queue,
+and the notifier outage was simulated by setting its reserved concurrency to 0; \code{dev} records
+notifications as SKIPPED without sending e-mail. Each script asserts its checks, calls \code{verify}
+after its scenario steps and writes \code{results/<date>-<experiment>/}; each experiment ran 3 times,
+and the latest complete run is quoted. Expiry experiments use $\text{holdSeconds} = 60$. The smoke
+test passed first (\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The
+\SeriesExperiments{} quoted runs recorded \SeriesCommitCount{} commits (\code{\SeriesCommits});
+\SeriesDirtyRuns{} runs had uncommitted changes in the working tree: \pending{confirm that the dev
+Lambda code was not redeployed between these commits and that only results/ and docs/ were
+uncommitted, or re-run from a clean checkout}. Run ids and commits of every number are listed in
+\code{report/generated/numbers.tex}.
 
 \subsection{System results against the acceptance targets}\label{sec:results}
-Table~\ref{tab:results} has one row per acceptance target of the Preliminary report (its Table~3, as
-restated in our execution plan; $^\dagger$ marks a threshold we added).
+Table~\ref{tab:results} reproduces the Preliminary report's Table~3, the acceptance contract,
+verbatim and adds the measured values; its last three rows cover the evaluations promised in its
+\S4--5. A verdict is the result of the script's checks, which derive from these targets
+(\code{docs/EXPERIMENTS.md}).
 
 \begin{table}[t]
 \centering\footnotesize
-\caption{Acceptance targets of the Preliminary report vs measured values (dev stage, 3 runs per
-experiment unless stated). Source directories: \code{results/2026-10-17-<experiment>[-<n>]/},
-\code{results/loadtest/}, \code{results/replay/}, \code{results/cost/}.}
+\caption{Acceptance targets of the Preliminary report (Table~3, verbatim) vs measured values (dev
+stage, 3 runs per experiment unless stated). Source directories:
+\code{results/2026-10-17-<experiment>[-<n>]/}, \code{results/loadtest/}, \code{results/replay/},
+\code{results/cost/}.}
 \label{tab:results}
-\begin{tabularx}{\textwidth}{@{}P{1.75cm}P{4.25cm}LP{1.2cm}@{}}
+\begin{tabularx}{\textwidth}{@{}P{4.45cm}P{2.55cm}LP{1.0cm}@{}}
 \toprule
-Experiment & Target & Measured & Verdict\\
+Aspect: scenario and method & Target & Measured & Verdict\\
 \midrule
-Core correctness & 0 over-capacity, 0 double holds, every step as expected, \code{verify} ok
- & \CorrectnessScenarios{} scenarios $\times$ \CorrectnessRuns{} runs: \CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks; over-capacity \CorrectnessOverCapacity, double holds \CorrectnessDoubleHolds; \CorrectnessVerifications{} verify calls, \CorrectnessVerifyFailures{} failed
+\textbf{Core correctness}: Register, confirm, decline, cancel, capacity change, event cancellation & Zero over-capacity; zero double holds
+ & \CorrectnessScenarios{} scenarios $\times$ \CorrectnessRuns{} runs: \CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks; over-capacity \CorrectnessOverCapacity, double holds \CorrectnessDoubleHolds; \CorrectnessVerifications{} \code{verify} calls, \CorrectnessVerifyFailures{} failed
  & \CorrectnessVerdict\\
-Preference, order & Never offer an unacceptable session; preference order respected (engine property test and 20 cases on dev)
- & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences, \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
+\textbf{Preference, order}: Fixed cases plus randomly generated arrival sequences & Never allocates an unacceptable session
+ & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences, \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
  & \PrefOrderVerdict{} (dev part)\\
-Concurrency & Invariants hold after each concurrent phase (50 accounts; one account's concurrent ACCEPT, DECLINE, CANCEL); version-conflict retries recorded (expected 0)
- & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; retries \ConcurrencyMetaRetries{} (inconclusive, see text); \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} requests got HTTP 503 (see text); same-account races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} as expected, each of the \ConcurrencySameAccountFailed{} others with an HTTP 503; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
+\textbf{Concurrency}: 50 requests contending for few seats; one account acting on several sessions & Final state satisfies every invariant
+ & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; version-conflict retries \ConcurrencyMetaRetries{} (inconclusive, see text); \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} requests got HTTP 503 (see text); same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} as expected, each of the \ConcurrencySameAccountFailed{} others with an HTTP 503; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
  & \ConcurrencyVerdict\\
-Repeat execution & Same \code{commandId} sent repeatedly and crash after commit: applied once, one record
- & \RepeatDupProbesPassed/\RepeatDupProbes{} probes with \RepeatDupCopies{} concurrent copies each; \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes, redelivery acknowledged without a second effect
+\textbf{Repeat execution}: Duplicate submits, message redelivery, response lost after submit & No double decrement or release
+ & \RepeatDupProbesPassed/\RepeatDupProbes{} probes sending one \code{commandId} \RepeatDupCopies{} times concurrently; \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes: redelivery acknowledged without a second effect, one record
  & \RepeatVerdict\\
-Expiry race & ACCEPT at \code{expiresAt}$-$200\,ms applied, at $+$200\,ms rejected OFFER\_EXPIRED whatever the timer did; a stale tick has no effect
- & Early applied \ExpiryRaceEarlyApplied/\ExpiryRaceEarlyAttempts; late rejected \ExpiryRaceLateRejected/\ExpiryRaceLateTrials{} (timer first in \ExpiryRaceOrderTimerFirst, see text); stale ticks without effect \ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks
+\textbf{Expiry race}: Confirmation concurrent with expiry; a delayed stale expiry task & Stale offers rejected; newer state intact
+ & ACCEPT 200\,ms before \code{expiresAt} applied \ExpiryRaceEarlyApplied/\ExpiryRaceEarlyAttempts, 200\,ms after rejected OFFER\_EXPIRED \ExpiryRaceLateRejected/\ExpiryRaceLateTrials{} (timer first in \ExpiryRaceOrderTimerFirst, see text); stale ticks without effect \ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks
  & \ExpiryRaceVerdict\\
-Failure recovery & Crashes before commit, at the timer-sending step and after commit recover, settle once and are traceable; notifier backlog delivered $<$\,300\,s after an outage
- & Before commit \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} and timer step \FailureTimerSendPassed/\FailureTimerSendCases{} settled on the redelivery (median \FailureBeforeCommitSettleMedianS{} and \FailureTimerSendSettleMedianS\,s); after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s), redelivery acknowledged; dead letters \FailureDeadLetters; backlog of \FailureNotifierOutageNotifications{} notifications processed $\leq$\,\FailureNotifierOutageMaxS\,s after restore, all SKIPPED (no e-mail on dev)
+\textbf{Failure recovery}: Worker killed before and after the transaction; notifier down; task retried & Recoverable and traceable; recovery within 5 min
+ & Crash before commit \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} and at the timer step \FailureTimerSendPassed/\FailureTimerSendCases{} settled on the redelivery (median \FailureBeforeCommitSettleMedianS{} and \FailureTimerSendSettleMedianS\,s); after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s), redelivery acknowledged; dead letters \FailureDeadLetters; notifier backlog of \FailureNotifierOutageNotifications{} processed $\leq$\,\FailureNotifierOutageMaxS\,s after restore, all SKIPPED (no e-mail on dev)
  & \FailureVerdict{} (e-mail not sent)\\
-Access control & Unauthorised requests refused (401/403/404, OFFER\_NOT\_YOURS); nothing changed
- & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups as expected}
+\textbf{Access control}: Confirming another account's offer; cross-organisation dashboard access & All unauthorised operations rejected
+ & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups refused as expected (401/403/404, OFFER\_NOT\_YOURS), nothing changed}
  & \IfPending{\AccessVerdict}{--}{\AccessVerdict}\\
-Performance & Read and 202 p95 $<$\,1\,s; settle p95 $<$\,5\,s (server and client); errors $<$\,1\,\%$^\dagger$
+\textbf{Performance}: 10\,/\,25\,/\,50 concurrent users; cross-workshop and single-workshop hot spot separately & Read/accept p95 $<$\,1\,s; settled p95 $<$\,5\,s
  & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels (\PerfDevMaxVUsMet{} VUs). 25 VUs, cross-workshop: settle \PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUTwentyFiveErrorPct\,\%. 50 VUs: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevCrossVUFiftyErrorPct\,\% (hot spot: settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%); Fig.~\ref{fig:perf}}
  & \IfPending{\PerfDevVerdict}{--}{\PerfDevVerdict}\\
-Backfill latency & Expiry-driven p95 $\leq$\,120\,s; every expiry relayed; \code{SweepLateExpiries} = 0
+\textbf{Backfill latency}: Time from hold expiry to reallocation under normal operation & p95 $\leq$\,120\,s; outliers reported
  & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, from the smoke and failure-recovery runs: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms}{p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed; cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries}
  & \IfPending{\BackfillVerdict}{--}{\BackfillVerdict}\\
-Cost & Unit cost and trend by scale in three layers; on-prem comparison
- & Model: \usd\CostUnitOneKCloudListUsd{} $\to$ \usd\CostUnitHundredKCloudListUsd{} per 1{,}000 registrations at list price (1k $\to$ 100k a month); crossovers in \S\ref{sec:business}. Measured usage: \CostMeasuredListUsd. On-prem reference: \IfPending{\PerfLocalCpuPeakPct}{not load-tested (\S\ref{sec:business})}{peak \PerfLocalCpuPeakPct\,\% CPU, \PerfLocalMemPeakMiB\,MiB under k6}
+\textbf{Cost}: Cloud bill, resource usage, and the local reference under the same load model & Unit cost and its trend with scale
+ & Model: \usd\CostUnitOneKCloudListUsd{} $\to$ \usd\CostUnitHundredKCloudListUsd{} per 1{,}000 registrations at list price (1k $\to$ 100k a month), three layers, crossovers in \S\ref{sec:business}. Measured usage: \CostMeasuredListUsd. On-prem reference: \IfPending{\PerfLocalCpuPeakPct}{not load-tested (\S\ref{sec:business})}{peak \PerfLocalCpuPeakPct\,\% CPU, \PerfLocalMemPeakMiB\,MiB under k6}
  & model\\
-Mechanism comparison & Duplicate holds, distinct participants served and refill time, UNIFIED vs PER\_SESSION, 95\,\% CIs
+\midrule
+\textbf{Mechanism comparison} (Prelim.\ \S4): one fixed sequence through per-session waitlists and the unified queue & No target: duplicate holds, distinct served, backfill time
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
-User study & Completion $\geq$\,90\,\%; paired task time $-$25\,\%; System Usability Scale (SUS) $\geq$\,75; 12 participants
+\textbf{User study} (Prelim.\ \S5): 12 non-team students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
  & \IfPending{\StudyParticipants}{\pending{user study not yet run}}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
  & --\\
-Real pilot & Two real sessions run with SeatRelay
+\textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
  & \IfPending{\PilotWorkshops}{\pending{pilot not yet run}}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
 \bottomrule
@@ -80,32 +83,30 @@ Real pilot & Two real sessions run with SeatRelay
 In their latest runs \SeriesFailed{} of the \SeriesExperiments{} experiments failed a check
 (\SeriesFailedNames), and we report them as failures. In the \emph{concurrency} run,
 \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} requests received HTTP 503 responses without
-an application error code, so they did not come from the API's own 503 path (failed enqueue).
-Because some of these commands were nevertheless applied, the harness's expected sequence numbers
-and confirmation counts no longer matched, although \code{verify} found no invariant violation after
-any phase. The version-conflict metric read \ConcurrencyMetaRetries, but CloudWatch returned no
-samples for any SeatRelay metric in that window, so that reading is inconclusive. The
-\emph{backfill} run aborted at its first request, creating a workshop, with the same kind of 503,
-so it produced no latency samples. The pilot stack was deployed to the same account around the time
-of the concurrency run (its deployment record falls inside the run window), a possible confounder
-for the re-run to exclude. \pending{root cause of the HTTP 503 responses, then clean
-concurrency and backfill re-runs}. An earlier \emph{expiry-race} run failed one check because a probe
-meant to reach the API 200\,ms before \code{expiresAt} arrived after it (client send-timing jitter)
-and was rejected as expired, which agrees with the server clock; the harness now calibrates the
-send time, and the quoted run (\code{\ExpiryRaceRunId}) is a re-run.
-In all \ExpiryRaceOrderTimerFirst{} late trials the timer's tick had expired the offer before the
-ACCEPT arrived, so the opposite order (ACCEPT before the timer) was not observed on \code{dev}; the
-engine's unit tests cover it. No stale tick changed a newer offer.
+an application error code, so not from the API's own 503 path (failed enqueue); some of these
+commands were nevertheless applied, so the harness's expected sequence numbers and confirmation
+counts no longer matched, although \code{verify} found no invariant violation after any phase. The
+version-conflict metric read \ConcurrencyMetaRetries, but CloudWatch returned no SeatRelay samples
+in that window, so that reading is inconclusive. The \emph{backfill} run aborted at its first request
+(creating a workshop) with the same kind of 503 and produced no latency samples. The pilot stack was
+deployed during the concurrency run window, a possible confounder for the re-run to exclude, and the
+account's Lambda concurrency quota is 10, shared by both stages' functions (an increase is pending).
+\pending{root cause of the HTTP 503 responses, then clean concurrency and backfill re-runs}. An
+earlier \emph{expiry-race} run failed one check: a probe meant to arrive 200\,ms before
+\code{expiresAt} arrived after it (client send-timing jitter) and was rejected as expired, as the
+server clock requires; the harness now calibrates the send time, and the quoted run
+(\code{\ExpiryRaceRunId}) is a re-run. In all \ExpiryRaceOrderTimerFirst{} late trials the timer had
+expired the offer before the ACCEPT arrived, so the opposite order was not observed on \code{dev};
+the engine's unit tests cover it. No stale tick changed a newer offer.
 
 \paragraph{Latency.}
 In the correctness run the server settled commands with p95 \CorrectnessSettleServerPNinetyFiveMs\,ms
-(\CorrectnessSettleClientN{} commands); the client observed p95 \CorrectnessSettleClientPNinetyFiveMs\,ms,
-because it adds the first 300\,ms poll interval, the request round trips and up to one further
-interval. In the concurrency run, where all commands of one workshop are serialised in one FIFO
-group by design, the server p95 rose to \ConcurrencySettleServerPNinetyFiveMs\,ms, above the 5\,s
-settle target (the same run had the 503 responses above). After a worker crash a command settles when
-the 120\,s visibility timeout returns the message (median \FailureBeforeCommitSettleMedianS\,s), which
-bounds the recovery of a stalled workshop.
+(\CorrectnessSettleClientN{} commands) and the client observed p95
+\CorrectnessSettleClientPNinetyFiveMs\,ms, which adds the first 300\,ms poll interval, the round
+trips and up to one further interval. In the concurrency run, where one workshop's commands are
+serialised by design, the server p95 rose to \ConcurrencySettleServerPNinetyFiveMs\,ms, above the
+5\,s target (with the 503 responses above). After a worker crash, the 120\,s visibility timeout bounds
+the recovery of a stalled workshop (Table~\ref{tab:results}).
 \ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf}),
 reads and 202 responses stayed fast, but settlement did not keep up above \PerfDevMaxVUsMet{} VUs, in
 the cross-workshop scenario as in the hot spot: the commands queue backed up (oldest message
@@ -147,8 +148,8 @@ The replay tool runs the production engine with a simulated clock and ideal time
 \ReplayRangeHoldSecondsMin--\ReplayRangeHoldSecondsMax\,s, random accept, decline, ignore, cancel and
 hoarding behaviour). Each seed's identical arrival stream is replayed twice: in UNIFIED mode (SeatRelay) and in
 PER\_SESSION mode, where a participant registers separately for every acceptable session, each
-session has its own queue, and duplicates are released by hand only with some probability. With one
-queue there were no duplicate holds, as C2 requires; with per-session queues there were
+session has its own queue, and duplicates are released by hand only with some probability. One queue had
+no duplicate holds, as C2 requires; per-session queues had
 \ReplayDupHoldEventsPerSessionMean{} duplicate-hold events per workshop
 [\ReplayDupHoldEventsPerSessionLo, \ReplayDupHoldEventsPerSessionHi] (Fig.~\ref{fig:replay}). One
 queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop against
@@ -158,9 +159,9 @@ queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop aga
 seat reached a new participant after \ReplayRefillMeanUnifiedMean{} instead of
 \ReplayRefillMeanPerSessionMean{} minutes on average (\ReplayRefillMeanN{} seeds with refills in both
 modes). Seats left empty at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
-[\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). The comparison is a simulation with an
-assumed behaviour model, not a field measurement; the plan's additional replay on the deployed system
-was not carried out.
+[\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). This compares two modes of our own engine
+under an assumed behaviour model: it is neither a field measurement nor a test of the tools in
+Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was not carried out.
 
 \begin{figure}[t]
   \centering\resultfig{replay-comparison}{5.2cm}{replay chart}
@@ -172,14 +173,15 @@ was not carried out.
 \end{figure}
 
 \subsection{User study}\label{sec:study}
-The protocol has twelve people outside the team (at least four with organising experience) use
-SeatRelay and a control that mirrors current practice, one Google Form per session plus a shared Sheet with
-duplicate-detection formulas, in counterbalanced order with equivalent data sets. Participants
-perform five tasks (choose acceptable sessions, join the waitlist, interpret their status, confirm,
-cancel) and organisers four (create a multi-session workshop, handle a cancellation, inspect the
-backfill, read the distinct count and export). We measure completion, paired task time (Wilcoxon
-signed-rank test~\cite{wilcoxon1945}), SUS~\cite{brooke1996sus}, erroneous actions, help requests and
-the organiser's manual steps.
+Twelve people outside the team (at least four with organising experience) use SeatRelay and a
+control that mirrors current practice, one Google Form per session plus a shared Sheet with
+duplicate-detection formulas, in counterbalanced order with equivalent data sets; a two-person pilot
+run precedes them and is excluded, and if recruitment falls short we report the real sample and its
+limits. Participants perform five tasks (choose acceptable sessions, join the waitlist, interpret
+their status, confirm, cancel) and organisers four (create a multi-session workshop, handle a
+cancellation, inspect the backfill, read the distinct count and export). We measure completion,
+paired task time (Wilcoxon signed-rank test~\cite{wilcoxon1945}), the original ten-item
+SUS~\cite{brooke1996sus}, erroneous actions, help requests and the organiser's manual steps.
 \IfPending{\StudyParticipants}{\pending{user-study results: completion, paired time with Wilcoxon $p$,
 SUS with 95\,\% CI, errors and help requests per condition, organiser manual steps}}{With
 \StudyParticipants{} participants, completion was \StudyCompletionSRPct\,\% with SeatRelay and
@@ -207,3 +209,26 @@ verified addresses receive mail and others rely on in-app notifications) is depl
 workshop in two sessions with registration open for at least five days; the organiser's CSV exports
 and the dashboard's backfill log will be the evidence. \pending{pilot workshop, dates and
 observations: natural cancellations, backfills, notifications, attendance, organiser feedback}.
+
+\subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
+\begin{itemize}
+\item \textbf{H2} (the cross-session constraint removes the capacity waste of duplicate holds):
+  \emph{supported in simulation, not yet in the field.} One queue had no duplicate holds against
+  \ReplayDupHoldEventsPerSessionMean{} duplicate-hold events per workshop with per-session queues and
+  served \ReplayDistinctUnifiedMean{} instead of \ReplayDistinctPerSessionMean{} distinct participants
+  (\S\ref{sec:mechanism}); seats left empty at cut-off did not differ, so the waste removed is
+  capacity tied up by duplicates, not seats empty at the end. No \code{verify} call on \code{dev}
+  found a C2 violation.
+\item \textbf{H3} (automatic backfill reduces the organiser's manual handling): \emph{partly
+  supported.} Every release is relayed in the same decision with no organiser step
+  (\TimerPathRelaysN{} timer-path relays took at most \TimerPathRelayMaxMs\,ms; a cancellation is
+  relayed inside its own transaction, \SmokeCancelBackfillMs\,ms), and in simulation per-session forms left
+  \ReplayDupConfirmedPerSessionMean{} duplicate confirmed seats per workshop to clean up, against
+  \ReplayDupConfirmedUnifiedMean{} with one queue. Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the
+  backfill-latency target (run aborted, \S\ref{sec:results}) and }{}\IfPending{\StudyParticipants}{the
+  organiser's manual steps in the user study (\S\ref{sec:study}).}{\pending{H3: compare the organiser's
+  manual steps in the user study}}
+\item \textbf{H1} (unified registration reduces participant effort): \IfPending{\StudyParticipants}{\emph{not
+  tested yet}; it rests on the user study's paired task times, completion, errors and help requests
+  (\S\ref{sec:study}).}{\pending{H1 verdict from the user-study results (\S\ref{sec:study})}}
+\end{itemize}

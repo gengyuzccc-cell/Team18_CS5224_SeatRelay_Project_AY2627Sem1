@@ -80,9 +80,15 @@ export function metricId(...parts: string[]): string {
   return /^[a-z]/.test(raw) ? raw : `m_${raw}`;
 }
 
+/**
+ * `extraDimensions` is added to the `service` dimension of every query. Stacks deployed from
+ * commit 25b7b9d on emit `service` + `stage` (services/aws/src/lib/metrics.ts); a query with
+ * `service` alone then addresses a different (empty) series, so pass `{ stage }` for them.
+ */
 export function seatRelayQueries(
   metrics: readonly string[] = Object.keys(SEATRELAY_METRIC_SERVICES),
   stats: readonly MetricStat[] = ['Sum', 'SampleCount'],
+  extraDimensions: Readonly<Record<string, string>> = {},
 ): MetricQuery[] {
   const queries: MetricQuery[] = [];
   for (const metricName of metrics) {
@@ -92,7 +98,7 @@ export function seatRelayQueries(
         id: metricId(metricName, stat),
         namespace: SEATRELAY_NAMESPACE,
         metricName,
-        dimensions: { service },
+        dimensions: { service, ...extraDimensions },
         stat,
         label: `${metricName} ${stat}`,
       });

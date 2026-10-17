@@ -71,6 +71,15 @@ only. Smoke test users (Cognito, e-mail suppressed): `smoke-{organiser,alice,bob
 The SPA is published to `https://d2ni5e1z674t04.cloudfront.net` with `env.js` pointing at the Cognito pool and
 the dev API (`STAGE=dev tools/scripts/bin/deploy-web.sh`).
 
+**2026-10-17 17:15 UTC: dev SPA republished** (same script, bundle `index-Dx1ogDmM.js` / `index-DW27saFr.css`) with
+the front-end fixes found by the first real-browser walkthrough: buttons no longer stretched across column
+containers, wizard step 1 top-aligned, *My registrations → Past* shows the human end-reason copy. The **pilot SPA
+was not republished** and still serves the previous bundle. Walkthrough accounts (Cognito, e-mail suppressed,
+display names "… (staged)"): `walkthrough-{organiser,alice,bob,carol}@example.com`, created by
+`tools/e2e/bin/ensure-users.sh` (recreated once on 2026-10-17, so the published screenshots start from empty
+histories). The walkthrough leaves its staged organisations and workshops ("Staged walkthrough …", "Cloud Computing
+Workshop (staged demo)") open on dev. Evidence: `results/2026-10-17-web-walkthrough-dev/`.
+
 ## seatrelay-web-pilot (deployed 2026-10-17, CREATE_COMPLETE)
 
 | Output | Value |
@@ -101,3 +110,13 @@ First attempt failed CloudFormation early validation: SAM names a `ScheduleV2` e
 `Name` is omitted, so the dev and pilot sweep schedules collided (`SweepFunctionEvery5Minutes`). Fixed by
 `Name: !Sub seatrelay-${Stage}-sweep`; dev still carries the old name until its next deployment (after the
 Table 3 run, so that the measurement is not disturbed).
+
+## Lambda concurrency quota (account-level, ap-southeast-1)
+
+`aws lambda get-account-settings` on 2026-10-17: `ConcurrentExecutions: 10`,
+`UnreservedConcurrentExecutions: 10`, `FunctionCount: 10` (the five functions of `dev` and the five of
+`pilot` share these 10 slots). An increase to 1,000 (quota `L-B99A9384`, "Concurrent executions") was
+requested through Service Quotas; status `CASE_OPENED`, support case `179224956500721`. Until it is
+granted, never generate concurrent load against AWS; the concurrency, backfill and k6 dev re-runs wait
+for it (`docs/SUBMISSION-CHECKLIST.md`). Whether the quota caused the HTTP 503 responses of the
+concurrency and backfill runs is not yet established (Final §4.2).

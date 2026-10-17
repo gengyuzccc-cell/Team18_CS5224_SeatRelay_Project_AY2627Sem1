@@ -60,6 +60,19 @@ export const COMMAND_TYPE_TEXT: Record<UserCommandType, string> = {
   OPEN_REGISTRATION: 'Open registration',
 };
 
+/**
+ * Status of a past registration in the "Past" list: the same human copy as the status card
+ * ("ended: none of your acceptable sessions could still be joined"), never the raw enum.
+ */
+export function pastStatusText(
+  registration: Pick<RegistrationSummary, 'status' | 'endReason'>,
+): string {
+  const status = registration.status.toLowerCase();
+  return registration.endReason === undefined
+    ? status
+    : `${status}: ${END_REASON_TEXT[registration.endReason]}`;
+}
+
 export function rejectReasonText(reason: RejectReason | undefined): string {
   return reason === undefined ? 'The request was rejected.' : REJECT_REASON_TEXT[reason];
 }
