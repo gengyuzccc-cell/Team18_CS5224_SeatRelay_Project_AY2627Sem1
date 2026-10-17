@@ -7,7 +7,11 @@ interface Props {
   onExpire?: () => void;
 }
 
-/** Live `mm:ss` until `expiresAt`, ticking every second; shows "expired" at zero. */
+/**
+ * Live `mm:ss` until `expiresAt` on the server's clock (`msUntil` → `serverNow()`), ticking
+ * every second; shows "expired" at zero. It never disables anything: the server decides whether
+ * an ACCEPT still counts (tick-first).
+ */
 export function Countdown({ expiresAt, onExpire }: Props) {
   const [remaining, setRemaining] = useState(() => msUntil(expiresAt));
   const fired = useRef(false);

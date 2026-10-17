@@ -16,7 +16,10 @@ export interface ParseSchema<T> {
 export class ApiError extends Error {
   /** HTTP status; 0 when the request never reached the server. */
   readonly status: number;
-  /** Contracts `ErrorCode`, or `NETWORK` / `INVALID_RESPONSE` / `HTTP_<status>`. */
+  /**
+   * Contracts `ErrorCode`, or `NETWORK` / `INVALID_RESPONSE` / `TOO_MANY_REQUESTS` /
+   * `HTTP_<status>`.
+   */
   readonly code: string;
 
   constructor(status: number, code: string, message: string) {
@@ -51,8 +54,11 @@ export interface ApiClient {
 export interface ApiClientOptions {
   baseUrl: string;
   getToken: () => Promise<string | undefined>;
-  /** Called on a 401 so the UI can prompt for a new sign-in. */
-  onUnauthorized?: () => void;
+  /**
+   * Called on a 401 so the session can be renewed or dropped. `sentToken` is the bearer the
+   * rejected request carried (`undefined` when there was none to send).
+   */
+  onUnauthorized?: (sentToken: string | undefined) => void;
   fetchImpl?: typeof fetch;
 }
 
@@ -68,6 +74,33 @@ async function readBody(response: Response): Promise<unknown> {
   }
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+/**
+ * A non-2xx body outside the `{ code, message }` contract. API Gateway answers its own
+ * rejections, before the Lambda runs, with `{ "message": "Unauthorized" }` (JWT authorizer:
+ * expired or invalid token) or `{ "message": "Too Many Requests" }` (stage throttling), so the
+ * status decides the code and the gateway's `message` is kept.
+ */
+export function errorFromUncontractedBody(status: number, payload: unknown): ApiError {
+  const text =
+    typeof payload === 'string' && payload.trim().length > 0
+      ? payload.trim()
+      : isRecord(payload) && typeof payload.message === 'string' && payload.message.length > 0
+        ? payload.message
+        : `Request failed with status ${status}`;
+  const message = text.slice(0, 200);
+  if (status === 401) {
+    return new ApiError(status, 'UNAUTHORIZED', message);
+  }
+  if (status === 429) {
+    return new ApiError(status, 'TOO_MANY_REQUESTS', message);
+  }
+  return new ApiError(status, `HTTP_${status}`, message);
+}
+
 export function createApiClient(options: ApiClientOptions): ApiClient {
   const fetchImpl = options.fetchImpl ?? ((input, init) => fetch(input, init));
   const baseUrl = options.baseUrl.replace(/\/+$/, '');
@@ -81,12 +114,13 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
     signal?: AbortSignal,
   ): Promise<Response> {
     const headers: Record<string, string> = { accept };
+    let token: string | undefined;
     if (auth !== 'none') {
-      const token = await options.getToken();
+      token = await options.getToken();
       if (token !== undefined) {
         headers.authorization = `Bearer ${token}`;
       } else if (auth === 'required') {
-        options.onUnauthorized?.();
+        options.onUnauthorized?.(undefined);
         throw new ApiError(401, 'UNAUTHORIZED', 'Please sign in to continue');
       }
     }
@@ -116,18 +150,12 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
       const payload = await readBody(response);
       const parsed = ErrorBodySchema.safeParse(payload);
       if (response.status === 401) {
-        options.onUnauthorized?.();
+        options.onUnauthorized?.(token);
       }
       if (parsed.success) {
         throw new ApiError(response.status, parsed.data.code, parsed.data.message);
       }
-      throw new ApiError(
-        response.status,
-        `HTTP_${response.status}`,
-        typeof payload === 'string' && payload.length > 0
-          ? payload.slice(0, 200)
-          : `Request failed with status ${response.status}`,
-      );
+      throw errorFromUncontractedBody(response.status, payload);
     }
     return response;
   }

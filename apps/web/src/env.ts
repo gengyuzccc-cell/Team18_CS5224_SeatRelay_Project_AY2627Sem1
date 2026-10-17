@@ -61,7 +61,8 @@ function stripTrailingSlash(value: string): string {
 /**
  * Validates `window.__SEATRELAY_ENV__` (or any raw object) and fills defaults. Missing fields
  * fall back to the local defaults; a wrong type or unknown provider is a configuration error
- * that the app renders instead of silently talking to the wrong backend.
+ * that the app renders instead of silently talking to the wrong backend. (`readEnv` additionally
+ * refuses a missing object on a deployed origin, see `resolveEnv`.)
  */
 export function parseEnv(raw: unknown): SeatRelayEnv {
   if (raw === undefined || raw === null) {
@@ -95,6 +96,34 @@ export function parseEnv(raw: unknown): SeatRelayEnv {
   };
 }
 
+/** `localhost`, `127.0.0.1`, `[::1]` and `*.localhost`: where the local defaults are right. */
+export function isLocalHostname(hostname: string): boolean {
+  return (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]' ||
+    hostname === '::1'
+  );
+}
+
+/**
+ * `parseEnv` plus one rule: an absent `window.__SEATRELAY_ENV__` only falls back to the local
+ * defaults in `vite dev` or on a local origin. On a deployed origin it means `/env.js` did not
+ * load (e.g. CloudFront answered a missing object with index.html, which `nosniff` refuses to
+ * run), and silently talking to localhost would send sign-in to http://localhost:8080.
+ */
+export function resolveEnv(raw: unknown, options: { allowLocalDefaults: boolean }): SeatRelayEnv {
+  if ((raw === undefined || raw === null) && !options.allowLocalDefaults) {
+    throw new EnvError(
+      'env.js did not load: window.__SEATRELAY_ENV__ is undefined on this origin. Publish /env.js for this deployment.',
+    );
+  }
+  return parseEnv(raw);
+}
+
 export function readEnv(): SeatRelayEnv {
-  return parseEnv(window.__SEATRELAY_ENV__);
+  return resolveEnv(window.__SEATRELAY_ENV__, {
+    allowLocalDefaults: import.meta.env.DEV || isLocalHostname(window.location.hostname),
+  });
 }

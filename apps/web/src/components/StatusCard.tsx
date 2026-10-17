@@ -5,8 +5,13 @@ import type {
   WorkshopPublic,
 } from '@seatrelay/contracts';
 import { useState } from 'react';
-import { useCommand } from '../commands/useCommand';
-import { END_REASON_TEXT, sessionTitle } from '../commands/copy';
+import { useCommand, type CommandPhase } from '../commands/useCommand';
+import {
+  COMMAND_TYPE_TEXT,
+  END_REASON_TEXT,
+  rejectReasonText,
+  sessionTitle,
+} from '../commands/copy';
 import { describeError } from '../util/errors';
 import { formatDateTime } from '../util/time';
 import { AsyncButton, type AsyncState } from './AsyncButton';
@@ -22,20 +27,22 @@ interface Props {
   compact?: boolean;
 }
 
-function stateOf(phase: string, active: boolean): AsyncState {
+/** A definitive (4xx) failure is not retried: the button offers the action again (fresh id). */
+function stateOf(state: CommandPhase, active: boolean): AsyncState {
   if (!active) {
     return 'idle';
   }
-  if (phase === 'submitting' || phase === 'processing') {
-    return 'pending';
+  switch (state.phase) {
+    case 'submitting':
+    case 'processing':
+      return 'pending';
+    case 'applied':
+      return 'done';
+    case 'error':
+      return state.retryable ? 'error' : 'idle';
+    default:
+      return 'idle';
   }
-  if (phase === 'applied') {
-    return 'done';
-  }
-  if (phase === 'error') {
-    return 'error';
-  }
-  return 'idle';
 }
 
 /**
@@ -75,7 +82,8 @@ export function StatusCard({
     }
   };
 
-  const phase = command.state.phase;
+  const retryActive = (kind: 'accept' | 'decline' | 'cancel') =>
+    active === kind && command.canRetry;
   const processing = command.state.phase === 'processing';
   const slow = command.state.phase === 'processing' && command.state.slow;
 
@@ -161,28 +169,22 @@ export function StatusCard({
             {registration.status === 'OFFERED' && offer !== undefined && (
               <>
                 <AsyncButton
-                  state={stateOf(phase, active === 'accept')}
+                  state={stateOf(command.state, active === 'accept')}
                   idle="Accept seat"
                   pending="Accepting…"
                   done="Accepted"
                   error="Retry accept"
-                  onClick={() =>
-                    active === 'accept' && phase === 'error' ? void command.retry() : act('accept')
-                  }
+                  onClick={() => (retryActive('accept') ? void command.retry() : act('accept'))}
                   disabled={command.busy}
                 />
                 <AsyncButton
                   variant="secondary"
-                  state={stateOf(phase, active === 'decline')}
+                  state={stateOf(command.state, active === 'decline')}
                   idle="Decline"
                   pending="Declining…"
                   done="Declined"
                   error="Retry decline"
-                  onClick={() =>
-                    active === 'decline' && phase === 'error'
-                      ? void command.retry()
-                      : act('decline')
-                  }
+                  onClick={() => (retryActive('decline') ? void command.retry() : act('decline'))}
                   disabled={command.busy}
                 />
               </>
@@ -190,7 +192,7 @@ export function StatusCard({
             {!confirmCancel ? (
               <AsyncButton
                 variant="danger"
-                state={stateOf(phase, active === 'cancel')}
+                state={stateOf(command.state, active === 'cancel')}
                 idle={
                   registration.status === 'CONFIRMED' ? 'Cancel my seat' : 'Cancel registration'
                 }
@@ -198,9 +200,7 @@ export function StatusCard({
                 done="Cancelled"
                 error="Retry cancel"
                 onClick={() =>
-                  active === 'cancel' && phase === 'error'
-                    ? void command.retry()
-                    : setConfirmCancel(true)
+                  retryActive('cancel') ? void command.retry() : setConfirmCancel(true)
                 }
                 disabled={command.busy}
               />
@@ -240,7 +240,8 @@ export function StatusCard({
       )}
       {command.state.phase === 'rejected' && (
         <p className="error-text small" role="alert">
-          Rejected — see the notification above. The view below reflects the current state.
+          {COMMAND_TYPE_TEXT[command.state.view.type]} rejected:{' '}
+          {rejectReasonText(command.state.view.reason)} The card shows the current state.
         </p>
       )}
     </section>

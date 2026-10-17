@@ -3,7 +3,8 @@ import { useEffect, useMemo, useReducer, useState, type FormEvent } from 'react'
 import { useParams } from 'react-router-dom';
 import { useWorkshop } from '../api/queries';
 import { useSession } from '../auth/useSession';
-import { useCommand } from '../commands/useCommand';
+import { rejectReasonText } from '../commands/copy';
+import { useCommand, type CommandPhase } from '../commands/useCommand';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
 import { CopyLink } from '../components/CopyLink';
 import { ErrorBanner } from '../components/ErrorBanner';
@@ -12,6 +13,7 @@ import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
 import { StatusCard } from '../components/StatusCard';
 import { preferenceRank, preferenceReducer } from '../preferences/reducer';
 import { describeError, isNotFound } from '../util/errors';
+import { serverNow } from '../util/serverClock';
 import { formatDateTime, formatSeconds } from '../util/time';
 
 function SessionsTable({ sessions }: { sessions: readonly SessionView[] }) {
@@ -57,17 +59,18 @@ function SessionsTable({ sessions }: { sessions: readonly SessionView[] }) {
   );
 }
 
-function stateOf(phase: string): AsyncState {
-  if (phase === 'submitting' || phase === 'processing') {
-    return 'pending';
+function stateOf(state: CommandPhase): AsyncState {
+  switch (state.phase) {
+    case 'submitting':
+    case 'processing':
+      return 'pending';
+    case 'applied':
+      return 'done';
+    case 'error':
+      return state.retryable ? 'error' : 'idle';
+    default:
+      return 'idle';
   }
-  if (phase === 'applied') {
-    return 'done';
-  }
-  if (phase === 'error') {
-    return 'error';
-  }
-  return 'idle';
 }
 
 /** Checkboxes of acceptable sessions + up/down to order preference (UNIFIED), radio (PER_SESSION). */
@@ -80,10 +83,11 @@ function RegistrationForm({
 }) {
   const { workshop, sessions } = view;
   const perSession = workshop.mode === 'PER_SESSION';
+  // Cut-offs are judged on the server's clock (plan §1.4), not the browser's.
   const joinable = useMemo(
     () =>
       sessions.filter(
-        (session) => !isCancelledLike(session.status) && Date.parse(session.cutoffAt) > Date.now(),
+        (session) => !isCancelledLike(session.status) && Date.parse(session.cutoffAt) > serverNow(),
       ),
     [sessions],
   );
@@ -107,15 +111,19 @@ function RegistrationForm({
       return;
     }
     setValidation(undefined);
-    if (command.state.phase === 'error') {
+    if (command.canRetry) {
+      // The inputs are locked meanwhile: what is re-sent is exactly what is shown.
       void command.retry();
       return;
     }
     void command.run({ type: 'REGISTER', acceptable: [...selected] });
   };
 
-  const phase = command.state.phase;
-  const busy = command.busy;
+  const { state } = command;
+  const phase = state.phase;
+  // A retryable failure keeps the previous request (same commandId) until it is retried or
+  // discarded, so the choices stay locked instead of silently not being sent.
+  const locked = command.busy || command.canRetry;
 
   return (
     <form className="card" onSubmit={submit} aria-labelledby="register-heading">
@@ -132,7 +140,7 @@ function RegistrationForm({
           No session can be joined any more (all cancelled or past their cut-off).
         </p>
       ) : (
-        <fieldset className="fieldset" disabled={busy}>
+        <fieldset className="fieldset" disabled={locked}>
           <legend>{perSession ? 'Session' : 'Acceptable sessions, in preference order'}</legend>
           <ol className="pref-list">
             {(perSession
@@ -209,7 +217,7 @@ function RegistrationForm({
       <div className="actions">
         <AsyncButton
           type="submit"
-          state={stateOf(phase)}
+          state={stateOf(state)}
           idle={
             perSession
               ? 'Join the queue'
@@ -217,19 +225,36 @@ function RegistrationForm({
           }
           pending={phase === 'submitting' ? 'Sending…' : 'Processing…'}
           done="Registered"
-          error="Retry"
+          error={
+            state.phase === 'error' && state.stage === 'poll'
+              ? 'Check the outcome'
+              : 'Retry previous request'
+          }
           disabled={joinable.length === 0}
         />
-        {phase === 'processing' && (
+        {command.canRetry && state.phase === 'error' && state.stage === 'submit' && (
+          <button type="button" className="btn btn-secondary" onClick={() => command.reset()}>
+            Discard and edit
+          </button>
+        )}
+        {state.phase === 'processing' && (
           <span className="muted small" role="status">
-            {command.state.slow
+            {state.slow
               ? 'Still processing — checking every 5 s.'
               : 'Request received, waiting for the outcome…'}
           </span>
         )}
-        {phase === 'error' && (
+        {state.phase === 'error' && (
           <span className="error-text small" role="alert">
-            {describeError(command.state.error)}
+            {describeError(state.error)}
+            {state.retryable && state.stage === 'submit'
+              ? ' Retrying sends the same choices again; discard to change them.'
+              : ''}
+          </span>
+        )}
+        {state.phase === 'rejected' && (
+          <span className="error-text small" role="alert">
+            Registration rejected: {rejectReasonText(state.view.reason)}
           </span>
         )}
       </div>

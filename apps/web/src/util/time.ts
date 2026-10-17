@@ -1,3 +1,5 @@
+import { serverNow } from './serverClock';
+
 /** All timestamps are ISO-8601 UTC (CONVENTIONS §3); rendered in the browser's locale. */
 
 const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
@@ -22,7 +24,8 @@ export function formatTime(iso: string | undefined): string {
   return Number.isNaN(ms) ? iso : timeFormat.format(ms);
 }
 
-export function msUntil(iso: string, now: number = Date.now()): number {
+/** Milliseconds until `iso` on the server's clock (`serverClock.ts`, plan §1.4). */
+export function msUntil(iso: string, now: number = serverNow()): number {
   return Date.parse(iso) - now;
 }
 

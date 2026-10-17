@@ -1,217 +1,87 @@
-import type { CommandBody, CommandResultView, SessionView } from '@seatrelay/contracts';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApi } from '../api/ApiProvider';
-import { ApiError } from '../api/client';
 import { useInvalidateWorkshop } from '../api/queries';
+import { applyCommandResult } from '../api/settledRegistrations';
 import { useToasts } from '../components/Toasts';
-import { describeError } from '../util/errors';
-import { describeSettled } from './copy';
-import { isTerminal, PollAbortedError, pollCommand } from './pollCommand';
+import {
+  CommandRunner,
+  type CommandBodyInput,
+  type CommandPhase,
+  type CommandRunnerDeps,
+  type CommandRunnerOptions,
+} from './commandRunner';
 
-/**
- * The 202 command flow (plan §1.3) as a state machine:
- *   idle → submitting (POST) → processing (polling) → applied | rejected
- *                     ↘ error (POST failed / polling gave up) → retry() reuses the commandId
- * The client-generated `commandId` (crypto.randomUUID) is kept until the command settles, so
- * a retry after a network failure or 503 is idempotent (C3).
- */
-
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
-/** A command body without `commandId` (the hook generates and keeps it). */
-export type CommandBodyInput = DistributiveOmit<CommandBody, 'commandId'>;
-
-export type CommandPhase =
-  | { phase: 'idle' }
-  | { phase: 'submitting'; commandId: string }
-  | { phase: 'processing'; commandId: string; slow: boolean; attempts: number }
-  | { phase: 'applied'; commandId: string; view: CommandResultView }
-  | { phase: 'rejected'; commandId: string; view: CommandResultView }
-  | { phase: 'error'; commandId: string; error: unknown; stage: 'submit' | 'poll' };
-
-export interface UseCommandOptions {
-  /** Session titles for the settlement toast. */
-  sessions?: readonly SessionView[];
-  onSettled?: (view: CommandResultView) => void;
-  /** Suppress the toasts (the caller renders its own copy). */
-  silent?: boolean;
-}
+export type { CommandBodyInput, CommandPhase } from './commandRunner';
+export type UseCommandOptions = CommandRunnerOptions;
 
 export interface CommandHandle {
   state: CommandPhase;
   /** Submitting or polling. */
   busy: boolean;
+  /**
+   * The last request failed in a way that `retry()` can repeat (same commandId). While true the
+   * caller keeps its inputs locked: what is re-sent is the previous body, not the form's content.
+   */
+  canRetry: boolean;
   run(body: CommandBodyInput): Promise<void>;
   /** Re-POST (same commandId) after a submit error, or resume polling after a poll error. */
   retry(): Promise<void>;
+  /** Drop the failed request; the next `run()` gets a fresh commandId. */
   reset(): void;
 }
 
-function newCommandId(): string {
-  return crypto.randomUUID();
-}
-
+/**
+ * React binding of `CommandRunner` (plan §1.3). Settled poll results are written into the query
+ * cache before anything is refetched (`applyCommandResult`). Unmounting does not cancel the
+ * command: polling continues for a while and the toasts, which live above the router, report the
+ * outcome.
+ */
 export function useCommand(wsId: string, options: UseCommandOptions = {}): CommandHandle {
   const api = useApi();
   const toasts = useToasts();
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateWorkshop();
-  const [state, setState] = useState<CommandPhase>({ phase: 'idle' });
-  const abortRef = useRef<AbortController | undefined>(undefined);
-  const lastRef = useRef<{ commandId: string; body: CommandBodyInput } | undefined>(undefined);
+
+  const deps: CommandRunnerDeps = {
+    postCommand: api.postCommand,
+    getCommand: api.getCommand,
+    toasts,
+    applyResult: (view) => applyCommandResult(queryClient, view),
+    invalidate,
+  };
+  const depsRef = useRef(deps);
+  depsRef.current = deps;
   const optionsRef = useRef(options);
   optionsRef.current = options;
+  const wsIdRef = useRef(wsId);
+  wsIdRef.current = wsId;
+  const listener = useRef<(state: CommandPhase) => void>(() => undefined);
 
-  useEffect(() => () => abortRef.current?.abort(), []);
-
-  const settle = useCallback(
-    async (commandId: string, view: CommandResultView, toastId: string | undefined) => {
-      const { sessions = [], onSettled, silent } = optionsRef.current;
-      const copy = describeSettled(view, sessions);
-      if (!silent) {
-        toasts.push({ id: toastId, kind: copy.kind, title: copy.title, message: copy.message });
-      }
-      setState(
-        view.status === 'APPLIED'
-          ? { phase: 'applied', commandId, view }
-          : { phase: 'rejected', commandId, view },
-      );
-      lastRef.current = undefined;
-      onSettled?.(view);
-      await invalidate(wsId);
-    },
-    [invalidate, toasts, wsId],
+  const [runner] = useState(
+    () =>
+      new CommandRunner(
+        () => depsRef.current,
+        () => optionsRef.current,
+        (state) => listener.current(state),
+      ),
   );
+  const [state, setState] = useState<CommandPhase>(() => runner.state);
+  listener.current = setState;
 
-  const poll = useCallback(
-    async (commandId: string, initialDelayMs: number, toastId: string | undefined) => {
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setState({ phase: 'processing', commandId, slow: false, attempts: 0 });
-      try {
-        const view = await pollCommand((id, signal) => api.getCommand(id, signal), commandId, {
-          signal: controller.signal,
-          initialDelayMs,
-          onSlow: () => {
-            setState((current) =>
-              current.phase === 'processing' && current.commandId === commandId
-                ? { ...current, slow: true }
-                : current,
-            );
-            if (!optionsRef.current.silent) {
-              toasts.push({
-                id: toastId,
-                kind: 'info',
-                title: 'Still processing…',
-                message: 'The server has your request; this is taking longer than usual.',
-                sticky: true,
-              });
-            }
-          },
-          onAttempt: (attempts) => {
-            setState((current) =>
-              current.phase === 'processing' && current.commandId === commandId
-                ? { ...current, attempts }
-                : current,
-            );
-          },
-        });
-        await settle(commandId, view, toastId);
-      } catch (error) {
-        if (error instanceof PollAbortedError || controller.signal.aborted) {
-          return;
-        }
-        setState({ phase: 'error', commandId, error, stage: 'poll' });
-        if (!optionsRef.current.silent) {
-          toasts.push({
-            id: toastId,
-            kind: 'error',
-            title: 'Outcome unknown',
-            message: `${describeError(error)} Your request was received; retry to check its outcome.`,
-            sticky: true,
-          });
-        }
-      }
-    },
-    [api, settle, toasts],
-  );
+  useEffect(() => {
+    runner.attach();
+    return () => runner.detach();
+  }, [runner]);
 
-  const submit = useCallback(
-    async (commandId: string, body: CommandBodyInput) => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setState({ phase: 'submitting', commandId });
-      const toastId = optionsRef.current.silent
-        ? undefined
-        : toasts.push({ kind: 'info', title: 'Sending…', sticky: true });
-      try {
-        const accepted = await api.postCommand(
-          wsId,
-          { ...body, commandId } as CommandBody,
-          controller.signal,
-        );
-        if (isTerminal(accepted)) {
-          // Idempotent re-POST of a command that already settled: the 202 carries the outcome.
-          await settle(commandId, accepted, toastId);
-          return;
-        }
-        if (!optionsRef.current.silent) {
-          toasts.push({
-            id: toastId,
-            kind: 'info',
-            title: 'Request received',
-            message: 'Processing… the result will appear here.',
-            sticky: true,
-          });
-        }
-        await poll(commandId, accepted.pollAfterMs, toastId);
-      } catch (error) {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setState({ phase: 'error', commandId, error, stage: 'submit' });
-        if (!optionsRef.current.silent) {
-          const retryable =
-            !(error instanceof ApiError) || error.status === 0 || error.status >= 500;
-          toasts.push({
-            id: toastId,
-            kind: 'error',
-            title: 'Request not sent',
-            message: `${describeError(error)}${retryable ? ' You can retry; the same request id is reused.' : ''}`,
-            sticky: retryable,
-          });
-        }
-      }
-    },
-    [api, poll, settle, toasts, wsId],
-  );
-
-  const run = useCallback(
-    async (body: CommandBodyInput) => {
-      const commandId = newCommandId();
-      lastRef.current = { commandId, body };
-      await submit(commandId, body);
-    },
-    [submit],
-  );
-
-  const retry = useCallback(async () => {
-    const last = lastRef.current;
-    if (last === undefined) {
-      return;
-    }
-    if (state.phase === 'error' && state.stage === 'poll') {
-      await poll(last.commandId, 0, undefined);
-      return;
-    }
-    await submit(last.commandId, last.body);
-  }, [poll, state, submit]);
-
-  const reset = useCallback(() => {
-    abortRef.current?.abort();
-    lastRef.current = undefined;
-    setState({ phase: 'idle' });
-  }, []);
+  const run = useCallback((body: CommandBodyInput) => runner.run(wsIdRef.current, body), [runner]);
+  const retry = useCallback(() => runner.retry(), [runner]);
+  const reset = useCallback(() => runner.reset(), [runner]);
 
   const busy = state.phase === 'submitting' || state.phase === 'processing';
-  return useMemo(() => ({ state, busy, run, retry, reset }), [busy, reset, retry, run, state]);
+  const canRetry = state.phase === 'error' && state.retryable;
+  return useMemo(
+    () => ({ state, busy, canRetry, run, retry, reset }),
+    [busy, canRetry, reset, retry, run, state],
+  );
 }

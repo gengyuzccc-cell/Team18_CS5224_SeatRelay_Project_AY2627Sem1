@@ -7,6 +7,7 @@ const CODE_TEXT: Record<string, string> = {
   NOT_FOUND: 'Not found',
   CONFLICT: 'Conflict with an existing request',
   QUEUE_UNAVAILABLE: 'The server could not queue the request right now',
+  TOO_MANY_REQUESTS: 'Too many requests right now; please wait a moment and retry',
   INTERNAL: 'The server hit an internal error',
   NETWORK: 'Could not reach the server',
   INVALID_RESPONSE: 'The server answered in an unexpected format',

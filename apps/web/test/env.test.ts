@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_ENV, EnvError, parseEnv } from '../src/env';
+import { DEFAULT_ENV, EnvError, isLocalHostname, parseEnv, resolveEnv } from '../src/env';
 
 describe('env.js contract', () => {
   it('falls back to the local Keycloak defaults when env.js is missing', () => {
@@ -26,5 +26,22 @@ describe('env.js contract', () => {
     expect(() => parseEnv({ provider: 'okta' })).toThrow(EnvError);
     expect(() => parseEnv({ apiBaseUrl: 42 })).toThrow(EnvError);
     expect(() => parseEnv({ provider: 'cognito', hostedUiDomain: '' })).toThrow(EnvError);
+  });
+
+  it('refuses a missing env.js on a deployed origin instead of defaulting to localhost', () => {
+    expect(() => resolveEnv(undefined, { allowLocalDefaults: false })).toThrow(
+      /env.js did not load/,
+    );
+    expect(resolveEnv(undefined, { allowLocalDefaults: true })).toEqual(DEFAULT_ENV);
+    expect(resolveEnv({ stage: 'dev' }, { allowLocalDefaults: false }).stage).toBe('dev');
+  });
+
+  it('treats only loopback hosts as local', () => {
+    for (const host of ['localhost', 'app.localhost', '127.0.0.1', '[::1]']) {
+      expect(isLocalHostname(host)).toBe(true);
+    }
+    for (const host of ['d1234.cloudfront.net', 'seatrelay.example.com', '10.0.0.5']) {
+      expect(isLocalHostname(host)).toBe(false);
+    }
   });
 });

@@ -1,17 +1,21 @@
-import type {
-  BackfillRecord,
-  ConfirmedEntry,
-  DashboardView,
-  SessionView,
-  VerifyView,
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
+  type BackfillRecord,
+  type ConfirmedEntry,
+  type DashboardView,
+  type PatchWorkshopBody,
+  type SessionView,
+  type VerifyView,
+  type WorkshopPublic,
 } from '@seatrelay/contracts';
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
-import { useDashboard } from '../api/queries';
+import { useDashboard, useInvalidateWorkshopInfo } from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
-import { BACKFILL_CAUSE_TEXT, sessionTitle } from '../commands/copy';
+import { BACKFILL_CAUSE_TEXT, rejectReasonText, sessionTitle } from '../commands/copy';
 import { useCommand, type CommandHandle } from '../commands/useCommand';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
 import { CopyLink } from '../components/CopyLink';
@@ -21,7 +25,9 @@ import { Loading } from '../components/Loading';
 import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
 import { describeError } from '../util/errors';
 import { formatDateTime, formatLatency, formatSeconds, formatTime, percentile } from '../util/time';
+import { buildWorkshopPatch } from '../util/workshopPatch';
 
+/** A definitive (4xx) failure is not retried: the button offers the action again (fresh id). */
 function commandState(command: CommandHandle): AsyncState {
   switch (command.state.phase) {
     case 'submitting':
@@ -30,7 +36,7 @@ function commandState(command: CommandHandle): AsyncState {
     case 'applied':
       return 'done';
     case 'error':
-      return 'error';
+      return command.canRetry ? 'error' : 'idle';
     default:
       return 'idle';
   }
@@ -55,7 +61,7 @@ function CommandFeedback({ command }: { command: CommandHandle }) {
   if (state.phase === 'rejected') {
     return (
       <span className="error-text small" role="alert">
-        Rejected ({state.view.reason ?? 'see notification'})
+        Rejected: {rejectReasonText(state.view.reason)}
       </span>
     );
   }
@@ -90,7 +96,8 @@ function SessionRow({
     if (!Number.isInteger(next) || next < 1) {
       return;
     }
-    if (capacity.state.phase === 'error') {
+    if (capacity.canRetry) {
+      // The input is locked meanwhile, so the retried capacity is the one on screen.
       void capacity.retry();
       return;
     }
@@ -127,6 +134,7 @@ function SessionRow({
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
                 className="input-small"
+                disabled={capacity.busy || capacity.canRetry}
               />
               <AsyncButton
                 className="btn-small"
@@ -137,8 +145,19 @@ function SessionRow({
                 done="Set"
                 error="Retry"
                 onClick={apply}
-                disabled={capacity.busy || Number(value) === session.capacity}
+                disabled={
+                  capacity.busy || (!capacity.canRetry && Number(value) === session.capacity)
+                }
               />
+              {capacity.canRetry && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-small"
+                  onClick={() => capacity.reset()}
+                >
+                  Discard
+                </button>
+              )}
             </div>
             <CommandFeedback command={capacity} />
             {!confirm ? (
@@ -150,9 +169,7 @@ function SessionRow({
                 pending="Cancelling…"
                 done="Cancelled"
                 error="Retry"
-                onClick={() =>
-                  cancel.state.phase === 'error' ? void cancel.retry() : setConfirm(true)
-                }
+                onClick={() => (cancel.canRetry ? void cancel.retry() : setConfirm(true))}
                 disabled={cancel.busy}
               />
             ) : (
@@ -429,6 +446,120 @@ function ExportButton({ orgId, wsId }: { orgId: string; wsId: string }) {
   );
 }
 
+/** "Edit details": title and description through the synchronous `PATCH /workshops/{wsId}`. */
+function WorkshopDetailsEditor({ orgId, workshop }: { orgId: string; workshop: WorkshopPublic }) {
+  const api = useApi();
+  const invalidateInfo = useInvalidateWorkshopInfo();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState({ title: workshop.title, description: workshop.description });
+  const [issues, setIssues] = useState<string[]>([]);
+  const [state, setState] = useState<AsyncState>('idle');
+  const save = useMutation({
+    mutationFn: (body: PatchWorkshopBody) => api.patchWorkshop(workshop.id, body),
+  });
+
+  const start = () => {
+    setDraft({ title: workshop.title, description: workshop.description });
+    setIssues([]);
+    setState('idle');
+    save.reset();
+    setOpen(true);
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    const patch = buildWorkshopPatch(workshop, draft);
+    if (patch.kind === 'unchanged') {
+      setOpen(false);
+      return;
+    }
+    if (patch.kind === 'invalid') {
+      setIssues(patch.issues);
+      return;
+    }
+    setIssues([]);
+    setState('pending');
+    try {
+      await save.mutateAsync(patch.body);
+      setState('done');
+      await invalidateInfo(orgId, workshop.id);
+      setOpen(false);
+      setState('idle');
+    } catch {
+      setState('error');
+    }
+  };
+
+  if (!open) {
+    return (
+      <button type="button" className="btn btn-secondary btn-small" onClick={start}>
+        Edit details
+      </button>
+    );
+  }
+  return (
+    <form className="card stack-tight" onSubmit={(event) => void submit(event)}>
+      <div className="field">
+        <label className="field-label" htmlFor="edit-title">
+          Title
+        </label>
+        <input
+          id="edit-title"
+          type="text"
+          maxLength={MAX_TITLE_LENGTH}
+          required
+          value={draft.title}
+          disabled={state === 'pending'}
+          onChange={(event) => setDraft({ ...draft, title: event.target.value })}
+        />
+      </div>
+      <div className="field">
+        <label className="field-label" htmlFor="edit-description">
+          Description
+        </label>
+        <textarea
+          id="edit-description"
+          rows={3}
+          maxLength={MAX_DESCRIPTION_LENGTH}
+          value={draft.description}
+          disabled={state === 'pending'}
+          onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+        />
+      </div>
+      {issues.length > 0 && (
+        <ul className="error-list" role="alert">
+          {issues.map((issue) => (
+            <li key={issue}>{issue}</li>
+          ))}
+        </ul>
+      )}
+      <div className="actions">
+        <AsyncButton
+          type="submit"
+          state={state}
+          idle="Save details"
+          pending="Saving…"
+          done="Saved"
+          error="Retry save"
+        />
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setOpen(false)}
+          disabled={state === 'pending'}
+        >
+          Cancel
+        </button>
+        {state === 'error' && (
+          <span className="error-text small" role="alert">
+            {describeError(save.error)}
+          </span>
+        )}
+      </div>
+    </form>
+  );
+}
+
 function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () => void }) {
   const { workshop, sessions } = view;
   const toggle = useCommand(workshop.id, { sessions, onSettled: refetch });
@@ -455,7 +586,7 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
         done={workshop.status === 'OPEN' ? 'Closed' : 'Opened'}
         error="Retry"
         onClick={() =>
-          toggle.state.phase === 'error'
+          toggle.canRetry
             ? void toggle.retry()
             : void toggle.run({
                 type: workshop.status === 'OPEN' ? 'CLOSE_REGISTRATION' : 'OPEN_REGISTRATION',
@@ -472,7 +603,7 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
           pending="Cancelling…"
           done="Cancelled"
           error="Retry"
-          onClick={() => (cancel.state.phase === 'error' ? void cancel.retry() : setConfirm(true))}
+          onClick={() => (cancel.canRetry ? void cancel.retry() : setConfirm(true))}
           disabled={cancel.busy}
         />
       ) : (
@@ -549,6 +680,8 @@ function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
           </button>
         </div>
       </header>
+      {workshop.description.length > 0 && <p className="description">{workshop.description}</p>}
+      <WorkshopDetailsEditor key={workshop.id} orgId={orgId} workshop={workshop} />
 
       <dl className="stats">
         <div>

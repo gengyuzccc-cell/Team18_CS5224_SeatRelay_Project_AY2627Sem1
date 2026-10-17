@@ -21,6 +21,7 @@ import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
 import { StatusBadge } from '../components/StatusBadge';
 import { describeError } from '../util/errors';
+import { serverNow } from '../util/serverClock';
 import { defaultLocalInput, formatDateTime, formatSeconds, localInputToIso } from '../util/time';
 
 interface SessionDraft {
@@ -70,6 +71,7 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
   });
   const [sessions, setSessions] = useState<SessionDraft[]>(() => [newDraft(0), newDraft(1)]);
   const [issues, setIssues] = useState<string[]>([]);
+  const [warnings, setWarnings] = useState<string[]>([]);
   const [state, setState] = useState<AsyncState>('idle');
   const create = useMutation({
     mutationFn: (body: CreateWorkshopInput) => api.createWorkshop(orgId, body),
@@ -85,19 +87,18 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
       );
       return undefined;
     }
-    const now = Date.now();
+    // Advisory only: the server re-checks every cut-off with its own clock when the workshop is
+    // created, and this browser's clock may be off (plan §1.4).
+    const now = serverNow();
     const late = body.sessions.filter(
       (session) => Date.parse(session.startsAt) - 30 * 60_000 <= now,
     );
-    if (late.length > 0) {
-      setIssues(
-        late.map(
-          (session) =>
-            `${session.title}: must start more than 30 minutes from now (registration cut-off).`,
-        ),
-      );
-      return undefined;
-    }
+    setWarnings(
+      late.map(
+        (session) =>
+          `${session.title}: starts within 30 minutes, so its registration cut-off has passed; the server will refuse it.`,
+      ),
+    );
     setIssues([]);
     return body;
   };
@@ -335,6 +336,13 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
         <ul className="error-list" role="alert">
           {issues.map((issue) => (
             <li key={issue}>{issue}</li>
+          ))}
+        </ul>
+      )}
+      {issues.length === 0 && warnings.length > 0 && (
+        <ul className="error-list" role="status">
+          {warnings.map((warning) => (
+            <li key={warning}>{warning}</li>
           ))}
         </ul>
       )}

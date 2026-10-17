@@ -1,8 +1,9 @@
-import { WebStorageStateStore, type User } from 'oidc-client-ts';
-import { useMemo, type ReactNode } from 'react';
+import { UserManager, WebStorageStateStore, type User } from 'oidc-client-ts';
+import { useState, type ReactNode } from 'react';
 import { AuthProvider } from 'react-oidc-context';
 import type { SeatRelayEnv } from '../env';
 import { buildOidcSettings, CALLBACK_PATH, RETURN_TO_KEY, returnToFromState } from './authAdapter';
+import { SessionRenewalProvider } from './sessionRenewal';
 
 interface Props {
   env: SeatRelayEnv;
@@ -20,19 +21,24 @@ function rememberReturnTo(user: User | undefined): void {
   window.history.replaceState({}, document.title, CALLBACK_PATH);
 }
 
+/**
+ * One `UserManager` for the app, shared by react-oidc-context and the session renewal (which
+ * calls it directly so that a failed start-up refresh is not reported as a sign-in error).
+ */
 export function SeatRelayAuthProvider({ env, children }: Props) {
-  const settings = useMemo(
+  const [userManager] = useState(
     () =>
-      buildOidcSettings(
-        env,
-        window.location.origin,
-        new WebStorageStateStore({ store: window.localStorage }),
+      new UserManager(
+        buildOidcSettings(
+          env,
+          window.location.origin,
+          new WebStorageStateStore({ store: window.localStorage }),
+        ),
       ),
-    [env],
   );
   return (
-    <AuthProvider {...settings} onSigninCallback={rememberReturnTo}>
-      {children}
+    <AuthProvider userManager={userManager} onSigninCallback={rememberReturnTo}>
+      <SessionRenewalProvider userManager={userManager}>{children}</SessionRenewalProvider>
     </AuthProvider>
   );
 }

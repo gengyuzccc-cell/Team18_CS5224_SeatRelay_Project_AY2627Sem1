@@ -7,6 +7,7 @@ import type {
   SessionView,
   UserCommandType,
 } from '@seatrelay/contracts';
+import { serverNow } from '../util/serverClock';
 import { formatCountdown, msUntil } from '../util/time';
 
 /** Human-readable copy for everything the engine can answer (plan §1.3 toasts, §2.6). */
@@ -77,7 +78,7 @@ export function sessionTitle(
 export function describeRegistration(
   registration: RegistrationSummary,
   sessions: readonly SessionView[],
-  now: number = Date.now(),
+  now: number = serverNow(),
 ): string {
   switch (registration.status) {
     case 'OFFERED': {
@@ -114,7 +115,7 @@ export interface SettledCopy {
 export function describeSettled(
   view: CommandResultView,
   sessions: readonly SessionView[],
-  now: number = Date.now(),
+  now: number = serverNow(),
 ): SettledCopy {
   if (view.status === 'REJECTED') {
     return {
