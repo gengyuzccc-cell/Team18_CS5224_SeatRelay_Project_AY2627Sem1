@@ -753,10 +753,13 @@ def section_loadtest(book: Book, results: Path) -> None:
                  f"{target}: largest VU level up to which both scenarios meet every target", reason)
     stats = db.read_csv(date_dir / "docker-stats.csv", book.notes) if date_dir else None
     cpu = mem = None
-    if stats is not None and {"ts", "cpuPercent", "memUsageMiB"}.issubset(stats.columns):
+    # Quoted only once the local matrix is complete: the peak over a partial matrix would understate it.
+    local_done = frame is not None and db.loadtest_complete(frame, "local")
+    if local_done and stats is not None and {"ts", "cpuPercent", "memUsageMiB"}.issubset(stats.columns):
         per_ts = stats.groupby("ts")[["cpuPercent", "memUsageMiB"]].sum()
         cpu, mem = float(per_ts["cpuPercent"].max()), float(per_ts["memUsageMiB"].max())
-    reason = "docker-stats.csv (local k6 matrix) not yet recorded"
+    reason = ("docker-stats.csv (local k6 matrix) not yet recorded" if stats is None
+              else "local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds)")
     dsrc = f"{rel(date_dir)}/docker-stats.csv" if date_dir else "results/loadtest/<date>/docker-stats.csv"
     book.num("PerfLocalCpuPeakPct", cpu, 0, f"{dsrc}: cpuPercent summed over containers per sample (max)", "on-prem stack peak CPU (% of one core)", reason)
     book.num("PerfLocalMemPeakMiB", mem, 0, f"{dsrc}: memUsageMiB summed over containers per sample (max)", "on-prem stack peak memory (MiB)", reason)

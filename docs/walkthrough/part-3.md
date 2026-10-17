@@ -8,7 +8,8 @@
 
 ## What to say (about 340 words)
 
-**Slide 5, Figure A.** SeatRelay is three CloudFormation stacks in the Singapore region:
+**Slide 5, Figure A.** SeatRelay is built from three CloudFormation templates in the Singapore region
+(the auth stack is deployed once; the web and app stacks once per stage, dev and pilot):
 - a web stack: a private S3 bucket behind CloudFront;
 - an auth stack: a Cognito user pool;
 - an app stack with everything else: an HTTP API with a JWT authorizer, five Lambda functions, a

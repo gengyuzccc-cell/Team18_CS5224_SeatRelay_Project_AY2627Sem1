@@ -5,7 +5,7 @@
 % visible [PENDING: ...] marker. External facts are cited from references.bib (sources.md).
 \documentclass[a4paper,10pt]{article}
 
-\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage[a4paper,margin=1.8cm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{lmodern}               % typewriter (scalable)
@@ -18,6 +18,7 @@
 \usepackage{booktabs,tabularx,array}
 \usepackage{relsize}
 \usepackage{enumitem}
+\usepackage{multicol}
 \usepackage[font=small,labelfont=bf,skip=3pt]{caption}
 \usepackage{titlesec}
 \usepackage{xurl}
@@ -61,10 +62,9 @@
 \setlength{\biblabelsep}{0.4em}
 \setlength{\bibitemsep}{0pt}
 \DefineBibliographyStrings{english}{urlseen={accessed}}
-% Every cited web page has urldate 2026-10-17 (references.bib); the date is stated once in the
-% note above the list. Re-check this if an entry with another access date is cited.
+% Cited web pages have urldate 2026-10-17 (references.bib); the date is stated once above the
+% list (end of document). An entry read on another day says so in its titleaddon (two on-prem prices).
 \AtEveryBibitem{\clearfield{note}\clearlist{organization}\clearfield{urlyear}\clearfield{urlmonth}\clearfield{urlday}}
-\defbibnote{webdate}{\scriptsize All web pages were accessed on 2026-10-17.}
 \DeclareFieldFormat{url}{\url{#1}}
 \DeclareFieldFormat{urldate}{(accessed #1)}
 \setcounter{biburlnumpenalty}{9000}
@@ -116,6 +116,10 @@
 \input{sections/06-code}
 \input{sections/07-declaration}
 
-{\small\printbibliography[heading=bibnumbered,title={References},prenote=webdate]}
+\section{References}\label{sec:refs}
+{\scriptsize All web pages were accessed on 2026-10-17 unless stated.\par}
+\begin{multicols}{2}
+\printbibliography[heading=none]
+\end{multicols}
 
 \end{document}

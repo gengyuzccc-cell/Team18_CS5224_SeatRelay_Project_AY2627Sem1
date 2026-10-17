@@ -16,14 +16,14 @@ Charts (sizes in cm; fonts 8 pt; no titles: the captions live in the LaTeX sourc
   cost-crossover.pdf     8.5 x 6.4 monthly cost vs registrations/month: cloud list price and
                                    after free tier, on-prem fully amortised and increment only
   cost-unit.pdf          8.5 x 6.4 the same as cost per 1,000 registrations
-  backfill-latency.pdf   17 x 5.2  expiry-driven backfill latency: histogram and ECDF (latest
+  backfill-latency.pdf   17 x 4.4  expiry-driven backfill latency: histogram and ECDF (latest
                                    results/<date>-backfill of the target)
   settle-latency.pdf     17 x 5.2  command settle latency ECDFs, server-side and client-observed,
                                    one curve per functional experiment (smoke, correctness, ...)
-  loadtest-p95.pdf       17 x 5.6/target  k6 matrix: p95 per VU level per scenario
+  loadtest-p95.pdf       17 x 5.0  k6 matrix of the report target: p95 per VU level per scenario
   study-completion.pdf   17 x 5.2  user study: task completion by task and condition
-  study-sus.pdf          8.5 x 6.0 user study: SUS per participant, paired
-  study-time.pdf         8.5 x 6.0 user study: total task time per participant, paired
+  study-sus.pdf          8.5 x 5.0 user study: SUS per participant, paired
+  study-time.pdf         8.5 x 5.0 user study: total task time per participant, paired
 
 Percentiles are nearest-rank (tools/experiments/src/lib/results.ts), so markers match summary.md.
 Dependencies: pandas and matplotlib only.
@@ -357,7 +357,7 @@ def chart_backfill(run: Run, runs, target: str) -> None:
     scale, unit = (1000.0, "s") if seconds else (1.0, "ms")
     shown = values / scale
     p95 = db.nearest_rank(values, 95) / scale
-    fig, axes = plt.subplots(1, 2, figsize=(WIDE, 5.2 * CM), constrained_layout=True)
+    fig, axes = plt.subplots(1, 2, figsize=(WIDE, 4.4 * CM), constrained_layout=True)
     ax = axes[0]
     edges = np.histogram_bin_edges(shown, bins="auto")
     if edges.size > 41:
@@ -458,7 +458,7 @@ LOADTEST_SERIES = (
 )
 
 
-def chart_loadtest(run: Run, results: Path) -> None:
+def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
     date_dir = db.latest_dir(results / "loadtest", "*", must_contain="raw.csv")
     if date_dir is None:
         run.skip("loadtest-p95", "no results/loadtest/<date>/raw.csv")
@@ -468,12 +468,14 @@ def chart_loadtest(run: Run, results: Path) -> None:
         run.skip("loadtest-p95", f"{rel(date_dir)}/raw.csv has no run-matrix rows")
         return
     frame = db.loadtest_active(frame)
-    if not db.loadtest_complete(frame, "dev"):
+    if not db.loadtest_complete(frame, target):
         # Drawn only once every level has all its rounds (the caption promises the median of them).
-        done = sum(1 for s, v in db.LOADTEST_LEVELS if db.loadtest_rounds(frame, "dev", s, v) >= db.LOADTEST_ROUNDS)
-        run.skip("loadtest-p95", f"{rel(date_dir)}/raw.csv: dev matrix incomplete ({done} of {len(db.LOADTEST_LEVELS)} levels have {db.LOADTEST_ROUNDS} rounds)")
+        done = sum(1 for s, v in db.LOADTEST_LEVELS if db.loadtest_rounds(frame, target, s, v) >= db.LOADTEST_ROUNDS)
+        run.skip("loadtest-p95", f"{rel(date_dir)}/raw.csv: {target} matrix incomplete ({done} of {len(db.LOADTEST_LEVELS)} levels have {db.LOADTEST_ROUNDS} rounds)")
         return
-    complete = [(t, s, v) for t in frame["target"].astype(str).unique() for s, v in db.LOADTEST_LEVELS
+    # The report figure shows the report target only (Fig. 4 is one row of two panels); other
+    # targets (the on-prem reference) are quoted in the text from numbers.py.
+    complete = [(t, s, v) for t in [target] for s, v in db.LOADTEST_LEVELS
                 if db.loadtest_rounds(frame, t, s, v) >= db.LOADTEST_ROUNDS]
     frame = frame[[(str(r.target), str(r.scenario), int(r.vus)) in complete for r in frame.itertuples()]]
     present = [s for s in LOADTEST_SERIES if s[0] in frame.columns]
@@ -491,7 +493,7 @@ def chart_loadtest(run: Run, results: Path) -> None:
     levels = levels.replace([np.inf, -np.inf], np.nan)
     targets = sorted(levels["target"].astype(str).unique(), key=lambda t: (t != "dev", t))
     scenarios = sorted(levels["scenario"].astype(str).unique(), key=lambda s: (s != "cross-workshop", s))
-    fig, axes = plt.subplots(len(targets), len(scenarios), figsize=(WIDE, 5.6 * CM * len(targets)), constrained_layout=True, squeeze=False, sharey=True)
+    fig, axes = plt.subplots(len(targets), len(scenarios), figsize=(WIDE, 5.0 * CM * len(targets)), constrained_layout=True, squeeze=False, sharey=True)
     letters = iter("abcdefgh")
     for r, target in enumerate(targets):
         for c, scenario in enumerate(scenarios):
@@ -595,7 +597,7 @@ def chart_study(run: Run, results: Path) -> None:
             run.skip("study-time", "no task timed in both conditions")
         else:
             per = totals.groupby(level="participant_id")[["SR", "CTRL"]].sum()
-            fig, ax = plt.subplots(figsize=(NARROW, 6.0 * CM), constrained_layout=True)
+            fig, ax = plt.subplots(figsize=(NARROW, 5.0 * CM), constrained_layout=True)
             for _, row in per.iterrows():
                 ax.plot([0, 1], [row["CTRL"], row["SR"]], color="#A9A8A2", linewidth=0.7, marker="o", markersize=3, markerfacecolor="white")
             ax.plot([0, 1], [per["CTRL"].median(), per["SR"].median()], color=INK, linewidth=1.6, marker="D", markersize=4, label="median")
@@ -610,7 +612,7 @@ def chart_study(run: Run, results: Path) -> None:
         run.skip("study-sus", f"no valid SUS rows in {rel(folder)}/sus-sheet.csv")
         return
     wide = sus.pivot_table(index="participant_id", columns="condition", values="sus", aggfunc="first")
-    fig, ax = plt.subplots(figsize=(NARROW, 6.0 * CM), constrained_layout=True)
+    fig, ax = plt.subplots(figsize=(NARROW, 5.0 * CM), constrained_layout=True)
     if {"SR", "CTRL"}.issubset(wide.columns):
         for _, row in wide[["CTRL", "SR"]].dropna().iterrows():
             ax.plot([0, 1], [row["CTRL"], row["SR"]], color="#A9A8A2", linewidth=0.7)
@@ -659,7 +661,7 @@ def main(argv=None) -> int:
         ("cost", lambda: chart_cost(run, results)),
         ("backfill", lambda: chart_backfill(run, runs, args.target)),
         ("settle", lambda: chart_settle(run, runs, args.target)),
-        ("loadtest", lambda: chart_loadtest(run, results)),
+        ("loadtest", lambda: chart_loadtest(run, results, args.target)),
         ("study", lambda: chart_study(run, results)),
     )
     errors = 0

@@ -2,11 +2,13 @@
 \section*{Assumptions}
 \begin{itemize}
 \item \emph{Market:} organisation counts are official lower bounds; NUS, SMU and SIT figures were read
-  from search excerpts of the official pages because direct download was blocked; $p$, $s$ and the
-  value per event come only from the organiser interviews.
+  from search excerpts of the official pages because direct download was blocked
+  (\pending{dated browser screenshots of these three pages}); $p$, $s$ and the value per event come
+  only from the organiser interviews.
 \item \emph{Cost:} usage per registration is modelled (\S\ref{sec:business}) until measured usage is
   priced; X-Ray is priced at 100\,\% sampling (an upper bound); operations labour and the on-prem
-  machine's capacity are assumptions; availability is not equalised between the two builds.
+  machine's capacity are assumptions\IfPending{\PerfLocalCpuPeakPct}{ (the on-prem stack has not been load-tested)}{};
+  availability is not equalised between the two builds.
 \item \emph{Experiments:} the \code{dev} stage, a 60\,s hold for expiry experiments and synthetic
   accounts; the mechanism comparison uses an assumed behaviour model and ideal timers.
 \item \emph{Operations:} one AWS region; until SES production access is granted, e-mail reaches only
@@ -15,15 +17,17 @@
 
 \section*{AI usage declaration}
 \emph{Where.} The application code, infrastructure-as-code templates, tests, experiment and
-load-test scripts, analysis and cost-model scripts, the market and competitor research notes, the
-documentation, and the drafts of this report and the slides were generated with Claude Code, an AI
-coding assistant. \emph{How.} The team set the scope, rules, constraints and acceptance targets in the
-Preliminary report and the execution plan, directed the work step by step, and reviewed the
-generated code, documents and figures. The team created and owns the AWS account and the
-repository, approved every deployment and experiment run (executed with the team's credentials), is
-responsible for the interviews, the user study and the pilot, and checked the reported numbers
-against the files in \code{results/}. The assistant did not write or alter any measured value: every
-measured number in this report is produced by a script from a raw file in \code{results/}, and data
-that does not exist yet is marked as pending. \emph{What we learned.}
-\pending{member learning paragraphs: one ``what I learned'' paragraph per team member, written by
-that member}
+load-test scripts, analysis and cost-model scripts, the market page captures and counts, the
+competitor scan, the documentation, and the drafts of this report and the slides were generated
+with Claude Code, an AI coding assistant. \emph{How.} The team set the scope, rules, constraints and
+acceptance targets in the Preliminary report and the execution plan, directed the work step by step,
+and reviewed the generated code, documents and figures. The team created and owns the AWS account
+and the repository. The deployment, experiment, load-test, replay and cost-model scripts were run by
+the assistant in a development session, at the team's request and with the team's AWS credentials;
+the assistant also did the desk research for \S\ref{sec:motivation}. The team is responsible for the
+interviews, the user study and the pilot. \pending{name of the team member who checked every
+reported number against results/}. The assistant did not type or alter any measured value: every
+experimental, simulation and own-count number in this report is produced by a script from a raw file
+in \code{results/}, external figures are cited, and data that does not exist yet is marked as
+pending. \emph{What we learned.} \pending{member learning paragraphs: one ``what I learned''
+paragraph of at most 50 words per team member, written by that member}

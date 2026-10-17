@@ -10,7 +10,7 @@ Verification levels:
 - **Crossref**: published paper; bibliographic data and DOI checked against `api.crossref.org` on 2026-10-17.
 - **resolves**: page opened (HTTP 200) and its title checked. Cited as the human-readable home of figures that were read elsewhere, such as the AWS Price List API.
 
-How pages were retrieved: `curl` from the build environment, plus web search for pages that block automated download. The raw captures were working files and are not committed; every count can be re-derived from the URLs below. For the LibCal counts, request `…/ajax/calendar/list?c=-1&date=YYYY-MM-DD&perpage=100&page=1&audience=&cats=&camps=&inc=0` for each day, which is the request the public calendar page makes.
+How pages were retrieved: `curl` from the build environment, plus web search for pages that block automated download. The pages behind the own counts (one LibCal day list per day and campus, the three NTU directory pages) are committed unmodified under `results/market/2026-10-17/raw/` with a `capture.json` log (URL, HTTP status, bytes, UTC time); `tools/market/capture.py` fetched them and `tools/market/count.py` counts them into `results/market/2026-10-17/counts.json` and `summary.md`, from which `report/tools/numbers.py` writes the `\Market…` macros. For the LibCal counts, the script requests `…/ajax/calendar/list?c=-1&date=YYYY-MM-DD&perpage=100&page=1&audience=&cats=&camps=&inc=0` for each day, which is the request the public calendar page makes.
 
 ## 1. AWS documentation (design facts)
 
@@ -68,13 +68,29 @@ Unit prices were read on 2026-10-16 from the Price List bulk API files named per
 | `aws-free-tier` | https://aws.amazon.com/free/ | 2026-10-17 | resolves | Free Tier regime. The post-2025-07-15 rule is `verified_secondary` in `pricing.json`. |
 | `aws-sla` | https://aws.amazon.com/legal/service-level-agreements/ | 2026-10-17 | resolves | SLA reference cited in `pricing.json`. |
 
-Not yet in the bibliography: the on-premise cost sources in `tools/experiments/cost/onprem.json` (Newegg SG, SourceIT, element14 SG, Notebookcheck, SP Group tariff, M1 business fibre, Backblaze B2, Postmark, FX). They were not re-opened for this register. Add them before Final §2 cites them.
+## 2b. On-premise cost inputs (`tools/experiments/cost/onprem.json`, cited in Final §2)
+
+The model read these figures on 2026-10-16, mostly from search-engine excerpts (`verification` in `onprem.json`). Each page was re-opened with `curl` on 2026-10-17 for this register. Two pages now show a different price from the one in the model; the report marks this with a visible `\pending` until the cost model is re-run.
+
+| Key | URL | Accessed | Verification | Claim supported (quote or value) |
+|---|---|---|---|---|
+| `onprem-newegg` | https://www.newegg.com/global/sg-en/p/3C6-01D0-000R1 | 2026-10-16 (excerpt); HTTP 403 on 2026-10-17 | official excerpt | Beelink Mini S12 Pro (N100, 16 GB, 500 GB) S$767.56 incl. GST (model input). The bib entry says the price was read from a search excerpt on 2026-10-16. |
+| `onprem-ups` | https://sourceit.com.sg/products/apc-back-ups-cs-650va-230v-asean-bk650-as | 2026-10-17 | fetched | Page on 2026-10-17: "APC BACK-UPS CS 650VA 230V ASEAN … S$212.75". **The model uses S$202.40** (search excerpt, 2026-10-16); the difference is S$10.35 over the 3-year amortisation. Updated in `onprem.json` on 2026-10-17 and the model re-run. |
+| `onprem-disk` | https://sg.element14.com/wd/wdbu6y0020bbk-eesn/disk-drive-2-5-2tb-usb-3-0/dp/3532741 | 2026-10-16 (excerpt); HTTP 403 on 2026-10-17 | official excerpt | WD Elements Portable 2 TB S$180.82 incl. GST (model input). |
+| `onprem-notebookcheck` | https://www.notebookcheck.net/Intel-N100-performance-debut-Beelink-Mini-S12-Pro-mini-PC-review.758950.0.html | 2026-10-17 | fetched | Power consumption table: "Idle 8.3 / 8.8 / 8.9 Watt Load 20.1 / 32.2 Watt" (model: idle 8.8 W, load 20.1 W, peak 32.2 W). |
+| `onprem-sp-tariff` | https://www.spgroup.com.sg/our-services/utilities/tariff-information | 2026-10-17 | fetched | "31.16 cents/kWh 28.59 cents/kWh (w/o GST) ELECTRICITY TARIFF (wef 1 Oct - 31 Dec 26)" (model input 31.16). Secondary report of the same release: The Star, 30 Sep 2026 ("28.59 cents per kilowatt hour"). |
+| `onprem-static-ip` | https://forums.hardwarezone.com.sg/threads/singapore-isp-comparisons.6665380 | 2026-10-17 | fetched (community forum) | MyRepublic: "You can pay one time charge of S$51 for the Static IP" (increment-only view). |
+| `onprem-m1-fibre` | https://www.m1.com.sg/business/deals/fibre-broadband | 2026-10-17 | fetched | Page on 2026-10-17 ("Prices are inclusive of GST"): 1 Gbps, 24-month contract, "Free 1 x Static IP" **S$139.52/mth**; 1 Gbps, 36 months S$128.62/mth; 500 Mbps S$100.28 (24 months) and S$89.38 (36 months). **The model uses S$108/month** (search excerpt, 2026-10-16), which the page no longer shows. Updated in `onprem.json` on 2026-10-17 and the model re-run. |
+| `onprem-b2` | https://www.backblaze.com/cloud-storage/pricing | 2026-10-17 | fetched | "Starts at $ 6.95 / TB / mo"; "a rate of $ 6.95 /TB/30-days" (model: US$0.00695/GB-month). |
+| `onprem-fx` | https://moneyexchangerate.org/currencyexchange/usd/sgd/262 | 2026-10-17 | fetched | "262 USD = 335.36 SGD By today rate (2026-10-17) USD to SGD equal 1.28" (model: 1.28). |
+
+Operations labour (4 h/month at S$60/h) and one machine's capacity (1,000,000 registrations/month) are assumptions, stated as such in the report. Postmark (`onprem.json` `email.alternative`) is a sensitivity only and is not cited.
 
 ## 3. Evaluation methods and tools
 
 | Key | URL / DOI | Accessed | Verification | Claim supported |
 |---|---|---|---|---|
-| `brooke1996sus` | doi:10.1201/9781498710411-35 | 2026-10-17 | Crossref | The original 10-item SUS (`docs/user-study/sus.md`). Original print: Taylor & Francis 1996, pp. 189–194. The DOI resolves to the CRC Press edition (Crossref gives pp. 207–212). |
+| `brooke1996sus` | (print; no DOI cited) | 2026-10-17 | Crossref | The original 10-item SUS (`docs/user-study/sus.md`). Cited as the original print: Taylor & Francis 1996, pp. 189–194. The DOI 10.1201/9781498710411-35 resolves to the later CRC Press edition (Crossref gives pp. 207–212), so it is not in the bib entry. |
 | `bangor2008sus` | doi:10.1080/10447310802205776 | 2026-10-17 | Crossref | SUS benchmark data and interpretation (IJHCI 24(6):574–594). |
 | `bangor2009sus` | https://uxpajournal.org/wp-content/uploads/sites/7/pdf/JUS_Bangor_May2009.pdf | 2026-10-17 | well-known paper; URL indexed but returned HTTP 404 (journal site migrated) | Adjective rating scale for interpreting SUS scores (JUS 4(3):114–123). No DOI. |
 | `lewis2018sus` | doi:10.1080/10447318.2018.1455307 | 2026-10-17 | Crossref | Review of SUS use and norms (IJHCI 34(7):577–590). Optional. |
@@ -105,8 +121,8 @@ Not yet in the bibliography: the on-premise cost sources in `tools/experiments/c
 | `ssg-ar-fy2425` | https://isomer-user-content.by.gov.sg/41/719a22ec-2e40-49f8-8d3a-1469f90efdd3/SSG%20Annual%20Report%20FY24-25.pdf | 2026-10-17 | PDF created 29 Aug 2025 | fetched | "550,000 individuals participated in, and benefitted from, SSG-supported training" (a rounded 2024 figure). Gives no total provider count. |
 | `moe-pq-2018-ssg-courses` | https://www.moe.gov.sg/news/parliamentary-replies/20181120-approval-and-rejection-of-skillsfuture-courses | 2026-10-17 | 20 Nov 2018 | fetched | "Currently, over 30,000 courses are funded by SkillsFuture Singapore (SSG). Since 2016, SSG has rejected over 4,000 other courses as they were not work skills-related." |
 | `ssg-credit-progress-2016` | https://www.skillsfuture.gov.sg/newsroom/steady-progress-in-implementation-of-skillsfuture-credit | 2026-10-17 | end of 2016 | official excerpt (page renders client-side only) | "over 18,000 approved skills-related courses, provided by over 700 training providers" |
-| `nus-libcal` | https://nus.libcal.com/calendar | 2026-10-17 | captured 2026-10-17 | own count | Events listed on each day from 1 Aug to 16 Oct 2026: 80 events; 37 tagged Workshop, 28 distinct titles; "LARC Library Tours" × 8 and "Library Essentials: Orientation Workshop" × 3 make 11 of 37. Across all 59 non-exhibition events, 4 repeated titles make 16 events. Upcoming list at access time: 29 events. |
-| `smu-libcal` | https://smu-sg.libcal.com/calendar | 2026-10-17 | captured 2026-10-17 | own count | Same window: 44 events, 42 distinct titles; "Library Orientation for New Research Staff" (4 Aug, 15 Sep; upcoming 3 Nov, 1 Dec) and "Learning Bloomberg The Fun Way" (10, 11 Sep). |
+| `nus-libcal` | https://nus.libcal.com/calendar | 2026-10-17 | captured 2026-10-17 (`results/market/2026-10-17/raw/libcal/nus/`) | own count (`tools/market/count.py`) | Events listed on each day from 1 Aug to 16 Oct 2026: 80 events; 37 tagged Workshop, 28 distinct titles; "LARC Library Tours" × 8 and "Library Essentials: Orientation Workshop" × 3 make 11 of 37. Across all 59 non-exhibition events, 4 repeated titles make 16 events. Upcoming list at access time: 29 events. |
+| `smu-libcal` | https://smu-sg.libcal.com/calendar | 2026-10-17 | captured 2026-10-17 (`results/market/2026-10-17/raw/libcal/smu/`) | own count (`tools/market/count.py`) | Same window: 44 events, 42 distinct titles; "Library Orientation for New Research Staff" (4 Aug, 15 Sep; upcoming 3 Nov, 1 Dec) and "Learning Bloomberg The Fun Way" (10, 11 Sep). |
 
 ## 5. Competitor scan (`docs/market-sizing.md` §5)
 

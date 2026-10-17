@@ -7,20 +7,24 @@ public at \url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Projec
 engine), \code{packages/service} (API routes, worker protocol, sweep), \code{services/aws} (SAM
 templates, five Lambda handlers, DynamoDB/SQS/SES adapters), \code{services/local} (the on-prem
 reference: Fastify, PostgreSQL, Keycloak, Mailpit, nginx), \code{apps/web} (React SPA),
-\code{tools/experiments}, \code{tools/loadtest} (k6), \code{tools/replay}, \code{results/} (raw
-outputs; the only source of reported numbers) and \code{report/}.
+\code{tools/experiments}, \code{tools/loadtest} (k6), \code{tools/replay}, \code{tools/market}
+(page captures and counts), \code{results/} (raw outputs; the only source of measured numbers) and
+\code{report/}.
 
-{\footnotesize
+\noindent\begin{minipage}{\textwidth}\footnotesize
 \begin{verbatim}
 corepack enable && pnpm install --frozen-lockfile
 pnpm lint && pnpm typecheck && pnpm test                       # all packages, as in CI
 STAGE=dev ALARM_EMAIL=<e-mail> tools/scripts/bin/deploy-all.sh  # bundles, sam deploy, SPA upload
 pnpm local:up                                                  # on-prem reference (Docker Compose)
-TARGET=dev tools/experiments/bin/run-table3.sh                 # Table 3 experiments x 3 runs, then k6
-pnpm replay --seeds 1000 --out results/<date>-replay           # mechanism comparison
+TARGET=dev tools/experiments/bin/run-table3.sh                 # acceptance-target experiments, then k6
+pnpm replay --seeds 1000                                       # mechanism comparison -> results/replay/
 python3 tools/experiments/cost/model.py                        # cost model -> results/cost/
-python3 -I report/tools/numbers.py && ./report/build.sh -t Final -m 10   # numbers file, this PDF
-\end{verbatim}}
+python3 -I tools/market/count.py                               # market own counts -> results/market/
+python3 -I report/tools/numbers.py && python3 -I report/tools/make_figures.py   # numbers, charts
+./report/build.sh -t Final -m 10                               # this PDF, with its checks
+\end{verbatim}
+\end{minipage}
 
 \begin{table}[h]
 \centering\footnotesize

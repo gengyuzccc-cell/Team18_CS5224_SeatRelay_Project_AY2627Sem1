@@ -65,7 +65,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1126 macros, 973 with data, 153 pending.
+1135 macros, 993 with data, 142 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -212,29 +212,30 @@ Source: `runId 3a636ec3-6a43-46f2-88ce-dd04a3288809, target dev, started 2026-10
 
 ### Expiry race (dev)
 
-Source: `runId 1b862065-3e76-4168-9f19-5d7c440d0ce5, target dev, started 2026-10-17T13:43:06.037Z, commit c1d066056b2c (dirty)` — 19/19 with data.
+Source: `runId e1be2b0b-85f6-41d5-b50a-4410abb7cb07, target dev, started 2026-10-17T15:46:25.018Z, commit 00faa52984fa` — 20/20 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\ExpiryRaceVerdict` | FAIL | results/2026-10-17-expiry-race/meta.json: ok |
-| `\ExpiryRaceRunId` | 1b862065 | results/2026-10-17-expiry-race/meta.json: runId (first 8 characters) |
-| `\ExpiryRaceDate` | 2026-10-17 | results/2026-10-17-expiry-race/meta.json: startedAt (UTC date) |
-| `\ExpiryRaceCommit` | c1d0660 | results/2026-10-17-expiry-race/meta.json: commit.hash (7 characters) |
-| `\ExpiryRaceRuns` | 3 | results/2026-10-17-expiry-race/meta.json: runs |
-| `\ExpiryRaceChecksPassed` | 26 | results/2026-10-17-expiry-race/meta.json: checks.passed |
-| `\ExpiryRaceChecksTotal` | 27 | results/2026-10-17-expiry-race/meta.json: checks.total |
-| `\ExpiryRaceRunsPassed` | 2 | results/2026-10-17-expiry-race/checks.csv: runs whose check rows are all ok |
-| `\ExpiryRaceMarginMs` | 200 | results/2026-10-17-expiry-race/meta.json: params.marginMs |
-| `\ExpiryRaceEarlyAttempts` | 3 | results/2026-10-17-expiry-race/raw.csv: variant = early (rows) |
-| `\ExpiryRaceEarlyApplied` | 2 | results/2026-10-17-expiry-race/raw.csv: variant = early, verdict = PASS |
-| `\ExpiryRaceEarlyInconclusive` | 0 | results/2026-10-17-expiry-race/raw.csv: variant = early, verdict = INCONCLUSIVE |
-| `\ExpiryRaceLateTrials` | 3 | results/2026-10-17-expiry-race/raw.csv: variant = late (rows) |
-| `\ExpiryRaceLateRejected` | 3 | results/2026-10-17-expiry-race/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED |
-| `\ExpiryRaceOrderTimerFirst` | 3 | results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' |
-| `\ExpiryRaceOrderTimerWhileQueued` | 0 | results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' |
-| `\ExpiryRaceOrderAcceptTickFirst` | 0 | results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' |
-| `\ExpiryRaceLateTicks` | 3 | results/2026-10-17-expiry-race/meta.json: lateTicks |
-| `\ExpiryRaceLateTicksNoEffect` | 3 | results/2026-10-17-expiry-race/late-tick.csv: ok = true |
+| `\ExpiryRaceVerdict` | PASS | results/2026-10-17-expiry-race-4/meta.json: ok |
+| `\ExpiryRaceRunId` | e1be2b0b | results/2026-10-17-expiry-race-4/meta.json: runId (first 8 characters) |
+| `\ExpiryRaceDate` | 2026-10-17 | results/2026-10-17-expiry-race-4/meta.json: startedAt (UTC date) |
+| `\ExpiryRaceCommit` | 00faa52 | results/2026-10-17-expiry-race-4/meta.json: commit.hash (7 characters) |
+| `\ExpiryRaceRuns` | 3 | results/2026-10-17-expiry-race-4/meta.json: runs |
+| `\ExpiryRaceChecksPassed` | 27 | results/2026-10-17-expiry-race-4/meta.json: checks.passed |
+| `\ExpiryRaceChecksTotal` | 27 | results/2026-10-17-expiry-race-4/meta.json: checks.total |
+| `\ExpiryRaceRunsPassed` | 3 | results/2026-10-17-expiry-race-4/checks.csv: runs whose check rows are all ok |
+| `\ExpiryRaceMarginMs` | 200 | results/2026-10-17-expiry-race-4/meta.json: params.marginMs |
+| `\ExpiryRaceEarlyAttempts` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = early (rows) |
+| `\ExpiryRaceEarlyApplied` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = PASS |
+| `\ExpiryRaceEarlyInconclusive` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = INCONCLUSIVE |
+| `\ExpiryRaceEarlyArrivedLate` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) |
+| `\ExpiryRaceLateTrials` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late (rows) |
+| `\ExpiryRaceLateRejected` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED |
+| `\ExpiryRaceOrderTimerFirst` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' |
+| `\ExpiryRaceOrderTimerWhileQueued` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' |
+| `\ExpiryRaceOrderAcceptTickFirst` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' |
+| `\ExpiryRaceLateTicks` | 3 | results/2026-10-17-expiry-race-4/meta.json: lateTicks |
+| `\ExpiryRaceLateTicksNoEffect` | 3 | results/2026-10-17-expiry-race-4/late-tick.csv: ok = true |
 
 ### Failure recovery (dev)
 
@@ -331,17 +332,17 @@ Source: `runId 3393de39-7f0b-4404-994e-cc912749aec4, target dev, started 2026-10
 
 ### Table 3 series (dev): failures and commits
 
-Source: `correctness: results/2026-10-17-correctness`; `preference-order: results/2026-10-17-preference-order`; `concurrency: results/2026-10-17-concurrency`; `repeat-execution: results/2026-10-17-repeat-execution`; `expiry-race: results/2026-10-17-expiry-race`; `failure-recovery: results/2026-10-17-failure-recovery`; `access-control: results/2026-10-17-access-control`; `backfill: results/2026-10-17-backfill` — 7/7 with data.
+Source: `correctness: results/2026-10-17-correctness`; `preference-order: results/2026-10-17-preference-order`; `concurrency: results/2026-10-17-concurrency`; `repeat-execution: results/2026-10-17-repeat-execution`; `expiry-race: results/2026-10-17-expiry-race-4`; `failure-recovery: results/2026-10-17-failure-recovery`; `access-control: results/2026-10-17-access-control`; `backfill: results/2026-10-17-backfill` — 7/7 with data.
 
 | Macro | Value | Source |
 |---|---|---|
 | `\SeriesExperiments` | 8 | meta.json of each selected run |
-| `\SeriesFailed` | 3 | meta.json ok = false of each selected run |
-| `\SeriesPassed` | 5 | meta.json ok = true of each selected run |
-| `\SeriesFailedNames` | concurrency, expiry-race, backfill | meta.json ok = false of each selected run |
-| `\SeriesCommits` | 227de3d, ec54916, c1d0660 | meta.json commit.hash of each selected run (in run order) |
-| `\SeriesCommitCount` | 3 | meta.json commit.hash (distinct) |
-| `\SeriesDirtyRuns` | 8 | meta.json commit.dirty = true |
+| `\SeriesFailed` | 2 | meta.json ok = false of each selected run |
+| `\SeriesPassed` | 6 | meta.json ok = true of each selected run |
+| `\SeriesFailedNames` | concurrency, backfill | meta.json ok = false of each selected run |
+| `\SeriesCommits` | 227de3d, ec54916, c1d0660, 00faa52 | meta.json commit.hash of each selected run (in run order) |
+| `\SeriesCommitCount` | 4 | meta.json commit.hash (distinct) |
+| `\SeriesDirtyRuns` | 7 | meta.json commit.dirty = true |
 
 ### Timer-path relays seen outside the backfill experiment (dev)
 
@@ -355,17 +356,17 @@ Source: `results/2026-10-17-smoke`; `results/2026-10-17-failure-recovery` — 3/
 
 ### Performance: k6 matrix
 
-Source: `results/loadtest/2026-10-17` — 54/117 with data.
+Source: `results/loadtest/2026-10-17` — 73/125 with data.
 
 | Macro | Value | Source |
 |---|---|---|
 | `\PerfRoundsPerLevel` | 3 | report/tools/resultsdb.py: LOADTEST_ROUNDS (tools/loadtest run-matrix default) |
 | `\PerfDate` | 2026-10-17 | results/loadtest/2026-10-17/raw.csv: directory name |
-| `\PerfCommit` | c1d0660 | results/loadtest/2026-10-17/raw.csv: commit |
+| `\PerfCommit` | 410622a, c1d0660 | results/loadtest/2026-10-17/raw.csv: commit |
 | `\PerfDevLevelsComplete` | 6 | results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds |
 | `\PerfDevMatrixComplete` | complete | results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds |
-| `\PerfLocalLevelsComplete` | 0 | results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds |
-| `\PerfLocalMatrixComplete` | PENDING: k6 matrix (local): 0 of 6 levels have all 3 rounds | results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds |
+| `\PerfLocalLevelsComplete` | 2 | results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds |
+| `\PerfLocalMatrixComplete` | PENDING: k6 matrix (local): 2 of 6 levels have all 3 rounds | results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds |
 | `\PerfDevCrossVUTenReadPNinetyFiveMs` | 290 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenAcceptPNinetyFiveMs` | 315 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenSettlePNinetyFiveMs` | 803 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
@@ -420,33 +421,33 @@ Source: `results/loadtest/2026-10-17` — 54/117 with data.
 | `\PerfDevHotspotVUFiftyQueueAgeMaxS` | 25 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyRounds` | 3 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, rows (count over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyUnsettledRounds` | 1 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 |
-| `\PerfLocalCrossVUTenReadPNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenAcceptPNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenServerSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenErrorPct` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenQueueAgeMaxS` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenRounds` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rows (count over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTenUnsettledRounds` | PENDING: k6 cross-workshop at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 |
-| `\PerfLocalCrossVUTwentyFiveReadPNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveAcceptPNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveServerSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveErrorPct` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveQueueAgeMaxS` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveRounds` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rows (count over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUTwentyFiveUnsettledRounds` | PENDING: k6 cross-workshop at 25 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 |
-| `\PerfLocalCrossVUFiftyReadPNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftySettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyErrorPct` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyQueueAgeMaxS` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyRounds` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rows (count over active rounds; quoted once 3 rounds exist) |
-| `\PerfLocalCrossVUFiftyUnsettledRounds` | PENDING: k6 cross-workshop at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 |
+| `\PerfLocalCrossVUTenReadPNinetyFiveMs` | 11 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenAcceptPNinetyFiveMs` | 10 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenSettlePNinetyFiveMs` | 414 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenServerSettlePNinetyFiveMs` | 250 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenQueueAgeMaxS` | PENDING: k6 cross-workshop at 10 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenRounds` | 3 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rows (count over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenUnsettledRounds` | 0 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 |
+| `\PerfLocalCrossVUTwentyFiveReadPNinetyFiveMs` | 17 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveAcceptPNinetyFiveMs` | 14 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveSettlePNinetyFiveMs` | 426 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveServerSettlePNinetyFiveMs` | 365 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveQueueAgeMaxS` | PENDING: k6 cross-workshop at 25 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveRounds` | 3 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rows (count over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveUnsettledRounds` | 0 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 |
+| `\PerfLocalCrossVUFiftyReadPNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftySettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyErrorPct` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyQueueAgeMaxS` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyRounds` | 1 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rows (count over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyUnsettledRounds` | PENDING: k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 |
 | `\PerfLocalHotspotVUTenReadPNinetyFiveMs` | PENDING: k6 hotspot at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenAcceptPNinetyFiveMs` | PENDING: k6 hotspot at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenSettlePNinetyFiveMs` | PENDING: k6 hotspot at 10 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
@@ -474,8 +475,16 @@ Source: `results/loadtest/2026-10-17` — 54/117 with data.
 | `\PerfLocalHotspotVUFiftyQueueAgeMaxS` | PENDING: k6 hotspot at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyRounds` | PENDING: k6 hotspot at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rows (count over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyUnsettledRounds` | PENDING: k6 hotspot at 50 VUs on local not yet run | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 |
-| `\PerfLocalCpuPeakPct` | PENDING: docker-stats.csv (local k6 matrix) not yet recorded | results/loadtest/2026-10-17/docker-stats.csv: cpuPercent summed over containers per sample (max) |
-| `\PerfLocalMemPeakMiB` | PENDING: docker-stats.csv (local k6 matrix) not yet recorded | results/loadtest/2026-10-17/docker-stats.csv: memUsageMiB summed over containers per sample (max) |
+| `\PerfDevVerdict` | FAIL | results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfDevLevelsMet` | 2 | results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfDevLevels` | 6 | results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfDevMaxVUsMet` | 10 | results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfLocalVerdict` | PENDING: k6 matrix (local) not complete | results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfLocalLevelsMet` | PENDING: k6 matrix (local) not complete | results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfLocalLevels` | PENDING: k6 matrix (local) not complete | results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfLocalMaxVUsMet` | PENDING: k6 matrix (local) not complete | results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) |
+| `\PerfLocalCpuPeakPct` | PENDING: local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds) | results/loadtest/2026-10-17/docker-stats.csv: cpuPercent summed over containers per sample (max) |
+| `\PerfLocalMemPeakMiB` | PENDING: local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds) | results/loadtest/2026-10-17/docker-stats.csv: memUsageMiB summed over containers per sample (max) |
 
 ### Cost model (cloud three layers vs on-prem)
 
@@ -1325,8 +1334,6 @@ Source: none yet — 0/8 with data.
 - results/2026-10-17-backfill: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-concurrency: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-correctness: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-expiry-race-2: no meta.json (still running or aborted), skipped
-- results/2026-10-17-expiry-race: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-failure-recovery: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-preference-order: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-repeat-execution: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run

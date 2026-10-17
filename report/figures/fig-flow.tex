@@ -25,7 +25,9 @@
   \draw[sr/flow] (que) -- node[sr/lbl, above=1pt, align=center] {free seat in an\\acceptable session} (off);
   \draw[sr/flow] (off) -- node[sr/lbl, above=1pt] {accept} (con);
   \draw[sr/flow] (con.east |- can.west) -- node[sr/lbl, above=1pt] {cancel} (can.west);
-  \draw[sr/flow] (off.north) .. controls +(0,0.62) and +(0,0.55) .. node[sr/lbl, pos=0.5, above=0pt] {cancel (from any state)} (can.north);
+  % cancel from QUEUED or OFFERED (R6): one line from each, joined above the boxes
+  \draw[sr/flow] (que.north) -- ++(0,0.32) coordinate (cq) -| node[sr/lbl, pos=0.25, above=0pt] {cancel (from QUEUED or OFFERED)} (can.north);
+  \draw[draw=srInk, line width=0.55pt] (off.north) -- (off.north |- cq);
   % decline or expiry: R5
   \draw[sr/flow] (off.south west) .. controls +(-0.4,-0.65) and +(0.6,-0.65) ..
     node[sr/lbl, below=1pt, align=center] {decline or expire:\\that session dropped (R5)} (que.south east);

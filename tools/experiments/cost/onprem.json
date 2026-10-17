@@ -26,23 +26,38 @@
     "verification": "verified_snippet",
     "retrieved": "2026-10-16",
     "alternatives": [
-      {"model": "Prittec F8C (Intel N150, 16 GB, 512 GB) from a Singapore Carousell retailer, 3-year carry-in warranty", "price_sgd": 438.0, "source_url": "https://www.carousell.sg/intel-n150/q/", "verification": "verified_snippet", "notes": "Cheaper local option; used as the low-hardware sensitivity (--server-price-sgd 438)."},
-      {"model": "Beelink Mini S12 Pro US street price", "price_usd": 199.0, "source_url": "https://www.notebookcheck.net/Intel-N100-performance-debut-Beelink-Mini-S12-Pro-mini-PC-review.758950.0.html", "verification": "verified_secondary", "notes": "Review quotes about US$200 online for the 16 GB/512 GB unit; shows how much of the SG price is import margin."}
+      {
+        "model": "Prittec F8C (Intel N150, 16 GB, 512 GB) from a Singapore Carousell retailer, 3-year carry-in warranty",
+        "price_sgd": 438.0,
+        "source_url": "https://www.carousell.sg/intel-n150/q/",
+        "verification": "verified_snippet",
+        "notes": "Cheaper local option; used as the low-hardware sensitivity (--server-price-sgd 438)."
+      },
+      {
+        "model": "Beelink Mini S12 Pro US street price",
+        "price_usd": 199.0,
+        "source_url": "https://www.notebookcheck.net/Intel-N100-performance-debut-Beelink-Mini-S12-Pro-mini-PC-review.758950.0.html",
+        "verification": "verified_secondary",
+        "notes": "Review quotes about US$200 online for the 16 GB/512 GB unit; shows how much of the SG price is import margin."
+      }
     ],
-    "amortisation_years": [3, 4],
+    "amortisation_years": [
+      3,
+      4
+    ],
     "amortisation_method": "straight-line, zero residual value",
     "capacity_registrations_per_month": 1000000,
     "capacity_note": "assumption: one N100-class machine running Postgres + the Node server handles up to ~1M registrations/month (~2.5M commands/month, <1 command/s average, ~40/s at 50x peak); beyond that the model adds a second identical machine (ceil(load/capacity)). Refine with the services/local k6 + docker stats measurements (plan §2.7)."
   },
   "ups": {
     "model": "APC Back-UPS CS 650VA 230V (BK650-AS)",
-    "price_sgd": 202.40,
+    "price_sgd": 212.75,
     "price_includes_gst": true,
     "source_url": "https://sourceit.com.sg/products/apc-back-ups-cs-650va-230v-asean-bk650-as",
-    "verification": "verified_snippet",
-    "retrieved": "2026-10-16",
+    "verification": "verified_official",
+    "retrieved": "2026-10-17",
     "amortised_with_server": true,
-    "notes": "Battery replacement every ~3-5 years is ignored (small). Schneider SG eShop lists the same unit at S$226 before GST."
+    "notes": "Official SourceIT product page on 2026-10-17: 'APC BACK-UPS CS 650VA 230V ASEAN ... S$212.75' (the 2026-10-16 search excerpt showed S$202.40). Battery replacement every ~3-5 years is ignored (small). Schneider SG eShop lists the same unit at S$226 before GST."
   },
   "power": {
     "idle_w": 8.8,
@@ -53,7 +68,12 @@
     "source_detail": "Notebookcheck review of the same model: idle ~8.8 W average, load ~20.1 W average, ~32.2 W peak (figures as relayed by secondary summaries; the review page itself was not fetched). Corroboration: igorslab.de EQ12 (same N100) 20-23 W under Prime95; starryhope.com 9-11 W idle / 20-25 W load.",
     "verification": "verified_secondary",
     "ups_overhead_note": "assumption: ~3 W standby draw of the UPS itself.",
-    "utilisation_by_tier": {"1000": 0.02, "10000": 0.05, "100000": 0.20, "default_formula": "clamp(0.02 + 0.18 * (registrations / 100000), 0.02, 0.95)"},
+    "utilisation_by_tier": {
+      "1000": 0.02,
+      "10000": 0.05,
+      "100000": 0.2,
+      "default_formula": "clamp(0.02 + 0.18 * (registrations / 100000), 0.02, 0.95)"
+    },
     "utilisation_note": "assumption: fraction of wall-clock time at load_w; the rest at idle_w. Scales with the registration tier."
   },
   "electricity": {
@@ -78,11 +98,12 @@
       "notes": "Hardware-increment view assumes the organisation's existing fibre line is shared; the only increment is a static public IPv4 (MyRepublic one-time S$51 per the HardwareZone ISP comparison thread)."
     },
     "dedicated_line": {
-      "monthly_sgd": 108.0,
+      "monthly_sgd": 139.52,
       "plan": "M1 Fibre BizPac 1 Gbps business broadband, 24-month contract, static IP included",
       "source_url": "https://www.m1.com.sg/business/deals/fibre-broadband",
-      "verification": "verified_snippet",
-      "notes": "Fully-amortised view uses a dedicated business line. Home-grade 1 Gbps plans are S$30-40/month (shopback.sg 2026 comparison) but carry no static IP and no business SLA."
+      "verification": "verified_official",
+      "notes": "Fully-amortised view uses a dedicated business line. Official M1 page on 2026-10-17 ('Prices are inclusive of GST'): 1 Gbps 24-month S$139.52/mth with a free static IP (36-month S$128.62; 500 Mbps S$100.28 / S$89.38). The earlier S$108 search excerpt (2026-10-16) is no longer shown. Home-grade 1 Gbps plans are S$30-40/month but carry no static IP and no business SLA.",
+      "retrieved": "2026-10-17"
     }
   },
   "backup": {
@@ -119,7 +140,7 @@
     "alternative": {
       "provider": "Postmark",
       "plan": "Basic: US$15/month for 10,000 e-mails, US$1.80 per extra 1,000",
-      "usd_per_1000_effective_at_10k": 1.50,
+      "usd_per_1000_effective_at_10k": 1.5,
       "source_url": "https://postmarkapp.com/pricing",
       "verification": "verified_secondary",
       "notes": "Shown as a sensitivity (--email-postmark). Mailpit in services/local is a development sink only; a real deployment must use a transactional provider."

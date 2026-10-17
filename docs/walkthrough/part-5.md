@@ -61,9 +61,9 @@ Table 3 rows come from the dev report runs. The run started on 2026-10-17
 | Correctness: verdict, scenario runs, checks, over-capacity, double holds | [PENDING] | `results/<date>-correctness/summary.md` (`\CorrectnessVerdict`, `\CorrectnessScenarioRunsPassed`, `\CorrectnessChecksPassed`, `\CorrectnessOverCapacity`, `\CorrectnessDoubleHolds`) |
 | Preference order: cases as predicted, non-acceptable offers | [PENDING] | `results/<date>-preference-order/summary.md` (`\PrefOrderCasesPassed`, `\PrefOrderNonAcceptable`) |
 | Concurrency: verdict, META conflict retries, settle p95 | [PENDING] | `results/<date>-concurrency/summary.md` (`\ConcurrencyVerdict`, `\ConcurrencyMetaRetries`, `\ConcurrencySettleServerPNinetyFiveMs`) |
-| Repeat execution: probes, AFTER_COMMIT cases | [PENDING] | `results/<date>-repeat-execution/summary.md` (`\RepeatProbesPassed`, `\RepeatAfterCommitPassed`) |
+| Repeat execution: duplicate-submission probes (5 concurrent copies each), AFTER_COMMIT probes (one POST, then redelivery) | [PENDING] | `results/<date>-repeat-execution/summary.md` (`\RepeatDupProbesPassed`/`\RepeatDupProbes`, `\RepeatAfterCommitPassed`/`\RepeatAfterCommitCases`) |
 | Expiry race: early applied, late rejected, stale ticks without effect | [PENDING] | `results/<date>-expiry-race/summary.md` (`\ExpiryRaceEarlyApplied`, `\ExpiryRaceLateRejected`, `\ExpiryRaceLateTicksNoEffect`) |
-| Failure recovery: fault cases, notifier backlog drained after restore | [PENDING] | `results/<date>-failure-recovery/summary.md` (`\FailureVerdict`, `\FailureNotifierOutageMaxS`) |
+| Failure recovery: fault cases, notifier backlog processed after restore (on dev e-mail is disabled, so the notifications are SKIPPED, not sent) | [PENDING] | `results/<date>-failure-recovery/summary.md` (`\FailureVerdict`, `\FailureNotifierOutageMaxS`) |
 | Access control: negative probes as expected | [PENDING] | `results/<date>-access-control/summary.md` (`\AccessProbesPassed`, `\AccessProbes`) |
 | Expiry-driven backfill: n, p50, p95, max | [PENDING] (target p95 ≤ 120 s) | `results/<date>-backfill/summary.md` (`\BackfillExpiredN`, `\BackfillExpiredPNinetyFiveS`, `\BackfillExpiredMaxS`) |
 | Cancellation-driven backfill | [PENDING] (0 ms by construction) | same file (`\BackfillCancelMaxMs`) |

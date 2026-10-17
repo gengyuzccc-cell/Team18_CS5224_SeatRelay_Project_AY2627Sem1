@@ -6,8 +6,9 @@
 Organisers pay; participants never pay or install anything. We propose two plans: a free tier with
 one open workshop at a time, and an organiser plan at \sd10 per organisation per month (\sd120 a
 year) with any number of open workshops and co-organisers. The prototype does not enforce plan
-limits. The first channel is NUS student organisations and units that run repeated workshops,
-starting with the pilot organiser (\S\ref{sec:pilot}). The price is defensible if
+limits; organisers already create their organisations themselves. The first channel is NUS student
+organisations and units that run repeated workshops, starting with the organiser of the planned
+pilot (\S\ref{sec:pilot}). The price is defensible if
 $h \cdot w \cdot k \geq P$, where $h$ is the coordination time saved per multi-session event, $w$
 the value of an organiser hour and $k$ the number of such events per organiser-year. The organiser
 interviews give $h$ (median \InterviewHoursMedian{} hours per event) and the willingness to pay
@@ -18,9 +19,10 @@ workshop end as duplicates that the organiser must chase, against \ReplayDupConf
 with one queue.
 
 \paragraph{Cost accounting in three layers.}
-Cloud cost is computed as usage $\times$ unit price for the \CostPricesTotal{} billable dimensions the
-stacks use in \code{ap-southeast-1}; \CostPricesVerified{} of the \CostPricesTotal{} unit prices were read from
-the AWS Price List API on \CostPricingDate~\cite{aws-pricelist-bulk-api}. The layers are (1)~list
+Cloud cost is computed as usage $\times$ unit price for the \CostDimensionsUsed{} billable dimensions
+the stacks use in \code{ap-southeast-1}; \CostPricesVerified{} of the \CostPricesTotal{} entries of
+the price file (which also holds two switched-off alternatives) were read from the AWS Price List API
+on \CostPricingDate~\cite{aws-pricelist-bulk-api}. The layers are (1)~list
 price, (2)~after the always-free allowances~\cite{aws-free-tier}, and (3)~after credits, which is
 \usd0 while the account's credits last. Layer~3 is why billing tools show a net cost of zero; our
 budget alarms therefore exclude credits, whose inclusion is the default~\cite{aws-budgets-costtypes}.
@@ -31,12 +33,24 @@ per registration, \CostAssumeReadsPerCommand{} API reads per command including p
 listed in \code{results/cost/model-summary.md}).
 
 \paragraph{On-premise reference.}
-The on-premise build runs the same engine and single-page application (SPA) (\code{services/local}:
-Docker Compose with PostgreSQL, Keycloak, Mailpit and nginx) on one mini-PC. Two views are priced:
-\emph{increment only} (hardware amortised over \CostAmortisationYears{} years, electricity, a static
-IP, e-mail at the same provider price, no labour) and \emph{fully amortised} (plus a business fibre
-line, an off-site backup copy and operations labour, which is an assumption). Load, retention and
-functionality are held equal; availability is not: one machine has no failover, whereas the cloud
+The same engine and single-page application (SPA) also run on a self-hosted stack
+(\code{services/local}: Docker Compose with PostgreSQL, Keycloak, Mailpit and nginx). That compose
+file is the functional reference; the priced service would run it on one mini-PC with Keycloak in
+production mode behind TLS, a transactional e-mail provider instead of the Mailpit sink, and backups.
+\IfPending{\PerfLocalCpuPeakPct}{We have not load-tested it
+(\pending{k6 and docker-stats run of services/local}), so}{Under the k6 matrix it peaked at
+\PerfLocalCpuPeakPct\,\% of one core and \PerfLocalMemPeakMiB\,MiB;} one machine's capacity
+(\CostOnpremCapacityRegs{} registrations a month) is an assumption. Two views are
+priced. \emph{Increment only}: an N100 mini-PC at \sd\CostOnpremServerPriceSgd~\cite{onprem-newegg}
+with a UPS~\cite{onprem-ups} and a backup disk~\cite{onprem-disk}, amortised over
+\CostAmortisationYears{} years; \CostOnpremLoadWatts\,W at load~\cite{onprem-notebookcheck} at
+\CostOnpremTariffCents{} cents/kWh~\cite{onprem-sp-tariff}; a static IP~\cite{onprem-static-ip};
+e-mail at the SES price; no labour. \emph{Fully amortised}: plus a business fibre line at
+\sd\CostOnpremLineSgd{} a month~\cite{onprem-m1-fibre}, an off-site backup copy~\cite{onprem-b2} and
+operations labour of \CostOnpremLabourHours{}\,h a month at \sd\CostOnpremLabourRateSgd/h, which is
+our assumption; \sd\CostFxSgdPerUsd{} = \usd1~\cite{onprem-fx}. \pending{re-run the cost model with
+the fibre and UPS prices re-checked on 2026-10-17 (report/sources.md)}. Load, retention and function
+are held equal in the model; availability is not: one machine has no failover, whereas the cloud
 services span several availability zones (AZs).
 
 \begin{table}[t]
@@ -67,9 +81,10 @@ with the crossover points (the after-credits layer is 0 and not drawn). Sources:
 \end{table}
 
 \paragraph{Result.}
-At 1{,}000 registrations a month the cloud list price (\usd\CostTierOneKCloudListUsd) is mostly
-fixed items, CloudWatch dashboard, metrics and alarms (\usd\CostSvcCloudWatchOneKListUsd) and
-Cognito (\usd\CostSvcCognitoUserPoolsOneKListUsd), which the free allowances cover; what remains is
+At 1{,}000 registrations a month the modelled cloud list price (\usd\CostTierOneKCloudListUsd) is
+mostly CloudWatch's fixed items, a dashboard, custom metrics and alarms
+(\usd\CostSvcCloudWatchOneKListUsd), and Cognito monthly active users
+(\usd\CostSvcCognitoUserPoolsOneKListUsd), which the free allowances cover; what remains is
 \usd\CostTierOneKCloudAfterFreeUsd{} (Table~\ref{tab:cost}). At 100{,}000 registrations Cognito
 dominates the list price (\usd\CostSvcCognitoUserPoolsHundredKListUsd{} of
 \usd\CostTierHundredKCloudListUsd). The fully amortised on-prem view is nearly flat because labour

@@ -253,45 +253,47 @@
 
 % ==============================================================================================
 % Expiry race (dev)
-%   source: runId 1b862065-3e76-4168-9f19-5d7c440d0ce5, target dev, started 2026-10-17T13:43:06.037Z, commit c1d066056b2c (dirty)
+%   source: runId e1be2b0b-85f6-41d5-b50a-4410abb7cb07, target dev, started 2026-10-17T15:46:25.018Z, commit 00faa52984fa
 % ==============================================================================================
-% results/2026-10-17-expiry-race/meta.json: ok -- expiry-race: verdict (PASS/FAIL)
-\newcommand{\ExpiryRaceVerdict}{FAIL}
-% results/2026-10-17-expiry-race/meta.json: runId (first 8 characters) -- expiry-race: run id
-\newcommand{\ExpiryRaceRunId}{1b862065}
-% results/2026-10-17-expiry-race/meta.json: startedAt (UTC date) -- expiry-race: date of the run
+% results/2026-10-17-expiry-race-4/meta.json: ok -- expiry-race: verdict (PASS/FAIL)
+\newcommand{\ExpiryRaceVerdict}{PASS}
+% results/2026-10-17-expiry-race-4/meta.json: runId (first 8 characters) -- expiry-race: run id
+\newcommand{\ExpiryRaceRunId}{e1be2b0b}
+% results/2026-10-17-expiry-race-4/meta.json: startedAt (UTC date) -- expiry-race: date of the run
 \newcommand{\ExpiryRaceDate}{2026-10-17}
-% results/2026-10-17-expiry-race/meta.json: commit.hash (7 characters) -- expiry-race: commit of the code under test
-\newcommand{\ExpiryRaceCommit}{c1d0660}
-% results/2026-10-17-expiry-race/meta.json: runs -- expiry-race: repetitions in the invocation
+% results/2026-10-17-expiry-race-4/meta.json: commit.hash (7 characters) -- expiry-race: commit of the code under test
+\newcommand{\ExpiryRaceCommit}{00faa52}
+% results/2026-10-17-expiry-race-4/meta.json: runs -- expiry-race: repetitions in the invocation
 \newcommand{\ExpiryRaceRuns}{3}
-% results/2026-10-17-expiry-race/meta.json: checks.passed -- expiry-race: checks passed
-\newcommand{\ExpiryRaceChecksPassed}{26}
-% results/2026-10-17-expiry-race/meta.json: checks.total -- expiry-race: checks in total
+% results/2026-10-17-expiry-race-4/meta.json: checks.passed -- expiry-race: checks passed
+\newcommand{\ExpiryRaceChecksPassed}{27}
+% results/2026-10-17-expiry-race-4/meta.json: checks.total -- expiry-race: checks in total
 \newcommand{\ExpiryRaceChecksTotal}{27}
-% results/2026-10-17-expiry-race/checks.csv: runs whose check rows are all ok -- expiry-race: runs with every check passed
-\newcommand{\ExpiryRaceRunsPassed}{2}
-% results/2026-10-17-expiry-race/meta.json: params.marginMs -- ACCEPT offset from expiresAt (ms)
+% results/2026-10-17-expiry-race-4/checks.csv: runs whose check rows are all ok -- expiry-race: runs with every check passed
+\newcommand{\ExpiryRaceRunsPassed}{3}
+% results/2026-10-17-expiry-race-4/meta.json: params.marginMs -- ACCEPT offset from expiresAt (ms)
 \newcommand{\ExpiryRaceMarginMs}{200}
-% results/2026-10-17-expiry-race/raw.csv: variant = early (rows) -- early ACCEPT attempts
+% results/2026-10-17-expiry-race-4/raw.csv: variant = early (rows) -- early ACCEPT attempts
 \newcommand{\ExpiryRaceEarlyAttempts}{3}
-% results/2026-10-17-expiry-race/raw.csv: variant = early, verdict = PASS -- early ACCEPTs applied
-\newcommand{\ExpiryRaceEarlyApplied}{2}
-% results/2026-10-17-expiry-race/raw.csv: variant = early, verdict = INCONCLUSIVE -- early ACCEPTs delayed past expiresAt by the queue (repeated)
+% results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = PASS -- early ACCEPTs applied
+\newcommand{\ExpiryRaceEarlyApplied}{3}
+% results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = INCONCLUSIVE -- early ACCEPTs delayed past expiresAt by the queue (repeated)
 \newcommand{\ExpiryRaceEarlyInconclusive}{0}
-% results/2026-10-17-expiry-race/raw.csv: variant = late (rows) -- late ACCEPT trials
+% results/2026-10-17-expiry-race-4/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) -- early ACCEPTs that reached the API after expiresAt (client send timing)
+\newcommand{\ExpiryRaceEarlyArrivedLate}{0}
+% results/2026-10-17-expiry-race-4/raw.csv: variant = late (rows) -- late ACCEPT trials
 \newcommand{\ExpiryRaceLateTrials}{3}
-% results/2026-10-17-expiry-race/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED -- late ACCEPTs rejected OFFER_EXPIRED
+% results/2026-10-17-expiry-race-4/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED -- late ACCEPTs rejected OFFER_EXPIRED
 \newcommand{\ExpiryRaceLateRejected}{3}
-% results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' -- late trials where the timer tick processed before the ACCEPT arrived
+% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' -- late trials where the timer tick processed before the ACCEPT arrived
 \newcommand{\ExpiryRaceOrderTimerFirst}{3}
-% results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' -- late trials where the timer tick processed while the ACCEPT was queued
+% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' -- late trials where the timer tick processed while the ACCEPT was queued
 \newcommand{\ExpiryRaceOrderTimerWhileQueued}{0}
-% results/2026-10-17-expiry-race/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' -- late trials where the the ACCEPT's own tick-first pass relayed the seat
+% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' -- late trials where the the ACCEPT's own tick-first pass relayed the seat
 \newcommand{\ExpiryRaceOrderAcceptTickFirst}{0}
-% results/2026-10-17-expiry-race/meta.json: lateTicks -- stale TICKs injected
+% results/2026-10-17-expiry-race-4/meta.json: lateTicks -- stale TICKs injected
 \newcommand{\ExpiryRaceLateTicks}{3}
-% results/2026-10-17-expiry-race/late-tick.csv: ok = true -- stale TICKs without any effect
+% results/2026-10-17-expiry-race-4/late-tick.csv: ok = true -- stale TICKs without any effect
 \newcommand{\ExpiryRaceLateTicksNoEffect}{3}
 
 % ==============================================================================================
@@ -459,7 +461,7 @@
 %   source: preference-order: results/2026-10-17-preference-order
 %   source: concurrency: results/2026-10-17-concurrency
 %   source: repeat-execution: results/2026-10-17-repeat-execution
-%   source: expiry-race: results/2026-10-17-expiry-race
+%   source: expiry-race: results/2026-10-17-expiry-race-4
 %   source: failure-recovery: results/2026-10-17-failure-recovery
 %   source: access-control: results/2026-10-17-access-control
 %   source: backfill: results/2026-10-17-backfill
@@ -467,17 +469,17 @@
 % meta.json of each selected run -- Table 3 experiments with a complete run
 \newcommand{\SeriesExperiments}{8}
 % meta.json ok = false of each selected run -- experiments whose run failed a check
-\newcommand{\SeriesFailed}{3}
+\newcommand{\SeriesFailed}{2}
 % meta.json ok = true of each selected run -- experiments whose run passed every check
-\newcommand{\SeriesPassed}{5}
+\newcommand{\SeriesPassed}{6}
 % meta.json ok = false of each selected run -- names of the failed experiments
-\newcommand{\SeriesFailedNames}{concurrency, expiry-race, backfill}
+\newcommand{\SeriesFailedNames}{concurrency, backfill}
 % meta.json commit.hash of each selected run (in run order) -- commits recorded by the series
-\newcommand{\SeriesCommits}{227de3d, ec54916, c1d0660}
+\newcommand{\SeriesCommits}{227de3d, ec54916, c1d0660, 00faa52}
 % meta.json commit.hash (distinct) -- distinct commits recorded by the series
-\newcommand{\SeriesCommitCount}{3}
+\newcommand{\SeriesCommitCount}{4}
 % meta.json commit.dirty = true -- runs recorded with uncommitted changes in the working tree
-\newcommand{\SeriesDirtyRuns}{8}
+\newcommand{\SeriesDirtyRuns}{7}
 
 % ==============================================================================================
 % Timer-path relays seen outside the backfill experiment (dev)
@@ -500,15 +502,15 @@
 % results/loadtest/2026-10-17/raw.csv: directory name -- date of the load-test matrix
 \newcommand{\PerfDate}{2026-10-17}
 % results/loadtest/2026-10-17/raw.csv: commit -- commit(s) under test
-\newcommand{\PerfCommit}{c1d0660}
+\newcommand{\PerfCommit}{410622a, c1d0660}
 % results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds -- dev: VU levels of the matrix with all rounds recorded
 \newcommand{\PerfDevLevelsComplete}{6}
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- dev: k6 matrix complete
 \newcommand{\PerfDevMatrixComplete}{complete}
 % results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds -- local: VU levels of the matrix with all rounds recorded
-\newcommand{\PerfLocalLevelsComplete}{0}
+\newcommand{\PerfLocalLevelsComplete}{2}
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- local: k6 matrix complete
-\newcommand{\PerfLocalMatrixComplete}{\pending{k6 matrix (local): 0 of 6 levels have all 3 rounds}}
+\newcommand{\PerfLocalMatrixComplete}{\pending{k6 matrix (local): 2 of 6 levels have all 3 rounds}}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: read p95 (GET /workshops), median of rounds (ms)
 \newcommand{\PerfDevCrossVUTenReadPNinetyFiveMs}{290}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
@@ -618,59 +620,59 @@
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev hotspot 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevHotspotVUFiftyUnsettledRounds}{1}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTenReadPNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenReadPNinetyFiveMs}{11}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTenAcceptPNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenAcceptPNinetyFiveMs}{10}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTenSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenSettlePNinetyFiveMs}{414}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTenServerSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenServerSettlePNinetyFiveMs}{250}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalCrossVUTenErrorPct}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalCrossVUTenQueueAgeMaxS}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenQueueAgeMaxS}{\pending{k6 cross-workshop at 10 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rows (count over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: rounds aggregated
-\newcommand{\PerfLocalCrossVUTenRounds}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 -- local cross-workshop 10 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalCrossVUTenUnsettledRounds}{\pending{k6 cross-workshop at 10 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTenUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTwentyFiveReadPNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveReadPNinetyFiveMs}{17}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTwentyFiveAcceptPNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveAcceptPNinetyFiveMs}{14}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTwentyFiveSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveSettlePNinetyFiveMs}{426}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTwentyFiveServerSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveServerSettlePNinetyFiveMs}{365}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on local: cwSettleP95 not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalCrossVUTwentyFiveErrorPct}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalCrossVUTwentyFiveQueueAgeMaxS}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveQueueAgeMaxS}{\pending{k6 cross-workshop at 25 VUs on local: sqsOldestAgeMax not recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rows (count over active rounds; quoted once 3 rounds exist) -- local cross-workshop 25 VUs: rounds aggregated
-\newcommand{\PerfLocalCrossVUTwentyFiveRounds}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 -- local cross-workshop 25 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalCrossVUTwentyFiveUnsettledRounds}{\pending{k6 cross-workshop at 25 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUTwentyFiveUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyReadPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyReadPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftySettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftySettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfLocalCrossVUFiftyErrorPct}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyErrorPct}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfLocalCrossVUFiftyQueueAgeMaxS}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyQueueAgeMaxS}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rows (count over active rounds; quoted once 3 rounds exist) -- local cross-workshop 50 VUs: rounds aggregated
-\newcommand{\PerfLocalCrossVUFiftyRounds}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyRounds}{1}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- local cross-workshop 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfLocalCrossVUFiftyUnsettledRounds}{\pending{k6 cross-workshop at 50 VUs on local not yet run}}
+\newcommand{\PerfLocalCrossVUFiftyUnsettledRounds}{\pending{k6 cross-workshop at 50 VUs on local: 1 of 3 rounds recorded}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: read p95 (GET /workshops), median of rounds (ms)
 \newcommand{\PerfLocalHotspotVUTenReadPNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on local not yet run}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local hotspot 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
@@ -725,10 +727,26 @@
 \newcommand{\PerfLocalHotspotVUFiftyRounds}{\pending{k6 hotspot at 50 VUs on local not yet run}}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- local hotspot 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfLocalHotspotVUFiftyUnsettledRounds}{\pending{k6 hotspot at 50 VUs on local not yet run}}
+% results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
+\newcommand{\PerfDevVerdict}{FAIL}
+% results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: levels that meet every Performance target
+\newcommand{\PerfDevLevelsMet}{2}
+% results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: levels in the matrix
+\newcommand{\PerfDevLevels}{6}
+% results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: largest VU level up to which both scenarios meet every target
+\newcommand{\PerfDevMaxVUsMet}{10}
+% results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
+\newcommand{\PerfLocalVerdict}{\pending{k6 matrix (local) not complete}}
+% results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: levels that meet every Performance target
+\newcommand{\PerfLocalLevelsMet}{\pending{k6 matrix (local) not complete}}
+% results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: levels in the matrix
+\newcommand{\PerfLocalLevels}{\pending{k6 matrix (local) not complete}}
+% results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: largest VU level up to which both scenarios meet every target
+\newcommand{\PerfLocalMaxVUsMet}{\pending{k6 matrix (local) not complete}}
 % results/loadtest/2026-10-17/docker-stats.csv: cpuPercent summed over containers per sample (max) -- on-prem stack peak CPU (% of one core)
-\newcommand{\PerfLocalCpuPeakPct}{\pending{docker-stats.csv (local k6 matrix) not yet recorded}}
+\newcommand{\PerfLocalCpuPeakPct}{\pending{local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds)}}
 % results/loadtest/2026-10-17/docker-stats.csv: memUsageMiB summed over containers per sample (max) -- on-prem stack peak memory (MiB)
-\newcommand{\PerfLocalMemPeakMiB}{\pending{docker-stats.csv (local k6 matrix) not yet recorded}}
+\newcommand{\PerfLocalMemPeakMiB}{\pending{local k6 matrix not yet complete (docker-stats peak quoted once every level has all rounds)}}
 
 % ==============================================================================================
 % Cost model (cloud three layers vs on-prem)
