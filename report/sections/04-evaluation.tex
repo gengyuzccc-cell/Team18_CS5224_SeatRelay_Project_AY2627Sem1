@@ -16,8 +16,10 @@ test passed first (\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\Smo
 \SeriesDirtyRuns{} are flagged dirty only because the runner appended to its own status log under
 \code{results/}. After the series we downloaded the five deployed Lambda bundles: they are
 byte-identical to a build of that commit, and no stack changed during the series
-(\code{results/2026-10-17-table3-dev-q1000-provenance.md}). Run ids and commits of every number are
-listed in \code{report/generated/numbers.tex}.
+(\code{results/2026-10-17-table3-dev-q1000-provenance.md}); \code{report/series.json} pins these
+runs. After the last redeploy (commit \code{\RegressionCommit}: web interface, participant read views and notification
+wording; engine decision code unchanged) we re-ran \RegressionExperiments: \RegressionChecksPassed/\RegressionChecksTotal{}
+checks passed. Run ids and commits of every number are listed in \code{report/generated/numbers.tex}.
 
 \subsection{System results against the acceptance targets}\label{sec:results}
 Table~\ref{tab:results} reproduces the Preliminary report's Table~3, the acceptance contract,

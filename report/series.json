@@ -1,0 +1,20 @@
+{
+  "about": "Run directories the report quotes for the Table 3 series on target dev (report/tools/resultsdb.py latest_run). The series is the re-run at the Lambda quota of 1000 (results/2026-10-17-table3-dev-q1000-provenance.md); later runs of the same experiments are regression checks after a redeploy and are listed separately, not quoted as the series.",
+  "target": "dev",
+  "series": {
+    "smoke": "2026-10-17-smoke-2",
+    "correctness": "2026-10-17-correctness-2",
+    "preference-order": "2026-10-17-preference-order-2",
+    "concurrency": "2026-10-17-concurrency-2",
+    "repeat-execution": "2026-10-17-repeat-execution-2",
+    "expiry-race": "2026-10-17-expiry-race-5",
+    "failure-recovery": "2026-10-17-failure-recovery-2",
+    "access-control": "2026-10-17-access-control-2",
+    "backfill": "2026-10-17-backfill-2"
+  },
+  "regression": [
+    "2026-10-17-smoke-3",
+    "2026-10-17-correctness-3",
+    "2026-10-17-access-control-3"
+  ]
+}

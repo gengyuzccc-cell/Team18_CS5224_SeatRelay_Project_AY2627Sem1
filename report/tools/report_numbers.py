@@ -470,6 +470,26 @@ def section_series(book: Book, runs, target: str) -> None:
     book.num("SeriesDirtyRuns", dirty if present else None, 0, "meta.json commit.dirty = true", "runs recorded with uncommitted changes in the working tree")
 
 
+def section_regression(book: Book, runs) -> None:
+    """Regression runs after a redeploy (report/series.json "regression"): same scripts, later code."""
+    names = db.pinned_series().get("regression") or []
+    by_dir = {run.path.name: run for group in runs.values() for run in group}
+    chosen = [by_dir[name] for name in names if name in by_dir and by_dir[name].complete]
+    book.section("regression", "Regression runs after the last redeploy", "no regression runs listed in report/series.json",
+                 [rel(run.path) for run in chosen] or ["none"])
+    src = "report/series.json regression -> meta.json of each run"
+    passed = sum((run.meta.get("checks") or {}).get("passed", 0) for run in chosen)
+    total = sum((run.meta.get("checks") or {}).get("total", 0) for run in chosen)
+    commits = sorted({(run.commit.get("hash") or "")[:7] for run in chosen})
+    book.num("RegressionRuns", len(chosen) if chosen else None, 0, src, "regression run directories")
+    book.num("RegressionChecksPassed", passed if chosen else None, 0, f"{src}: checks.passed (sum)", "regression checks passed")
+    book.num("RegressionChecksTotal", total if chosen else None, 0, f"{src}: checks.total (sum)", "regression checks in total")
+    book.text("RegressionCommit", ", ".join(commits) if chosen else None, f"{src}: commit.hash", "commit under test in the regression runs")
+    book.text("RegressionExperiments", ", ".join(run.name for run in chosen) if chosen else None, f"{src}: experiment names", "experiments re-run as regression checks")
+    book.text("RegressionVerdict", ("PASS" if all(run.meta.get("ok") for run in chosen) else "FAIL") if chosen else None, f"{src}: ok", "all regression runs passed")
+    book.text("RegressionDirSuffix", "-".join(sorted({str(run.suffix) for run in chosen})) if chosen else None, f"{src}: directory suffix", "suffix of the regression directories")
+
+
 THROTTLE_WINDOWS = (("concurrency", "Concurrency"), ("backfill", "Backfill"), ("k6-matrix", "Ksix"))
 
 
@@ -1714,6 +1734,7 @@ def main(argv=None) -> int:
     section_backfill(book, runs, args.target)
     section_series(book, runs, args.target)
     section_throttling(book, runs, results, args.target)
+    section_regression(book, runs)
     section_timer_path(book, runs, args.target)
     section_loadtest(book, results)
     section_cost(book, results)

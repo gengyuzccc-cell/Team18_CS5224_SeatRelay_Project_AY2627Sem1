@@ -1,0 +1,673 @@
+scenario,step,ok,expected,actual,run,ms
+register-confirm,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,1,894
+register-confirm,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,1,
+register-confirm,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,886
+register-confirm,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+register-confirm,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,08 A REGISTER again (R1),true,REJECTED(ALREADY_REGISTERED),REJECTED(ALREADY_REGISTERED) none,1,908
+register-confirm,09 verify after A REGISTER again (R1),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,"10 B REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,1,880
+register-confirm,"11 B REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,1,
+register-confirm,"12 verify after B REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,13 C REGISTER [S1] (full),true,APPLIED,APPLIED QUEUED#1,1,867
+register-confirm,14 C REGISTER [S1] (full): result,true,QUEUED#1,QUEUED#1,1,
+register-confirm,15 verify after C REGISTER [S1] (full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,16 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,1,858
+register-confirm,17 B ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,1,
+register-confirm,18 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,19 dashboard counts,true,"confirmed 2, distinct served 2, queued 1, offered 0","confirmed 2, distinct served 2, queued 1, offered 0",1,
+rejections,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,"02 A REGISTER [S1,S1]",true,REJECTED(DUPLICATE_SESSION_IN_PREFERENCES),REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none,1,799
+rejections,"03 verify after A REGISTER [S1,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,04 A REGISTER [unknown],true,REJECTED(UNKNOWN_SESSION_IN_PREFERENCES),REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none,1,903
+rejections,05 verify after A REGISTER [unknown],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,06 A ACCEPT_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,1,834
+rejections,07 verify after A ACCEPT_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,08 A DECLINE_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,1,795
+rejections,09 verify after A DECLINE_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,10 A CANCEL_REGISTRATION (not registered),true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,1,830
+rejections,11 verify after A CANCEL_REGISTRATION (not registered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,12 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,793
+rejections,13 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+rejections,14 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+rejections,15 rejected commands consumed no seq,true,seq 1,seq 1,1,
+decline,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,1,893
+decline,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,1,
+decline,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,05 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,1,807
+decline,06 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,1,
+decline,07 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,08 A DECLINE_OFFER S1,true,APPLIED,APPLIED OFFERED@S2,1,798
+decline,09 A DECLINE_OFFER S1: result,true,OFFERED@S2,OFFERED@S2,1,
+decline,10 verify after A DECLINE_OFFER S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,11 B gets the declined S1 seat,true,OFFERED@S1,OFFERED@S1,1,
+decline,12 backfill DECLINED relayed in the same settlement,true,"1 × DECLINED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",1,
+decline,13 A DECLINE_OFFER S2 (last preference),true,APPLIED,APPLIED ENDED(NO_ACCEPTABLE_SESSION),1,794
+decline,14 A DECLINE_OFFER S2 (last preference): result,true,ENDED(NO_ACCEPTABLE_SESSION),ENDED(NO_ACCEPTABLE_SESSION),1,
+decline,15 verify after A DECLINE_OFFER S2 (last preference),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,16 A has no live registration,true,none,none,1,
+decline,17 A DECLINE_OFFER S1 again,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,1,798
+decline,18 verify after A DECLINE_OFFER S1 again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+decline,19 B still OFFERED S1,true,OFFERED@S1,OFFERED@S1,1,
+decline,20 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,800
+decline,21 B ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+decline,22 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,796
+cancel,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+cancel,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,822
+cancel,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+cancel,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,1,876
+cancel,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,1,
+cancel,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,1,795
+cancel,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,1,
+cancel,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,14 A CANCEL_REGISTRATION (confirmed),true,APPLIED,APPLIED CANCELLED,1,818
+cancel,15 A CANCEL_REGISTRATION (confirmed): result,true,CANCELLED,CANCELLED,1,
+cancel,16 verify after A CANCEL_REGISTRATION (confirmed),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,17 B gets the seat,true,OFFERED@S1,OFFERED@S1,1,
+cancel,18 C moves up,true,QUEUED#1,QUEUED#1,1,
+cancel,19 backfill CANCELLED_CONFIRMED relayed in the same settlement,true,"1 × CANCELLED_CONFIRMED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",1,
+cancel,20 B CANCEL_REGISTRATION (offered),true,APPLIED,APPLIED CANCELLED,1,792
+cancel,21 B CANCEL_REGISTRATION (offered): result,true,CANCELLED,CANCELLED,1,
+cancel,22 verify after B CANCEL_REGISTRATION (offered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,23 C gets the seat,true,OFFERED@S1,OFFERED@S1,1,
+cancel,24 backfill CANCELLED_OFFER relayed in the same settlement,true,"1 × CANCELLED_OFFER, latencyMs 0, one to loaduser-3@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",1,
+cancel,25 D REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,1,821
+cancel,26 D REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,1,
+cancel,27 verify after D REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,28 D CANCEL_REGISTRATION (queued),true,APPLIED,APPLIED CANCELLED,1,802
+cancel,29 D CANCEL_REGISTRATION (queued): result,true,CANCELLED,CANCELLED,1,
+cancel,30 verify after D CANCEL_REGISTRATION (queued),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,31 D has no live registration,true,none,none,1,
+cancel,32 D CANCEL_REGISTRATION again,true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,1,799
+cancel,33 verify after D CANCEL_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,34 A REGISTER [S1] again,true,APPLIED,APPLIED QUEUED#1,1,873
+cancel,35 A REGISTER [S1] again: result,true,QUEUED#1,QUEUED#1,1,
+cancel,36 verify after A REGISTER [S1] again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel,37 re-registration gets a new seq at the tail (R6),true,seq > 4,seq 5,1,
+capacity-up,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,800
+capacity-up,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+capacity-up,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,803
+capacity-up,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+capacity-up,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,1,790
+capacity-up,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,1,
+capacity-up,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,1,791
+capacity-up,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,1,
+capacity-up,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,"14 D REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,1,799
+capacity-up,"15 D REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,1,
+capacity-up,"16 verify after D REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,17 SET_CAPACITY S1 1 → 3,true,APPLIED,APPLIED none,1,817
+capacity-up,18 verify after SET_CAPACITY S1 1 → 3,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,19 two offers created by the capacity increase,true,offersCreated 2,offersCreated 2,1,
+capacity-up,20 B offered,true,OFFERED@S1,OFFERED@S1,1,
+capacity-up,21 C offered,true,OFFERED@S1,OFFERED@S1,1,
+capacity-up,22 D keeps S2,true,OFFERED@S2,OFFERED@S2,1,
+capacity-up,"23 S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms",true,"capacity 3, free 0, 2 × CAPACITY_UP latency 0","capacity 3, free 0, [0,0]",1,
+capacity-up,24 SET_CAPACITY S1 3 → 4 (nobody waiting),true,APPLIED,APPLIED none,1,793
+capacity-up,25 verify after SET_CAPACITY S1 3 → 4 (nobody waiting),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-up,26 no offer without demand,true,offersCreated 0,offersCreated 0,1,
+capacity-down,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,804
+capacity-down,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+capacity-down,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,790
+capacity-down,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+capacity-down,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,08 B REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,786
+capacity-down,09 B REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+capacity-down,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,11 SET_CAPACITY S1 3 → 1 (below usage 2),true,REJECTED(CAPACITY_BELOW_USAGE),REJECTED(CAPACITY_BELOW_USAGE) none,1,797
+capacity-down,12 verify after SET_CAPACITY S1 3 → 1 (below usage 2),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,13 SET_CAPACITY S1 → 0,true,REJECTED(INVALID_CAPACITY),REJECTED(INVALID_CAPACITY) none,1,797
+capacity-down,14 verify after SET_CAPACITY S1 → 0,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,15 capacity unchanged after rejections,true,capacity 3,capacity 3,1,
+capacity-down,16 SET_CAPACITY S1 3 → 2 (= usage),true,APPLIED,APPLIED none,1,787
+capacity-down,17 verify after SET_CAPACITY S1 3 → 2 (= usage),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,"18 S1 capacity 2, free 0",true,"capacity 2, free 0","capacity 2, free 0",1,
+capacity-down,19 C REGISTER [S1] (now full),true,APPLIED,APPLIED QUEUED#1,1,788
+capacity-down,20 C REGISTER [S1] (now full): result,true,QUEUED#1,QUEUED#1,1,
+capacity-down,21 verify after C REGISTER [S1] (now full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+capacity-down,22 SET_CAPACITY unknown session,true,REJECTED(SESSION_NOT_FOUND),REJECTED(SESSION_NOT_FOUND) none,1,830
+capacity-down,23 verify after SET_CAPACITY unknown session,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,1,812
+cancel-session,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,1,
+cancel-session,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,791
+cancel-session,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+cancel-session,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,"08 B REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,1,796
+cancel-session,"09 B REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,1,
+cancel-session,"10 verify after B REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,11 C REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,1,789
+cancel-session,12 C REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,1,
+cancel-session,13 verify after C REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,14 C ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,1,793
+cancel-session,15 C ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,1,
+cancel-session,16 verify after C ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,"17 D REGISTER [S1,S2] (both full)",true,APPLIED,APPLIED QUEUED#1,1,796
+cancel-session,"18 D REGISTER [S1,S2] (both full): result",true,QUEUED#1,QUEUED#1,1,
+cancel-session,"19 verify after D REGISTER [S1,S2] (both full)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,20 CANCEL_SESSION S1,true,APPLIED,APPLIED none,1,835
+cancel-session,21 verify after CANCEL_SESSION S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,22 S1 CANCELLED with no seats in use,true,"CANCELLED, confirmed 0, held 0","CANCELLED, confirmed 0, held 0",1,
+cancel-session,23 A (was confirmed in S1) queues for S2,true,QUEUED#1,QUEUED#1,1,
+cancel-session,24 B (offer revoked) queues for S2,true,QUEUED#2,QUEUED#2,1,
+cancel-session,25 D queues for S2,true,QUEUED#3,QUEUED#3,1,
+cancel-session,26 C keeps S2,true,CONFIRMED@S2,CONFIRMED@S2,1,
+cancel-session,27 B ACCEPT_OFFER revoked offer,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,1,793
+cancel-session,28 verify after B ACCEPT_OFFER revoked offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,29 E REGISTER [S1] (cancelled),true,REJECTED(NO_ACCEPTABLE_SESSION),REJECTED(NO_ACCEPTABLE_SESSION) none,1,915
+cancel-session,30 verify after E REGISTER [S1] (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,31 SET_CAPACITY S1 (cancelled),true,REJECTED(SESSION_CANCELLED),REJECTED(SESSION_CANCELLED) none,1,792
+cancel-session,32 verify after SET_CAPACITY S1 (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,33 C CANCEL_REGISTRATION,true,APPLIED,APPLIED CANCELLED,1,790
+cancel-session,34 C CANCEL_REGISTRATION: result,true,CANCELLED,CANCELLED,1,
+cancel-session,35 verify after C CANCEL_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-session,36 A (lowest seq) gets S2,true,OFFERED@S2,OFFERED@S2,1,
+cancel-session,37 B moves up,true,QUEUED#1,QUEUED#1,1,
+cancel-session,38 D moves up,true,QUEUED#2,QUEUED#2,1,
+cancel-workshop,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,790
+cancel-workshop,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+cancel-workshop,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,1,789
+cancel-workshop,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+cancel-workshop,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,08 B REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,1,791
+cancel-workshop,09 B REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,1,
+cancel-workshop,10 verify after B REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,"11 C REGISTER [S1,S2]",true,APPLIED,APPLIED QUEUED#1,1,797
+cancel-workshop,"12 C REGISTER [S1,S2]: result",true,QUEUED#1,QUEUED#1,1,
+cancel-workshop,"13 verify after C REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,14 CANCEL_WORKSHOP,true,APPLIED,APPLIED none,1,792
+cancel-workshop,15 verify after CANCEL_WORKSHOP,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,"16 workshop and sessions CANCELLED, nothing live",true,CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations,CANCELLED; sessions CANCELLED/0/0 CANCELLED/0/0; live 0,1,
+cancel-workshop,17 A has no live registration,true,none,none,1,
+cancel-workshop,18 B has no live registration,true,none,none,1,
+cancel-workshop,19 C has no live registration,true,none,none,1,
+cancel-workshop,20 A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations,true,ENDED(WORKSHOP_CANCELLED),ENDED(WORKSHOP_CANCELLED),1,
+cancel-workshop,21 D REGISTER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,1,1322
+cancel-workshop,22 verify after D REGISTER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,23 B ACCEPT_OFFER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,1,793
+cancel-workshop,24 verify after B ACCEPT_OFFER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+cancel-workshop,25 CANCEL_WORKSHOP again,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,1,820
+cancel-workshop,26 verify after CANCEL_WORKSHOP again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,1,797
+close-open,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,1,
+close-open,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,05 CLOSE_REGISTRATION,true,APPLIED,APPLIED none,1,791
+close-open,06 verify after CLOSE_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,07 B REGISTER while closed,true,REJECTED(WORKSHOP_NOT_OPEN),REJECTED(WORKSHOP_NOT_OPEN) none,1,790
+close-open,08 verify after B REGISTER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,09 A ACCEPT_OFFER while closed,true,APPLIED,APPLIED CONFIRMED@S1,1,827
+close-open,10 A ACCEPT_OFFER while closed: result,true,CONFIRMED@S1,CONFIRMED@S1,1,
+close-open,11 verify after A ACCEPT_OFFER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,12 CLOSE_REGISTRATION again,true,REJECTED(INVALID_STATE),REJECTED(INVALID_STATE) none,1,795
+close-open,13 verify after CLOSE_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,14 OPEN_REGISTRATION,true,APPLIED,APPLIED none,1,802
+close-open,15 verify after OPEN_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+close-open,16 B REGISTER after reopening,true,APPLIED,APPLIED OFFERED@S2,1,803
+close-open,17 B REGISTER after reopening: result,true,OFFERED@S2,OFFERED@S2,1,
+close-open,18 verify after B REGISTER after reopening,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",1,
+register-confirm,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,2,797
+register-confirm,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,2,
+register-confirm,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,789
+register-confirm,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+register-confirm,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,08 A REGISTER again (R1),true,REJECTED(ALREADY_REGISTERED),REJECTED(ALREADY_REGISTERED) none,2,822
+register-confirm,09 verify after A REGISTER again (R1),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,"10 B REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,2,792
+register-confirm,"11 B REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,2,
+register-confirm,"12 verify after B REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,13 C REGISTER [S1] (full),true,APPLIED,APPLIED QUEUED#1,2,790
+register-confirm,14 C REGISTER [S1] (full): result,true,QUEUED#1,QUEUED#1,2,
+register-confirm,15 verify after C REGISTER [S1] (full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,16 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,2,788
+register-confirm,17 B ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,2,
+register-confirm,18 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,19 dashboard counts,true,"confirmed 2, distinct served 2, queued 1, offered 0","confirmed 2, distinct served 2, queued 1, offered 0",2,
+rejections,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,"02 A REGISTER [S1,S1]",true,REJECTED(DUPLICATE_SESSION_IN_PREFERENCES),REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none,2,788
+rejections,"03 verify after A REGISTER [S1,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,04 A REGISTER [unknown],true,REJECTED(UNKNOWN_SESSION_IN_PREFERENCES),REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none,2,797
+rejections,05 verify after A REGISTER [unknown],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,06 A ACCEPT_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,2,785
+rejections,07 verify after A ACCEPT_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,08 A DECLINE_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,2,793
+rejections,09 verify after A DECLINE_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,10 A CANCEL_REGISTRATION (not registered),true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,2,804
+rejections,11 verify after A CANCEL_REGISTRATION (not registered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,12 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,788
+rejections,13 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+rejections,14 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+rejections,15 rejected commands consumed no seq,true,seq 1,seq 1,2,
+decline,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,2,797
+decline,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,2,
+decline,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,05 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,2,817
+decline,06 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,2,
+decline,07 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,08 A DECLINE_OFFER S1,true,APPLIED,APPLIED OFFERED@S2,2,791
+decline,09 A DECLINE_OFFER S1: result,true,OFFERED@S2,OFFERED@S2,2,
+decline,10 verify after A DECLINE_OFFER S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,11 B gets the declined S1 seat,true,OFFERED@S1,OFFERED@S1,2,
+decline,12 backfill DECLINED relayed in the same settlement,true,"1 × DECLINED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",2,
+decline,13 A DECLINE_OFFER S2 (last preference),true,APPLIED,APPLIED ENDED(NO_ACCEPTABLE_SESSION),2,788
+decline,14 A DECLINE_OFFER S2 (last preference): result,true,ENDED(NO_ACCEPTABLE_SESSION),ENDED(NO_ACCEPTABLE_SESSION),2,
+decline,15 verify after A DECLINE_OFFER S2 (last preference),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,16 A has no live registration,true,none,none,2,
+decline,17 A DECLINE_OFFER S1 again,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,2,839
+decline,18 verify after A DECLINE_OFFER S1 again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+decline,19 B still OFFERED S1,true,OFFERED@S1,OFFERED@S1,2,
+decline,20 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,785
+decline,21 B ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+decline,22 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,790
+cancel,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+cancel,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,790
+cancel,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+cancel,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,2,789
+cancel,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,2,
+cancel,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,2,854
+cancel,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,2,
+cancel,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,14 A CANCEL_REGISTRATION (confirmed),true,APPLIED,APPLIED CANCELLED,2,796
+cancel,15 A CANCEL_REGISTRATION (confirmed): result,true,CANCELLED,CANCELLED,2,
+cancel,16 verify after A CANCEL_REGISTRATION (confirmed),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,17 B gets the seat,true,OFFERED@S1,OFFERED@S1,2,
+cancel,18 C moves up,true,QUEUED#1,QUEUED#1,2,
+cancel,19 backfill CANCELLED_CONFIRMED relayed in the same settlement,true,"1 × CANCELLED_CONFIRMED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",2,
+cancel,20 B CANCEL_REGISTRATION (offered),true,APPLIED,APPLIED CANCELLED,2,789
+cancel,21 B CANCEL_REGISTRATION (offered): result,true,CANCELLED,CANCELLED,2,
+cancel,22 verify after B CANCEL_REGISTRATION (offered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,23 C gets the seat,true,OFFERED@S1,OFFERED@S1,2,
+cancel,24 backfill CANCELLED_OFFER relayed in the same settlement,true,"1 × CANCELLED_OFFER, latencyMs 0, one to loaduser-3@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",2,
+cancel,25 D REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,2,791
+cancel,26 D REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,2,
+cancel,27 verify after D REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,28 D CANCEL_REGISTRATION (queued),true,APPLIED,APPLIED CANCELLED,2,792
+cancel,29 D CANCEL_REGISTRATION (queued): result,true,CANCELLED,CANCELLED,2,
+cancel,30 verify after D CANCEL_REGISTRATION (queued),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,31 D has no live registration,true,none,none,2,
+cancel,32 D CANCEL_REGISTRATION again,true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,2,791
+cancel,33 verify after D CANCEL_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,34 A REGISTER [S1] again,true,APPLIED,APPLIED QUEUED#1,2,790
+cancel,35 A REGISTER [S1] again: result,true,QUEUED#1,QUEUED#1,2,
+cancel,36 verify after A REGISTER [S1] again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel,37 re-registration gets a new seq at the tail (R6),true,seq > 4,seq 5,2,
+capacity-up,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,801
+capacity-up,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+capacity-up,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,796
+capacity-up,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+capacity-up,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,2,788
+capacity-up,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,2,
+capacity-up,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,2,784
+capacity-up,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,2,
+capacity-up,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,"14 D REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,2,801
+capacity-up,"15 D REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,2,
+capacity-up,"16 verify after D REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,17 SET_CAPACITY S1 1 → 3,true,APPLIED,APPLIED none,2,797
+capacity-up,18 verify after SET_CAPACITY S1 1 → 3,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,19 two offers created by the capacity increase,true,offersCreated 2,offersCreated 2,2,
+capacity-up,20 B offered,true,OFFERED@S1,OFFERED@S1,2,
+capacity-up,21 C offered,true,OFFERED@S1,OFFERED@S1,2,
+capacity-up,22 D keeps S2,true,OFFERED@S2,OFFERED@S2,2,
+capacity-up,"23 S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms",true,"capacity 3, free 0, 2 × CAPACITY_UP latency 0","capacity 3, free 0, [0,0]",2,
+capacity-up,24 SET_CAPACITY S1 3 → 4 (nobody waiting),true,APPLIED,APPLIED none,2,789
+capacity-up,25 verify after SET_CAPACITY S1 3 → 4 (nobody waiting),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-up,26 no offer without demand,true,offersCreated 0,offersCreated 0,2,
+capacity-down,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,794
+capacity-down,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+capacity-down,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,815
+capacity-down,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+capacity-down,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,08 B REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,795
+capacity-down,09 B REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+capacity-down,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,11 SET_CAPACITY S1 3 → 1 (below usage 2),true,REJECTED(CAPACITY_BELOW_USAGE),REJECTED(CAPACITY_BELOW_USAGE) none,2,805
+capacity-down,12 verify after SET_CAPACITY S1 3 → 1 (below usage 2),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,13 SET_CAPACITY S1 → 0,true,REJECTED(INVALID_CAPACITY),REJECTED(INVALID_CAPACITY) none,2,869
+capacity-down,14 verify after SET_CAPACITY S1 → 0,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,15 capacity unchanged after rejections,true,capacity 3,capacity 3,2,
+capacity-down,16 SET_CAPACITY S1 3 → 2 (= usage),true,APPLIED,APPLIED none,2,867
+capacity-down,17 verify after SET_CAPACITY S1 3 → 2 (= usage),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,"18 S1 capacity 2, free 0",true,"capacity 2, free 0","capacity 2, free 0",2,
+capacity-down,19 C REGISTER [S1] (now full),true,APPLIED,APPLIED QUEUED#1,2,788
+capacity-down,20 C REGISTER [S1] (now full): result,true,QUEUED#1,QUEUED#1,2,
+capacity-down,21 verify after C REGISTER [S1] (now full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+capacity-down,22 SET_CAPACITY unknown session,true,REJECTED(SESSION_NOT_FOUND),REJECTED(SESSION_NOT_FOUND) none,2,791
+capacity-down,23 verify after SET_CAPACITY unknown session,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,2,791
+cancel-session,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,2,
+cancel-session,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,831
+cancel-session,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+cancel-session,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,"08 B REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,2,812
+cancel-session,"09 B REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,2,
+cancel-session,"10 verify after B REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,11 C REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,2,784
+cancel-session,12 C REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,2,
+cancel-session,13 verify after C REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,14 C ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,2,801
+cancel-session,15 C ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,2,
+cancel-session,16 verify after C ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,"17 D REGISTER [S1,S2] (both full)",true,APPLIED,APPLIED QUEUED#1,2,786
+cancel-session,"18 D REGISTER [S1,S2] (both full): result",true,QUEUED#1,QUEUED#1,2,
+cancel-session,"19 verify after D REGISTER [S1,S2] (both full)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,20 CANCEL_SESSION S1,true,APPLIED,APPLIED none,2,797
+cancel-session,21 verify after CANCEL_SESSION S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,22 S1 CANCELLED with no seats in use,true,"CANCELLED, confirmed 0, held 0","CANCELLED, confirmed 0, held 0",2,
+cancel-session,23 A (was confirmed in S1) queues for S2,true,QUEUED#1,QUEUED#1,2,
+cancel-session,24 B (offer revoked) queues for S2,true,QUEUED#2,QUEUED#2,2,
+cancel-session,25 D queues for S2,true,QUEUED#3,QUEUED#3,2,
+cancel-session,26 C keeps S2,true,CONFIRMED@S2,CONFIRMED@S2,2,
+cancel-session,27 B ACCEPT_OFFER revoked offer,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,2,803
+cancel-session,28 verify after B ACCEPT_OFFER revoked offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,29 E REGISTER [S1] (cancelled),true,REJECTED(NO_ACCEPTABLE_SESSION),REJECTED(NO_ACCEPTABLE_SESSION) none,2,797
+cancel-session,30 verify after E REGISTER [S1] (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,31 SET_CAPACITY S1 (cancelled),true,REJECTED(SESSION_CANCELLED),REJECTED(SESSION_CANCELLED) none,2,790
+cancel-session,32 verify after SET_CAPACITY S1 (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,33 C CANCEL_REGISTRATION,true,APPLIED,APPLIED CANCELLED,2,786
+cancel-session,34 C CANCEL_REGISTRATION: result,true,CANCELLED,CANCELLED,2,
+cancel-session,35 verify after C CANCEL_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-session,36 A (lowest seq) gets S2,true,OFFERED@S2,OFFERED@S2,2,
+cancel-session,37 B moves up,true,QUEUED#1,QUEUED#1,2,
+cancel-session,38 D moves up,true,QUEUED#2,QUEUED#2,2,
+cancel-workshop,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,790
+cancel-workshop,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+cancel-workshop,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,2,783
+cancel-workshop,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+cancel-workshop,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,08 B REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,2,806
+cancel-workshop,09 B REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,2,
+cancel-workshop,10 verify after B REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,"11 C REGISTER [S1,S2]",true,APPLIED,APPLIED QUEUED#1,2,789
+cancel-workshop,"12 C REGISTER [S1,S2]: result",true,QUEUED#1,QUEUED#1,2,
+cancel-workshop,"13 verify after C REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,14 CANCEL_WORKSHOP,true,APPLIED,APPLIED none,2,815
+cancel-workshop,15 verify after CANCEL_WORKSHOP,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,"16 workshop and sessions CANCELLED, nothing live",true,CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations,CANCELLED; sessions CANCELLED/0/0 CANCELLED/0/0; live 0,2,
+cancel-workshop,17 A has no live registration,true,none,none,2,
+cancel-workshop,18 B has no live registration,true,none,none,2,
+cancel-workshop,19 C has no live registration,true,none,none,2,
+cancel-workshop,20 A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations,true,ENDED(WORKSHOP_CANCELLED),ENDED(WORKSHOP_CANCELLED),2,
+cancel-workshop,21 D REGISTER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,2,1378
+cancel-workshop,22 verify after D REGISTER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,23 B ACCEPT_OFFER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,2,794
+cancel-workshop,24 verify after B ACCEPT_OFFER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+cancel-workshop,25 CANCEL_WORKSHOP again,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,2,791
+cancel-workshop,26 verify after CANCEL_WORKSHOP again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,2,790
+close-open,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,2,
+close-open,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,05 CLOSE_REGISTRATION,true,APPLIED,APPLIED none,2,796
+close-open,06 verify after CLOSE_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,07 B REGISTER while closed,true,REJECTED(WORKSHOP_NOT_OPEN),REJECTED(WORKSHOP_NOT_OPEN) none,2,791
+close-open,08 verify after B REGISTER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,09 A ACCEPT_OFFER while closed,true,APPLIED,APPLIED CONFIRMED@S1,2,782
+close-open,10 A ACCEPT_OFFER while closed: result,true,CONFIRMED@S1,CONFIRMED@S1,2,
+close-open,11 verify after A ACCEPT_OFFER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,12 CLOSE_REGISTRATION again,true,REJECTED(INVALID_STATE),REJECTED(INVALID_STATE) none,2,789
+close-open,13 verify after CLOSE_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,14 OPEN_REGISTRATION,true,APPLIED,APPLIED none,2,784
+close-open,15 verify after OPEN_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+close-open,16 B REGISTER after reopening,true,APPLIED,APPLIED OFFERED@S2,2,798
+close-open,17 B REGISTER after reopening: result,true,OFFERED@S2,OFFERED@S2,2,
+close-open,18 verify after B REGISTER after reopening,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",2,
+register-confirm,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,3,787
+register-confirm,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,3,
+register-confirm,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,791
+register-confirm,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+register-confirm,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,08 A REGISTER again (R1),true,REJECTED(ALREADY_REGISTERED),REJECTED(ALREADY_REGISTERED) none,3,792
+register-confirm,09 verify after A REGISTER again (R1),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,"10 B REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,3,805
+register-confirm,"11 B REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,3,
+register-confirm,"12 verify after B REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,13 C REGISTER [S1] (full),true,APPLIED,APPLIED QUEUED#1,3,788
+register-confirm,14 C REGISTER [S1] (full): result,true,QUEUED#1,QUEUED#1,3,
+register-confirm,15 verify after C REGISTER [S1] (full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,16 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,3,799
+register-confirm,17 B ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,3,
+register-confirm,18 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+register-confirm,19 dashboard counts,true,"confirmed 2, distinct served 2, queued 1, offered 0","confirmed 2, distinct served 2, queued 1, offered 0",3,
+rejections,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,"02 A REGISTER [S1,S1]",true,REJECTED(DUPLICATE_SESSION_IN_PREFERENCES),REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none,3,794
+rejections,"03 verify after A REGISTER [S1,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,04 A REGISTER [unknown],true,REJECTED(UNKNOWN_SESSION_IN_PREFERENCES),REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none,3,818
+rejections,05 verify after A REGISTER [unknown],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,06 A ACCEPT_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,3,800
+rejections,07 verify after A ACCEPT_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,08 A DECLINE_OFFER unknown offer,true,REJECTED(OFFER_NOT_FOUND),REJECTED(OFFER_NOT_FOUND) none,3,788
+rejections,09 verify after A DECLINE_OFFER unknown offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,10 A CANCEL_REGISTRATION (not registered),true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,3,794
+rejections,11 verify after A CANCEL_REGISTRATION (not registered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,12 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,789
+rejections,13 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+rejections,14 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+rejections,15 rejected commands consumed no seq,true,seq 1,seq 1,3,
+decline,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,3,789
+decline,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,3,
+decline,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,05 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,3,785
+decline,06 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,3,
+decline,07 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,08 A DECLINE_OFFER S1,true,APPLIED,APPLIED OFFERED@S2,3,785
+decline,09 A DECLINE_OFFER S1: result,true,OFFERED@S2,OFFERED@S2,3,
+decline,10 verify after A DECLINE_OFFER S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,11 B gets the declined S1 seat,true,OFFERED@S1,OFFERED@S1,3,
+decline,12 backfill DECLINED relayed in the same settlement,true,"1 × DECLINED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",3,
+decline,13 A DECLINE_OFFER S2 (last preference),true,APPLIED,APPLIED ENDED(NO_ACCEPTABLE_SESSION),3,787
+decline,14 A DECLINE_OFFER S2 (last preference): result,true,ENDED(NO_ACCEPTABLE_SESSION),ENDED(NO_ACCEPTABLE_SESSION),3,
+decline,15 verify after A DECLINE_OFFER S2 (last preference),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,16 A has no live registration,true,none,none,3,
+decline,17 A DECLINE_OFFER S1 again,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,3,789
+decline,18 verify after A DECLINE_OFFER S1 again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+decline,19 B still OFFERED S1,true,OFFERED@S1,OFFERED@S1,3,
+decline,20 B ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,790
+decline,21 B ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+decline,22 verify after B ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,791
+cancel,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+cancel,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,786
+cancel,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+cancel,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,3,787
+cancel,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,3,
+cancel,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,3,786
+cancel,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,3,
+cancel,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,14 A CANCEL_REGISTRATION (confirmed),true,APPLIED,APPLIED CANCELLED,3,789
+cancel,15 A CANCEL_REGISTRATION (confirmed): result,true,CANCELLED,CANCELLED,3,
+cancel,16 verify after A CANCEL_REGISTRATION (confirmed),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,17 B gets the seat,true,OFFERED@S1,OFFERED@S1,3,
+cancel,18 C moves up,true,QUEUED#1,QUEUED#1,3,
+cancel,19 backfill CANCELLED_CONFIRMED relayed in the same settlement,true,"1 × CANCELLED_CONFIRMED, latencyMs 0, one to loaduser-2@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",3,
+cancel,20 B CANCEL_REGISTRATION (offered),true,APPLIED,APPLIED CANCELLED,3,789
+cancel,21 B CANCEL_REGISTRATION (offered): result,true,CANCELLED,CANCELLED,3,
+cancel,22 verify after B CANCEL_REGISTRATION (offered),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,23 C gets the seat,true,OFFERED@S1,OFFERED@S1,3,
+cancel,24 backfill CANCELLED_OFFER relayed in the same settlement,true,"1 × CANCELLED_OFFER, latencyMs 0, one to loaduser-3@example.com","[{""session"":""S1"",""latencyMs"":0,""toCaller"":true}]",3,
+cancel,25 D REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,3,788
+cancel,26 D REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,3,
+cancel,27 verify after D REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,28 D CANCEL_REGISTRATION (queued),true,APPLIED,APPLIED CANCELLED,3,832
+cancel,29 D CANCEL_REGISTRATION (queued): result,true,CANCELLED,CANCELLED,3,
+cancel,30 verify after D CANCEL_REGISTRATION (queued),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,31 D has no live registration,true,none,none,3,
+cancel,32 D CANCEL_REGISTRATION again,true,REJECTED(NOT_REGISTERED),REJECTED(NOT_REGISTERED) none,3,790
+cancel,33 verify after D CANCEL_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,34 A REGISTER [S1] again,true,APPLIED,APPLIED QUEUED#1,3,783
+cancel,35 A REGISTER [S1] again: result,true,QUEUED#1,QUEUED#1,3,
+cancel,36 verify after A REGISTER [S1] again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel,37 re-registration gets a new seq at the tail (R6),true,seq > 4,seq 5,3,
+capacity-up,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,786
+capacity-up,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+capacity-up,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,783
+capacity-up,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+capacity-up,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,08 B REGISTER [S1],true,APPLIED,APPLIED QUEUED#1,3,824
+capacity-up,09 B REGISTER [S1]: result,true,QUEUED#1,QUEUED#1,3,
+capacity-up,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,11 C REGISTER [S1],true,APPLIED,APPLIED QUEUED#2,3,799
+capacity-up,12 C REGISTER [S1]: result,true,QUEUED#2,QUEUED#2,3,
+capacity-up,13 verify after C REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,"14 D REGISTER [S2,S1]",true,APPLIED,APPLIED OFFERED@S2,3,811
+capacity-up,"15 D REGISTER [S2,S1]: result",true,OFFERED@S2,OFFERED@S2,3,
+capacity-up,"16 verify after D REGISTER [S2,S1]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,17 SET_CAPACITY S1 1 → 3,true,APPLIED,APPLIED none,3,812
+capacity-up,18 verify after SET_CAPACITY S1 1 → 3,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,19 two offers created by the capacity increase,true,offersCreated 2,offersCreated 2,3,
+capacity-up,20 B offered,true,OFFERED@S1,OFFERED@S1,3,
+capacity-up,21 C offered,true,OFFERED@S1,OFFERED@S1,3,
+capacity-up,22 D keeps S2,true,OFFERED@S2,OFFERED@S2,3,
+capacity-up,"23 S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms",true,"capacity 3, free 0, 2 × CAPACITY_UP latency 0","capacity 3, free 0, [0,0]",3,
+capacity-up,24 SET_CAPACITY S1 3 → 4 (nobody waiting),true,APPLIED,APPLIED none,3,790
+capacity-up,25 verify after SET_CAPACITY S1 3 → 4 (nobody waiting),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-up,26 no offer without demand,true,offersCreated 0,offersCreated 0,3,
+capacity-down,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,787
+capacity-down,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+capacity-down,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,795
+capacity-down,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+capacity-down,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,08 B REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,786
+capacity-down,09 B REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+capacity-down,10 verify after B REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,11 SET_CAPACITY S1 3 → 1 (below usage 2),true,REJECTED(CAPACITY_BELOW_USAGE),REJECTED(CAPACITY_BELOW_USAGE) none,3,784
+capacity-down,12 verify after SET_CAPACITY S1 3 → 1 (below usage 2),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,13 SET_CAPACITY S1 → 0,true,REJECTED(INVALID_CAPACITY),REJECTED(INVALID_CAPACITY) none,3,793
+capacity-down,14 verify after SET_CAPACITY S1 → 0,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,15 capacity unchanged after rejections,true,capacity 3,capacity 3,3,
+capacity-down,16 SET_CAPACITY S1 3 → 2 (= usage),true,APPLIED,APPLIED none,3,797
+capacity-down,17 verify after SET_CAPACITY S1 3 → 2 (= usage),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,"18 S1 capacity 2, free 0",true,"capacity 2, free 0","capacity 2, free 0",3,
+capacity-down,19 C REGISTER [S1] (now full),true,APPLIED,APPLIED QUEUED#1,3,787
+capacity-down,20 C REGISTER [S1] (now full): result,true,QUEUED#1,QUEUED#1,3,
+capacity-down,21 verify after C REGISTER [S1] (now full),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+capacity-down,22 SET_CAPACITY unknown session,true,REJECTED(SESSION_NOT_FOUND),REJECTED(SESSION_NOT_FOUND) none,3,788
+capacity-down,23 verify after SET_CAPACITY unknown session,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,"02 A REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,3,790
+cancel-session,"03 A REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,3,
+cancel-session,"04 verify after A REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,798
+cancel-session,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+cancel-session,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,"08 B REGISTER [S1,S2]",true,APPLIED,APPLIED OFFERED@S1,3,785
+cancel-session,"09 B REGISTER [S1,S2]: result",true,OFFERED@S1,OFFERED@S1,3,
+cancel-session,"10 verify after B REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,11 C REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,3,782
+cancel-session,12 C REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,3,
+cancel-session,13 verify after C REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,14 C ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S2,3,783
+cancel-session,15 C ACCEPT_OFFER: result,true,CONFIRMED@S2,CONFIRMED@S2,3,
+cancel-session,16 verify after C ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,"17 D REGISTER [S1,S2] (both full)",true,APPLIED,APPLIED QUEUED#1,3,788
+cancel-session,"18 D REGISTER [S1,S2] (both full): result",true,QUEUED#1,QUEUED#1,3,
+cancel-session,"19 verify after D REGISTER [S1,S2] (both full)",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,20 CANCEL_SESSION S1,true,APPLIED,APPLIED none,3,793
+cancel-session,21 verify after CANCEL_SESSION S1,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,22 S1 CANCELLED with no seats in use,true,"CANCELLED, confirmed 0, held 0","CANCELLED, confirmed 0, held 0",3,
+cancel-session,23 A (was confirmed in S1) queues for S2,true,QUEUED#1,QUEUED#1,3,
+cancel-session,24 B (offer revoked) queues for S2,true,QUEUED#2,QUEUED#2,3,
+cancel-session,25 D queues for S2,true,QUEUED#3,QUEUED#3,3,
+cancel-session,26 C keeps S2,true,CONFIRMED@S2,CONFIRMED@S2,3,
+cancel-session,27 B ACCEPT_OFFER revoked offer,true,REJECTED(OFFER_NOT_ACTIVE),REJECTED(OFFER_NOT_ACTIVE) none,3,797
+cancel-session,28 verify after B ACCEPT_OFFER revoked offer,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,29 E REGISTER [S1] (cancelled),true,REJECTED(NO_ACCEPTABLE_SESSION),REJECTED(NO_ACCEPTABLE_SESSION) none,3,793
+cancel-session,30 verify after E REGISTER [S1] (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,31 SET_CAPACITY S1 (cancelled),true,REJECTED(SESSION_CANCELLED),REJECTED(SESSION_CANCELLED) none,3,786
+cancel-session,32 verify after SET_CAPACITY S1 (cancelled),true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,33 C CANCEL_REGISTRATION,true,APPLIED,APPLIED CANCELLED,3,785
+cancel-session,34 C CANCEL_REGISTRATION: result,true,CANCELLED,CANCELLED,3,
+cancel-session,35 verify after C CANCEL_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-session,36 A (lowest seq) gets S2,true,OFFERED@S2,OFFERED@S2,3,
+cancel-session,37 B moves up,true,QUEUED#1,QUEUED#1,3,
+cancel-session,38 D moves up,true,QUEUED#2,QUEUED#2,3,
+cancel-workshop,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,793
+cancel-workshop,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+cancel-workshop,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,05 A ACCEPT_OFFER,true,APPLIED,APPLIED CONFIRMED@S1,3,790
+cancel-workshop,06 A ACCEPT_OFFER: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+cancel-workshop,07 verify after A ACCEPT_OFFER,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,08 B REGISTER [S2],true,APPLIED,APPLIED OFFERED@S2,3,786
+cancel-workshop,09 B REGISTER [S2]: result,true,OFFERED@S2,OFFERED@S2,3,
+cancel-workshop,10 verify after B REGISTER [S2],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,"11 C REGISTER [S1,S2]",true,APPLIED,APPLIED QUEUED#1,3,784
+cancel-workshop,"12 C REGISTER [S1,S2]: result",true,QUEUED#1,QUEUED#1,3,
+cancel-workshop,"13 verify after C REGISTER [S1,S2]",true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,14 CANCEL_WORKSHOP,true,APPLIED,APPLIED none,3,792
+cancel-workshop,15 verify after CANCEL_WORKSHOP,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,"16 workshop and sessions CANCELLED, nothing live",true,CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations,CANCELLED; sessions CANCELLED/0/0 CANCELLED/0/0; live 0,3,
+cancel-workshop,17 A has no live registration,true,none,none,3,
+cancel-workshop,18 B has no live registration,true,none,none,3,
+cancel-workshop,19 C has no live registration,true,none,none,3,
+cancel-workshop,20 A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations,true,ENDED(WORKSHOP_CANCELLED),ENDED(WORKSHOP_CANCELLED),3,
+cancel-workshop,21 D REGISTER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,3,1317
+cancel-workshop,22 verify after D REGISTER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,23 B ACCEPT_OFFER after cancel,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,3,794
+cancel-workshop,24 verify after B ACCEPT_OFFER after cancel,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+cancel-workshop,25 CANCEL_WORKSHOP again,true,REJECTED(WORKSHOP_CANCELLED),REJECTED(WORKSHOP_CANCELLED) none,3,794
+cancel-workshop,26 verify after CANCEL_WORKSHOP again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,01 verify after workshop creation,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,02 A REGISTER [S1],true,APPLIED,APPLIED OFFERED@S1,3,788
+close-open,03 A REGISTER [S1]: result,true,OFFERED@S1,OFFERED@S1,3,
+close-open,04 verify after A REGISTER [S1],true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,05 CLOSE_REGISTRATION,true,APPLIED,APPLIED none,3,793
+close-open,06 verify after CLOSE_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,07 B REGISTER while closed,true,REJECTED(WORKSHOP_NOT_OPEN),REJECTED(WORKSHOP_NOT_OPEN) none,3,803
+close-open,08 verify after B REGISTER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,09 A ACCEPT_OFFER while closed,true,APPLIED,APPLIED CONFIRMED@S1,3,792
+close-open,10 A ACCEPT_OFFER while closed: result,true,CONFIRMED@S1,CONFIRMED@S1,3,
+close-open,11 verify after A ACCEPT_OFFER while closed,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,12 CLOSE_REGISTRATION again,true,REJECTED(INVALID_STATE),REJECTED(INVALID_STATE) none,3,792
+close-open,13 verify after CLOSE_REGISTRATION again,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,14 OPEN_REGISTRATION,true,APPLIED,APPLIED none,3,791
+close-open,15 verify after OPEN_REGISTRATION,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,
+close-open,16 B REGISTER after reopening,true,APPLIED,APPLIED OFFERED@S2,3,794
+close-open,17 B REGISTER after reopening: result,true,OFFERED@S2,OFFERED@S2,3,
+close-open,18 verify after B REGISTER after reopening,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",3,

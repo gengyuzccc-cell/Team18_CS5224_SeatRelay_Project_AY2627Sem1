@@ -68,7 +68,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1321 macros, 1236 with data, 85 pending.
+1328 macros, 1243 with data, 85 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -382,6 +382,20 @@ Source: `results/2026-10-17-throttling-evidence` — 18/18 with data.
 | `\ThrottleFirstConcurrencyChecksPassed` | 22 | results/2026-10-17-concurrency/meta.json: checks.passed |
 | `\ThrottleFirstConcurrencyChecksTotal` | 39 | results/2026-10-17-concurrency/meta.json: checks.total |
 | `\ThrottleFirstConcurrencyCommit` | ec54916 | results/2026-10-17-concurrency/meta.json: commit.hash |
+
+### Regression runs after the last redeploy
+
+Source: `results/2026-10-17-smoke-3`; `results/2026-10-17-correctness-3`; `results/2026-10-17-access-control-3` — 7/7 with data.
+
+| Macro | Value | Source |
+|---|---|---|
+| `\RegressionRuns` | 3 | report/series.json regression -> meta.json of each run |
+| `\RegressionChecksPassed` | 862 | report/series.json regression -> meta.json of each run: checks.passed (sum) |
+| `\RegressionChecksTotal` | 862 | report/series.json regression -> meta.json of each run: checks.total (sum) |
+| `\RegressionCommit` | d34e0ac | report/series.json regression -> meta.json of each run: commit.hash |
+| `\RegressionExperiments` | smoke, correctness, access-control | report/series.json regression -> meta.json of each run: experiment names |
+| `\RegressionVerdict` | PASS | report/series.json regression -> meta.json of each run: ok |
+| `\RegressionDirSuffix` | 3 | report/series.json regression -> meta.json of each run: directory suffix |
 
 ### Timer-path relays seen outside the backfill experiment (dev)
 

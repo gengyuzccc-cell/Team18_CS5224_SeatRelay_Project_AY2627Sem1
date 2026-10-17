@@ -213,9 +213,26 @@ def scan_runs(results: Path = RESULTS) -> dict[str, list[RunDir]]:
     return found
 
 
+SERIES_FILE = REPO_ROOT / "report" / "series.json"
+
+
+def pinned_series() -> dict:
+    """report/series.json: the run directories quoted for the Table 3 series, and the regression runs."""
+    return read_json(SERIES_FILE) or {}
+
+
 def latest_run(runs: dict[str, list[RunDir]], name: str, target: str | None = "dev",
                notes: list[str] | None = None) -> RunDir | None:
-    """The latest complete run of ``name`` for ``target`` (None: any target)."""
+    """The run of ``name`` for ``target`` that the report quotes: the directory pinned in
+    report/series.json when there is one, else the latest complete run (None: any target)."""
+    pins = pinned_series()
+    pinned = (pins.get("series") or {}).get(name) if target is not None and target == pins.get("target") else None
+    if pinned:
+        match = next((run for run in runs.get(name, []) if run.path.name == pinned and run.complete), None)
+        if match is not None:
+            return match
+        if notes is not None:
+            notes.append(f"report/series.json pins {pinned} for {name}, but it is missing or incomplete; using the latest run")
     candidates = sorted(runs.get(name, []), key=lambda run: (run.date, run.suffix, run.started), reverse=True)
     for run in candidates:
         if not run.complete:

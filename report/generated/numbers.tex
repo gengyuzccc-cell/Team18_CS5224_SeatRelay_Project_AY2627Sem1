@@ -545,6 +545,27 @@
 \newcommand{\ThrottleFirstConcurrencyCommit}{ec54916}
 
 % ==============================================================================================
+% Regression runs after the last redeploy
+%   source: results/2026-10-17-smoke-3
+%   source: results/2026-10-17-correctness-3
+%   source: results/2026-10-17-access-control-3
+% ==============================================================================================
+% report/series.json regression -> meta.json of each run -- regression run directories
+\newcommand{\RegressionRuns}{3}
+% report/series.json regression -> meta.json of each run: checks.passed (sum) -- regression checks passed
+\newcommand{\RegressionChecksPassed}{862}
+% report/series.json regression -> meta.json of each run: checks.total (sum) -- regression checks in total
+\newcommand{\RegressionChecksTotal}{862}
+% report/series.json regression -> meta.json of each run: commit.hash -- commit under test in the regression runs
+\newcommand{\RegressionCommit}{d34e0ac}
+% report/series.json regression -> meta.json of each run: experiment names -- experiments re-run as regression checks
+\newcommand{\RegressionExperiments}{smoke, correctness, access-control}
+% report/series.json regression -> meta.json of each run: ok -- all regression runs passed
+\newcommand{\RegressionVerdict}{PASS}
+% report/series.json regression -> meta.json of each run: directory suffix -- suffix of the regression directories
+\newcommand{\RegressionDirSuffix}{3}
+
+% ==============================================================================================
 % Timer-path relays seen outside the backfill experiment (dev)
 %   source: results/2026-10-17-smoke-2
 %   source: results/2026-10-17-failure-recovery-2
