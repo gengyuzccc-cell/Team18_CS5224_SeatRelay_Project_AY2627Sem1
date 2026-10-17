@@ -1,0 +1,4 @@
+window,start,end,api_503_in_access_log,api_requests_metric,api_5xx_metric,api_lambda_throttles
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,76,888,76,76
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,63,1142,63,63
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,5580,104656,5580,5580

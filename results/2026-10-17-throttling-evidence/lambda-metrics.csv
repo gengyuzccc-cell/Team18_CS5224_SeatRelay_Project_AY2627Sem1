@@ -1,0 +1,19 @@
+window,start,end,function,throttles_sum,invocations_sum,concurrent_max
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,seatrelay-dev-api,76.0,812.0,10.0
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,seatrelay-dev-worker,2.0,230.0,2.0
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,seatrelay-dev-expiry-forwarder,0,0,None
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,seatrelay-dev-notifier,0.0,70.0,4.0
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,seatrelay-dev-sweep,0.0,1.0,1.0
+concurrency,2026-10-17T13:26:00Z,2026-10-17T13:29:00Z,ACCOUNT(all functions),,,10.0
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,seatrelay-dev-api,63.0,1063.0,10.0
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,seatrelay-dev-worker,9.0,296.0,5.0
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,seatrelay-dev-expiry-forwarder,0.0,87.0,3.0
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,seatrelay-dev-notifier,0.0,84.0,3.0
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,seatrelay-dev-sweep,0,0,None
+backfill,2026-10-17T14:16:00Z,2026-10-17T14:18:00Z,ACCOUNT(all functions),,,10.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,seatrelay-dev-api,5580.0,99076.0,10.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,seatrelay-dev-worker,416.0,21637.0,5.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,seatrelay-dev-expiry-forwarder,213.0,7308.0,4.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,seatrelay-dev-notifier,103.0,4222.0,4.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,seatrelay-dev-sweep,0.0,10.0,1.0
+k6-matrix,2026-10-17T14:17:39Z,2026-10-17T15:04:05Z,ACCOUNT(all functions),,,10.0
