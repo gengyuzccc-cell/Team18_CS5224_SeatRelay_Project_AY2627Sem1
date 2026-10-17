@@ -120,3 +120,35 @@ requested through Service Quotas; status `CASE_OPENED`, support case `1792249565
 granted, never generate concurrent load against AWS; the concurrency, backfill and k6 dev re-runs wait
 for it (`docs/SUBMISSION-CHECKLIST.md`). Whether the quota caused the HTTP 503 responses of the
 concurrency and backfill runs is not yet established (Final §4.2).
+
+## 2026-10-17 evening: quota, re-run, redeploy, test-account passwords
+
+- **Lambda account concurrency quota: 1000** (was 10, the new-account default; increase approved,
+  `aws lambda get-account-settings` → `AccountLimit.ConcurrentExecutions = 1000`). The first Table 3 series
+  failed under the old quota (`results/2026-10-17-throttling-evidence/`); the whole series was re-run at 1000
+  from commit `e05c037` (`results/2026-10-17-table3-dev-q1000-provenance.md`), then the k6 matrix
+  (`results/loadtest/2026-10-17/`, run `20261017T192002Z`).
+- **18:14 UTC** `seatrelay-app-dev` update: only the sweep schedule gained the name `seatrelay-dev-sweep`
+  (no function, queue, table or API changed).
+- **21:08 UTC** `seatrelay-app-dev` redeployed from commit `d34e0ac` (ended-registration card, notification
+  wording, backfill holder names, refresh while confirmed), same parameters as above; dev SPA republished
+  (`index-C61U0ZZ4.js` / `index-DW27saFr.css`). **21:19 UTC** `seatrelay-app-pilot` and the pilot SPA
+  redeployed from the same commit (`Stage=pilot AllowFaultFlags=false EmailEnabled=true
+  WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`). The ten deployed Lambda
+  bundles were downloaded afterwards and are byte-identical to `node services/aws/scripts/build.mjs` at
+  `d34e0ac`. Both `/health` endpoints answer `ok`; both `env.js` files point at their own API. Regression on
+  dev after the deploy: smoke, correctness and access-control passed (`results/2026-10-17-*-3/`).
+- **Test-account passwords (21:02–21:07 UTC).** The repository is public and its documented local default was
+  also the password of every synthetic account in the pool. All 93 synthetic accounts (`@example.com`, SES
+  simulator) now have a private password that is not stored anywhere in the repository, and were signed out
+  everywhere (`tools/scripts/bin/reset-test-passwords.sh`); the tools read it from `SEATRELAY_TEST_PASSWORD`
+  and refuse the public default on AWS stages. To use the accounts (demo, user study), a team member picks a
+  password, exports it and runs the reset script with the deployer credentials.
+- **Leaked ID tokens.** The k6 summaries committed at 15:07 UTC (`63eba12`) contained the ID tokens of the 62
+  load-test accounts (k6 copies `setup()`'s return value into the summary). They were redacted in `9fc93fc`
+  and the k6 script now keeps only e-mail and user id; the copies in git history stay valid until they expire
+  at the latest 2026-10-18 02:15 UTC (12 h ID tokens; API Gateway's JWT authorizer cannot revoke them), for
+  synthetic accounts in synthetic organisations only. The passwords above were rotated so that no new token
+  can be minted from public information.
+- **SES:** sender identity `gengyuzccc@gmail.com` is verified; production access still shows **DENIED** for
+  case `179219791000451` (the team replied to the case; waiting for AWS). The sandbox fallback applies.

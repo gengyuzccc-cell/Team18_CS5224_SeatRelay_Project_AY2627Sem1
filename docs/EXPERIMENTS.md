@@ -470,13 +470,19 @@ times per run.
   tools/scripts/bin/cost-snapshot.sh                                            # daily during experiments and pilot → results/cost/snapshots/<date>.json
   python3 tools/experiments/cost/model.py                                       # tiers 1k/10k/100k → results/cost/model-summary.md, crossover.png, unit-cost.png, crossover-curve.csv
   python3 tools/experiments/cost/model.py --from-snapshot results/cost/snapshots/<date>.json   # measured usage priced → results/cost/usage-priced.md
+  python3 tools/experiments/cost/cloudwatch_usage.py --date <day> --price      # same day from CloudWatch (read-only), no billing lag → results/cost/usage-<day>-cloudwatch.{json,md}, usage-priced.md
   ```
 - **Notes.**
   - Cost Explorer's net (after-credits) cost shows 0 while credits last. The billing layer is
     therefore computed as usage × unit price (`pricing.json`, retrieved 2026-10-16).
   - Cost-allocation tag `Project` is active (`tools/scripts/bin/activate-cost-tags.sh`).
+  - Cost Explorer lags about a day, so the experiment day (17 October) was priced from CloudWatch
+    metrics instead: `results/cost/usage-2026-10-17-cloudwatch.md` lists every metric, conversion and
+    bound (SQS requests, data transfer, Cognito MAU). Whichever path ran last writes
+    `usage-priced.md`, which the report quotes; CloudWatch has no registration count, so that path
+    gives no measured unit cost.
 - **Pass** (a reporting criterion, not a threshold): every price has a source and a verification
-  flag; usage comes from a snapshot file; the crossover is computed, not estimated by hand.
+  flag; usage comes from a snapshot or CloudWatch file; the crossover is computed, not estimated by hand.
 - **Into the report.** The §2 cost table (tiers × layers), the crossover figure, and the unit cost.
   Each figure cites `results/cost/model-summary.md` and the snapshot date.
 
