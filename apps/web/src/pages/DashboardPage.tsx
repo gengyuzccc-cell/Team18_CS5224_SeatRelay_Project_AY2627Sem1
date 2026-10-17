@@ -1,7 +1,6 @@
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
-  type BackfillRecord,
   type ConfirmedEntry,
   type DashboardView,
   type PatchWorkshopBody,
@@ -15,16 +14,18 @@ import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
 import { useDashboard, useInvalidateWorkshopInfo } from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
-import { BACKFILL_CAUSE_TEXT, rejectReasonText, sessionTitle } from '../commands/copy';
+import { rejectReasonText, sessionTitle } from '../commands/copy';
 import { useCommand, type CommandHandle } from '../commands/useCommand';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
+import { BackfillLog } from '../components/BackfillLog';
 import { CopyLink } from '../components/CopyLink';
 import { Countdown } from '../components/Countdown';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
 import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
 import { describeError } from '../util/errors';
-import { formatDateTime, formatLatency, formatSeconds, formatTime, percentile } from '../util/time';
+import { participantLabel } from '../util/people';
+import { formatDateTime, formatSeconds, formatTime } from '../util/time';
 import { buildWorkshopPatch } from '../util/workshopPatch';
 
 /** A definitive (4xx) failure is not retried: the button offers the action again (fresh id). */
@@ -66,10 +67,6 @@ function CommandFeedback({ command }: { command: CommandHandle }) {
     );
   }
   return null;
-}
-
-function participantLabel(entry: { displayName?: string; email: string }): string {
-  return entry.displayName !== undefined ? `${entry.displayName} <${entry.email}>` : entry.email;
 }
 
 /** Per-session row: counters + SET_CAPACITY + CANCEL_SESSION, each with its own command flow. */
@@ -264,75 +261,6 @@ function AttendanceCell({
         </span>
       )}
     </div>
-  );
-}
-
-function BackfillLog({
-  backfills,
-  sessions,
-}: {
-  backfills: readonly BackfillRecord[];
-  sessions: readonly SessionView[];
-}) {
-  const latencies = backfills.flatMap((record) =>
-    record.latencyMs === undefined ? [] : [record.latencyMs],
-  );
-  const rows = [...backfills].reverse();
-  return (
-    <section className="card" aria-labelledby="backfill-heading">
-      <header className="card-header">
-        <h2 id="backfill-heading">Backfill log</h2>
-        <span className="muted small">
-          {latencies.length}/{backfills.length} reallocated
-          {latencies.length > 0 &&
-            ` · p50 ${formatLatency(percentile(latencies, 50))} · p95 ${formatLatency(percentile(latencies, 95))} · max ${formatLatency(Math.max(...latencies))}`}
-        </span>
-      </header>
-      {rows.length === 0 ? (
-        <p className="muted">No seat has been released yet.</p>
-      ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Released</th>
-                <th scope="col">Session</th>
-                <th scope="col">Cause</th>
-                <th scope="col">Reallocated</th>
-                <th scope="col" className="num">
-                  Latency
-                </th>
-                <th scope="col">New holder</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((record) => (
-                <tr key={record.id}>
-                  <td>{formatTime(record.releasedAt)}</td>
-                  <td>{sessionTitle(sessions, record.sessionId)}</td>
-                  <td>{BACKFILL_CAUSE_TEXT[record.cause]}</td>
-                  <td>
-                    {record.reallocatedAt === undefined ? (
-                      <span className="muted">waiting for a taker</span>
-                    ) : (
-                      formatTime(record.reallocatedAt)
-                    )}
-                  </td>
-                  <td className="num">{formatLatency(record.latencyMs)}</td>
-                  <td className="small">
-                    {record.newUserId === undefined ? (
-                      '—'
-                    ) : (
-                      <code title={record.newUserId}>{record.newUserId.slice(0, 8)}…</code>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
   );
 }
 

@@ -1,12 +1,23 @@
 import type { SessionView, WorkshopPublicView } from '@seatrelay/contracts';
-import { useEffect, useMemo, useReducer, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { useWorkshop } from '../api/queries';
+import {
+  latestEndedRegistration,
+  listBehindWorkshopView,
+  needsCatchUp,
+} from '../api/endedRegistration';
+import {
+  CONFIRMED_REFRESH_MS,
+  LIVE_REFRESH_MS,
+  useMyRegistrations,
+  useWorkshop,
+} from '../api/queries';
 import { useSession } from '../auth/useSession';
 import { rejectReasonText } from '../commands/copy';
 import { useCommand, type CommandPhase } from '../commands/useCommand';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
 import { CopyLink } from '../components/CopyLink';
+import { EndedStatusCard } from '../components/EndedStatusCard';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
 import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
@@ -59,6 +70,20 @@ function SessionsTable({ sessions }: { sessions: readonly SessionView[] }) {
   );
 }
 
+/** Sessions that can still be joined: not cancelled and before their cut-off (server clock). */
+export function joinableSessions(
+  sessions: readonly SessionView[],
+  now: number = serverNow(),
+): SessionView[] {
+  return sessions.filter(
+    (session) => !isCancelledLike(session.status) && Date.parse(session.cutoffAt) > now,
+  );
+}
+
+/** How long the page waits before asking again for a `/me/registrations` that is behind. */
+export const LIST_CATCH_UP_DELAY_MS = 1_500;
+export const LIST_CATCH_UP_ATTEMPTS = 4;
+
 function stateOf(state: CommandPhase): AsyncState {
   switch (state.phase) {
     case 'submitting':
@@ -77,20 +102,24 @@ function stateOf(state: CommandPhase): AsyncState {
 function RegistrationForm({
   view,
   onChanged,
+  autoFocus = false,
 }: {
   view: WorkshopPublicView;
   onChanged: () => void;
+  /** Bring the form into view and focus its first choice ("Register again"). */
+  autoFocus?: boolean;
 }) {
   const { workshop, sessions } = view;
   const perSession = workshop.mode === 'PER_SESSION';
   // Cut-offs are judged on the server's clock (plan §1.4), not the browser's.
-  const joinable = useMemo(
-    () =>
-      sessions.filter(
-        (session) => !isCancelledLike(session.status) && Date.parse(session.cutoffAt) > serverNow(),
-      ),
-    [sessions],
-  );
+  const joinable = useMemo(() => joinableSessions(sessions), [sessions]);
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (autoFocus) {
+      formRef.current?.scrollIntoView({ block: 'nearest' });
+      formRef.current?.querySelector('input')?.focus();
+    }
+  }, [autoFocus]);
   const [selected, dispatch] = useReducer(preferenceReducer, []);
   const command = useCommand(workshop.id, { sessions, onSettled: onChanged });
   const [validation, setValidation] = useState<string | undefined>(undefined);
@@ -126,7 +155,7 @@ function RegistrationForm({
   const locked = command.busy || command.canRetry;
 
   return (
-    <form className="card" onSubmit={submit} aria-labelledby="register-heading">
+    <form ref={formRef} className="card" onSubmit={submit} aria-labelledby="register-heading">
       <header className="card-header">
         <h3 id="register-heading">Register</h3>
       </header>
@@ -270,7 +299,87 @@ export function WorkshopPage() {
   const { wsId } = useParams<{ wsId: string }>();
   const session = useSession();
   const query = useWorkshop(wsId);
+  // History of my registrations: says how one ended once `me` (live only) has disappeared.
+  const registrations = useMyRegistrations({ poll: false });
+  const [registerAgainFor, setRegisterAgainFor] = useState<string | undefined>(undefined);
   const refetch = () => void query.refetch();
+
+  const loaded = query.data;
+  const me = loaded?.me;
+  const mode = loaded?.workshop.mode ?? 'UNIFIED';
+  // The live registration this page saw last. Once `me` is gone, the list has to show that one
+  // as CANCELLED/ENDED before an ending is explained: on AWS the index can briefly list neither
+  // its live nor its archived copy, and an older ending must not stand in for it meanwhile.
+  const [lastLiveSeq, setLastLiveSeq] = useState<number | undefined>(undefined);
+  if (me !== undefined && me.seq !== lastLiveSeq) {
+    setLastLiveSeq(me.seq);
+  }
+  const awaitedSeq = loaded !== undefined && me === undefined ? lastLiveSeq : undefined;
+  const latestEnded =
+    loaded === undefined
+      ? undefined
+      : latestEndedRegistration(registrations.data, loaded.workshop.id, me, mode);
+  const behind =
+    loaded !== undefined &&
+    needsCatchUp(registrations.data, loaded.workshop.id, me, mode, awaitedSeq);
+  // The list still has my registration as live, or not at all, although the workshop view no
+  // longer has it (a tick, an expiry or an organiser action ended it): no card can be shown yet,
+  // and the empty form would be wrong, so the page waits for the list while catch-up attempts
+  // remain.
+  const listBehind =
+    loaded !== undefined &&
+    listBehindWorkshopView(registrations.data, loaded.workshop.id, me, mode, awaitedSeq);
+  const [catchUpExhausted, setCatchUpExhausted] = useState(false);
+  const ended =
+    listBehind && !catchUpExhausted && latestEnded?.registration.seq !== awaitedSeq
+      ? undefined
+      : latestEnded;
+  const refetchRegistrations = registrations.refetch;
+  const refetchWorkshop = query.refetch;
+
+  // My live registration changed (ended, re-queued, confirmed…): fetch the list again, it says
+  // how a registration ended.
+  const meKey = loaded === undefined ? undefined : `${me?.seq ?? '-'}:${me?.status ?? '-'}`;
+  const previousMeKey = useRef(meKey);
+  useEffect(() => {
+    const previous = previousMeKey.current;
+    previousMeKey.current = meKey;
+    if (previous !== undefined && meKey !== undefined && previous !== meKey) {
+      void refetchRegistrations();
+    }
+  }, [meKey, refetchRegistrations]);
+
+  // The list still shows a registration as live that the (consistent) workshop view no longer
+  // has, does not list it yet, or has only the poll result of how it ended: it is behind
+  // (eventually consistent index). Ask again a few times. A failed refetch counts as an attempt
+  // too: it moves `errorUpdatedAt`, not `dataUpdatedAt`, and must schedule the next attempt (or
+  // end the loop) rather than leave the placeholder up.
+  const catchUpAttempts = useRef(0);
+  useEffect(() => {
+    if (!behind) {
+      catchUpAttempts.current = 0;
+      setCatchUpExhausted(false);
+      return;
+    }
+    if (catchUpAttempts.current >= LIST_CATCH_UP_ATTEMPTS) {
+      // Still behind after the last attempt: stop waiting (the form or the card from what the
+      // list says), rather than a placeholder that never goes away.
+      setCatchUpExhausted(true);
+      return;
+    }
+    const timer = setTimeout(() => {
+      catchUpAttempts.current += 1;
+      void refetchRegistrations();
+      void refetchWorkshop();
+    }, LIST_CATCH_UP_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [
+    behind,
+    registrations.dataUpdatedAt,
+    registrations.errorUpdatedAt,
+    refetchRegistrations,
+    refetchWorkshop,
+  ]);
 
   if (wsId === undefined) {
     return <ErrorBanner error={new Error('Missing workshop id')} />;
@@ -291,6 +400,27 @@ export function WorkshopPage() {
   const { workshop, sessions } = view;
   const closed = isCancelledLike(workshop.status);
   const shareUrl = `${window.location.origin}/workshops/${encodeURIComponent(workshop.id)}`;
+  const endedKey =
+    ended === undefined ? undefined : `${ended.registration.seq}:${ended.registration.status}`;
+  const registeringAgain = endedKey !== undefined && registerAgainFor === endedKey;
+  const canRegisterAgain = workshop.status === 'OPEN' && joinableSessions(sessions).length > 0;
+  // UNIFIED: the form appears when there is nothing to explain, or after "Register again".
+  // PER_SESSION: one registration per session, so the form is always there.
+  const showForm =
+    workshop.mode === 'PER_SESSION' ||
+    (view.me === undefined && (ended === undefined || registeringAgain));
+  const checkingHistory =
+    workshop.mode === 'UNIFIED' &&
+    view.me === undefined &&
+    (registrations.isPending || (listBehind && !catchUpExhausted));
+  const refreshNote =
+    view.me === undefined
+      ? undefined
+      : view.me.status === 'QUEUED' || view.me.status === 'OFFERED'
+        ? `This page refreshes every ${LIVE_REFRESH_MS / 1000} s while you are queued or offered (paused when the tab is hidden).`
+        : view.me.status === 'CONFIRMED'
+          ? `This page refreshes every ${CONFIRMED_REFRESH_MS / 1000} s while your seat is confirmed (paused when the tab is hidden).`
+          : undefined;
 
   return (
     <div className="stack">
@@ -340,6 +470,17 @@ export function WorkshopPage() {
               onChanged={refetch}
             />
           )}
+          {ended !== undefined && (
+            <EndedStatusCard
+              sessions={sessions}
+              mode={workshop.mode}
+              registration={ended.registration}
+              title={view.me === undefined ? 'My status' : 'Your last ended registration'}
+              {...(canRegisterAgain && !registeringAgain
+                ? { onRegisterAgain: () => setRegisterAgainFor(endedKey) }
+                : {})}
+            />
+          )}
           {closed ? (
             <p className="banner banner-info">
               This workshop is {workshop.status === 'CANCELLING' ? 'being cancelled' : 'cancelled'};
@@ -347,16 +488,17 @@ export function WorkshopPage() {
             </p>
           ) : workshop.status === 'CLOSED' ? (
             <p className="banner banner-info">Registration is closed by the organiser.</p>
-          ) : view.me === undefined || workshop.mode === 'PER_SESSION' ? (
-            <RegistrationForm key={view.me?.seq ?? 'new'} view={view} onChanged={refetch} />
+          ) : checkingHistory ? (
+            <Loading label="Checking your registrations…" />
+          ) : showForm ? (
+            <RegistrationForm
+              key={view.me?.seq ?? 'new'}
+              view={view}
+              onChanged={refetch}
+              autoFocus={registeringAgain}
+            />
           ) : null}
-          {view.me !== undefined &&
-            (view.me.status === 'QUEUED' || view.me.status === 'OFFERED') && (
-              <p className="muted small">
-                This page refreshes every 10 s while you are queued or offered (paused when the tab
-                is hidden).
-              </p>
-            )}
+          {refreshNote !== undefined && <p className="muted small">{refreshNote}</p>}
         </>
       )}
 

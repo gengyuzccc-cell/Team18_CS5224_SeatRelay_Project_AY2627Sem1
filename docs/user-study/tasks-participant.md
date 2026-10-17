@@ -99,10 +99,10 @@ Control only: the "seat held" e-mail (`control-condition-setup.md` §4.2) must b
 | | Dataset A | Dataset B |
 |---|---|---|
 | **Scenario** | "Your plans have changed: you can no longer attend **Data Visualisation Basics** at all. Give up your seat so that someone else can have it. Say 'done'." | "Your plans have changed: you can no longer attend **Resume Clinic** at all. Give up your seat so that someone else can have it. Say 'done'." |
-| **Success — SR** | W1-A registration status **CANCELLED** (Cancel + confirmation dialog). Cancelling Git Basics instead → `0` (wrong action). | W1-B CANCELLED. |
+| **Success — SR** | W1-A registration status **CANCELLED** (Cancel + confirmation dialog). The W1-A page then keeps a **Cancelled** status card: *You gave up your confirmed seat in ‹Tuesday session› at ‹time›; it is free again for the next person waiting, if there is one.* (true here: the W1 queue is empty, so nobody receives it) with *You can register again; you will join the end of the queue.* and a **Register again** button (the empty registration form does not come back by itself). Cancelling Git Basics instead → `0` (wrong action). Clicking **Register again** and re-registering → `0` (the seat is no longer given up). | W1-B CANCELLED; the card names the Friday session. |
 | **Success — CTRL** | An e-mail **sent** to the organiser address that identifies Jordan Lee and the Tuesday session (or the workshop) and asks to cancel. Submitting any form → error. Saying "done" without sending anything → `0`. | Friday session / Resume Clinic. |
 | **Max time** | 300 s (expected SR ≈ 15–40 s, CTRL ≈ 45–120 s) | same |
-| **Observe** | SR: is Cancel discoverable; do they read the "seat goes to the next person" text; any fear of cancelling the wrong workshop. CTRL: do they know whom to e-mail (address is in the announcement and in the form description); do they try to delete their form response. | same |
+| **Observe** | SR: is Cancel discoverable; do they read the *Cancelled* card ("free again for the next person waiting, if there is one") and take it as confirmation, or look elsewhere (My registrations → Past reads *cancelled: you gave up your seat in ‹session›*); any fear of cancelling the wrong workshop. CTRL: do they know whom to e-mail (address is in the announcement and in the form description); do they try to delete their form response. | same |
 
 ## 3. Answer key summary (facilitator copy)
 
@@ -120,7 +120,7 @@ After T5 in SR the freed seat has no queue behind it (W1 queue is empty), so not
 
 | Risk | Handling |
 |---|---|
-| Hold expires before T4 (T1–T3 took > 30 min) | Cannot normally happen (12-min round); if it does: T4 `success = 0`, `time_s` empty, `notes = "offer expired before T4"`; T5 is then run on the Git Basics / Python queue entry instead and noted. |
+| Hold expires before T4 (T1–T3 took > 30 min) | Cannot normally happen (12-min round); if it does: T4 `success = 0`, `time_s` empty, `notes = "offer expired before T4"`; T5 is then run on the Git Basics / Python queue entry instead and noted. What the participant sees: the W1 card goes back to **Queued** for the first-choice session (Wed / Thu), and the notification reads *Your hold on a seat in "‹Tuesday / Friday session›" (starts ‹Tue 17 Nov 2026, 14:00 SGT› / ‹Fri 20 Nov 2026, 10:00 SGT›) … expired at ‹… SGT› because it was not accepted in time, … You keep your place in the queue for the other sessions you chose.* (notification and e-mail times are Singapore time). |
 | Participant submits the SR registration without ordering (default order) and the default happens to be right | Still `1` — the UI's default is part of the tool. Note "default order" in `notes`. |
 | Control status board shows a stale value (Sheets recalculation lag) | Refresh the tab; if still wrong, stop the stopwatch, note "tool lag", resume. |
 | Persona Gmail shows the e-mail in "Promotions" or spam | Dry-run check; whitelist the organiser address beforehand. |

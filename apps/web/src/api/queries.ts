@@ -16,6 +16,8 @@ export { queryKeys };
 
 /**
  * Status page refresh while QUEUED/OFFERED (plan §1.3), and the organiser dashboard's refresh.
+ * A CONFIRMED participant's page refreshes less often (`CONFIRMED_REFRESH_MS`): nothing is
+ * pending for them, but the free-seat and waiting counts on the page go stale otherwise.
  * "Paused when the tab is hidden" is `refetchIntervalInBackground: false`: the interval keeps
  * ticking but query-core skips the fetch while `document.visibilityState` is hidden. The
  * interval itself must stay a plain number: an interval function that answers `false` while
@@ -23,6 +25,7 @@ export { queryKeys };
  * would switch the refresh off for good.
  */
 export const LIVE_REFRESH_MS = 10_000;
+export const CONFIRMED_REFRESH_MS = 30_000;
 export const NOTIFICATIONS_REFRESH_MS = 30_000;
 const LIVE_STATUSES: readonly RegistrationStatus[] = ['QUEUED', 'OFFERED'];
 
@@ -30,18 +33,24 @@ export function isLiveStatus(status: RegistrationStatus | undefined): boolean {
   return status !== undefined && LIVE_STATUSES.includes(status);
 }
 
-/** `GET /workshops/{id}` refresh: only while my registration is QUEUED/OFFERED. */
-export function workshopRefetchInterval(view: WorkshopPublicView | undefined): number | false {
-  return isLiveStatus(view?.me?.status) ? LIVE_REFRESH_MS : false;
+/** Refresh period for a page showing registrations in these states (false: no refresh). */
+export function refreshIntervalFor(statuses: readonly RegistrationStatus[]): number | false {
+  if (statuses.some(isLiveStatus)) {
+    return LIVE_REFRESH_MS;
+  }
+  return statuses.includes('CONFIRMED') ? CONFIRMED_REFRESH_MS : false;
 }
 
-/** `GET /me/registrations` refresh: while any registration is QUEUED/OFFERED. */
+/** `GET /workshops/{id}` refresh: 10 s while my registration is QUEUED/OFFERED, 30 s while CONFIRMED. */
+export function workshopRefetchInterval(view: WorkshopPublicView | undefined): number | false {
+  return refreshIntervalFor(view?.me === undefined ? [] : [view.me.status]);
+}
+
+/** `GET /me/registrations` refresh: 10 s while any registration is QUEUED/OFFERED, else 30 s while one is CONFIRMED. */
 export function myRegistrationsRefetchInterval(
   list: MyRegistrationListView | undefined,
 ): number | false {
-  return (list?.registrations ?? []).some((entry) => isLiveStatus(entry.registration.status))
-    ? LIVE_REFRESH_MS
-    : false;
+  return refreshIntervalFor((list?.registrations ?? []).map((entry) => entry.registration.status));
 }
 
 /** 404/403/401 are final answers; everything else gets one retry. */
@@ -83,16 +92,19 @@ export function useWorkshop(wsId: string | undefined) {
  * with the registrations that settled commands reported, until the server reflects them
  * (`settledRegistrations.ts`, plan §1.3).
  */
-export function useMyRegistrations() {
+export function useMyRegistrations(options: { poll?: boolean } = {}) {
   const api = useApi();
   const session = useSession();
   const queryClient = useQueryClient();
+  // `poll: false` (the workshop page, which polls its own view): fetched on mount and refetched
+  // on invalidation or on demand only.
+  const poll = options.poll ?? true;
   return useQuery({
     queryKey: queryKeys.myRegistrations,
     queryFn: async () => settledRegistrationsFor(queryClient).apply(await api.myRegistrations()),
     enabled: session.isAuthenticated,
     retry: shouldRetry,
-    refetchInterval: (query) => myRegistrationsRefetchInterval(query.state.data),
+    refetchInterval: poll ? (query) => myRegistrationsRefetchInterval(query.state.data) : false,
     refetchIntervalInBackground: false,
   });
 }

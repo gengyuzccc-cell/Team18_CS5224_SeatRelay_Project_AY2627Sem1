@@ -33,6 +33,14 @@ decide(snapshot: WorkshopSnapshot, command: Command, ctx: { now, newId, limits? 
   (90) storage items under `COMMIT_ITEM_COST` (see Limits).
 - `notifications`: drafts for OFFER, CONFIRMED, EXPIRED, DECLINED, REVOKED, SESSION_CANCELLED,
   WORKSHOP_CANCELLED (one per user), ENDED (cut-off). A participant's own cancel is silent.
+  Title and body are written for people (they are also the e-mail text): times are rendered by
+  `formatDisplayTime` as `Wed 21 Oct 2026, 10:00 SGT` in `DISPLAY_TIME_ZONE` (`Asia/Singapore`,
+  the deployment's audience; change the one constant in `src/displayTime.ts` to move them) with a
+  fixed locale, so the text stays deterministic. Every ending says what happened (declined or let
+  expire the last chosen session, cut-off, session or workshop cancelled), never an enum value;
+  in PER_SESSION mode it is about that session's registration only (the participant's
+  registrations for other sessions are not affected). `sessionCancelledTitle` is exported so the
+  service can tell which cancellation a SESSION_CANCELLED notice was about.
 - `timers`: one `{ offerId, expiresAt }` per new offer; schedule them **before** committing.
 - `backfills`: records created, relayed or closed in this decision (also in `writes` as
   PUT_BACKFILL / PUT_PENDING_BACKFILL / ARCHIVE_BACKFILL). `latencyMs = reallocatedAt −

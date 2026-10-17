@@ -20,7 +20,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['test/**/*.test.ts', 'src/**/*.test.ts'],
+    include: ['test/**/*.test.ts', 'test/**/*.test.tsx', 'src/**/*.test.ts'],
     // Vitest stubs CSS imports by default; test/styles.test.ts reads the stylesheet (`?raw`).
     css: { include: [/styles\.css/] },
   },

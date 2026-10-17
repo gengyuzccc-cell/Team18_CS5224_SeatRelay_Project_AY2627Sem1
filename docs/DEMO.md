@@ -41,9 +41,14 @@ Why two browsers: the SPA keeps the signed-in user in `localStorage`, so one bro
 account. A private window has its own storage and its own identity-provider cookies, so it counts as
 a third profile.
 
-Roles in the team: one **operator** drives all windows and the terminal and never talks. One
-**narrator** speaks the "Say" lines. Swap roles between rehearsals so that two people can do each
-job.
+Roles in the team (`docs/walkthrough/README.md`, Part 4):
+
+- **Narrator: ZHANG TIANYI** (organiser dashboard) speaks every "Say" line of D1, D2, D5a, D3, D5b
+  and D4, and the fallback lines of §6, then hands over to Part 5 (ZHU GENGYU).
+- **Operator: LI ZONGZE** (product and front end) drives the participant browser (Browser 2: A and B)
+  and, so that one person has the mouse, also Window O and the terminal, and never talks.
+
+Swap roles between rehearsals so that two people can do each job.
 
 ---
 
@@ -199,6 +204,19 @@ message pauses only *its own* workshop: the expiry runs on another workshop's qu
 Notation: **Do** = operator action, **Expect** = what appears (exact UI text where it matters),
 **Say** = narrator line. Times are relative to the start of the demo block.
 
+> **Requires an API + SPA redeploy after the Table 3 run.** The *Expect* lines of D2 and D3 about
+> the ended-status card (its wording, **Register again**) and the named *New holder* in the backfill
+> log need both the API that returns `ending` and `newHolderEmail` and the SPA that shows them. The
+> dev stack is not redeployed while the Table 3 run is in progress. Until it is, the deployed build
+> behaves as in the 2026-10-17 walkthrough: after a cancellation or an expiry the card vanishes and
+> the empty registration form returns (the reason is under **Notifications** and **My registrations
+> → Past**), and the *New holder* column shows the first 8 characters of the user id (section 8).
+> After the redeploy, re-run the browser walkthrough (section 9) to refresh `docs/demo/screenshots/`,
+> `docs/demo/backup-demo.mp4` and the timings quoted below. Until then the backup recording (B1) and
+> the screenshots (B2–B5, e.g. `16-cancelled.png` and `21-after-expiry.png` with the empty form,
+> `24-dashboard-backfill-log.png` with truncated user ids) show the earlier UI: narrate them with
+> the fallback script in `docs/walkthrough/part-4.md`, which does not describe the ended card.
+
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 
 - **Say:** "Three sessions of the same workshop. Session 3 is already taken; sessions 1 and 2 have
@@ -226,8 +244,13 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   position **1**.* In the sessions table, Session 1 shows *Free* 0 and *Waiting* 1.
 - **Say:** "Session 1 is full; Demo 2 waits first in line. Now Demo 1's plans change."
 - **Do (Window A):** **Cancel my seat** → *Release your seat?* **Yes, cancel**.
-- **Expect (A):** *Cancellation applied — Your registration is cancelled.* The page shows the
-  registration form again.
+- **Expect (A):** toast *Cancellation applied — Your registration is cancelled. If you held or had a
+  confirmed seat, it is free again for the next person waiting.* The **My status** card stays (badge
+  *Cancelled*) and reads *You gave up your confirmed seat in **Session 1** at ‹time›; it is free
+  again for the next person waiting, if there is one.*, then *You can register again; you will join
+  the end of the queue.* with **Register again** (the registration form only comes back on that
+  click). For a second or two the card may read the shorter *You cancelled your registration at
+  ‹time›. If you held or had a confirmed seat, …* while *My registrations* catches up.
 - **Expect (B):** Within 10 s (the status page refreshes while you are queued; or press F5) the card
   switches to *Offered*: *A seat in **Session 1** (‹date›) is held for you. Confirm within 59:5x.*
   B gets no toast: toasts only report commands sent from that window. (Browser walkthroughs on dev,
@@ -235,8 +258,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 - **Do (Window B):** **Accept seat** → *Your seat in Session 1 is confirmed.*
 - **Do (Window O):** **Refresh**. The **Backfill log** shows *Session 1 · confirmed seat cancelled ·
   latency 0 ms*. The header reads *1/1 reallocated · p50 0 ms · p95 0 ms · max 0 ms*. The *New
-  holder* column shows the first 8 characters of the user id, not the name; Demo 2's name is in
-  *Offered*.
+  holder* column names her like the other tables: *Demo 2 ‹demo-2@example.com›*.
 - **Say:** "The cancellation and the hand-over to the next person are one transaction: zero
   milliseconds, nobody had to email anyone."
 
@@ -282,15 +304,23 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   - A late or duplicate tick finds nothing to do. The five-minute sweep is only a safety net; it is
     not what makes this fast."
 - At 00:00 A's countdown reads *expired*. **Accept seat** stays enabled, because the server decides.
-  The page refreshes once at zero. On dev the timer usually relays the seat within a second, so A's
-  card often disappears about 1 s after 00:00 (browser walkthrough 2026-10-17: 0.95 s).
+  The page refreshes once at zero. On dev the timer usually relays the seat within a second, and
+  A's offered card is gone about 2 s after 00:00 (1,975 ms in the published browser walkthrough,
+  `results/2026-10-17-web-walkthrough-dev/`, earlier UI, timed once the registration form was back).
+  The *Ended* card follows once *My registrations* has the ending (one more round trip; not yet
+  measured on dev: after the redeploy, the walkthrough's `bobEndedCardAfterExpiryMs` replaces the
+  1,975 ms here).
 - **Do (Window A), optional, at 00:00 while the Accept button is still visible:** **Accept seat**.
   Skip this if the card is already gone.
 - **Expect:** *Accept rejected — The offer expired before your answer arrived.* At the next refresh
-  A's page shows the registration form again, **with no message on the page itself**. Her
-  registration has ended. The reason is in **Notifications** (*Offer expired: Session A … your
-  registration has ended*) and in **My registrations** under *Past*: *ended: none of your acceptable
-  sessions could still be joined · ‹date›*.
+  A's **My status** card (badge *Ended*) reads *Your hold for **Session A** expired at ‹time› without
+  being accepted — the seat is free again for the next person waiting, if there is one. That was the
+  last session you had chosen, so your registration has ended.* with *You can register again; you will join the
+  end of the queue.* and **Register again**. The same story is in **Notifications** (*Offer
+  expired: Session A* — *Your hold on a seat in "Session A" (starts ‹Wed 18 Nov 2026, 10:00 SGT›)
+  of "Expiry demo" expired at ‹… SGT› because it was not accepted in time, …*; every time in a
+  notification and e-mail is Singapore time) and in **My registrations** under *Past*: *ended: your
+  hold on Session A expired · ‹date›*.
   - If A's click arrives before the timer, A's own command performs the expiry (tick-first). The
     outcome is the same.
 - **Expect (Window B):** within 10 s after 00:00 (the auto-refresh; press F5 to see it at once) the
@@ -403,9 +433,11 @@ over it.
 
 | Symptom | Likely cause | Action (≤ 10 s, otherwise Plan C) |
 |---|---|---|
-| A status card does not change after the other window acted | auto-refresh runs every 10 s and only while the tab is visible | press F5 in that window |
-| After an offer expired, that participant's card vanished and the empty registration form is back, with no message | expected: the page shows only live registrations; the reason is under **Notifications** and **My registrations → Past** | say "her registration ended because the hold ran out" and open **Notifications** if asked |
-| The counters on a confirmed participant's page (*Free*, *Waiting*) look stale | the page refreshes itself only while the registration is queued or offered | **Refresh** button or F5 |
+| A status card does not change after the other window acted | auto-refresh runs every 10 s (30 s once confirmed) and only while the tab is visible | press F5 in that window |
+| After an offer expired or a cancellation, the card vanished and the empty registration form is back, with no message | the deployed SPA/API predate the ended-status card (fixed after the 2026-10-17 walkthrough; see the note at the top of section 5) | say "her registration ended because the hold ran out" and open **Notifications**; redeploy before the next rehearsal |
+| *Checking your registrations…* under the sessions table for a few seconds after the card vanished | expected: the page waits for *My registrations* (up to about 6 s) instead of showing the empty form | wait; F5 if it stays |
+| The ended card says that the registration was cancelled or has ended, but not for which session or what happened to the seat (it starts *You cancelled your registration at ‹time›* or *Your registration has ended at ‹time›*) | *My registrations* (an eventually consistent index on AWS) has not caught up yet; the page asks again for a few seconds | wait 2 s or press F5 |
+| The counters on a confirmed participant's page (*Free*, *Waiting*) lag behind | the page refreshes every 30 s while the seat is confirmed (10 s while queued or offered) | **Refresh** button or F5 |
 | "Still processing — the server has your request; we keep checking every 5 s." | worker backlog, or the workshop's group is waiting for the D5 redelivery | if it is *Demo workshop* between D5a and D5b: expected; say so. Otherwise switch to the video |
 | Sign-in page appears | token or session expired | sign in again (password manager); if it fails, Plan C |
 | `"status": "ACCEPTED"` stays on the D5a poll | queue slow | poll again after 2 s; the redelivery is unaffected |
@@ -455,7 +487,8 @@ Observed in the published run (dev, 2026-10-17, 45 checks passed, evidence
 - Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 6 s later, on
   its 10 s refresh.
 - Expiry backfill: latency 179 ms on the dashboard (103–189 ms over three runs). Carol's page
-  showed the relayed offer 7 s after `expiresAt`.
+  showed the relayed offer 7 s after `expiresAt`. Bob's offered card was gone and the registration
+  form back 2.0 s after `expiresAt` (`bobCardGoneAfterExpiryMs` 1,975 in `meta.json`).
 - 0 API responses ≥ 400, 0 browser console errors.
 
 ---

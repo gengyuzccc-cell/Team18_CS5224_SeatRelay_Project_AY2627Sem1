@@ -1,10 +1,10 @@
 # Part 3: architecture, request path, timers, transactions
 
-- **Speaker:** LIN JIE
+- **Speaker:** LIN JIE (AWS and monitoring)
 - **Clock:** 4:00–6:00 (2:00)
 - **Slides:** 5 Architecture (Final report Fig. 2), 6 Request path and transaction (Fig. 3a), 7 Timers
   and sweep (Fig. 3b), in `report/Slides.tex`. Sources: `docs/ARCHITECTURE.md` §1.2, §3.2, §5.3.
-- **Hands over to:** Part 4 (live demo)
+- **Hands over to:** Part 4 (live demo: ZHANG TIANYI narrates, LI ZONGZE operates)
 
 ## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
@@ -29,7 +29,7 @@ forwarder moves the due tick into the workshop's FIFO group, and the worker firs
 due by the server clock, then offers the seat to the next person. A late or duplicate tick finds
 nothing to do. The five-minute sweep is only a safety net, and we count every expiry it performs.
 
-Now let's see it live. Over to ZHU GENGYU.
+Now let's see it live. Over to ZHANG TIANYI.
 
 ## Key numbers
 

@@ -132,6 +132,19 @@ export interface WorkshopStore {
   /** Live and archived registrations of a user across workshops. */
   listRegistrationsForUser(userId: string): Promise<Registration[]>;
   listNotificationsForUser(userId: string): Promise<Notification[]>;
+  /**
+   * The notifications of one user in one workshop created at or after `since`, strongly
+   * consistent: what the decision that ended a registration told the participant, so that
+   * `GET /me/registrations` can name the session whose cancellation ended it (no engine field
+   * records that). Read only when the workshop has a cancelled session. DynamoDB: one query of
+   * the user's `N#` items from `since` on, with a `workshopId` filter; Postgres: `notifications`
+   * by user, workshop and time.
+   */
+  listNotificationsOfUserSince(
+    userId: string,
+    wsId: string,
+    since: string,
+  ): Promise<Notification[]>;
   /** Sets `readAt`; undefined when the notification does not exist or belongs to someone else. */
   markNotificationRead(
     userId: string,
@@ -142,6 +155,16 @@ export interface WorkshopStore {
   listBackfills(wsId: string): Promise<BackfillRecord[]>;
   /** Archived registrations/offers (dashboard history, CSV export, attendance eligibility). */
   listHistory(wsId: string): Promise<WorkshopHistory>;
+  /**
+   * The archived (settled) offers of one user in one workshop: how that user's CANCELLED/ENDED
+   * registrations ended (`GET /me/registrations`). Narrower than `listHistory`: no archived
+   * registrations, and only this user's offers are returned. DynamoDB: one strongly consistent
+   * query of the `H#O#` prefix with a `userId` filter (1 RRU per 4 KB, twice the eventually
+   * consistent rate; the filtered-out items are still read and billed, since offers are keyed
+   * by offerId), so that an offer archived in the same transaction as a registration the GSI
+   * already lists as ended is never missing; Postgres: `offers_history` by workshop and user.
+   */
+  listArchivedOffersOfUser(wsId: string, userId: string): Promise<Offer[]>;
   putAttendance(record: Attendance): Promise<void>;
   listAttendance(wsId: string): Promise<Attendance[]>;
   /**

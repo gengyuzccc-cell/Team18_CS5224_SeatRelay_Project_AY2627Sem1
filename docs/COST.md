@@ -9,7 +9,7 @@ where every number comes from. The inputs, the model and the outputs live in the
 | On-prem inputs | `tools/experiments/cost/onprem.json` | hardware, power, tariff, network, backup, e-mail, labour and FX assumptions, each with source and verification flag |
 | Model | `tools/experiments/cost/model.py` | workload model, three cloud layers, two on-prem views, crossover, charts; `--usage`/`--from-snapshot` price measured usage |
 | Output | `results/cost/model-summary.md`, `results/cost/crossover.png`, `results/cost/unit-cost.png`, `results/cost/crossover-curve.csv` | regenerated with `python3 tools/experiments/cost/model.py` |
-| Measured usage | `results/cost/snapshots/<date>.json` (from `tools/scripts/bin/cost-snapshot.sh`), `results/cost/usage-priced.md` | plan section 3 step 24 |
+| Measured usage | `results/cost/usage-<date>-cloudwatch.{json,md}` and `usage-<date>-cloudwatch-priced.md` (from `tools/experiments/cost/cloudwatch_usage.py`), `results/cost/snapshots/<date>.json` (from `tools/scripts/bin/cost-snapshot.sh`), `results/cost/usage-priced.md` (the last priced usage; now the CloudWatch day) | plan section 3 step 24 |
 
 Notation: `pricing.json: <key>` refers to `prices.<key>.usd` in that file; `onprem.json: <path>` refers to the
 JSON path. "Verified" below means the price was read from the AWS Price List API file named in the entry's
@@ -64,6 +64,30 @@ usage quantities over the period, maps Cost Explorer usage types to `pricing.jso
 `model.py`) and prices them in layers 1 and 2 (`results/cost/usage-priced.md`). A hand-written
 `{pricing_key: quantity, "registrations": N}` file can be priced the same way with `--usage`.
 
+**Measured usage of the experiment day (CloudWatch).** Cost Explorer lags about a day and covers only
+tagged usage since the cost allocation tag became active, so the experiment day was read from the
+service metrics instead: `python3 tools/experiments/cost/cloudwatch_usage.py --date 2026-10-17 --price`
+(read-only AWS calls) finds the resources of the SeatRelay stacks, sums their billing-relevant AWS/*
+metrics over the window and writes the `{pricing_key: quantity}` object
+`results/cost/usage-2026-10-17-cloudwatch.json` and, per resource, the metrics, conversions and
+assumptions in `usage-2026-10-17-cloudwatch.md`. `--price` then runs `model.py --usage` on the object
+(into a temporary `--out`, so `model-summary.md` and the charts are not overwritten) and copies the
+priced table to `usage-2026-10-17-cloudwatch-priced.md` and to `results/cost/usage-priced.md`, the file
+`report/tools/report_numbers.py` reads. For 2026-10-17 00:00-20:20 UTC, dev and pilot stages, it gives
+US$3.25 at list price (US$1.86 without the month's Cognito MAU line of US$1.40) and US$1.19 after the
+free tier. The main assumptions, all in that `.md`:
+
+- SQS bills API calls, which no metric counts directly, so requests = sends + empty receives + one
+  receive and one delete call per consumer Lambda batch (central estimate; low/high bounds per queue
+  in the file).
+- `data_transfer_out_gb` is API Gateway `DataProcessed`, which counts request and response bytes: an
+  upper bound on data transfer out.
+- Cognito MAU is every user in the pool, an upper bound on the month's MAU and a month-level charge
+  put into one day; CloudFront requests are all priced at the Asia Pacific HTTPS rate (upper bound).
+- The after-free-tier figure applies the whole month's free allowances to this window alone.
+- No metric counts REGISTER commands, so the object has no `registrations` entry and gives no measured
+  unit cost; the per-registration drivers of section 3 stay modelled.
+
 ## 3. Workload model (registrations per month -> usage)
 
 The model is parameterised by registrations per month `N` (default tiers 1,000 / 10,000 / 100,000). The
@@ -89,6 +113,38 @@ per-registration drivers are the `Workload` dataclass in `model.py` (also printe
 | X-Ray | 1 trace per sampled invocation, sampling fraction 1.0 | upper bound; the default rule samples 1 req/s + 5% |
 | Cognito | MAU = N / 3 | assumption from plan section 6 |
 | Fixed observability | 1 dashboard, 9 alarms, 8 custom metrics, 50,000 CloudWatch API requests | `app.yaml` |
+
+**Reads outside the drivers (not in `model.py`; small).** Four read paths of the participant pages are
+not separate drivers; "API reads per command" is meant to absorb them.
+
+- The 30 s refresh of `GET /workshops/{id}` and `GET /me/registrations` while a seat is CONFIRMED (the
+  10 s refresh while QUEUED/OFFERED is the plan section 1.3 behaviour; nothing refreshes otherwise or in
+  a hidden tab). At the prices above one such GET costs about US$4.0e-6 (HTTP API request, `api` Lambda
+  512 MB x 0.15 s and its request, 2 RRU, 1.9 KB of logs), US$9.0e-6 with the X-Ray upper bound. Ten
+  extra refreshes per confirmed registration (a tab left visible for 5 minutes) add US$0.04-0.09 per
+  1,000 registrations, 0.7-1.5% of the US$5.91 list-price unit cost at 100,000 registrations/month.
+- The archived-offer read of `GET /me/registrations` (`docs/ARCHITECTURE.md` section 8.2): one strongly
+  consistent query of the workshop's `H#O#` prefix wherever the caller has an ended registration, billed
+  for the whole offer history of that workshop (about 0.4 KB per offer, 1 RRU per 4 KB): 24 RRU
+  (US$3.4e-6) for a workshop of 200 registrations at 1.2 offers each, about US$0.02 per 1,000
+  registrations at six such calls per registration.
+- The workshop page's re-read of `GET /me/registrations` when the caller's own registration there
+  changes (`docs/ARCHITECTURE.md` section 3): one GET per change, about one per command, which is the
+  kind of page refresh the driver already counts. While that list lags the workshop view (GSI1), the
+  page asks again at most 4 times 1.5 s apart, each time with a list and a workshop GET: at most 8 more
+  GETs (US$3.2e-5) for one ending, none once the index has caught up.
+- The ending-notices read of `GET /me/registrations` (`docs/ARCHITECTURE.md` section 8.2): only in a
+  UNIFIED workshop with a cancelled session, where the caller has a registration that ended with CUTOFF
+  or NO_ACCEPTABLE_SESSION and no longer lists that session. It is one strongly consistent query of
+  the caller's `N#` items from the earliest such ending on, filtered on the workshop after the read,
+  so it is billed for all of the caller's notifications since then, in every workshop (under 1 KB
+  each, 1 RRU per 4 KB): a few RRU per call, under US$1e-6, on every such list read, including the
+  10 s and 30 s refreshes and the catch-up GETs.
+
+Raising "API reads per command" from 6 to 10 (10 more GETs per registration, US$4.0e-5) covers the
+CONFIRMED refresh only. The archived-offer read adds US$2.1e-5 per registration in read units, which the
+X-Ray bound does not scale, so covering both takes 13 (17.5 more GETs, US$7.0e-5 against US$6.1e-5);
+the catch-up GETs and the ending-notices read are not included.
 
 ## 4. On-premise model
 
@@ -219,9 +275,10 @@ While credits last, the actual invoice is 0 at every tier.
 
 ## 8. Limitations
 
-- The workload drivers in section 3 are modelled, not measured, until the Phase 3 experiments run; the
-  per-command Lambda durations, DynamoDB request units and log volumes should be replaced by the
-  `cost-snapshot.sh` usage quantities (`--from-snapshot`) and the k6 results. The Cognito MAU ratio
+- The workload drivers in section 3 are still modelled. One day of measured usage is priced
+  (section 2: 2026-10-17 from CloudWatch, US$3.25 at list price), but no metric counts registrations,
+  so it gives no per-registration drivers; the per-command Lambda durations, DynamoDB request units and
+  log volumes stay modelled until a measured window also has a registration count. The Cognito MAU ratio
   (N/3) and the SQS long-poll floor are assumptions and are the two largest cloud items.
 - X-Ray is priced at 100% sampling (upper bound); with the default sampling rule the recorded traces at
   100k registrations/month would be a few percent of that figure.

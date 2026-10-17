@@ -3,6 +3,7 @@ import type {
   CommandBody,
   CommandResultView,
   SessionView,
+  WorkshopMode,
 } from '@seatrelay/contracts';
 import { ApiError } from '../api/client';
 import type { ToastApi, ToastInput } from '../components/Toasts';
@@ -46,6 +47,8 @@ export type CommandPhase =
 export interface CommandRunnerOptions {
   /** Session titles for the settlement toast. */
   sessions?: readonly SessionView[];
+  /** The workshop's mode for the settlement toast (PER_SESSION endings are per session). */
+  mode?: WorkshopMode;
   /** Called once the command settled (not after the component unmounted). */
   onSettled?: (view: CommandResultView) => void;
   /** Suppress the toasts (the caller renders its own copy). */
@@ -376,10 +379,10 @@ export class CommandRunner {
     }
     this.#clearDetachTimer();
     const deps = this.#deps();
-    const { sessions = [], onSettled } = this.#options();
+    const { sessions = [], mode, onSettled } = this.#options();
     // Plan §1.3: the UI updates from the poll response; refetches come after.
     deps.applyResult(view);
-    const copy = describeSettled(view, sessions);
+    const copy = describeSettled(view, sessions, undefined, mode);
     this.#toast(attempt, {
       kind: copy.kind,
       title: copy.title,

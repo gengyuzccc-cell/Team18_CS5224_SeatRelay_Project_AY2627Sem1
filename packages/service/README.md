@@ -14,7 +14,7 @@ consumed by `services/aws` (Lambda + DynamoDB/SQS) and `services/local` (Fastify
 | `worker/processCommand.ts` | load → decide → schedule timers → commit (retry / ack) → continuation → metrics; fault injection                          |
 | `worker/sweep.ts`          | `runSweep`: TICK every workshop whose `nextDueAt` passed                                                                 |
 | `commands.ts`              | `acceptedCommandResult`, `materializeNotification`, `commandDedupId`, `tickForTimer`, `sweepTick`                        |
-| `views.ts`                 | `workshopPublicView`, `dashboardView`, `myRegistrationViews`, `commandResultView`, `notificationView`                    |
+| `views.ts`                 | `workshopPublicView`, `dashboardView` (backfill entries name the new holder), `myRegistrationViews` (+ `registrationEnding`: the offer settled with an archived registration, from history), `commandResultView`, `notificationView` |
 | `csv.ts`                   | `registrationsCsv` (organiser export; UTF-8 BOM, confirmed session only while CONFIRMED)                                  |
 | `memory/*`                 | `InMemoryWorkshopStore`, `InMemoryCommandQueue`, `InMemoryTimerScheduler`, `ManualClock`, `createInMemoryPorts` harness |
 
@@ -34,6 +34,16 @@ consumed by `services/aws` (Lambda + DynamoDB/SQS) and `services/local` (Fastify
   commit within 90 items under core's `COMMIT_ITEM_COST` (+1 per notification, +1 for the
   CommandResult), so the plan §2.3 item mapping, R1 marker included, fits the 100-item
   `TransactWriteItems`; the marker must be keyed per registration scope (`registrationScopeKey`).
+- `WorkshopStore.listArchivedOffersOfUser(wsId, userId)` — the caller's settled offers in one
+  workshop, for the `ending` of their CANCELLED/ENDED registrations in `GET /me/registrations`
+  (read only where such a registration did not give up a confirmed seat; the workshops are read
+  in parallel). Narrower than `listHistory`, which the organiser routes use.
+- `WorkshopStore.listNotificationsOfUserSince(userId, wsId, since)` — the caller's notifications
+  in one workshop from `since` on, strongly consistent. Read only when that workshop has a
+  cancelled session and one of the caller's UNIFIED registrations there ended (CUTOFF or
+  NO_ACCEPTABLE_SESSION) without listing it any more: the SESSION_CANCELLED notice of the decision
+  that ended it names the session (`ending.cancelledSessionId`, and `confirmedSessionId` when a
+  confirmed seat went with it), which no engine field records.
 - `updateWorkshopInfo` writes title/description and `updatedAt` only (the API edits them
   outside the worker lock).
 - `putCommandAccepted` is a conditional insert that returns the existing record;

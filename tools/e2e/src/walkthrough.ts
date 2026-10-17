@@ -969,13 +969,18 @@ async function aliceCancelsBobGetsBackfill(): Promise<void> {
     await expect(toast(alice, 'Cancellation applied')).toContainText(
       'Your registration is cancelled.',
     );
-    await expect(alice.getByRole('heading', { name: 'Register' })).toBeVisible({ timeout: 15_000 });
-    await expect(statusCard(alice)).toHaveCount(0, { timeout: 15_000 });
+    // The page keeps a status card that says what happened, instead of the empty form.
+    await expect(statusCard(alice, 'cancelled')).toContainText(
+      'You gave up your confirmed seat in Session 2',
+      { timeout: 15_000 },
+    );
+    await expect(alice.getByRole('button', { name: 'Register again' })).toBeVisible();
+    await expect(alice.getByRole('heading', { name: 'Register', exact: true })).toHaveCount(0);
     await beat(1.2);
     await shot(
       'alice',
       'cancelled',
-      'After the cancellation the page offers the registration form again',
+      'After the cancellation the page says what happened and offers "Register again"',
     );
   });
 
@@ -1036,12 +1041,13 @@ async function carolQueuesBehindBobsOffer(browser: Browser): Promise<void> {
     const log = section(page, 'backfill-heading');
     await expect(log.locator('tbody tr')).toHaveCount(1);
     const cells = await rowCells(log.locator('tbody tr').first());
-    // Released, Session, Cause, Reallocated, Latency, New holder
+    // Released, Session, Cause, Reallocated, Latency, New holder (named, like the other tables)
     check(
-      'backfill log: Session 2, "confirmed seat cancelled", reallocated',
+      'backfill log: Session 2, "confirmed seat cancelled", reallocated to Bob',
       cells[1] === 'Session 2' &&
         cells[2] === 'confirmed seat cancelled' &&
-        cells[3] !== 'waiting for a taker',
+        cells[3] !== 'waiting for a taker' &&
+        (cells[5] ?? '').includes('Bob (staged)'),
       cells.join(' | '),
     );
     facts.cancellationBackfillLatency = cells[4];
@@ -1078,13 +1084,19 @@ async function bobsHoldExpires(): Promise<void> {
     await expect(statusCard(bob, 'offered')).toHaveCount(0, {
       timeout: Math.max(0, expiresAt - Date.now()) + 40_000,
     });
-    await expect(bob.getByRole('heading', { name: 'Register' })).toBeVisible({ timeout: 15_000 });
+    // Same meaning as in earlier runs: the offered card is gone (the workshop view has no `me`).
     facts.bobCardGoneAfterExpiryMs = Date.now() - expiresAt;
+    await expect(statusCard(bob, 'ended')).toContainText('Your hold for Session 2 expired', {
+      timeout: 15_000,
+    });
+    await expect(bob.getByRole('button', { name: 'Register again' })).toBeVisible();
+    // Includes the `GET /me/registrations` round trip(s) that bring the ending.
+    facts.bobEndedCardAfterExpiryMs = Date.now() - expiresAt;
     await beat(1.2);
     await shot(
       'bob',
       'after-expiry',
-      "After the expiry Bob's page shows the registration form again",
+      'After the expiry Bob\'s page says his hold expired and offers "Register again"',
     );
     observations.push(
       `Bob's page around the expiry (status card states): ${events
@@ -1152,8 +1164,12 @@ async function organiserReviews(): Promise<void> {
     const expired = rows.find((cells) => cells[2] === 'offer expired');
     const cancelled = rows.find((cells) => cells[2] === 'confirmed seat cancelled');
     check(
-      'backfill log lists the expiry and the cancellation, both reallocated',
-      expired !== undefined && cancelled !== undefined && expired[3] !== 'waiting for a taker',
+      'backfill log lists the expiry and the cancellation, both reallocated, holders named',
+      expired !== undefined &&
+        cancelled !== undefined &&
+        expired[3] !== 'waiting for a taker' &&
+        (expired[5] ?? '').includes('Carol (staged)') &&
+        (cancelled[5] ?? '').includes('Bob (staged)'),
       rows.map((r) => r.join(' | ')).join(' ;; '),
     );
     facts.expiryBackfillLatency = expired?.[4];
@@ -1282,7 +1298,7 @@ async function participantsLookBack(): Promise<void> {
     );
     await expect(page.getByRole('heading', { name: 'Past' })).toBeVisible({ timeout: 15_000 });
     const row = pastRow(page);
-    await expect(row).toContainText('ended: ', { timeout: 15_000 });
+    await expect(row).toContainText('ended: your hold on Session 2 expired', { timeout: 15_000 });
     facts.bobPastRow = (await row.innerText()).replace(/\s+/g, ' ').trim();
     await beat(1.2);
     await shot(

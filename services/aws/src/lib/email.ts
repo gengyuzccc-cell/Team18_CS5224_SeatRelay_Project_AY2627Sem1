@@ -1,22 +1,10 @@
-import type { Notification, NotificationKind } from '@seatrelay/contracts';
+import type { Notification } from '@seatrelay/contracts';
 
 export interface EmailContent {
   subject: string;
   text: string;
   html: string;
 }
-
-/** Subject prefix per notification kind (the engine writes the title/body). */
-const SUBJECT_PREFIX: Record<NotificationKind, string> = {
-  OFFER: 'Seat offered',
-  CONFIRMED: 'Seat confirmed',
-  EXPIRED: 'Offer expired',
-  DECLINED: 'Offer declined',
-  REVOKED: 'Offer withdrawn',
-  SESSION_CANCELLED: 'Session cancelled',
-  WORKSHOP_CANCELLED: 'Workshop cancelled',
-  ENDED: 'Registration ended',
-};
 
 const FOOTER = 'You receive this e-mail because you registered with SeatRelay.';
 
@@ -29,11 +17,16 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-/** Plain text plus a minimal HTML alternative for one stored notification. */
+/**
+ * Plain text plus a minimal HTML alternative for one stored notification. The engine writes the
+ * whole text for people (core `notifications.ts`): the title already starts with what happened
+ * ("Offer expired: Session 2") and the body renders times in the audience's zone, so the subject
+ * is the title itself and nothing here re-formats timestamps.
+ */
 export function renderEmail(
   notification: Pick<Notification, 'kind' | 'title' | 'body'>,
 ): EmailContent {
-  const subject = `[SeatRelay] ${SUBJECT_PREFIX[notification.kind]}: ${notification.title}`;
+  const subject = `[SeatRelay] ${notification.title}`;
   const text = `${notification.title}\n\n${notification.body}\n\n--\n${FOOTER}\n`;
   const paragraphs = notification.body
     .split(/\n{2,}/)

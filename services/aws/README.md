@@ -193,8 +193,9 @@ the field, so nothing can be injected.
 The stream event source filters `INSERT` records whose `NewImage.entityType = NOTIFICATION`, so the
 notifier's own status updates (MODIFY) and TTL deletes (REMOVE) never re-trigger it. Per record:
 `EMAIL_ENABLED != true` → mark `SKIPPED`; otherwise check the item is still `PENDING` (retried
-batches), wait for a token (`EMAIL_RATE_PER_SEC`), `SendEmail` (text + minimal HTML, subject by
-kind), mark `SENT`. A permanent SES error (`MessageRejected`, e.g. an unverified address in the
+batches), wait for a token (`EMAIL_RATE_PER_SEC`), `SendEmail` (text + minimal HTML; the subject is
+`[SeatRelay] <title>`, and the title and body are the engine's text, with times already written for
+people in the deployment's zone, core `DISPLAY_TIME_ZONE`), mark `SENT`. A permanent SES error (`MessageRejected`, e.g. an unverified address in the
 sandbox) marks `FAILED` with `lastError` and continues; a transient one (throttling, 5xx) stops the
 batch at that record and reports it (`batchItemFailures`), so the stream retries from there
 (`BisectBatchOnFunctionError`, 20 attempts, then `notify-dlq`). `NotificationFailures` counts both.

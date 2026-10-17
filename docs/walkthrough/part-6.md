@@ -1,6 +1,6 @@
 # Part 6: user study and pilot, limitations, future work, AI use, division of work
 
-- **Speaker:** ZHANG TIANYI
+- **Speaker:** LIANG ZIHAN (user research and evaluation tooling)
 - **Clock:** 13:00–15:00 (2:00)
 - **Slides:** 12 User study and pilot, 13 Limitations, future work, AI use and roles, 14 Questions
   (`report/Slides.tex`)
@@ -20,11 +20,12 @@ Before the pilot we rehearsed it on the pilot stage with 20 synthetic accounts a
 That is **staged**, not user evidence: all 43 commands were applied, 9 released seats were relayed, and
 the invariants held throughout.
 
-**Slide 13, limitations and future work.** One writer per workshop is the price of ordering, and under
-load settling fell behind above 10 virtual users, with HTTP 503s whose cause we have not found. We run
-in one region. E-mail reaches only verified addresses until SES production access is granted. The
-mechanism comparison is a simulation, and the cost is modelled. Next we would batch commands per
-workshop, obtain SES production access, and try a cheaper Cognito tier, our largest cost at scale.
+**Slide 13, limitations and future work.** One writer per workshop is the price of ordering: hot
+workshops settle slower, though within target. A Lambda quota of ten throttled our first runs; the
+re-runs passed. We run in one region. E-mail reaches only verified addresses until SES production
+access is granted. The mechanism comparison is a simulation, and the cost is modelled. Next we would
+batch commands per workshop, obtain SES production access, and try a cheaper Cognito tier, our largest
+cost at scale.
 
 **AI use.** An AI coding assistant generated our code, tests, scripts, desk research and first drafts,
 and ran the deployments and experiments with our credentials. The scope, rules and targets are ours,

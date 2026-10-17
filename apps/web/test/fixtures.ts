@@ -17,6 +17,13 @@ export function at(seconds: number): string {
   return new Date(Date.UTC(2026, 10, 3, 6, 0, seconds)).toISOString();
 }
 
+/**
+ * "Now" for anything rendered against the clock (cut-offs, "Register again", relative times):
+ * the fixtures' day, before the sessions' cut-off. Tests pin the clock to it (fake timers)
+ * instead of depending on the date they run.
+ */
+export const FIXTURE_NOW = Date.parse('2026-11-03T06:09:00.000Z');
+
 export const workshop: WorkshopPublic = {
   id: WS,
   orgId: 'org-1',

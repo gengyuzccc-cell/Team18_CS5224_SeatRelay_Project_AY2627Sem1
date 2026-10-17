@@ -1,9 +1,53 @@
-import type { MeView, MyRegistrationView, Registration } from '@seatrelay/contracts';
-import { compareIso } from '@seatrelay/core';
+import type {
+  MeView,
+  MyRegistrationView,
+  Notification,
+  Offer,
+  Registration,
+} from '@seatrelay/contracts';
+import { compareIso, type WorkshopSnapshot } from '@seatrelay/core';
 import { notFound } from '../../errors';
-import { myRegistrationViews, notificationView } from '../../views';
+import {
+  endingNoticesSince,
+  isArchivedRegistration,
+  myRegistrationViews,
+  notificationView,
+} from '../../views';
 import { param, requireUser, type ApiRoute } from '../context';
 import { json } from '../http';
+
+/**
+ * The archived offers that `ending` needs for these registrations of one workshop: none when
+ * nothing ended (`undefined`: no `ending` is computed), and no read when every ended
+ * registration had a confirmed seat (a CONFIRMED registration holds no offer, so the ending is
+ * that seat alone: `[]`).
+ */
+async function settledOffersFor(
+  mine: readonly Registration[],
+  read: () => Promise<Offer[]>,
+): Promise<Offer[] | undefined> {
+  const archived = mine.filter(isArchivedRegistration);
+  if (archived.length === 0) {
+    return undefined;
+  }
+  return archived.every((registration) => registration.confirmedSessionId !== undefined)
+    ? []
+    : read();
+}
+
+/**
+ * The user's notifications that tell which session cancellation ended some of these
+ * registrations: read only when one of them may have ended that way (the workshop has a
+ * cancelled session), from the earliest such ending on (`endingNoticesSince`).
+ */
+async function endingNoticesFor(
+  snapshot: WorkshopSnapshot | undefined,
+  mine: readonly Registration[],
+  read: (since: string) => Promise<Notification[]>,
+): Promise<Notification[]> {
+  const since = snapshot === undefined ? undefined : endingNoticesSince(snapshot, mine);
+  return since === undefined ? [] : read(since);
+}
 
 export const meRoutes: ApiRoute[] = [
   {
@@ -36,13 +80,28 @@ export const meRoutes: ApiRoute[] = [
         list.push(registration);
         byWorkshop.set(registration.workshopId, list);
       }
-      const views: MyRegistrationView[] = [];
-      for (const [wsId, mine] of byWorkshop) {
-        const snapshot = await deps.store.loadSnapshot(wsId);
-        if (snapshot !== undefined) {
-          views.push(...myRegistrationViews(snapshot, mine));
-        }
-      }
+      // The workshops are read in parallel: one live snapshot each, plus this user's archived
+      // offers where one of their registrations ended in a way an offer can explain, and (once
+      // the snapshot shows a cancelled session) their notifications of the decisions that a
+      // session cancellation may have ended a registration in.
+      const perWorkshop = await Promise.all(
+        [...byWorkshop].map(async ([wsId, mine]) => {
+          const snapshotRead = deps.store.loadSnapshot(wsId);
+          const [snapshot, settledOffers, notices] = await Promise.all([
+            snapshotRead,
+            settledOffersFor(mine, () => deps.store.listArchivedOffersOfUser(wsId, user.userId)),
+            snapshotRead.then((loaded) =>
+              endingNoticesFor(loaded, mine, (since) =>
+                deps.store.listNotificationsOfUserSince(user.userId, wsId, since),
+              ),
+            ),
+          ]);
+          return snapshot === undefined
+            ? []
+            : myRegistrationViews(snapshot, mine, settledOffers, notices);
+        }),
+      );
+      const views: MyRegistrationView[] = perWorkshop.flat();
       views.sort(
         (a, b) =>
           compareIso(b.registration.updatedAt, a.registration.updatedAt) ||

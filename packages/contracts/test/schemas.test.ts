@@ -6,9 +6,11 @@ import {
   CommandBodySchema,
   CommandSchema,
   CreateWorkshopBodySchema,
+  DashboardBackfillEntrySchema,
   DashboardViewSchema,
   ErrorBodySchema,
   IsoTimestampSchema,
+  MyRegistrationViewSchema,
   OfferSchema,
   PatchWorkshopBodySchema,
   REJECT_REASONS,
@@ -364,6 +366,93 @@ describe('api bodies', () => {
         },
       }).success,
     ).toBe(true);
+  });
+});
+
+describe('views for people (ending of a registration, backfill holder)', () => {
+  const workshop = {
+    id: 'ws1',
+    orgId: 'org1',
+    title: 'T',
+    description: '',
+    status: 'OPEN',
+    mode: 'UNIFIED',
+    holdSeconds: 900,
+    createdAt: T,
+    updatedAt: T,
+  };
+  const registration = {
+    status: 'ENDED',
+    seq: 3,
+    acceptable: [],
+    endReason: 'NO_ACCEPTABLE_SESSION',
+    createdAt: T,
+    updatedAt: T,
+  };
+
+  it('accepts a past registration with and without its ending', () => {
+    const ending = {
+      offer: { id: 'o1', sessionId: 's2', status: 'EXPIRED', expiresAt: T, settledAt: T },
+    };
+    const withEnding = MyRegistrationViewSchema.parse({
+      workshop,
+      sessions: [],
+      registration: { ...registration, ending },
+    });
+    expect(withEnding.registration.ending).toEqual(ending);
+    expect(
+      MyRegistrationViewSchema.safeParse({ workshop, sessions: [], registration }).success,
+    ).toBe(true);
+    expect(
+      MyRegistrationViewSchema.safeParse({
+        workshop,
+        sessions: [],
+        registration: { ...registration, ending: { confirmedSessionId: 's1' } },
+      }).success,
+    ).toBe(true);
+    // the organiser cancelled the session of a confirmed seat
+    expect(
+      MyRegistrationViewSchema.parse({
+        workshop,
+        sessions: [],
+        registration: {
+          ...registration,
+          ending: { confirmedSessionId: 's1', cancelledSessionId: 's1' },
+        },
+      }).registration.ending,
+    ).toEqual({ confirmedSessionId: 's1', cancelledSessionId: 's1' });
+    expect(
+      MyRegistrationViewSchema.safeParse({
+        workshop,
+        sessions: [],
+        registration: { ...registration, ending: { offer: { ...ending.offer, settledAt: 'x' } } },
+      }).success,
+    ).toBe(false);
+  });
+
+  it('accepts backfill entries with the new holder named, and old records without it', () => {
+    const record = {
+      id: 'b1',
+      workshopId: 'ws1',
+      sessionId: 's1',
+      releasedAt: T,
+      cause: 'EXPIRED',
+      reallocatedAt: T,
+      newOfferId: 'o2',
+      newUserId: 'u2',
+      latencyMs: 120,
+    };
+    expect(DashboardBackfillEntrySchema.safeParse(record).success).toBe(true);
+    expect(
+      DashboardBackfillEntrySchema.parse({
+        ...record,
+        newHolderEmail: 'bob@example.com',
+        newHolderDisplayName: 'Bob',
+      }),
+    ).toMatchObject({ newHolderEmail: 'bob@example.com', newHolderDisplayName: 'Bob' });
+    expect(
+      DashboardBackfillEntrySchema.safeParse({ ...record, newHolderEmail: 'not-an-email' }).success,
+    ).toBe(false);
   });
 });
 

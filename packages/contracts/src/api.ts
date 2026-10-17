@@ -14,6 +14,7 @@ import {
   CommandStatusSchema,
   NotificationKindSchema,
   NotificationStatusSchema,
+  OfferStatusSchema,
   RejectReasonSchema,
   UserCommandTypeSchema,
   WorkshopModeSchema,
@@ -156,6 +157,49 @@ export const WorkshopPublicViewSchema = z.object({
 });
 export type WorkshopPublicView = z.infer<typeof WorkshopPublicViewSchema>;
 
+/**
+ * The offer that the decision ending a registration settled along with it: `EXPIRED` (the hold
+ * ran out), `DECLINED` (the participant declined it) or `REVOKED` (withdrawn because the
+ * participant cancelled while holding it, or the organiser cancelled its session or the workshop).
+ * `EXPIRED` also appears on a CANCELLED registration or a cancelled workshop when the hold had
+ * run out before the command was processed: the decision expires due offers first (tick-first),
+ * so the participant was back in the queue when the cancel applied.
+ */
+export const EndingOfferSchema = z.object({
+  id: IdSchema,
+  sessionId: IdSchema,
+  status: OfferStatusSchema,
+  expiresAt: IsoTimestampSchema,
+  settledAt: IsoTimestampSchema,
+});
+export type EndingOffer = z.infer<typeof EndingOfferSchema>;
+
+/**
+ * How a CANCELLED/ENDED registration ended, derived from history (no engine field): lets the
+ * browser say what happened in plain words ("your hold for Session 2 expired at 14:05"). All
+ * fields are absent when no offer was settled with it, no confirmed seat was given up and no
+ * session cancellation could be identified as the cause: a queued participant who left, one
+ * whose sessions all passed the cut-off, or one whose last session the organiser cancelled when
+ * the server could not tell which (losing a session clears the confirmed session, R5). The time
+ * it ended is the registration's `updatedAt`.
+ */
+export const RegistrationEndingSchema = z.object({
+  offer: EndingOfferSchema.optional(),
+  /**
+   * The session whose confirmed seat was released: given up (CANCELLED), the workshop cancelled,
+   * or the session itself cancelled by the organiser (then equal to `cancelledSessionId`).
+   */
+  confirmedSessionId: IdSchema.optional(),
+  /**
+   * ENDED only: the session whose cancellation by the organiser ended the registration (it was
+   * the last session left, or the others are past the cut-off). `offer` is then absent: a hold
+   * that expired or was declined earlier in the same decision had put the participant back in
+   * the queue, so it did not end the registration.
+   */
+  cancelledSessionId: IdSchema.optional(),
+});
+export type RegistrationEnding = z.infer<typeof RegistrationEndingSchema>;
+
 /** GET /me/registrations (one entry per registration, live or archived). */
 export const MyRegistrationViewSchema = z.object({
   workshop: WorkshopPublicSchema,
@@ -163,6 +207,8 @@ export const MyRegistrationViewSchema = z.object({
   registration: RegistrationSummarySchema.extend({
     createdAt: IsoTimestampSchema,
     updatedAt: IsoTimestampSchema,
+    /** Present on CANCELLED/ENDED registrations only. */
+    ending: RegistrationEndingSchema.optional(),
   }),
 });
 export type MyRegistrationView = z.infer<typeof MyRegistrationViewSchema>;
@@ -224,6 +270,17 @@ export const DashboardCountsSchema = z.object({
 });
 export type DashboardCounts = z.infer<typeof DashboardCountsSchema>;
 
+/**
+ * A backfill record as the dashboard lists it: with the new holder's e-mail and display name
+ * (from the registration that received the relayed offer), so the log names people like the
+ * queue/offered/confirmed tables do.
+ */
+export const DashboardBackfillEntrySchema = BackfillRecordSchema.extend({
+  newHolderEmail: EmailSchema.optional(),
+  newHolderDisplayName: DisplayNameSchema.optional(),
+});
+export type DashboardBackfillEntry = z.infer<typeof DashboardBackfillEntrySchema>;
+
 /** GET /orgs/{orgId}/workshops/{wsId}/dashboard */
 export const DashboardViewSchema = z.object({
   workshop: WorkshopSchema,
@@ -231,7 +288,7 @@ export const DashboardViewSchema = z.object({
   queue: z.array(QueueEntrySchema),
   offered: z.array(OfferedEntrySchema),
   confirmed: z.array(ConfirmedEntrySchema),
-  backfills: z.array(BackfillRecordSchema),
+  backfills: z.array(DashboardBackfillEntrySchema),
   /** Distinct userIds holding a CONFIRMED seat (differs from `counts.confirmed` in PER_SESSION mode). */
   distinctParticipantsServed: NonNegativeIntSchema,
   attendance: z.array(AttendanceSchema),

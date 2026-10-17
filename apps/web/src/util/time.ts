@@ -7,6 +7,7 @@ const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'short',
 });
 const timeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'medium' });
+const shortTimeFormat = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' });
 
 export function formatDateTime(iso: string | undefined): string {
   if (iso === undefined) {
@@ -22,6 +23,19 @@ export function formatTime(iso: string | undefined): string {
   }
   const ms = Date.parse(iso);
   return Number.isNaN(ms) ? iso : timeFormat.format(ms);
+}
+
+/**
+ * A past moment in a sentence: `at 14:05` on the same (local) day as `now`, otherwise
+ * `on 21 Oct 2026, 14:05` (browser locale).
+ */
+export function formatMoment(iso: string, now: number = serverNow()): string {
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) {
+    return `at ${iso}`;
+  }
+  const sameDay = new Date(ms).toDateString() === new Date(now).toDateString();
+  return sameDay ? `at ${shortTimeFormat.format(ms)}` : `on ${dateTimeFormat.format(ms)}`;
 }
 
 /** Milliseconds until `iso` on the server's clock (`serverClock.ts`, plan §1.4). */

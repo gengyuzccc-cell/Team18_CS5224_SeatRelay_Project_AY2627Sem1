@@ -1,4 +1,5 @@
 import { Metrics } from '@aws-lambda-powertools/metrics';
+import { decide, newSession, newWorkshop } from '@seatrelay/core';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { userFromEvent } from '../src/lib/auth';
 import { renderEmail } from '../src/lib/email';
@@ -93,19 +94,73 @@ describe('TokenBucket', () => {
 });
 
 describe('email rendering', () => {
-  test('subject by kind, text and minimal HTML with escaping', () => {
+  test('subject is the engine title, text and minimal HTML with escaping', () => {
     const email = renderEmail({
       kind: 'SESSION_CANCELLED',
       title: 'Session cancelled: <Morning>',
       body: 'Line one & two.\n\nSecond paragraph.',
     });
-    expect(email.subject).toBe('[SeatRelay] Session cancelled: Session cancelled: <Morning>');
+    // the title already says what happened: it is not repeated in the subject
+    expect(email.subject).toBe('[SeatRelay] Session cancelled: <Morning>');
+    // nothing in the subject comes from the kind
+    expect(
+      renderEmail({ kind: 'OFFER', title: 'Session cancelled: <Morning>', body: 'x' }).subject,
+    ).toBe('[SeatRelay] Session cancelled: <Morning>');
     expect(email.text).toBe(
       'Session cancelled: <Morning>\n\nLine one & two.\n\nSecond paragraph.\n\n--\nYou receive this e-mail because you registered with SeatRelay.\n',
     );
     expect(email.html).toContain('<h2>Session cancelled: &lt;Morning&gt;</h2>');
     expect(email.html).toContain('<p>Line one &amp; two.</p>\n<p>Second paragraph.</p>');
     expect(email.html).not.toContain('<Morning>');
+  });
+});
+
+describe('e-mail text of an engine notification', () => {
+  test('times are written for people in the audience zone; no ISO timestamp reaches the e-mail', () => {
+    const workshop = newWorkshop({
+      id: 'ws1',
+      orgId: 'org1',
+      title: 'Intro to Git',
+      mode: 'UNIFIED',
+      holdSeconds: 900,
+      createdAt: '2026-10-17T00:00:00.000Z',
+    });
+    const session = newSession({
+      id: 's1',
+      workshopId: 'ws1',
+      title: 'Morning',
+      startsAt: '2026-10-21T02:00:00.000Z',
+      capacity: 1,
+    });
+    const decision = decide(
+      { workshop, sessions: [session], registrations: [], offers: [], pendingBackfills: [] },
+      {
+        type: 'REGISTER',
+        commandId: '8f0d2a7e-6f4b-4a7c-9c1e-2a3b4c5d6e7f',
+        workshopId: 'ws1',
+        actorUserId: 'bob',
+        actorEmail: 'bob@example.com',
+        acceptable: ['s1'],
+      },
+      {
+        now: '2026-10-17T09:14:25.813Z',
+        newId: (() => {
+          let n = 0;
+          return () => `id-${++n}`;
+        })(),
+      },
+    );
+    const [offer] = decision.notifications;
+    expect(offer).toBeDefined();
+    const email = renderEmail({
+      kind: 'OFFER',
+      title: offer?.title ?? '',
+      body: offer?.body ?? '',
+    });
+    expect(email.subject).toBe('[SeatRelay] Seat offered: Morning');
+    expect(email.text).toContain('(starts Wed 21 Oct 2026, 10:00 SGT)');
+    expect(email.text).toContain('held for you until Sat 17 Oct 2026, 17:29 SGT');
+    expect(`${email.subject}\n${email.text}\n${email.html}`).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
   });
 });
 

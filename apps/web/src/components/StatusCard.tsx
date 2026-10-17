@@ -6,12 +6,7 @@ import type {
 } from '@seatrelay/contracts';
 import { useState } from 'react';
 import { useCommand, type CommandPhase } from '../commands/useCommand';
-import {
-  COMMAND_TYPE_TEXT,
-  END_REASON_TEXT,
-  rejectReasonText,
-  sessionTitle,
-} from '../commands/copy';
+import { COMMAND_TYPE_TEXT, endReasonText, rejectReasonText, sessionTitle } from '../commands/copy';
 import { describeError } from '../util/errors';
 import { formatDateTime } from '../util/time';
 import { AsyncButton, type AsyncState } from './AsyncButton';
@@ -57,7 +52,11 @@ export function StatusCard({
   onChanged,
   compact = false,
 }: Props) {
-  const command = useCommand(workshop.id, { sessions, onSettled: onChanged });
+  const command = useCommand(workshop.id, {
+    sessions,
+    mode: workshop.mode,
+    onSettled: onChanged,
+  });
   const [active, setActive] = useState<'accept' | 'decline' | 'cancel' | undefined>(undefined);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const mode: WorkshopMode = workshop.mode;
@@ -140,10 +139,10 @@ export function StatusCard({
 
       {registration.status === 'ENDED' && (
         <p className="status-line">
-          Ended:{' '}
+          Your registration has ended
           {registration.endReason === undefined
-            ? 'no seat could be allocated'
-            : END_REASON_TEXT[registration.endReason]}
+            ? ''
+            : `: ${endReasonText(registration.endReason, mode)}`}
           .
         </p>
       )}

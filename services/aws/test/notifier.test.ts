@@ -134,7 +134,7 @@ describe('notifier handler', () => {
     expect(sender.sent).toHaveLength(1);
     expect(sender.sent[0]).toMatchObject({
       to: 'bob@example.com',
-      subject: '[SeatRelay] Seat offered: Seat offered',
+      subject: '[SeatRelay] Seat offered',
     });
     expect(sender.sent[0]?.text).toContain('A seat in Morning is held for you.');
     expect(sender.sent[0]?.html).toContain('<h2>Seat offered</h2>');

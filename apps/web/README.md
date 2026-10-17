@@ -75,9 +75,22 @@ _REJECTED_ (human-readable reason, also shown inline next to the button that sen
 - **Leaving the page** does not cancel a command: polling continues for up to 2 min and the toast
   (above the router) shows the outcome; after that it is replaced by a non-sticky "check My
   registrations" hint.
-- **Refresh**: status pages refetch every 10 s while a registration is QUEUED/OFFERED, the
-  dashboard every 10 s; `refetchIntervalInBackground: false` pauses this while the tab is hidden
-  (the interval stays a plain number so a fetch finishing in a hidden tab cannot switch it off).
+- **Refresh**: status pages refetch every 10 s while a registration is QUEUED/OFFERED and every
+  30 s while it is CONFIRMED (free-seat and waiting counts stay current), the dashboard every
+  10 s; `refetchIntervalInBackground: false` pauses this while the tab is hidden (the interval
+  stays a plain number so a fetch finishing in a hidden tab cannot switch it off).
+- **Ended registrations** (`src/api/endedRegistration.ts`, `src/components/EndedStatusCard.tsx`):
+  the workshop view's `me` is the live registration only, so when a hold expires, a decline or
+  cancellation ends it, the cut-off passes or the organiser cancels, the page shows a persistent
+  card for the most recent CANCELLED/ENDED registration of that workshop from
+  `GET /me/registrations` (its `ending` says which offer was settled and how, or which session
+  the organiser cancelled and whether a confirmed seat went with it), in plain words, with
+  **Register again** (the form appears; the new registration joins the end of the queue).
+  PER_SESSION endings speak of that session's registration only. The list is refetched when
+  `me` changes and, while it lags behind the workshop view, up to 4 more times 1.5 s apart (a
+  failed refetch counts as one); while it still lists the ended registration as live, or not at
+  all, the page shows *Checking your registrations…* instead of the empty form or an older
+  ending (`test/workshopPageEffects.test.tsx` runs these effects in jsdom, on a pinned clock).
 - **Server time** (plan §1.4, `src/util/serverClock.ts`): the offer countdown, settlement copy
   and cut-off checks use the server clock, estimated from `GET /health` (`time`) at start-up and
   every 10 min. The countdown never disables Accept; the server's tick-first logic decides.

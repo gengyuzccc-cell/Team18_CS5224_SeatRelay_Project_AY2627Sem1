@@ -330,6 +330,20 @@ export class PostgresWorkshopStore implements WorkshopStore {
     return result.rows.map(toNotification);
   }
 
+  async listNotificationsOfUserSince(
+    userId: string,
+    wsId: string,
+    since: string,
+  ): Promise<Notification[]> {
+    const result = await this.executor.query<NotificationRow>(
+      `SELECT * FROM notifications
+       WHERE user_id = $1 AND workshop_id = $2 AND created_at >= $3::timestamptz
+       ORDER BY created_at, id`,
+      [userId, wsId, since],
+    );
+    return result.rows.map(toNotification);
+  }
+
   async markNotificationRead(
     userId: string,
     notificationId: string,
@@ -366,6 +380,14 @@ export class PostgresWorkshopStore implements WorkshopStore {
       registrations: registrations.rows.map(toRegistration),
       offers: offers.rows.map(toOffer),
     };
+  }
+
+  async listArchivedOffersOfUser(wsId: string, userId: string): Promise<Offer[]> {
+    const result = await this.executor.query<OfferRow>(
+      `SELECT * FROM offers_history WHERE workshop_id = $1 AND user_id = $2 ORDER BY created_at, id`,
+      [wsId, userId],
+    );
+    return result.rows.map(toOffer);
   }
 
   async putAttendance(record: Attendance): Promise<void> {

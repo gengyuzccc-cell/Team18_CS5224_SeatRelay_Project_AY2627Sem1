@@ -252,6 +252,19 @@ export class InMemoryWorkshopStore implements WorkshopStore {
     return (this.notifications.get(userId) ?? []).map(clone);
   }
 
+  async listNotificationsOfUserSince(
+    userId: string,
+    wsId: string,
+    since: string,
+  ): Promise<Notification[]> {
+    return (this.notifications.get(userId) ?? [])
+      .filter(
+        (notification) =>
+          notification.workshopId === wsId && compareIso(notification.createdAt, since) >= 0,
+      )
+      .map(clone);
+  }
+
   async markNotificationRead(
     userId: string,
     notificationId: string,
@@ -283,6 +296,13 @@ export class InMemoryWorkshopStore implements WorkshopStore {
       registrations: partition.historyRegistrations,
       offers: partition.historyOffers,
     });
+  }
+
+  async listArchivedOffersOfUser(wsId: string, userId: string): Promise<Offer[]> {
+    const partition = this.partitions.get(wsId);
+    return partition === undefined
+      ? []
+      : partition.historyOffers.filter((offer) => offer.userId === userId).map(clone);
   }
 
   async putAttendance(record: Attendance): Promise<void> {

@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom';
-import { isLiveStatus, useMyRegistrations } from '../api/queries';
+import {
+  CONFIRMED_REFRESH_MS,
+  isLiveStatus,
+  LIVE_REFRESH_MS,
+  myRegistrationsRefetchInterval,
+  useMyRegistrations,
+} from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
@@ -52,9 +58,16 @@ function RegistrationsList() {
             </div>
           ))
         )}
-        {current.some((entry) => isLiveStatus(entry.registration.status)) && (
+        {myRegistrationsRefetchInterval(query.data) === LIVE_REFRESH_MS && (
           <p className="muted small">
-            Refreshing every 10 s while a registration is queued or offered (paused when hidden).
+            Refreshing every {LIVE_REFRESH_MS / 1000} s while a registration is queued or offered
+            (paused when hidden).
+          </p>
+        )}
+        {myRegistrationsRefetchInterval(query.data) === CONFIRMED_REFRESH_MS && (
+          <p className="muted small">
+            Refreshing every {CONFIRMED_REFRESH_MS / 1000} s while a seat is confirmed (paused when
+            hidden).
           </p>
         )}
       </section>
@@ -68,7 +81,7 @@ function RegistrationsList() {
                   {entry.workshop.title}
                 </Link>
                 <span>
-                  {pastStatusText(entry.registration)} ·{' '}
+                  {pastStatusText(entry.registration, entry.sessions, entry.workshop.mode)} ·{' '}
                   {formatDateTime(entry.registration.updatedAt)}
                 </span>
               </li>

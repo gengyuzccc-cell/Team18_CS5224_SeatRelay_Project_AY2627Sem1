@@ -286,6 +286,8 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect(history.registrations).toHaveLength(1);
     expect(history.registrations[0]).toMatchObject({ userId: 'alice', seq: 1, status: 'CANCELLED' });
     expect(history.offers.map((o) => o.status)).toEqual(['ACCEPTED']);
+    expect((await f.store.listArchivedOffersOfUser(f.wsId, 'alice')).map((o) => o.status)).toEqual(['ACCEPTED']);
+    expect(await f.store.listArchivedOffersOfUser(f.wsId, 'bob')).toEqual([]);
     const backfills = await f.store.listBackfills(f.wsId);
     expect(backfills).toHaveLength(1);
     expect(backfills[0]).toMatchObject({ sessionId: f.s1, cause: 'CANCELLED_CONFIRMED', newUserId: 'bob', latencyMs: 0 });
@@ -717,6 +719,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect((await f.store.getCommandResult(register.commandId))?.status).toBe('APPLIED');
 
     const [notification] = await f.store.listNotificationsForUser('alice');
+    expect(await f.store.listNotificationsOfUserSince('alice', f.wsId, notification!.createdAt)).toEqual([notification]);
+    expect(await f.store.listNotificationsOfUserSince('alice', 'other-ws', notification!.createdAt)).toEqual([]);
+    expect(await f.store.listNotificationsOfUserSince('alice', f.wsId, addSeconds(notification!.createdAt, 1))).toEqual([]);
     const readAt = systemClock.now();
     expect(await f.store.markNotificationRead('bob', notification!.id, readAt)).toBeUndefined();
     expect((await f.store.markNotificationRead('alice', notification!.id, readAt))?.readAt).toBe(readAt);

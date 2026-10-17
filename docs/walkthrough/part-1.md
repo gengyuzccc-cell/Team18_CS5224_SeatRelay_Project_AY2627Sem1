@@ -1,6 +1,7 @@
 # Part 1: problem, market, business model
 
-- **Speaker:** LI ZONGZE
+- **Speaker:** LI ZONGZE (product and front end). You also operate the participant browser in the
+  live demo ([part-4.md](part-4.md)).
 - **Clock:** 0:00–2:00 (2:00)
 - **Slides:** 1 Title, 2 Problem and market, 3 Business model (`report/Slides.tex`)
 - **Hands over to:** Part 2 (mechanism and rules)

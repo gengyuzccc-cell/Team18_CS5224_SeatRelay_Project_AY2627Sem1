@@ -1176,6 +1176,62 @@ describe('read models', () => {
     await expect(store.listBackfills(WS)).resolves.toEqual([final, pending]);
   });
 
+  test('listArchivedOffersOfUser queries only H#O# of the workshop, filtered on userId, all pages', async () => {
+    const first = offer({ id: 'offer-1', status: 'EXPIRED', settledAt: T1 });
+    const second = offer({ id: 'offer-2', status: 'REVOKED', settledAt: T1 });
+    ddb
+      .on(QueryCommand)
+      .resolvesOnce({
+        Items: [historyOfferItem(first)],
+        LastEvaluatedKey: { PK: `WS#${WS}`, SK: 'H#O#offer-1' },
+      })
+      .resolvesOnce({ Items: [historyOfferItem(second)] });
+    await expect(newStore().listArchivedOffersOfUser(WS, first.userId)).resolves.toEqual([
+      first,
+      second,
+    ]);
+    const calls = ddb.commandCalls(QueryCommand);
+    expect(calls).toHaveLength(2);
+    expect(calls[0]!.args[0].input).toMatchObject({
+      KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :prefix)',
+      FilterExpression: '#userId = :userId',
+      ExpressionAttributeNames: { '#pk': 'PK', '#sk': 'SK', '#userId': 'userId' },
+      ExpressionAttributeValues: { ':pk': `WS#${WS}`, ':prefix': 'H#O#', ':userId': first.userId },
+      // the registration came from GSI1: the offer of the same transaction must be visible
+      ConsistentRead: true,
+    });
+    expect(calls[0]!.args[0].input.IndexName).toBeUndefined();
+    expect(calls[1]!.args[0].input.ExclusiveStartKey).toEqual({
+      PK: `WS#${WS}`,
+      SK: 'H#O#offer-1',
+    });
+  });
+
+  test('listNotificationsOfUserSince reads the user’s N# items from that time on, consistently, filtered on the workshop', async () => {
+    const cancelled = notification({ kind: 'SESSION_CANCELLED', createdAt: T1 });
+    ddb.on(QueryCommand).resolvesOnce({ Items: [notificationItem(cancelled)] });
+    await expect(newStore().listNotificationsOfUserSince('bob', WS, T1)).resolves.toEqual([
+      cancelled,
+    ]);
+    const calls = ddb.commandCalls(QueryCommand);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.args[0].input).toMatchObject({
+      KeyConditionExpression: '#pk = :pk AND #sk BETWEEN :from AND :to',
+      FilterExpression: '#workshopId = :workshopId',
+      ExpressionAttributeValues: {
+        ':pk': 'U#bob',
+        ':from': `N#${T1}`,
+        ':to': 'N#~',
+        ':workshopId': WS,
+      },
+      // the registration came from GSI1: the notifications of the same transaction must be visible
+      ConsistentRead: true,
+    });
+    // every notification of that time sorts inside the range (`N#{createdAt}#{id}`)
+    expect(`N#${T1}#n-1` >= `N#${T1}` && `N#${T1}#n-1` <= 'N#~').toBe(true);
+    expect(calls[0]!.args[0].input.IndexName).toBeUndefined();
+  });
+
   test('markNotificationRead sets readAt once and returns undefined for someone else’s notification', async () => {
     const mine = notification();
     ddb

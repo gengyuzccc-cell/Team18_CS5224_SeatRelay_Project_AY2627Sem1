@@ -1,5 +1,6 @@
 import type {
   Attendance,
+  AuthUser,
   CommandResultView,
   DashboardView,
   MyRegistrationListView,
@@ -7,9 +8,11 @@ import type {
   NotificationView,
   VerifyView,
 } from '@seatrelay/contracts';
-import { describe, expect, test } from 'vitest';
-import { csvCell, csvLine } from '../src/index';
+import { addMinutes } from '@seatrelay/core';
+import { describe, expect, test, vi } from 'vitest';
+import { csvCell, csvLine, myRegistrationViews } from '../src/index';
 import {
+  T0,
   accepted,
   alice,
   bob,
@@ -90,9 +93,18 @@ describe('dashboard, verify and attendance', () => {
     expect(dashboard.distinctParticipantsServed).toBe(0);
     expect(dashboard.backfills).toMatchObject([
       { cause: 'DECLINED', sessionId: s2 },
-      { cause: 'CANCELLED_CONFIRMED', sessionId: s1, newUserId: carol.userId, latencyMs: 0 },
+      {
+        cause: 'CANCELLED_CONFIRMED',
+        sessionId: s1,
+        newUserId: carol.userId,
+        latencyMs: 0,
+        // named like the queue/offered/confirmed tables (carol has no display name)
+        newHolderEmail: carol.email,
+      },
     ]);
     expect(dashboard.backfills[0]).not.toHaveProperty('reallocatedAt');
+    expect(dashboard.backfills[0]).not.toHaveProperty('newHolderEmail');
+    expect(dashboard.backfills[1]).not.toHaveProperty('newHolderDisplayName');
     expect(dashboard.counts).toEqual({
       queued: 1,
       offered: 1,
@@ -105,6 +117,38 @@ describe('dashboard, verify and attendance', () => {
 
     const verify = bodyOf<VerifyView>(await call(ports, 'GET', `${base}/verify`, { user: alice }));
     expect(verify).toEqual({ ok: true, checkedAt: ports.clock.now(), violations: [] });
+  });
+
+  test('backfill log names the new holder from live or archived registrations', async () => {
+    const { ports, orgId, wsId, s1 } = await scenario();
+    const first = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await accepted(ports, dave, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await ports.drain();
+    const bobOffer = bodyOf<CommandResultView>(
+      await call(ports, 'GET', `/commands/${first.commandId}`, { user: bob }),
+    ).result?.registration?.currentOffer;
+    // bob lets the 60 s hold run out: the seat is relayed to dave (live, OFFERED)
+    ports.clock.advanceSeconds(61);
+    await ports.fireDueTimers();
+    const dashboardPath = `/orgs/${orgId}/workshops/${wsId}/dashboard`;
+    let dashboard = bodyOf<DashboardView>(await call(ports, 'GET', dashboardPath, { user: alice }));
+    expect(dashboard.backfills).toEqual([
+      expect.objectContaining({
+        cause: 'EXPIRED',
+        releasedAt: bobOffer?.expiresAt,
+        newUserId: dave.userId,
+        newHolderEmail: dave.email,
+        newHolderDisplayName: 'Dave',
+      }),
+    ]);
+    // dave then cancels: his registration is archived, the record still names him
+    await accepted(ports, dave, wsId, { type: 'CANCEL_REGISTRATION' });
+    await ports.drain();
+    dashboard = bodyOf<DashboardView>(await call(ports, 'GET', dashboardPath, { user: alice }));
+    expect(dashboard.backfills.map((record) => record.newHolderDisplayName)).toEqual([
+      'Dave',
+      undefined,
+    ]);
   });
 
   test('PER_SESSION: one person with two confirmed seats counts once in distinctParticipantsServed', async () => {
@@ -292,6 +336,15 @@ describe('my registrations and notifications', () => {
     });
     expect(bobView.registrations[0]?.registration).not.toHaveProperty('confirmedSessionId');
     expect(bobView.registrations[0]?.registration).not.toHaveProperty('queuePosition');
+    // he gave up a confirmed seat: the ending names its session, no offer was settled with it
+    expect(bobView.registrations[0]?.registration.ending).toEqual({ confirmedSessionId: s1 });
+    // without the workshop history the ending is unknown, not "nothing was held"
+    const snapshot = await ports.store.loadSnapshot(wsId);
+    const bobRegistrations = await ports.store.listRegistrationsForUser(bob.userId);
+    expect(snapshot).toBeDefined();
+    expect(myRegistrationViews(snapshot!, bobRegistrations)[0]?.registration).not.toHaveProperty(
+      'ending',
+    );
 
     const carolView = bodyOf<MyRegistrationListView>(
       await call(ports, 'GET', '/me/registrations', { user: carol }),
@@ -300,10 +353,279 @@ describe('my registrations and notifications', () => {
       status: 'OFFERED',
       currentOffer: { sessionId: s1 },
     });
+    expect(carolView.registrations[0]?.registration).not.toHaveProperty('ending');
     expect(
       bodyOf<MyRegistrationListView>(await call(ports, 'GET', '/me/registrations', { user: alice }))
         .registrations,
     ).toEqual([]);
+  });
+
+  test('GET /me/registrations says how a registration ended: expired, declined, cancelled while held, left the queue', async () => {
+    const { ports, wsId, s1, s2 } = await scenario();
+    const mine = async (user: typeof bob) =>
+      bodyOf<MyRegistrationListView>(await call(ports, 'GET', '/me/registrations', { user }))
+        .registrations;
+    const offerOf = async (commandId: string, user: typeof bob) =>
+      bodyOf<CommandResultView>(await call(ports, 'GET', `/commands/${commandId}`, { user })).result
+        ?.registration?.currentOffer;
+
+    // bob holds s1 and lets it expire; carol holds s2 and declines it; dave queues for s1
+    const bobReg = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    const carolReg = await accepted(ports, carol, wsId, { type: 'REGISTER', acceptable: [s2] });
+    await accepted(ports, dave, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await ports.drain();
+    const bobOffer = await offerOf(bobReg.commandId, bob);
+    const carolOffer = await offerOf(carolReg.commandId, carol);
+    ports.clock.advanceSeconds(10);
+    await accepted(ports, carol, wsId, { type: 'DECLINE_OFFER', offerId: carolOffer?.id ?? '' });
+    await ports.drain();
+    const declinedAt = ports.clock.now();
+    ports.clock.advanceSeconds(51);
+    await ports.fireDueTimers(); // bob's hold expires, the seat goes to dave
+    const expiredAt = ports.clock.now();
+
+    const [bobEnded] = await mine(bob);
+    expect(bobEnded?.registration).toMatchObject({
+      status: 'ENDED',
+      endReason: 'NO_ACCEPTABLE_SESSION',
+      acceptable: [],
+      updatedAt: expiredAt,
+      ending: {
+        offer: {
+          id: bobOffer?.id,
+          sessionId: s1,
+          status: 'EXPIRED',
+          expiresAt: bobOffer?.expiresAt,
+          settledAt: expiredAt,
+        },
+      },
+    });
+    const [carolEnded] = await mine(carol);
+    expect(carolEnded?.registration).toMatchObject({
+      status: 'ENDED',
+      endReason: 'NO_ACCEPTABLE_SESSION',
+      ending: { offer: { sessionId: s2, status: 'DECLINED', settledAt: declinedAt } },
+    });
+
+    // dave cancels while the relayed seat is held for him; then queues again and leaves the queue
+    await accepted(ports, dave, wsId, { type: 'CANCEL_REGISTRATION' });
+    await ports.drain();
+    ports.clock.advanceSeconds(1);
+    await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] }); // bob holds s1 again
+    await accepted(ports, dave, wsId, { type: 'REGISTER', acceptable: [s1] }); // dave queues
+    await ports.drain();
+    ports.clock.advanceSeconds(1);
+    await accepted(ports, dave, wsId, { type: 'CANCEL_REGISTRATION' });
+    await ports.drain();
+    const dave2 = await mine(dave);
+    expect(dave2.map((entry) => [entry.registration.status, entry.registration.ending])).toEqual([
+      ['CANCELLED', {}],
+      ['CANCELLED', { offer: expect.objectContaining({ sessionId: s1, status: 'REVOKED' }) }],
+    ]);
+    // a live registration carries no ending
+    expect((await mine(bob)).map((entry) => entry.registration.ending)).toEqual([
+      undefined,
+      expect.objectContaining({ offer: expect.objectContaining({ status: 'EXPIRED' }) }),
+    ]);
+  });
+
+  test('GET /me/registrations reads only the caller’s archived offers, and none for a given-up confirmed seat', async () => {
+    const { ports, wsId } = await populated();
+    const history = vi.spyOn(ports.store, 'listHistory');
+    const archivedOffers = vi.spyOn(ports.store, 'listArchivedOffersOfUser');
+    const notices = vi.spyOn(ports.store, 'listNotificationsOfUserSince');
+    const mine = async (user: typeof bob) =>
+      bodyOf<MyRegistrationListView>(await call(ports, 'GET', '/me/registrations', { user }))
+        .registrations;
+
+    // bob's only ended registration gave up a confirmed seat: its ending needs no offer
+    expect((await mine(bob))[0]?.registration.ending).toEqual({
+      confirmedSessionId: expect.any(String),
+    });
+    expect(archivedOffers).not.toHaveBeenCalled();
+    // dave is live only: no history read at all
+    await mine(dave);
+    expect(archivedOffers).not.toHaveBeenCalled();
+    // carol declined s2 and is live again; bob's view is unaffected by her offers
+    await mine(carol);
+    expect(archivedOffers).not.toHaveBeenCalled();
+
+    ports.clock.advanceSeconds(1);
+    await accepted(ports, carol, wsId, { type: 'CANCEL_REGISTRATION' }); // gives up the held s1
+    await ports.drain();
+    const carolEntries = await mine(carol);
+    expect(archivedOffers).toHaveBeenCalledTimes(1);
+    expect(archivedOffers).toHaveBeenCalledWith(wsId, carol.userId);
+    expect(carolEntries[0]?.registration.ending).toEqual({
+      offer: expect.objectContaining({ status: 'REVOKED' }),
+    });
+    // the whole workshop history (archived registrations of everyone) is never read here, and
+    // no notification either: no session of this workshop was cancelled
+    expect(history).not.toHaveBeenCalled();
+    expect(notices).not.toHaveBeenCalled();
+    // only the caller's offers are returned by the narrow read
+    const offers = await ports.store.listArchivedOffersOfUser(wsId, carol.userId);
+    expect(offers.length).toBeGreaterThan(0);
+    expect(offers.every((offer) => offer.userId === carol.userId)).toBe(true);
+  });
+
+  test('a cancel that arrives after the hold expired (tick-first in the same decision) ends with the EXPIRED offer', async () => {
+    // bob accepts s1 and s2; carol holds s2 (full), bob holds s1 and cancels 61 s later, before
+    // any timer fires: the decision expires his hold first (back in the queue for s2), then
+    // cancels. The ending names the expired offer; the web copy must not say "held for you".
+    const { ports, wsId, s1, s2 } = await scenario();
+    await accepted(ports, carol, wsId, { type: 'REGISTER', acceptable: [s2] });
+    await ports.drain();
+    await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1, s2] });
+    await ports.drain();
+    ports.clock.advanceSeconds(61);
+    await accepted(ports, bob, wsId, { type: 'CANCEL_REGISTRATION' });
+    await ports.drain();
+    const [entry] = bodyOf<MyRegistrationListView>(
+      await call(ports, 'GET', '/me/registrations', { user: bob }),
+    ).registrations;
+    expect(entry?.registration).toMatchObject({
+      status: 'CANCELLED',
+      ending: { offer: { sessionId: s1, status: 'EXPIRED', settledAt: ports.clock.now() } },
+    });
+    expect(
+      Date.parse(entry?.registration.ending?.offer?.expiresAt ?? '') <
+        Date.parse(entry?.registration.updatedAt ?? ''),
+    ).toBe(true);
+  });
+
+  describe('an organiser session cancellation that ended a registration', () => {
+    const erin: AuthUser = { userId: 'erin', email: 'erin@example.com' };
+    const ended = async (ports: Scenario['ports'], user: AuthUser) =>
+      bodyOf<MyRegistrationListView>(await call(ports, 'GET', '/me/registrations', { user }))
+        .registrations[0]?.registration;
+    const offerOf = async (ports: Scenario['ports'], commandId: string, user: AuthUser) =>
+      bodyOf<CommandResultView>(await call(ports, 'GET', `/commands/${commandId}`, { user })).result
+        ?.registration?.currentOffer?.id ?? '';
+
+    test('is named, with the confirmed seat it took, when the rest is past the cut-off (not "cut-off before a seat")', async () => {
+      // Early starts in 40 min (cut-off in 10 min), Late tomorrow; one seat each.
+      const {
+        ports,
+        wsId,
+        s1: early,
+        s2: late,
+      } = await scenario(
+        {},
+        workshopInput({
+          sessions: [
+            { title: 'Early', startsAt: addMinutes(T0, 40), capacity: 1 },
+            { title: 'Late', startsAt: addMinutes(T0, 24 * 60), capacity: 1 },
+          ],
+        }),
+      );
+      // dave takes Early's seat; bob confirms Late (Early as a fallback); carol queues for both,
+      // erin for Early only.
+      const daveReg = await accepted(ports, dave, wsId, { type: 'REGISTER', acceptable: [early] });
+      const bobReg = await accepted(ports, bob, wsId, {
+        type: 'REGISTER',
+        acceptable: [late, early],
+      });
+      await accepted(ports, carol, wsId, { type: 'REGISTER', acceptable: [late, early] });
+      await accepted(ports, erin, wsId, { type: 'REGISTER', acceptable: [early] });
+      await ports.drain();
+      for (const [user, reg] of [
+        [dave, daveReg],
+        [bob, bobReg],
+      ] as const) {
+        const offerId = await offerOf(ports, reg.commandId, user);
+        await accepted(ports, user, wsId, { type: 'ACCEPT_OFFER', offerId });
+      }
+      await ports.drain();
+      // Early's cut-off passes: the sweep ends erin (queued for Early only); Late keeps carol.
+      ports.clock.advanceSeconds(11 * 60);
+      await ports.sweep();
+      await ports.drain();
+      const cutoffAt = ports.clock.now();
+      ports.clock.advanceSeconds(60);
+      await accepted(ports, alice, wsId, { type: 'CANCEL_SESSION', sessionId: late });
+      await ports.drain();
+      const cancelledAt = ports.clock.now();
+
+      const notices = vi.spyOn(ports.store, 'listNotificationsOfUserSince');
+      // bob had a confirmed seat in Late: the ending names the cancellation and that seat
+      expect(await ended(ports, bob)).toMatchObject({
+        status: 'ENDED',
+        endReason: 'CUTOFF',
+        acceptable: [early],
+        updatedAt: cancelledAt,
+        ending: { cancelledSessionId: late, confirmedSessionId: late },
+      });
+      expect(notices).toHaveBeenLastCalledWith(bob.userId, wsId, cancelledAt);
+      // carol was queued for Late: the cancellation, not the cut-off, ended her registration
+      expect(await ended(ports, carol)).toMatchObject({
+        status: 'ENDED',
+        endReason: 'CUTOFF',
+        updatedAt: cancelledAt,
+        ending: { cancelledSessionId: late },
+      });
+      expect((await ended(ports, carol))?.ending).not.toHaveProperty('confirmedSessionId');
+      // erin's cut-off came from the tick: nothing to name, although a session is cancelled now
+      expect(await ended(ports, erin)).toMatchObject({
+        status: 'ENDED',
+        endReason: 'CUTOFF',
+        updatedAt: cutoffAt,
+        ending: {},
+      });
+      expect((await ended(ports, erin))?.ending).toEqual({});
+      // dave is live: no history, no notification read for him
+      notices.mockClear();
+      await ended(ports, dave);
+      expect(notices).not.toHaveBeenCalled();
+    });
+
+    test('a hold that expired in the same decision is not named as the cause', async () => {
+      // bob holds Morning and also accepts Afternoon. His hold runs out, but the organiser's
+      // cancellation of Afternoon is processed before any timer tick: the decision expires the
+      // hold first (bob back in the queue for Afternoon), then the drain ends his registration.
+      const { ports, wsId, s1, s2 } = await scenario();
+      await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1, s2] });
+      await ports.drain();
+      ports.clock.advanceSeconds(61);
+      await accepted(ports, alice, wsId, { type: 'CANCEL_SESSION', sessionId: s2 });
+      await ports.drain();
+      const registration = await ended(ports, bob);
+      expect(registration).toMatchObject({
+        status: 'ENDED',
+        endReason: 'NO_ACCEPTABLE_SESSION',
+        updatedAt: ports.clock.now(),
+        ending: { cancelledSessionId: s2 },
+      });
+      expect(registration?.ending).not.toHaveProperty('offer');
+      // the two notices of that decision say the same: back in the queue, then ended
+      const kinds = bodyOf<NotificationListView>(
+        await call(ports, 'GET', '/me/notifications', { user: bob }),
+      ).notifications.map((notification) => notification.kind);
+      expect(kinds).toEqual(expect.arrayContaining(['EXPIRED', 'SESSION_CANCELLED']));
+    });
+
+    test('PER_SESSION: the confirmed seat of the cancelled session is named, without a notification read', async () => {
+      const { ports, wsId, s1 } = await scenario({}, workshopInput({ mode: 'PER_SESSION' }));
+      const bobReg = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+      await accepted(ports, carol, wsId, { type: 'REGISTER', acceptable: [s1] });
+      await ports.drain();
+      const offerId = await offerOf(ports, bobReg.commandId, bob);
+      await accepted(ports, bob, wsId, { type: 'ACCEPT_OFFER', offerId });
+      await ports.drain();
+      ports.clock.advanceSeconds(5);
+      await accepted(ports, alice, wsId, { type: 'CANCEL_SESSION', sessionId: s1 });
+      await ports.drain();
+
+      const notices = vi.spyOn(ports.store, 'listNotificationsOfUserSince');
+      expect(await ended(ports, bob)).toMatchObject({
+        status: 'ENDED',
+        endReason: 'NO_ACCEPTABLE_SESSION',
+        ending: { cancelledSessionId: s1, confirmedSessionId: s1 },
+      });
+      // carol was queued and never offered a seat: the session is not known, nothing is claimed
+      expect((await ended(ports, carol))?.ending).toEqual({});
+      expect(notices).not.toHaveBeenCalled();
+    });
   });
 
   test('GET /me/notifications is newest first; read marks are per owner', async () => {

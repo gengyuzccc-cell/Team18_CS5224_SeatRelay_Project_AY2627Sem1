@@ -161,10 +161,16 @@ apps/web            SPA (depends on contracts only)
    public view's `me` (status, queue position, current offer and its `expiresAt`), so the UI updates
    from the poll alone and never reads an eventually consistent index right after settlement.
 7. **Changes caused by other users** (for example, an offer created by a backfill) reach the browser
-   through the status pages. They refetch every 10 s while a registration is QUEUED/OFFERED, and
-   pause while the tab is hidden (`apps/web/src/api/queries.ts`, `LIVE_REFRESH_MS`). There are no
-   WebSockets: at pilot scale they add an API type, a connection table and a failure point for no
-   measurable gain (plan §1.3).
+   through the status pages. They refetch every 10 s while a registration is QUEUED/OFFERED
+   (plan §1.3, `LIVE_REFRESH_MS`) and every 30 s while it is CONFIRMED (`CONFIRMED_REFRESH_MS`:
+   nothing is pending for the participant, but the free-seat and waiting counts would otherwise go
+   stale), for both `GET /workshops/{id}` and `GET /me/registrations`. Nothing is refreshed while
+   no registration is live, and polling pauses while the tab is hidden
+   (`apps/web/src/api/queries.ts`). When the workshop page's `me` changes (it ended, or was
+   re-queued or confirmed), the page fetches `GET /me/registrations` once to explain how it ended,
+   and up to 4 more times 1.5 s apart while that list is behind the workshop view (GSI1 lag). There
+   are no WebSockets: at pilot scale they add an API type, a connection table and a failure point
+   for no measurable gain (plan §1.3).
 
 Latency definitions used everywhere (plan §1.3):
 
@@ -481,6 +487,21 @@ TTL attribute `ttl` (epoch seconds).
 - **R1 marker scope.** `L#U#{userId}` in UNIFIED mode, `L#U#{userId}#{sessionId}` in PER_SESSION mode
   (`registrationScopeKey`). It is upserted with the registration and deleted on archive.
 - History registrations keep GSI1 `U#{userId}`, so "my registrations" lists past ones too.
+  `GET /me/registrations` is one GSI1 query plus, per workshop listed, the consistent `L#` snapshot
+  and, only where one of the caller's registrations there is CANCELLED/ENDED without a given-up
+  confirmed seat, one query of that workshop's `H#O#` prefix filtered on `userId`
+  (`listArchivedOffersOfUser`: it gives each ended registration its `ending`, the offer settled
+  with it). The workshops are read in parallel. Offers are keyed by offerId, so the filter cuts
+  the response, not the read units: that query is strongly consistent and billed for the workshop's
+  whole offer history (about 0.4 KB per offer, 1 RRU per 4 KB: 24 RRU for 200 registrations at 1.2
+  offers each, `docs/COST.md` section 3). One more read follows the snapshot only in a UNIFIED
+  workshop with a cancelled session, where one of the caller's registrations ended with CUTOFF or
+  NO_ACCEPTABLE_SESSION and no longer lists that session (`endingNoticesSince` in
+  `packages/service/src/views.ts`): one strongly consistent query of `U#{userId}` from
+  `N#{earliest such ending}` to `N#~`, filtered on `workshopId` (`listNotificationsOfUserSince`;
+  the notices of that decision name the cancelled session that ended it). The filter again cuts
+  only the response, so it is billed for all of the caller's notifications since that ending, in
+  every workshop: a few RRU per call.
 - Every item carries `entityType`. Reads are validated with the contracts zod schemas.
 - **TTL.** CommandResult `ttl = acceptedAt + 30 d`. Notification `ttl = createdAt + 90 d`.
   Workshop history has no TTL (organisers need it for the export).
@@ -642,8 +663,13 @@ Prices and the per-dimension model are in `docs/COST.md` (`tools/experiments/cos
    message. The sweep runs only every 5 min (about 8,640 invocations/month) and queries a **sparse**
    index of workshops with pending work.
 6. **Client polling with backoff** (300 → 2000 ms, 5 s after 30 s). Status pages refresh every 10 s
-   only while something is pending and the tab is visible. Consistent reads cost twice eventual
-   reads, so their number is bounded.
+   while something is pending (QUEUED/OFFERED), every 30 s while a seat is CONFIRMED, never
+   otherwise, and only while the tab is visible. Consistent reads cost twice eventual reads, so
+   their number is bounded. `GET /me/registrations` also reads the caller's archived offers in a
+   workshop where they have an ended registration (section 8.2). That query is strongly consistent,
+   so it costs 1 RRU per 4 KB of that workshop's offer history, which is small at club scale (about
+   24 RRU for 200 registrations; see `docs/COST.md`). After a session cancellation it may also read
+   the caller's notifications since such an ending (section 8.2; a few RRU).
 7. **Stream filter on the notifier.** Only notification inserts invoke it; every other table write is
    free for the notifier.
 8. **Low-cardinality metrics.** EMF metrics carry only the `service` dimension, because each distinct

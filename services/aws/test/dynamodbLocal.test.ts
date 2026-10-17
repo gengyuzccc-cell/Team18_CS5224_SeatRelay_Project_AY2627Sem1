@@ -516,6 +516,14 @@ describe.skipIf(ENDPOINT === undefined)('DynamoWorkshopStore on DynamoDB Local',
             expect(
               sortBy(await ddb.store.listRegistrationsForUser(user), (r) => `${r.seq}`),
             ).toEqual(sortBy(await mem.store.listRegistrationsForUser(user), (r) => `${r.seq}`));
+            expect(
+              sortBy(await ddb.store.listArchivedOffersOfUser(ws.wsId, user), (o) => o.id),
+            ).toEqual(sortBy(await mem.store.listArchivedOffersOfUser(ws.wsId, user), (o) => o.id));
+            const notices = async (side: typeof mem) =>
+              (await side.store.listNotificationsOfUserSince(user, ws.wsId, T0))
+                .map((n) => `${n.createdAt} ${n.kind} ${n.title}`)
+                .sort();
+            expect(await notices(ddb)).toEqual(await notices(mem));
           }
         },
         120_000,

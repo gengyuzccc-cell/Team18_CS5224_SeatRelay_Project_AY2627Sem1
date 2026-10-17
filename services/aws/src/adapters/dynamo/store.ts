@@ -903,6 +903,32 @@ export class DynamoWorkshopStore implements WorkshopStore {
     return items.map(toNotification);
   }
 
+  /**
+   * The user's `N#` items from `since` on (the sort key starts with `createdAt`), filtered on
+   * `workshopId`. Strongly consistent for the same reason as `listArchivedOffersOfUser`: the
+   * notifications of the decision that archived a registration the GSI already lists must be
+   * there.
+   */
+  async listNotificationsOfUserSince(
+    userId: string,
+    wsId: string,
+    since: string,
+  ): Promise<Notification[]> {
+    const items = await this.queryAll({
+      KeyConditionExpression: '#pk = :pk AND #sk BETWEEN :from AND :to',
+      FilterExpression: '#workshopId = :workshopId',
+      ExpressionAttributeNames: { '#pk': 'PK', '#sk': 'SK', '#workshopId': 'workshopId' },
+      ExpressionAttributeValues: {
+        ':pk': userPk(userId),
+        ':from': `${NOTIFICATION_PREFIX}${since}`,
+        ':to': `${NOTIFICATION_PREFIX}~`,
+        ':workshopId': wsId,
+      },
+      ConsistentRead: true,
+    });
+    return items.map(toNotification);
+  }
+
   async markNotificationRead(
     userId: string,
     notificationId: string,
@@ -961,6 +987,29 @@ export class DynamoWorkshopStore implements WorkshopStore {
       this.queryPartition(workshopPk(wsId), HISTORY_OFFER_PREFIX),
     ]);
     return { registrations: registrations.map(toRegistration), offers: offers.map(toOffer) };
+  }
+
+  /**
+   * `H#O#` only (no `H#R#` query), filtered on `userId` so that only this user's offers cross
+   * the wire and get parsed. Offers are keyed by offerId, so the key condition cannot narrow
+   * it: the read capacity is that of the workshop's whole offer history (filter after read).
+   * Strongly consistent: the caller found the archived registration on GSI1, and the offer
+   * archived by the same transaction must not be missing from an eventually consistent replica
+   * (an ending without its offer would name the wrong cause).
+   */
+  async listArchivedOffersOfUser(wsId: string, userId: string): Promise<Offer[]> {
+    const items = await this.queryAll({
+      KeyConditionExpression: '#pk = :pk AND begins_with(#sk, :prefix)',
+      FilterExpression: '#userId = :userId',
+      ExpressionAttributeNames: { '#pk': 'PK', '#sk': 'SK', '#userId': 'userId' },
+      ExpressionAttributeValues: {
+        ':pk': workshopPk(wsId),
+        ':prefix': HISTORY_OFFER_PREFIX,
+        ':userId': userId,
+      },
+      ConsistentRead: true,
+    });
+    return items.map(toOffer);
   }
 
   async putAttendance(record: Attendance): Promise<void> {
