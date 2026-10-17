@@ -1,0 +1,276 @@
+{
+  "runId": "fe64a545-028a-44dd-8988-073b8bd2dfd0",
+  "name": "correctness",
+  "tableRow": "Core correctness (plan §4, Table 3)",
+  "criterion": "every scripted step as expected; verify ok after every step; 0 over-capacity; 0 double holds",
+  "startedAt": "2026-10-17T13:21:12.236Z",
+  "finishedAt": "2026-10-17T13:25:33.738Z",
+  "durationMs": 261502,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "227de3d12b0f6f87b7f614ee785f57d62bc28189",
+    "short": "227de3d12b0f",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 900,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 6,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "scenarios": [
+      "register-confirm",
+      "rejections",
+      "decline",
+      "cancel",
+      "capacity-up",
+      "capacity-down",
+      "cancel-session",
+      "cancel-workshop",
+      "close-open"
+    ],
+    "participants": [
+      "loaduser-1@example.com",
+      "loaduser-2@example.com",
+      "loaduser-3@example.com",
+      "loaduser-4@example.com",
+      "loaduser-5@example.com"
+    ]
+  },
+  "checks": {
+    "total": 672,
+    "passed": 672,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "scenarios": [
+    {
+      "run": 1,
+      "name": "register-confirm",
+      "workshopId": "b0c8948d-fcd5-4518-acf4-020fdb760e74",
+      "checks": 19,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "rejections",
+      "workshopId": "556d3979-908e-4dd9-ab14-8378b3b3db74",
+      "checks": 15,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "decline",
+      "workshopId": "7b6809b7-4a86-4990-9937-4bda78903ac9",
+      "checks": 22,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "cancel",
+      "workshopId": "45b936da-9c1f-49d2-9285-7ebde5635637",
+      "checks": 37,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "capacity-up",
+      "workshopId": "b77c8ddc-47f1-47ea-8f4f-12650c9fb628",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "capacity-down",
+      "workshopId": "f68f8851-310d-46d9-afc1-b99fcd1fe7f0",
+      "checks": 23,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "cancel-session",
+      "workshopId": "aafec673-2b75-47c3-8a21-ac07e6a399cc",
+      "checks": 38,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "cancel-workshop",
+      "workshopId": "150d0724-387a-4d71-b7bf-6a6eb9cf0f36",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 1,
+      "name": "close-open",
+      "workshopId": "1d8dd864-8422-4b3a-828c-7b8176349837",
+      "checks": 18,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "register-confirm",
+      "workshopId": "1e7246e3-95ff-4d8c-88ce-2e81962475bd",
+      "checks": 19,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "rejections",
+      "workshopId": "e873f6d9-d007-42db-bd3f-73f2aa69519d",
+      "checks": 15,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "decline",
+      "workshopId": "5409f1ba-8cbb-4ac5-a7bf-47ed2130426a",
+      "checks": 22,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "cancel",
+      "workshopId": "4f4f785d-16c8-4a92-b4b8-df40b5da2413",
+      "checks": 37,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "capacity-up",
+      "workshopId": "1617ce0c-e226-4046-943f-11bcb1f2e1d6",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "capacity-down",
+      "workshopId": "a975562f-cd66-4a9c-9406-7ffab958dc51",
+      "checks": 23,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "cancel-session",
+      "workshopId": "4b222fd7-617b-4648-a9eb-99afc5d477c1",
+      "checks": 38,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "cancel-workshop",
+      "workshopId": "64a7942e-f9fa-4d12-9393-26eaa2270c15",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 2,
+      "name": "close-open",
+      "workshopId": "a80e2883-6944-476d-a16d-b76fb8b253b8",
+      "checks": 18,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "register-confirm",
+      "workshopId": "e7dd53e0-d16b-4da3-a4c9-7035a9347e28",
+      "checks": 19,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "rejections",
+      "workshopId": "f15ff303-9201-4386-8b45-7f3e93921472",
+      "checks": 15,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "decline",
+      "workshopId": "3e7758d4-2a37-4b94-87e8-7c4d0e22d3c9",
+      "checks": 22,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "cancel",
+      "workshopId": "f5283515-f0eb-4541-b87f-86f70b11297c",
+      "checks": 37,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "capacity-up",
+      "workshopId": "3f8e95be-3579-413f-a085-38ce64f2c9c5",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "capacity-down",
+      "workshopId": "b3d6df7b-5c13-467a-8ac5-13fc88459f02",
+      "checks": 23,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "cancel-session",
+      "workshopId": "7cbe25a5-b1ce-4ac0-a2a4-cd196facc8af",
+      "checks": 38,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "cancel-workshop",
+      "workshopId": "731e6aea-49f7-4129-b10a-28d94b6b7dc4",
+      "checks": 26,
+      "failed": 0
+    },
+    {
+      "run": 3,
+      "name": "close-open",
+      "workshopId": "afb33e56-5dbc-4809-bbf3-d4852223f08b",
+      "checks": 18,
+      "failed": 0
+    }
+  ],
+  "overCapacity": 0,
+  "doubleHolds": 0,
+  "verifications": 234,
+  "verifyFailures": 0,
+  "settleMs": {
+    "count": 207,
+    "min": 777,
+    "max": 1009,
+    "mean": 804.3913043478261,
+    "p50": 799,
+    "p95": 837,
+    "p99": 895,
+    "stdev": 22.9718694121531
+  },
+  "serverSettleMs": {
+    "count": 207,
+    "min": 29,
+    "max": 239,
+    "mean": 42.31884057971015,
+    "p50": 39,
+    "p95": 59,
+    "p99": 93,
+    "stdev": 17.26476914784001
+  }
+}
