@@ -1,0 +1,59 @@
+07:03:33.781 PASS GET /health 200 (818 ms) {"ok":true,"service":"seatrelay","stage":"dev","time":"2026-10-17T07:03:33.740Z"}
+07:03:34.464 PASS GET /me without token -> 401
+07:03:34.808 PASS GET /me 200 {"userId":"b9bad52c-b081-7003-3d51-61a6c5c3b367","email":"smoke-organiser@example.com","name":"Smoke Organiser","organiz
+07:03:35.070 PASS POST /orgs 201
+07:03:35.340 PASS POST workshop 201
+07:03:35.345 workshop 0358ea35-e1bf-48d0-bcbd-d986a53b8c52 sessions ad5e1095-245f-4761-afe2-ce98db75073a 00a3d11c-d7d9-4a51-ad04-8032102ed63c
+07:03:35.968 PASS alice REGISTER APPLIED (202 in 392 ms, settled client-side in 623 ms)
+07:03:36.216 PASS alice OFFERED S1 (expiresAt 2026-10-17T07:04:35.723Z)
+07:03:36.711 PASS alice ACCEPT APPLIED (495 ms)
+07:03:37.242 PASS carol REGISTER S2 (gets S2 offer, keeps it so S2 is full)
+07:03:37.824 PASS bob REGISTER S1
+07:03:38.058 PASS bob QUEUED position 1
+07:03:38.599 PASS alice CANCEL APPLIED
+07:03:38.845 PASS bob OFFERED S1 in the same settlement as alice cancel (cancel-driven backfill)
+07:03:39.183 backfills after cancel [{"cause":"CANCELLED_CONFIRMED","latencyMs":0}]
+07:03:39.429 PASS non-member dashboard -> 403
+07:03:39.926 PASS alice re-REGISTER S1 (new seq, queued behind bob)
+07:03:39.927 waiting for bob offer to expire at 2026-10-17T07:04:38.286Z
+07:04:40.130 PASS bob ACCEPT at expiresAt+200ms -> REJECTED OFFER_EXPIRED
+07:04:40.414 PASS alice received the expired seat (expiry-driven backfill)
+07:04:40.744 backfills [{"cause":"CANCELLED_CONFIRMED","releasedAt":"2026-10-17T07:03:38.286Z","reallocatedAt":"2026-10-17T07:03:38.286Z","latencyMs":0},{"cause":"EXPIRED","releasedAt":"2026-10-17T07:04:36.957Z"},{"cause":"EXPIRED","releasedAt":"2026-10-17T07:04:38.286Z","reallocatedAt":"2026-10-17T07:04:38.374Z","latencyMs":88}]
+07:04:41.042 PASS verify ok (0 violations)
+07:04:41.343 PASS export.csv 200 (6 lines)
+{
+ "orgId": "ca8c5ba0-f688-4ba1-b6f2-165c423366da",
+ "wsId": "0358ea35-e1bf-48d0-bcbd-d986a53b8c52",
+ "backfills": [
+  {
+   "id": "b1745abe-ef07-4770-9981-5a1075e2dcfb",
+   "workshopId": "0358ea35-e1bf-48d0-bcbd-d986a53b8c52",
+   "sessionId": "ad5e1095-245f-4761-afe2-ce98db75073a",
+   "releasedAt": "2026-10-17T07:03:38.286Z",
+   "cause": "CANCELLED_CONFIRMED",
+   "reallocatedAt": "2026-10-17T07:03:38.286Z",
+   "newOfferId": "79f7cd99-97ff-4f44-9723-f15a007b29b2",
+   "newUserId": "d91a250c-50f1-708d-564c-160ba8ea5d31",
+   "latencyMs": 0
+  },
+  {
+   "id": "75aeed46-59a6-40ff-a8bd-73bb6a7ddded",
+   "workshopId": "0358ea35-e1bf-48d0-bcbd-d986a53b8c52",
+   "sessionId": "00a3d11c-d7d9-4a51-ad04-8032102ed63c",
+   "releasedAt": "2026-10-17T07:04:36.957Z",
+   "cause": "EXPIRED"
+  },
+  {
+   "id": "b17ee86d-f0e0-4d08-9046-b71e1f04b8d8",
+   "workshopId": "0358ea35-e1bf-48d0-bcbd-d986a53b8c52",
+   "sessionId": "ad5e1095-245f-4761-afe2-ce98db75073a",
+   "releasedAt": "2026-10-17T07:04:38.286Z",
+   "cause": "EXPIRED",
+   "reallocatedAt": "2026-10-17T07:04:38.374Z",
+   "newOfferId": "ee8c1bc5-b450-4383-964e-6c89acac3167",
+   "newUserId": "c96a157c-90c1-702b-29d8-02932e51272f",
+   "latencyMs": 88
+  }
+ ],
+ "distinctParticipantsServed": 0
+}

@@ -16,9 +16,12 @@ CLIENT_ID="$(stack_output "$AUTH_STACK" WebClientId)"
 HOSTED_UI="$(stack_output "$AUTH_STACK" HostedUiDomain)"
 log "stage=$STAGE bucket=$BUCKET dist=$DIST_ID web=$WEB_URL api=$API_URL"
 
-# Runtime configuration is injected as /env.js so the SAME build works for CloudFront and nginx.
-mkdir -p "$ROOT/apps/web/public"
-cat > "$ROOT/apps/web/public/env.js" <<EOT
+# Build once, then inject the stage's runtime configuration as dist/env.js so the SAME bundle works
+# for CloudFront and nginx. The committed apps/web/public/env.js (local Keycloak defaults) is never touched.
+(cd "$ROOT" && pnpm --filter @seatrelay/web build)
+
+DIST="$ROOT/apps/web/dist"
+cat > "$DIST/env.js" <<EOT
 window.__SEATRELAY_ENV__ = {
   provider: 'cognito',
   authority: '${ISSUER}',
@@ -28,9 +31,6 @@ window.__SEATRELAY_ENV__ = {
   stage: '${STAGE}'
 };
 EOT
-(cd "$ROOT" && pnpm --filter @seatrelay/web build)
-
-DIST="$ROOT/apps/web/dist"
 aws s3 sync "$DIST/assets" "s3://$BUCKET/assets" --delete \
   --cache-control "public,max-age=31536000,immutable"
 aws s3 sync "$DIST" "s3://$BUCKET" --exclude "assets/*" --exclude "index.html" --exclude "env.js" \

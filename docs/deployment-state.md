@@ -47,9 +47,29 @@ and the dev stack runs with `EmailEnabled=false`.
 Callback/logout URLs registered in Cognito: `http://localhost:5173/callback`, `https://d2ni5e1z674t04.cloudfront.net/callback`
 (logout: `http://localhost:5173/`, `https://d2ni5e1z674t04.cloudfront.net/`).
 
-## seatrelay-app-dev
+## seatrelay-app-dev (deployed 2026-10-17, CREATE_COMPLETE)
 
-Not yet deployed (requires the Lambda bundles from `services/aws`).
+Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=false WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`.
+
+| Output | Value |
+|---|---|
+| ApiUrl | `https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com` |
+| TableName | `seatrelay-dev` |
+| CommandsQueueUrl | `https://sqs.ap-southeast-1.amazonaws.com/379549361891/seatrelay-dev-commands.fifo` |
+| ExpiryDelayQueueUrl | `https://sqs.ap-southeast-1.amazonaws.com/379549361891/seatrelay-dev-expiry-delay` |
+| DLQs | `seatrelay-dev-commands-dlq.fifo`, `seatrelay-dev-expiry-delay-dlq`, `seatrelay-dev-notify-dlq` |
+| Functions | `seatrelay-dev-{api,worker,expiry-forwarder,sweep,notifier}` (nodejs22.x, arm64) |
+| Dashboard | CloudWatch dashboard `seatrelay-dev` |
+| Alarm topic | `seatrelay-dev-alarms` (e-mail subscription pending confirmation) |
+
+Smoke test (plan §3 step 12) passed against the live stack twice; evidence in `results/2026-10-17-smoke-dev/`
+(`run.log`, `meta.json`, `smoke-dev.mjs`). After the runs: all DLQs empty, no alarm in ALARM state, 0 Lambda
+errors, custom metrics `CommandSettledLatency`, `BackfillLatency`, `OffersCreated`, `OffersExpired` present with
+only the `service` dimension. CORS pre-flight answered by API Gateway for the CloudFront and localhost origins
+only. Smoke test users (Cognito, e-mail suppressed): `smoke-{organiser,alice,bob,carol}@example.com`.
+
+The SPA is published to `https://d2ni5e1z674t04.cloudfront.net` with `env.js` pointing at the Cognito pool and
+the dev API (`STAGE=dev tools/scripts/bin/deploy-web.sh`).
 
 ## seatrelay-app-pilot / seatrelay-web-pilot
 
