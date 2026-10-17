@@ -7,7 +7,9 @@ deployed system \SeriesPassed{} of the \SeriesExperiments{} system experiments m
 (preference order on its dev part; failure recovery without e-mail, which is off on \code{dev}), no
 \code{verify} call found an invariant violation, and the load test met its targets only up to
 \PerfDevMaxVUsMet{} virtual users. Per-offer timers with tick-first semantics take the sweep interval
-off the backfill path (\TimerPathRelaysN{} timer-path relays on \code{dev} so far, at most \TimerPathRelayMaxMs\,ms),
+off the backfill path (\IfPending{\BackfillExpiredPNinetyFiveS}{\TimerPathRelaysN{} timer-path relays on
+\code{dev} so far, at most \TimerPathRelayMaxMs\,ms}{expiry-driven backfill p95 \BackfillExpiredPNinetyFiveS\,s on
+\code{dev}, against 120\,s}),
 and the 202 protocol is settled by bounded polling. In our usage model the cloud build costs
 \usd\CostTierOneKCloudListUsd{} a month at list price for 1{,}000 registrations and is cheaper than a
 self-hosted machine that pays for its line and operations up to \CostCrossoverListFullRegs{}

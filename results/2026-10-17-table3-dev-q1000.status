@@ -1,0 +1,9 @@
+# Table 3 run on dev, started 2026-10-17T18:16:05Z, commit e05c037
+2026-10-17T18:20:33Z	correctness	exit=0	268s
+2026-10-17T18:21:14Z	preference-order	exit=0	41s
+2026-10-17T18:23:15Z	concurrency	exit=0	121s
+2026-10-17T18:38:10Z	repeat-execution	exit=0	895s
+2026-10-17T18:39:45Z	expiry-race	exit=0	95s
+2026-10-17T19:10:46Z	failure-recovery	exit=0	1861s
+2026-10-17T19:11:39Z	access-control	exit=0	53s
+2026-10-17T19:16:36Z	backfill	exit=0	297s

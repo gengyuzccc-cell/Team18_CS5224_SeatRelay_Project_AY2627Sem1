@@ -1,0 +1,14 @@
+scenario,step,ok,detail,run,expected,actual,ms
+smoke,1 workshop created,true,"workshop 8531dcd7-2bb5-474e-beb4-bfba2e8527d1, sessions a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7, eec4bf18-c4df-45b6-b3b1-4b12c31e922b",1,,,
+smoke,2 alice OFFERED S1,true,,1,OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7,REGISTER → APPLIED OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7 [1765 ms],1765
+smoke,3 alice CONFIRMED S1,true,,1,CONFIRMED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7,ACCEPT_OFFER → APPLIED CONFIRMED [849 ms],849
+smoke,3 bob QUEUED position 1,true,,1,QUEUED#1,REGISTER → APPLIED QUEUED#1 [876 ms],876
+smoke,4 alice CANCEL relays one offer,true,,1,APPLIED offersCreated=1,CANCEL_REGISTRATION → APPLIED CANCELLED [906 ms] offersCreated=1,906
+smoke,4 bob OFFERED S1,true,,1,OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7,OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7,
+smoke,4 backfill CANCELLED_CONFIRMED latency 0,true,,1,"1 record, latencyMs 0, newUserId bob","[{""cause"":""CANCELLED_CONFIRMED"",""latencyMs"":0}]",
+smoke,5 carol QUEUED,true,,1,QUEUED,REGISTER → APPLIED QUEUED#1 [858 ms],858
+smoke,5 carol OFFERED S1 after expiry,true,,1,OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7,OFFERED@a1bfbc5b-cf1e-4f0d-ab45-64f476acf5a7 observed 2026-10-17T18:15:52.387Z,585
+smoke,5 backfill EXPIRED relayed within 15 s,true,,1,"1 EXPIRED record, latencyMs < 15000","[{""latencyMs"":108,""reallocatedAt"":""2026-10-17T18:15:51.910Z""}]",108
+smoke,6 bob late ACCEPT rejected OFFER_EXPIRED,true,,1,REJECTED(OFFER_EXPIRED),ACCEPT_OFFER → REJECTED(OFFER_EXPIRED) [832 ms],832
+smoke,"7 verify ok, no over-capacity, no double holds",true,,1,ok=true overCapacity=0 doubleHolds=0,ok=true overCapacity=0 doubleHolds=0 violations=[],
+smoke,7 dead letters empty,true,"DLQ depths of seatrelay-app-dev: {""commands-dlq"":0,""expiry-delay-dlq"":0,""notify-dlq"":0}",1,0,0,

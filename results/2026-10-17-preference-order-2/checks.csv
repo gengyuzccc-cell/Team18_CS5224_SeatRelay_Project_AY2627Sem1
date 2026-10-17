@@ -1,0 +1,205 @@
+run,scenario,step,ok,expected,actual,ms
+1,P02,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+1,P01,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+1,P03,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+1,P02,REGISTER [S3 S1] with nothing full,true,OFFERED@S3,OFFERED@S3,776
+1,P02,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P01,REGISTER [S1 S2 S3 S4 S5] with nothing full,true,OFFERED@S1,OFFERED@S1,814
+1,P04,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+1,P05,precondition: fillers hold their seats,true,"free 0,0,0,0,1","free 0,0,0,0,1",
+1,P01,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P03,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,918
+1,P03,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P04,REGISTER [S1 S2 S3] with S1 S2 full,true,OFFERED@S3,OFFERED@S3,794
+1,P05,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 full,true,OFFERED@S5,OFFERED@S5,776
+1,P06,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+1,P04,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P05,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P07,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+1,P06,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,769
+1,P08,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+1,P09,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+1,P07,REGISTER [S2] with S2 full,true,QUEUED#1,QUEUED#1,770
+1,P10,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+1,P08,REGISTER [S2] with S1 S2 full,true,QUEUED#1,QUEUED#1,782
+1,P06,release S3 (filler cancels),true,OFFERED@S3,OFFERED@S3,
+1,P06,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P09,REGISTER [S1 S2] with nothing full,true,OFFERED@S1,OFFERED@S1,776
+1,P07,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+1,P09,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P10,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,1032
+1,P07,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P08,release S1 (filler cancels),true,QUEUED#1,QUEUED#1,
+1,P10,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P08,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P11,precondition: fillers hold their seats,true,"free 1,1,1,1,0","free 1,1,1,1,0",
+1,P12,precondition: fillers hold their seats,true,"free 1,1,0,0,0","free 1,1,0,0,0",
+1,P13,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+1,P11,REGISTER [S5 S4 S3 S2 S1] with S5 full,true,OFFERED@S4,OFFERED@S4,783
+1,P14,precondition: fillers hold their seats,true,"free 0,0,0,1,0","free 0,0,0,1,0",
+1,P11,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P12,REGISTER [S5 S4 S3 S2 S1] with S3 S4 S5 full,true,OFFERED@S2,OFFERED@S2,778
+1,P15,precondition: fillers hold their seats,true,"free 0,1,0,1,0","free 0,1,0,1,0",
+1,P12,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P13,REGISTER [S2 S4] with S2 S4 full,true,QUEUED#1,QUEUED#1,777
+1,P14,REGISTER [S4] with S1 S2 S3 S5 full,true,OFFERED@S4,OFFERED@S4,772
+1,P14,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P15,REGISTER [S1 S3 S5] with S1 S3 S5 full,true,QUEUED#1,QUEUED#1,785
+1,P16,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+1,P17,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+1,P13,release S4 (filler cancels),true,OFFERED@S4,OFFERED@S4,
+1,P13,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P15,release S5 (filler cancels),true,OFFERED@S5,OFFERED@S5,
+1,P16,REGISTER [S3 S2] with nothing full,true,OFFERED@S3,OFFERED@S3,782
+1,P18,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+1,P15,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P16,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P17,REGISTER [S2 S1] with S2 full,true,OFFERED@S1,OFFERED@S1,935
+1,P17,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P18,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,784
+1,P19,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+1,P20,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+1,P19,REGISTER [S4 S2] with S2 S4 full,true,QUEUED#1,QUEUED#1,790
+1,P18,release S1 (filler cancels),true,OFFERED@S1,OFFERED@S1,
+1,P18,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P20,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,774
+1,P19,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+1,P19,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+1,P20,release S1 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+1,P20,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P02,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+2,P01,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+2,P02,REGISTER [S3 S1] with nothing full,true,OFFERED@S3,OFFERED@S3,794
+2,P01,REGISTER [S1 S2 S3 S4 S5] with nothing full,true,OFFERED@S1,OFFERED@S1,783
+2,P03,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+2,P04,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+2,P02,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P05,precondition: fillers hold their seats,true,"free 0,0,0,0,1","free 0,0,0,0,1",
+2,P01,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P03,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,800
+2,P04,REGISTER [S1 S2 S3] with S1 S2 full,true,OFFERED@S3,OFFERED@S3,784
+2,P03,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P05,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 full,true,OFFERED@S5,OFFERED@S5,795
+2,P04,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P06,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+2,P07,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+2,P05,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P06,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,775
+2,P08,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+2,P07,REGISTER [S2] with S2 full,true,QUEUED#1,QUEUED#1,807
+2,P09,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+2,P08,REGISTER [S2] with S1 S2 full,true,QUEUED#1,QUEUED#1,792
+2,P10,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+2,P09,REGISTER [S1 S2] with nothing full,true,OFFERED@S1,OFFERED@S1,780
+2,P06,release S3 (filler cancels),true,OFFERED@S3,OFFERED@S3,
+2,P07,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+2,P09,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P06,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P07,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P10,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,782
+2,P08,release S1 (filler cancels),true,QUEUED#1,QUEUED#1,
+2,P10,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P08,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P12,precondition: fillers hold their seats,true,"free 1,1,0,0,0","free 1,1,0,0,0",
+2,P13,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+2,P11,precondition: fillers hold their seats,true,"free 1,1,1,1,0","free 1,1,1,1,0",
+2,P14,precondition: fillers hold their seats,true,"free 0,0,0,1,0","free 0,0,0,1,0",
+2,P12,REGISTER [S5 S4 S3 S2 S1] with S3 S4 S5 full,true,OFFERED@S2,OFFERED@S2,787
+2,P15,precondition: fillers hold their seats,true,"free 0,1,0,1,0","free 0,1,0,1,0",
+2,P13,REGISTER [S2 S4] with S2 S4 full,true,QUEUED#1,QUEUED#1,781
+2,P12,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P11,REGISTER [S5 S4 S3 S2 S1] with S5 full,true,OFFERED@S4,OFFERED@S4,812
+2,P14,REGISTER [S4] with S1 S2 S3 S5 full,true,OFFERED@S4,OFFERED@S4,796
+2,P11,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P15,REGISTER [S1 S3 S5] with S1 S3 S5 full,true,QUEUED#1,QUEUED#1,791
+2,P14,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P13,release S4 (filler cancels),true,OFFERED@S4,OFFERED@S4,
+2,P13,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P16,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+2,P15,release S5 (filler cancels),true,OFFERED@S5,OFFERED@S5,
+2,P17,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+2,P15,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P18,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+2,P16,REGISTER [S3 S2] with nothing full,true,OFFERED@S3,OFFERED@S3,768
+2,P16,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P17,REGISTER [S2 S1] with S2 full,true,OFFERED@S1,OFFERED@S1,775
+2,P19,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+2,P17,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P18,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,779
+2,P20,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+2,P19,REGISTER [S4 S2] with S2 S4 full,true,QUEUED#1,QUEUED#1,776
+2,P18,release S1 (filler cancels),true,OFFERED@S1,OFFERED@S1,
+2,P20,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,794
+2,P18,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P19,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+2,P19,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+2,P20,release S1 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+2,P20,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P02,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+3,P01,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+3,P02,REGISTER [S3 S1] with nothing full,true,OFFERED@S3,OFFERED@S3,779
+3,P05,precondition: fillers hold their seats,true,"free 0,0,0,0,1","free 0,0,0,0,1",
+3,P01,REGISTER [S1 S2 S3 S4 S5] with nothing full,true,OFFERED@S1,OFFERED@S1,772
+3,P04,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+3,P03,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+3,P01,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P02,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P05,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 full,true,OFFERED@S5,OFFERED@S5,790
+3,P04,REGISTER [S1 S2 S3] with S1 S2 full,true,OFFERED@S3,OFFERED@S3,785
+3,P03,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,790
+3,P05,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P04,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P03,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P07,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+3,P06,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+3,P08,precondition: fillers hold their seats,true,"free 0,0,1,1,1","free 0,0,1,1,1",
+3,P09,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+3,P07,REGISTER [S2] with S2 full,true,QUEUED#1,QUEUED#1,781
+3,P10,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+3,P06,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,794
+3,P08,REGISTER [S2] with S1 S2 full,true,QUEUED#1,QUEUED#1,793
+3,P09,REGISTER [S1 S2] with nothing full,true,OFFERED@S1,OFFERED@S1,790
+3,P10,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,784
+3,P07,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+3,P09,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P06,release S3 (filler cancels),true,OFFERED@S3,OFFERED@S3,
+3,P10,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P07,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P06,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P08,release S1 (filler cancels),true,QUEUED#1,QUEUED#1,
+3,P08,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P11,precondition: fillers hold their seats,true,"free 1,1,1,1,0","free 1,1,1,1,0",
+3,P12,precondition: fillers hold their seats,true,"free 1,1,0,0,0","free 1,1,0,0,0",
+3,P13,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+3,P14,precondition: fillers hold their seats,true,"free 0,0,0,1,0","free 0,0,0,1,0",
+3,P11,REGISTER [S5 S4 S3 S2 S1] with S5 full,true,OFFERED@S4,OFFERED@S4,770
+3,P12,REGISTER [S5 S4 S3 S2 S1] with S3 S4 S5 full,true,OFFERED@S2,OFFERED@S2,792
+3,P13,REGISTER [S2 S4] with S2 S4 full,true,QUEUED#1,QUEUED#1,786
+3,P11,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P14,REGISTER [S4] with S1 S2 S3 S5 full,true,OFFERED@S4,OFFERED@S4,783
+3,P12,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P14,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P15,precondition: fillers hold their seats,true,"free 0,1,0,1,0","free 0,1,0,1,0",
+3,P13,release S4 (filler cancels),true,OFFERED@S4,OFFERED@S4,
+3,P15,REGISTER [S1 S3 S5] with S1 S3 S5 full,true,QUEUED#1,QUEUED#1,780
+3,P13,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P16,precondition: fillers hold their seats,true,"free 1,1,1,1,1","free 1,1,1,1,1",
+3,P17,precondition: fillers hold their seats,true,"free 1,0,1,1,1","free 1,0,1,1,1",
+3,P18,precondition: fillers hold their seats,true,"free 0,0,0,0,0","free 0,0,0,0,0",
+3,P16,REGISTER [S3 S2] with nothing full,true,OFFERED@S3,OFFERED@S3,778
+3,P15,release S5 (filler cancels),true,OFFERED@S5,OFFERED@S5,
+3,P17,REGISTER [S2 S1] with S2 full,true,OFFERED@S1,OFFERED@S1,788
+3,P16,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P18,REGISTER [S1 S2 S3 S4 S5] with S1 S2 S3 S4 S5 full,true,QUEUED#1,QUEUED#1,789
+3,P15,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P17,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P19,precondition: fillers hold their seats,true,"free 1,0,1,0,1","free 1,0,1,0,1",
+3,P19,REGISTER [S4 S2] with S2 S4 full,true,QUEUED#1,QUEUED#1,782
+3,P18,release S1 (filler cancels),true,OFFERED@S1,OFFERED@S1,
+3,P20,precondition: fillers hold their seats,true,"free 0,1,1,1,1","free 0,1,1,1,1",
+3,P18,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P20,REGISTER [S1 S2] with S1 full,true,OFFERED@S2,OFFERED@S2,784
+3,P19,release S2 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+3,P19,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",
+3,P20,release S1 (filler cancels),true,OFFERED@S2,OFFERED@S2,
+3,P20,verify,true,"verify ok, overCapacity 0, doubleHolds 0","verify ok, overCapacity 0, doubleHolds 0",

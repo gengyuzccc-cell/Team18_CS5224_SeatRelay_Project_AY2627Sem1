@@ -1,0 +1,4 @@
+run,workshopId,injected,processed,versionBefore,versionAfter,newerOfferUnchanged,backfillsUnchanged,newerOfferAccepted,ok
+1,8c5c07b1-1d70-4d40-9d23-44b66f0e5f40,true,waited 20 s,3,3,true,true,APPLIED,true
+2,e9b51f99-06cd-4443-8433-96df7bad293f,true,waited 20 s,3,3,true,true,APPLIED,true
+3,ec4ddc1a-a27b-4277-82b7-900c1d8d242c,true,waited 20 s,3,3,true,true,APPLIED,true

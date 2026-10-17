@@ -1,0 +1,64 @@
+{
+  "runId": "4b65ed89-d047-4946-9188-deaefb827df1",
+  "name": "preference-order",
+  "tableRow": "Preference, order (plan §4, Table 3) — deployment replay of 20 fixed cases",
+  "criterion": "the allocated session is always the first acceptable session with a free seat; a non-acceptable session is never offered; verify ok",
+  "startedAt": "2026-10-17T18:20:35.647Z",
+  "finishedAt": "2026-10-17T18:21:14.946Z",
+  "durationMs": 39299,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "e05c037d485dc9e64ca0e45552a530bba7ba43b0",
+    "short": "e05c037d485d",
+    "dirty": true
+  },
+  "runs": 3,
+  "holdSeconds": 900,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 7,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "parallel": 5,
+    "participant": "loaduser-1@example.com",
+    "fillers": [
+      "loaduser-2@example.com",
+      "loaduser-3@example.com",
+      "loaduser-4@example.com",
+      "loaduser-5@example.com",
+      "loaduser-6@example.com"
+    ]
+  },
+  "checks": {
+    "total": 204,
+    "passed": 204,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "cases": 60,
+  "passed": 60,
+  "offeredNonAcceptable": 0,
+  "settleMs": {
+    "count": 84,
+    "min": 766,
+    "max": 1032,
+    "mean": 790.3214285714286,
+    "p50": 782,
+    "p95": 812,
+    "p99": 1032,
+    "stdev": 35.55952779504816
+  }
+}

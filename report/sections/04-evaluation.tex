@@ -12,11 +12,12 @@ notifications as SKIPPED without sending e-mail. Each script asserts its checks,
 after its scenario steps and writes \code{results/<date>-<experiment>/}; each experiment ran 3 times,
 and the latest complete run is quoted. Expiry experiments use $\text{holdSeconds} = 60$. The smoke
 test passed first (\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The
-\SeriesExperiments{} quoted runs recorded \SeriesCommitCount{} commits (\code{\SeriesCommits});
-\SeriesDirtyRuns{} runs had uncommitted changes in the working tree: \pending{confirm that the dev
-Lambda code was not redeployed between these commits and that only results/ and docs/ were
-uncommitted, or re-run from a clean checkout}. Run ids and commits of every number are listed in
-\code{report/generated/numbers.tex}.
+\SeriesExperiments{} quoted runs all ran from a clean checkout of commit \code{\SeriesCommits};
+\SeriesDirtyRuns{} are flagged dirty only because the runner appended to its own status log under
+\code{results/}. After the series we downloaded the five deployed Lambda bundles: they are
+byte-identical to a build of that commit, and no stack changed during the series
+(\code{results/2026-10-17-table3-dev-q1000-provenance.md}). Run ids and commits of every number are
+listed in \code{report/generated/numbers.tex}.
 
 \subsection{System results against the acceptance targets}\label{sec:results}
 Table~\ref{tab:results} reproduces the Preliminary report's Table~3, the acceptance contract,
@@ -42,7 +43,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences, \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
  & \PrefOrderVerdict{} (dev part)\\
 \textbf{Concurrency}: 50 requests contending for few seats; one account acting on several sessions & Final state satisfies every invariant
- & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; version-conflict retries \ConcurrencyMetaRetries{} (inconclusive, see text); \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} requests got HTTP 503 (see text); same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} as expected, each of the \ConcurrencySameAccountFailed{} others with an HTTP 503; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
+ & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} commands failed; same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} with exactly one effect; version-conflict retries \ConcurrencyMetaRetries{} (one consumer per workshop); server settle p95 \ConcurrencySettleServerPNinetyFiveMs\,ms; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
  & \ConcurrencyVerdict\\
 \textbf{Repeat execution}: Duplicate submits, message redelivery, response lost after submit & No double decrement or release
  & \RepeatDupProbesPassed/\RepeatDupProbes{} probes sending one \code{commandId} \RepeatDupCopies{} times concurrently; \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes: redelivery acknowledged without a second effect, one record
@@ -60,7 +61,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels (\PerfDevMaxVUsMet{} VUs). 25 VUs, cross-workshop: settle \PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUTwentyFiveErrorPct\,\%. 50 VUs: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevCrossVUFiftyErrorPct\,\% (hot spot: settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%); Fig.~\ref{fig:perf}}
  & \IfPending{\PerfDevVerdict}{--}{\PerfDevVerdict}\\
 \textbf{Backfill latency}: Time from hold expiry to reallocation under normal operation & p95 $\leq$\,120\,s; outliers reported
- & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, smoke and failure-recovery runs on dev: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms. Staged rehearsal on pilot (\S\ref{sec:pilot}): \RehearsalBackfillExpiredN{} more, \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms}{p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed; cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries}
+ & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, smoke and failure-recovery runs on dev: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms. Staged rehearsal on pilot (\S\ref{sec:pilot}): \RehearsalBackfillExpiredN{} more, \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms}{Expiry-driven p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed, \BackfillOutliers{} outliers (Fig.~\ref{fig:backfill}); cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries{} (the sweep never had to act)}
  & \IfPending{\BackfillVerdict}{--}{\BackfillVerdict}\\
 \textbf{Cost}: Cloud bill, resource usage, and the local reference under the same load model & Unit cost and its trend with scale
  & Model: \usd\CostUnitOneKCloudListUsd{} $\to$ \usd\CostUnitHundredKCloudListUsd{} per 1{,}000 registrations at list price (1k $\to$ 100k a month), three layers, crossovers in \S\ref{sec:business}. Bill (Cost Explorer, project tag): \usd\CostBillListUsd{} over \CostBillTaggedDays{} tagged day, incomplete (\S\ref{sec:business}). On-prem reference: \IfPending{\PerfLocalCpuPeakPct}{not load-tested (\S\ref{sec:business})}{peak \PerfLocalCpuPeakPct\,\% CPU, \PerfLocalMemPeakMiB\,MiB under k6}
@@ -79,20 +80,22 @@ Aspect: scenario and method & Target & Measured & Verdict\\
 \end{tabularx}
 \end{table}
 
-\paragraph{Failed checks.}
-In their latest runs \SeriesFailed{} of the \SeriesExperiments{} experiments failed a check
-(\SeriesFailedNames), and we report them as failures. In the \emph{concurrency} run,
-\ConcurrencyTransportErrors{} of \ConcurrencyCommands{} requests received HTTP 503 responses without
-an application error code, so not from the API's own 503 path (failed enqueue); some of these
-commands were nevertheless applied, so the harness's expected sequence numbers and confirmation
-counts no longer matched, although \code{verify} found no invariant violation after any phase. The
-version-conflict metric read \ConcurrencyMetaRetries, but CloudWatch returned no SeatRelay samples
-in that window, so that reading is inconclusive. The \emph{backfill} run aborted at its first request
-(creating a workshop) with the same kind of 503 and produced no latency samples. The pilot stack was
-deployed during the concurrency run window, a possible confounder for the re-run to exclude, and the
-account's Lambda concurrency quota is 10, shared by both stages' functions (an increase is pending);
-neither is established as the cause.
-\pending{root cause of the HTTP 503 responses, then clean concurrency and backfill re-runs}. An
+\paragraph{The first series failed, and why.}
+The first series on \code{dev} ran under the new account's Lambda quota of
+\ThrottleConcurrencyAccountConcurrencyMax{} concurrent executions, shared by every function of both
+stages. Its concurrency run passed \ThrottleFirstConcurrencyChecksPassed/\ThrottleFirstConcurrencyChecksTotal{}
+checks, with HTTP 503 responses that carried no application error code; the backfill run aborted at
+its first request with the same 503; and the k6 matrix lost requests from 25 VUs on. CloudWatch shows
+the cause (\code{results/2026-10-17-throttling-evidence/}): in all \ThrottleWindows{} windows the API
+function's throttles, the API's 5xx count and the 503s in its access log are equal
+(\ThrottleConcurrencyApiThrottles, \ThrottleBackfillApiThrottles{} and \ThrottleKsixApiThrottles{} of
+\ThrottleKsixRequests{} requests), and account-wide concurrency peaked at exactly
+\ThrottleKsixAccountConcurrencyMax. API Gateway answers 503 when it cannot invoke a throttled Lambda
+integration. Even then \code{verify} found no invariant violation after any phase of that
+concurrency run: throttling lost requests, not correctness. AWS then raised the quota to 1{,}000, and we re-ran the whole series,
+smoke test first, on the same deployed code (the only stack change in between renamed the sweep
+schedule). Table~\ref{tab:results} quotes these re-runs: \SeriesPassed{} of
+\SeriesExperiments{} experiments passed every check, and the failed runs remain in \code{results/}. An
 earlier \emph{expiry-race} run failed one check: a probe meant to arrive 200\,ms before
 \code{expiresAt} arrived after it (client send-timing jitter) and was rejected as expired, as the
 server clock requires; the harness now calibrates the send time, and the quoted run
@@ -105,8 +108,8 @@ In the correctness run the server settled commands with p95 \CorrectnessSettleSe
 (\CorrectnessSettleClientN{} commands) and the client observed p95
 \CorrectnessSettleClientPNinetyFiveMs\,ms, which adds the first 300\,ms poll interval, the round
 trips and up to one further interval. In the concurrency run, where one workshop's commands are
-serialised by design, the server p95 rose to \ConcurrencySettleServerPNinetyFiveMs\,ms, above the
-5\,s target (with the 503 responses above). After a worker crash, the 120\,s visibility timeout bounds
+serialised by design, the server p95 was \ConcurrencySettleServerPNinetyFiveMs\,ms and the client's
+\ConcurrencySettleClientPNinetyFiveMs\,ms, within the 5\,s target. After a worker crash, the 120\,s visibility timeout bounds
 the recovery of a stalled workshop (Table~\ref{tab:results}).
 \ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf}),
 reads and 202 responses stayed fast, but settlement did not keep up above \PerfDevMaxVUsMet{} VUs, in
@@ -149,7 +152,7 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
   \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
   \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{expiresAt}) on dev with
   $\text{holdSeconds} = 60$, histogram and empirical cumulative distribution against the 120\,s target. Source:
-  \code{results/<date>-backfill/raw.csv}.}
+  \code{results/\BackfillDir/raw.csv} (run \code{\BackfillRunId}).}
   \label{fig:backfill}
 \end{figure}}{}
 
@@ -248,7 +251,9 @@ evidence only.
   found a C2 violation.
 \item \textbf{H3} (automatic backfill reduces the organiser's manual handling): \emph{partly
   supported.} Every release is relayed in the same decision with no organiser step
-  (\TimerPathRelaysN{} timer-path relays on \code{dev} took at most \TimerPathRelayMaxMs\,ms; a cancellation is
+  (\IfPending{\BackfillExpiredPNinetyFiveS}{\TimerPathRelaysN{} timer-path relays on \code{dev} took at most
+  \TimerPathRelayMaxMs\,ms}{on \code{dev} \BackfillExpiredN{} expiry-driven backfills took p95
+  \BackfillExpiredPNinetyFiveS\,s against the 120\,s target}; a cancellation is
   relayed inside its own transaction, \SmokeCancelBackfillMs\,ms), and in simulation per-session forms left
   \ReplayDupConfirmedPerSessionMean{} duplicate confirmed seats per workshop to clean up, against
   \ReplayDupConfirmedUnifiedMean{} with one queue. Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the

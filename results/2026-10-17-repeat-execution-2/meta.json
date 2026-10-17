@@ -1,0 +1,49 @@
+{
+  "runId": "668e39b5-6b98-45b3-89d9-d8872e900f13",
+  "name": "repeat-execution",
+  "tableRow": "Repeat execution (plan §4, Table 3; C3)",
+  "criterion": "no double booking or double release: one command record, settled once (APPLIED once), identical on every read; AFTER_COMMIT redelivery applies nothing twice",
+  "startedAt": "2026-10-17T18:23:18.537Z",
+  "finishedAt": "2026-10-17T18:38:10.396Z",
+  "durationMs": 891859,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "e05c037d485dc9e64ca0e45552a530bba7ba43b0",
+    "short": "e05c037d485d",
+    "dirty": true
+  },
+  "runs": 3,
+  "holdSeconds": 900,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 5,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "copies": 5,
+    "run1.workshopId": "c863c1ad-cd67-4792-acab-c9c0d1bb9215",
+    "run2.workshopId": "49657b5e-ad84-48b0-a913-6eaed573d5cd",
+    "run3.workshopId": "26f6186b-2c9b-49b8-b4a6-619baf4fa1ba"
+  },
+  "checks": {
+    "total": 75,
+    "passed": 75,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "probes": 18,
+  "passed": 18,
+  "copies": 5
+}

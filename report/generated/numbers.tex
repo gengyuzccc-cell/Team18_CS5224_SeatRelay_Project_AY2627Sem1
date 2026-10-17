@@ -11,131 +11,137 @@
 
 % ==============================================================================================
 % Acceptance smoke test (dev)
-%   source: runId c527cac7-5cf1-4e4a-a6e7-6cfa5ce16ad9, target dev, started 2026-10-17T13:19:10.386Z, commit 227de3d12b0f
+%   source: runId 3aabe3fe-c5be-49d8-aa99-46b12dd28242, target dev, started 2026-10-17T18:14:45.190Z, commit e05c037d485d
 % ==============================================================================================
-% results/2026-10-17-smoke/meta.json: ok -- smoke: verdict (PASS/FAIL)
+% results/2026-10-17-smoke-2/meta.json: ok -- smoke: verdict (PASS/FAIL)
 \newcommand{\SmokeVerdict}{PASS}
-% results/2026-10-17-smoke/meta.json: runId (first 8 characters) -- smoke: run id
-\newcommand{\SmokeRunId}{c527cac7}
-% results/2026-10-17-smoke/meta.json: startedAt (UTC date) -- smoke: date of the run
+% results/2026-10-17-smoke-2/meta.json: runId (first 8 characters) -- smoke: run id
+\newcommand{\SmokeRunId}{3aabe3fe}
+% results/2026-10-17-smoke-2/meta.json: startedAt (UTC date) -- smoke: date of the run
 \newcommand{\SmokeDate}{2026-10-17}
-% results/2026-10-17-smoke/meta.json: commit.hash (7 characters) -- smoke: commit of the code under test
-\newcommand{\SmokeCommit}{227de3d}
-% results/2026-10-17-smoke/meta.json: runs -- smoke: repetitions in the invocation
+% results/2026-10-17-smoke-2/meta.json: commit.hash (7 characters) -- smoke: commit of the code under test
+\newcommand{\SmokeCommit}{e05c037}
+% results/2026-10-17-smoke-2 -- smoke: results directory quoted
+\newcommand{\SmokeDir}{2026-10-17-smoke-2}
+% results/2026-10-17-smoke-2/meta.json: runs -- smoke: repetitions in the invocation
 \newcommand{\SmokeRuns}{1}
-% results/2026-10-17-smoke/meta.json: checks.passed -- smoke: checks passed
+% results/2026-10-17-smoke-2/meta.json: checks.passed -- smoke: checks passed
 \newcommand{\SmokeChecksPassed}{13}
-% results/2026-10-17-smoke/meta.json: checks.total -- smoke: checks in total
+% results/2026-10-17-smoke-2/meta.json: checks.total -- smoke: checks in total
 \newcommand{\SmokeChecksTotal}{13}
-% results/2026-10-17-smoke/checks.csv: runs whose check rows are all ok -- smoke: runs with every check passed
+% results/2026-10-17-smoke-2/checks.csv: runs whose check rows are all ok -- smoke: runs with every check passed
 \newcommand{\SmokeRunsPassed}{1}
-% results/2026-10-17-smoke/meta.json: holdSeconds -- holdSeconds of the smoke workshop
+% results/2026-10-17-smoke-2/meta.json: holdSeconds -- holdSeconds of the smoke workshop
 \newcommand{\SmokeHoldSeconds}{60}
-% results/2026-10-17-smoke/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
+% results/2026-10-17-smoke-2/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
 \newcommand{\SmokeSettleClientN}{6}
-% results/2026-10-17-smoke/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
-\newcommand{\SmokeSettleClientPFiftyMs}{848}
-% results/2026-10-17-smoke/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
-\newcommand{\SmokeSettleClientPNinetyFiveMs}{1{,}815}
-% results/2026-10-17-smoke/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
-\newcommand{\SmokeSettleClientMaxMs}{1{,}815}
-% results/2026-10-17-smoke/meta.json: serverSettleMs.p50 -- server settle latency settledAt - acceptedAt (ms) (p50)
-\newcommand{\SmokeSettleServerPFiftyMs}{45}
-% results/2026-10-17-smoke/meta.json: serverSettleMs.p95 -- server settle latency settledAt - acceptedAt (ms) (p95)
-\newcommand{\SmokeSettleServerPNinetyFiveMs}{904}
-% results/2026-10-17-smoke/meta.json: serverSettleMs.max -- server settle latency settledAt - acceptedAt (ms) (max)
-\newcommand{\SmokeSettleServerMaxMs}{904}
-% results/2026-10-17-smoke/meta.json: expiryBackfillLatencyMs (count) -- expiry-driven backfill samples
+% results/2026-10-17-smoke-2/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
+\newcommand{\SmokeSettleClientPFiftyMs}{858}
+% results/2026-10-17-smoke-2/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
+\newcommand{\SmokeSettleClientPNinetyFiveMs}{1{,}765}
+% results/2026-10-17-smoke-2/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
+\newcommand{\SmokeSettleClientMaxMs}{1{,}765}
+% results/2026-10-17-smoke-2/meta.json: serverSettleMs.p50 -- server settle latency settledAt - acceptedAt (ms) (p50)
+\newcommand{\SmokeSettleServerPFiftyMs}{57}
+% results/2026-10-17-smoke-2/meta.json: serverSettleMs.p95 -- server settle latency settledAt - acceptedAt (ms) (p95)
+\newcommand{\SmokeSettleServerPNinetyFiveMs}{767}
+% results/2026-10-17-smoke-2/meta.json: serverSettleMs.max -- server settle latency settledAt - acceptedAt (ms) (max)
+\newcommand{\SmokeSettleServerMaxMs}{767}
+% results/2026-10-17-smoke-2/meta.json: expiryBackfillLatencyMs (count) -- expiry-driven backfill samples
 \newcommand{\SmokeExpiryBackfillN}{1}
-% results/2026-10-17-smoke/meta.json: expiryBackfillLatencyMs (max) -- expiry-driven backfill latency, largest sample (ms)
-\newcommand{\SmokeExpiryBackfillMaxMs}{117}
+% results/2026-10-17-smoke-2/meta.json: expiryBackfillLatencyMs (max) -- expiry-driven backfill latency, largest sample (ms)
+\newcommand{\SmokeExpiryBackfillMaxMs}{108}
 
 % ==============================================================================================
 % Core correctness (dev)
-%   source: runId fe64a545-028a-44dd-8988-073b8bd2dfd0, target dev, started 2026-10-17T13:21:12.236Z, commit 227de3d12b0f (dirty)
+%   source: runId d179d40d-6148-41b2-8a5d-1a4df8ae0ac5, target dev, started 2026-10-17T18:16:07.202Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-correctness/meta.json: ok -- correctness: verdict (PASS/FAIL)
+% results/2026-10-17-correctness-2/meta.json: ok -- correctness: verdict (PASS/FAIL)
 \newcommand{\CorrectnessVerdict}{PASS}
-% results/2026-10-17-correctness/meta.json: runId (first 8 characters) -- correctness: run id
-\newcommand{\CorrectnessRunId}{fe64a545}
-% results/2026-10-17-correctness/meta.json: startedAt (UTC date) -- correctness: date of the run
+% results/2026-10-17-correctness-2/meta.json: runId (first 8 characters) -- correctness: run id
+\newcommand{\CorrectnessRunId}{d179d40d}
+% results/2026-10-17-correctness-2/meta.json: startedAt (UTC date) -- correctness: date of the run
 \newcommand{\CorrectnessDate}{2026-10-17}
-% results/2026-10-17-correctness/meta.json: commit.hash (7 characters) -- correctness: commit of the code under test
-\newcommand{\CorrectnessCommit}{227de3d}
-% results/2026-10-17-correctness/meta.json: runs -- correctness: repetitions in the invocation
+% results/2026-10-17-correctness-2/meta.json: commit.hash (7 characters) -- correctness: commit of the code under test
+\newcommand{\CorrectnessCommit}{e05c037}
+% results/2026-10-17-correctness-2 -- correctness: results directory quoted
+\newcommand{\CorrectnessDir}{2026-10-17-correctness-2}
+% results/2026-10-17-correctness-2/meta.json: runs -- correctness: repetitions in the invocation
 \newcommand{\CorrectnessRuns}{3}
-% results/2026-10-17-correctness/meta.json: checks.passed -- correctness: checks passed
+% results/2026-10-17-correctness-2/meta.json: checks.passed -- correctness: checks passed
 \newcommand{\CorrectnessChecksPassed}{672}
-% results/2026-10-17-correctness/meta.json: checks.total -- correctness: checks in total
+% results/2026-10-17-correctness-2/meta.json: checks.total -- correctness: checks in total
 \newcommand{\CorrectnessChecksTotal}{672}
-% results/2026-10-17-correctness/raw.csv: runs whose check rows are all ok -- correctness: runs with every check passed
+% results/2026-10-17-correctness-2/raw.csv: runs whose check rows are all ok -- correctness: runs with every check passed
 \newcommand{\CorrectnessRunsPassed}{3}
-% results/2026-10-17-correctness/meta.json: scenarios[].name (distinct) -- distinct scenarios
+% results/2026-10-17-correctness-2/meta.json: scenarios[].name (distinct) -- distinct scenarios
 \newcommand{\CorrectnessScenarios}{9}
-% results/2026-10-17-correctness/meta.json: scenarios (entries) -- scenario executions (scenarios x runs)
+% results/2026-10-17-correctness-2/meta.json: scenarios (entries) -- scenario executions (scenarios x runs)
 \newcommand{\CorrectnessScenarioRuns}{27}
-% results/2026-10-17-correctness/meta.json: scenarios[].failed == 0 -- scenario executions without a failed check
+% results/2026-10-17-correctness-2/meta.json: scenarios[].failed == 0 -- scenario executions without a failed check
 \newcommand{\CorrectnessScenarioRunsPassed}{27}
-% results/2026-10-17-correctness/meta.json: overCapacity -- over-capacity observations
+% results/2026-10-17-correctness-2/meta.json: overCapacity -- over-capacity observations
 \newcommand{\CorrectnessOverCapacity}{0}
-% results/2026-10-17-correctness/meta.json: doubleHolds -- double holds
+% results/2026-10-17-correctness-2/meta.json: doubleHolds -- double holds
 \newcommand{\CorrectnessDoubleHolds}{0}
-% results/2026-10-17-correctness/meta.json: verifications -- post-step invariant reads (verify)
+% results/2026-10-17-correctness-2/meta.json: verifications -- post-step invariant reads (verify)
 \newcommand{\CorrectnessVerifications}{234}
-% results/2026-10-17-correctness/meta.json: verifyFailures -- verify failures
+% results/2026-10-17-correctness-2/meta.json: verifyFailures -- verify failures
 \newcommand{\CorrectnessVerifyFailures}{0}
-% results/2026-10-17-correctness/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
+% results/2026-10-17-correctness-2/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
 \newcommand{\CorrectnessSettleClientN}{207}
-% results/2026-10-17-correctness/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
-\newcommand{\CorrectnessSettleClientPFiftyMs}{799}
-% results/2026-10-17-correctness/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
-\newcommand{\CorrectnessSettleClientPNinetyFiveMs}{837}
-% results/2026-10-17-correctness/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
-\newcommand{\CorrectnessSettleClientMaxMs}{1{,}009}
-% results/2026-10-17-correctness/meta.json: serverSettleMs.p50 -- server settle latency (ms) (p50)
-\newcommand{\CorrectnessSettleServerPFiftyMs}{39}
-% results/2026-10-17-correctness/meta.json: serverSettleMs.p95 -- server settle latency (ms) (p95)
-\newcommand{\CorrectnessSettleServerPNinetyFiveMs}{59}
-% results/2026-10-17-correctness/meta.json: serverSettleMs.max -- server settle latency (ms) (max)
-\newcommand{\CorrectnessSettleServerMaxMs}{239}
+% results/2026-10-17-correctness-2/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
+\newcommand{\CorrectnessSettleClientPFiftyMs}{793}
+% results/2026-10-17-correctness-2/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
+\newcommand{\CorrectnessSettleClientPNinetyFiveMs}{852}
+% results/2026-10-17-correctness-2/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
+\newcommand{\CorrectnessSettleClientMaxMs}{1{,}024}
+% results/2026-10-17-correctness-2/meta.json: serverSettleMs.p50 -- server settle latency (ms) (p50)
+\newcommand{\CorrectnessSettleServerPFiftyMs}{38}
+% results/2026-10-17-correctness-2/meta.json: serverSettleMs.p95 -- server settle latency (ms) (p95)
+\newcommand{\CorrectnessSettleServerPNinetyFiveMs}{54}
+% results/2026-10-17-correctness-2/meta.json: serverSettleMs.max -- server settle latency (ms) (max)
+\newcommand{\CorrectnessSettleServerMaxMs}{215}
 
 % ==============================================================================================
 % Preference, order: deployment replay (dev) and core property test
-%   source: runId 5d51b310-256c-4ca0-bf48-c6e3e9840d0f, target dev, started 2026-10-17T13:25:36.174Z, commit ec54916a2dcb (dirty)
+%   source: runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10-17T18:20:35.647Z, commit e05c037d485d (dirty)
 %   source: core-tests: none
 % ==============================================================================================
-% results/2026-10-17-preference-order/meta.json: ok -- preference-order: verdict (PASS/FAIL)
+% results/2026-10-17-preference-order-2/meta.json: ok -- preference-order: verdict (PASS/FAIL)
 \newcommand{\PrefOrderVerdict}{PASS}
-% results/2026-10-17-preference-order/meta.json: runId (first 8 characters) -- preference-order: run id
-\newcommand{\PrefOrderRunId}{5d51b310}
-% results/2026-10-17-preference-order/meta.json: startedAt (UTC date) -- preference-order: date of the run
+% results/2026-10-17-preference-order-2/meta.json: runId (first 8 characters) -- preference-order: run id
+\newcommand{\PrefOrderRunId}{4b65ed89}
+% results/2026-10-17-preference-order-2/meta.json: startedAt (UTC date) -- preference-order: date of the run
 \newcommand{\PrefOrderDate}{2026-10-17}
-% results/2026-10-17-preference-order/meta.json: commit.hash (7 characters) -- preference-order: commit of the code under test
-\newcommand{\PrefOrderCommit}{ec54916}
-% results/2026-10-17-preference-order/meta.json: runs -- preference-order: repetitions in the invocation
+% results/2026-10-17-preference-order-2/meta.json: commit.hash (7 characters) -- preference-order: commit of the code under test
+\newcommand{\PrefOrderCommit}{e05c037}
+% results/2026-10-17-preference-order-2 -- preference-order: results directory quoted
+\newcommand{\PrefOrderDir}{2026-10-17-preference-order-2}
+% results/2026-10-17-preference-order-2/meta.json: runs -- preference-order: repetitions in the invocation
 \newcommand{\PrefOrderRuns}{3}
-% results/2026-10-17-preference-order/meta.json: checks.passed -- preference-order: checks passed
+% results/2026-10-17-preference-order-2/meta.json: checks.passed -- preference-order: checks passed
 \newcommand{\PrefOrderChecksPassed}{204}
-% results/2026-10-17-preference-order/meta.json: checks.total -- preference-order: checks in total
+% results/2026-10-17-preference-order-2/meta.json: checks.total -- preference-order: checks in total
 \newcommand{\PrefOrderChecksTotal}{204}
-% results/2026-10-17-preference-order/checks.csv: runs whose check rows are all ok -- preference-order: runs with every check passed
+% results/2026-10-17-preference-order-2/checks.csv: runs whose check rows are all ok -- preference-order: runs with every check passed
 \newcommand{\PrefOrderRunsPassed}{3}
-% results/2026-10-17-preference-order/meta.json: cases -- case executions (20 cases x runs)
+% results/2026-10-17-preference-order-2/meta.json: cases -- case executions (20 cases x runs)
 \newcommand{\PrefOrderCases}{60}
-% results/2026-10-17-preference-order/meta.json: passed -- case executions as predicted by the oracle
+% results/2026-10-17-preference-order-2/meta.json: passed -- case executions as predicted by the oracle
 \newcommand{\PrefOrderCasesPassed}{60}
-% results/2026-10-17-preference-order/meta.json: offeredNonAcceptable -- offers of a non-acceptable session
+% results/2026-10-17-preference-order-2/meta.json: offeredNonAcceptable -- offers of a non-acceptable session
 \newcommand{\PrefOrderNonAcceptable}{0}
-% results/2026-10-17-preference-order/raw.csv: case (distinct) -- distinct fixed cases
+% results/2026-10-17-preference-order-2/raw.csv: case (distinct) -- distinct fixed cases
 \newcommand{\PrefOrderDistinctCases}{20}
-% results/2026-10-17-preference-order/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
+% results/2026-10-17-preference-order-2/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
 \newcommand{\PrefOrderSettleClientN}{84}
-% results/2026-10-17-preference-order/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
-\newcommand{\PrefOrderSettleClientPFiftyMs}{795}
-% results/2026-10-17-preference-order/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
-\newcommand{\PrefOrderSettleClientPNinetyFiveMs}{849}
-% results/2026-10-17-preference-order/latency.csv: serverSettleMs (nearest-rank p95) -- server settle latency p95 (ms)
-\newcommand{\PrefOrderSettleServerPNinetyFiveMs}{85}
+% results/2026-10-17-preference-order-2/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
+\newcommand{\PrefOrderSettleClientPFiftyMs}{782}
+% results/2026-10-17-preference-order-2/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
+\newcommand{\PrefOrderSettleClientPNinetyFiveMs}{812}
+% results/2026-10-17-preference-order-2/latency.csv: serverSettleMs (nearest-rank p95) -- server settle latency p95 (ms)
+\newcommand{\PrefOrderSettleServerPNinetyFiveMs}{61}
 % results/<date>-core-tests/run.log: 'Tests N passed' -- core unit + property tests passed
 \newcommand{\CoreTestsPassed}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
 % results/<date>-core-tests/run.log: 'Tests ... (total)' -- core tests in total
@@ -153,344 +159,397 @@
 
 % ==============================================================================================
 % Concurrency (dev)
-%   source: runId a6983ff8-cf1d-44c5-9b89-94751e701ca4, target dev, started 2026-10-17T13:26:18.893Z, commit ec54916a2dcb (dirty)
+%   source: runId 08262972-5e6e-4436-af51-36893adf38c3, target dev, started 2026-10-17T18:21:17.132Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-concurrency/meta.json: ok -- concurrency: verdict (PASS/FAIL)
-\newcommand{\ConcurrencyVerdict}{FAIL}
-% results/2026-10-17-concurrency/meta.json: runId (first 8 characters) -- concurrency: run id
-\newcommand{\ConcurrencyRunId}{a6983ff8}
-% results/2026-10-17-concurrency/meta.json: startedAt (UTC date) -- concurrency: date of the run
+% results/2026-10-17-concurrency-2/meta.json: ok -- concurrency: verdict (PASS/FAIL)
+\newcommand{\ConcurrencyVerdict}{PASS}
+% results/2026-10-17-concurrency-2/meta.json: runId (first 8 characters) -- concurrency: run id
+\newcommand{\ConcurrencyRunId}{08262972}
+% results/2026-10-17-concurrency-2/meta.json: startedAt (UTC date) -- concurrency: date of the run
 \newcommand{\ConcurrencyDate}{2026-10-17}
-% results/2026-10-17-concurrency/meta.json: commit.hash (7 characters) -- concurrency: commit of the code under test
-\newcommand{\ConcurrencyCommit}{ec54916}
-% results/2026-10-17-concurrency/meta.json: runs -- concurrency: repetitions in the invocation
+% results/2026-10-17-concurrency-2/meta.json: commit.hash (7 characters) -- concurrency: commit of the code under test
+\newcommand{\ConcurrencyCommit}{e05c037}
+% results/2026-10-17-concurrency-2 -- concurrency: results directory quoted
+\newcommand{\ConcurrencyDir}{2026-10-17-concurrency-2}
+% results/2026-10-17-concurrency-2/meta.json: runs -- concurrency: repetitions in the invocation
 \newcommand{\ConcurrencyRuns}{3}
-% results/2026-10-17-concurrency/meta.json: checks.passed -- concurrency: checks passed
-\newcommand{\ConcurrencyChecksPassed}{22}
-% results/2026-10-17-concurrency/meta.json: checks.total -- concurrency: checks in total
+% results/2026-10-17-concurrency-2/meta.json: checks.passed -- concurrency: checks passed
+\newcommand{\ConcurrencyChecksPassed}{39}
+% results/2026-10-17-concurrency-2/meta.json: checks.total -- concurrency: checks in total
 \newcommand{\ConcurrencyChecksTotal}{39}
-% results/2026-10-17-concurrency/checks.csv: runs whose check rows are all ok -- concurrency: runs with every check passed
-\newcommand{\ConcurrencyRunsPassed}{0}
-% results/2026-10-17-concurrency/meta.json: params.accounts -- concurrent accounts
+% results/2026-10-17-concurrency-2/checks.csv: runs whose check rows are all ok -- concurrency: runs with every check passed
+\newcommand{\ConcurrencyRunsPassed}{3}
+% results/2026-10-17-concurrency-2/meta.json: params.accounts -- concurrent accounts
 \newcommand{\ConcurrencyAccounts}{50}
-% results/2026-10-17-concurrency/meta.json: params.sessions -- sessions
+% results/2026-10-17-concurrency-2/meta.json: params.sessions -- sessions
 \newcommand{\ConcurrencySessions}{3}
-% results/2026-10-17-concurrency/meta.json: params.capacityTotal -- seats in total
+% results/2026-10-17-concurrency-2/meta.json: params.capacityTotal -- seats in total
 \newcommand{\ConcurrencySeats}{5}
-% results/2026-10-17-concurrency/meta.json: metaConflictRetries -- META version-conflict retries in the run window
+% results/2026-10-17-concurrency-2/meta.json: metaConflictRetries -- META version-conflict retries in the run window
 \newcommand{\ConcurrencyMetaRetries}{0}
-% results/2026-10-17-concurrency/raw.csv: rows -- commands issued
-\newcommand{\ConcurrencyCommands}{209}
-% results/2026-10-17-concurrency/raw.csv: error (non-empty) -- commands with a transport error
-\newcommand{\ConcurrencyTransportErrors}{76}
-% results/2026-10-17-concurrency/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
-\newcommand{\ConcurrencySettleClientN}{133}
-% results/2026-10-17-concurrency/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
-\newcommand{\ConcurrencySettleClientPFiftyMs}{1{,}002}
-% results/2026-10-17-concurrency/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
-\newcommand{\ConcurrencySettleClientPNinetyFiveMs}{7{,}788}
-% results/2026-10-17-concurrency/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
-\newcommand{\ConcurrencySettleClientMaxMs}{7{,}839}
-% results/2026-10-17-concurrency/meta.json: serverSettleMs.p50 -- server settle latency (ms) (p50)
-\newcommand{\ConcurrencySettleServerPFiftyMs}{447}
-% results/2026-10-17-concurrency/meta.json: serverSettleMs.p95 -- server settle latency (ms) (p95)
-\newcommand{\ConcurrencySettleServerPNinetyFiveMs}{6{,}349}
-% results/2026-10-17-concurrency/meta.json: serverSettleMs.max -- server settle latency (ms) (max)
-\newcommand{\ConcurrencySettleServerMaxMs}{6{,}593}
-% results/2026-10-17-concurrency/checks.csv: same-account race checks (rows) -- same-account ACCEPT/DECLINE/CANCEL races
+% results/2026-10-17-concurrency-2/raw.csv: rows -- commands issued
+\newcommand{\ConcurrencyCommands}{210}
+% results/2026-10-17-concurrency-2/raw.csv: error (non-empty) -- commands with a transport error
+\newcommand{\ConcurrencyTransportErrors}{0}
+% results/2026-10-17-concurrency-2/meta.json: settleMs.count -- client-observed settle latency (ms) (count)
+\newcommand{\ConcurrencySettleClientN}{210}
+% results/2026-10-17-concurrency-2/meta.json: settleMs.p50 -- client-observed settle latency (ms) (p50)
+\newcommand{\ConcurrencySettleClientPFiftyMs}{1{,}599}
+% results/2026-10-17-concurrency-2/meta.json: settleMs.p95 -- client-observed settle latency (ms) (p95)
+\newcommand{\ConcurrencySettleClientPNinetyFiveMs}{3{,}384}
+% results/2026-10-17-concurrency-2/meta.json: settleMs.max -- client-observed settle latency (ms) (max)
+\newcommand{\ConcurrencySettleClientMaxMs}{3{,}725}
+% results/2026-10-17-concurrency-2/meta.json: serverSettleMs.p50 -- server settle latency (ms) (p50)
+\newcommand{\ConcurrencySettleServerPFiftyMs}{656}
+% results/2026-10-17-concurrency-2/meta.json: serverSettleMs.p95 -- server settle latency (ms) (p95)
+\newcommand{\ConcurrencySettleServerPNinetyFiveMs}{1{,}525}
+% results/2026-10-17-concurrency-2/meta.json: serverSettleMs.max -- server settle latency (ms) (max)
+\newcommand{\ConcurrencySettleServerMaxMs}{1{,}732}
+% results/2026-10-17-concurrency-2/checks.csv: same-account race checks (rows) -- same-account ACCEPT/DECLINE/CANCEL races
 \newcommand{\ConcurrencySameAccountRaces}{15}
-% results/2026-10-17-concurrency/checks.csv: same-account race checks with ok = true -- same-account races with exactly one effective command
-\newcommand{\ConcurrencySameAccountConsistent}{5}
-% results/2026-10-17-concurrency/checks.csv: same-account race checks with ok = false -- same-account races that failed the check
-\newcommand{\ConcurrencySameAccountFailed}{10}
-% results/2026-10-17-concurrency/checks.csv: failed same-account races whose actual value contains 'HTTP 503' -- failed same-account races in which one of the commands got HTTP 503
-\newcommand{\ConcurrencySameAccountFailedWithServiceUnavailable}{10}
-% results/2026-10-17-concurrency/meta.json: raceFirst.ACCEPT -- same-account races won by ACCEPT
-\newcommand{\ConcurrencyRaceFirstAccept}{3}
-% results/2026-10-17-concurrency/meta.json: raceFirst.DECLINE -- same-account races won by DECLINE
-\newcommand{\ConcurrencyRaceFirstDecline}{5}
-% results/2026-10-17-concurrency/meta.json: raceFirst.CANCEL -- same-account races won by CANCEL
-\newcommand{\ConcurrencyRaceFirstCancel}{7}
+% results/2026-10-17-concurrency-2/checks.csv: same-account race checks with ok = true -- same-account races with exactly one effective command
+\newcommand{\ConcurrencySameAccountConsistent}{15}
+% results/2026-10-17-concurrency-2/checks.csv: same-account race checks with ok = false -- same-account races that failed the check
+\newcommand{\ConcurrencySameAccountFailed}{0}
+% results/2026-10-17-concurrency-2/checks.csv: failed same-account races whose actual value contains 'HTTP 503' -- failed same-account races in which one of the commands got HTTP 503
+\newcommand{\ConcurrencySameAccountFailedWithServiceUnavailable}{0}
+% results/2026-10-17-concurrency-2/meta.json: raceFirst.ACCEPT -- same-account races won by ACCEPT
+\newcommand{\ConcurrencyRaceFirstAccept}{7}
+% results/2026-10-17-concurrency-2/meta.json: raceFirst.DECLINE -- same-account races won by DECLINE
+\newcommand{\ConcurrencyRaceFirstDecline}{6}
+% results/2026-10-17-concurrency-2/meta.json: raceFirst.CANCEL -- same-account races won by CANCEL
+\newcommand{\ConcurrencyRaceFirstCancel}{2}
 
 % ==============================================================================================
 % Repeat execution (dev)
-%   source: runId 3a636ec3-6a43-46f2-88ce-dd04a3288809, target dev, started 2026-10-17T13:28:23.895Z, commit c1d066056b2c (dirty)
+%   source: runId 668e39b5-6b98-45b3-89d9-d8872e900f13, target dev, started 2026-10-17T18:23:18.537Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-repeat-execution/meta.json: ok -- repeat-execution: verdict (PASS/FAIL)
+% results/2026-10-17-repeat-execution-2/meta.json: ok -- repeat-execution: verdict (PASS/FAIL)
 \newcommand{\RepeatVerdict}{PASS}
-% results/2026-10-17-repeat-execution/meta.json: runId (first 8 characters) -- repeat-execution: run id
-\newcommand{\RepeatRunId}{3a636ec3}
-% results/2026-10-17-repeat-execution/meta.json: startedAt (UTC date) -- repeat-execution: date of the run
+% results/2026-10-17-repeat-execution-2/meta.json: runId (first 8 characters) -- repeat-execution: run id
+\newcommand{\RepeatRunId}{668e39b5}
+% results/2026-10-17-repeat-execution-2/meta.json: startedAt (UTC date) -- repeat-execution: date of the run
 \newcommand{\RepeatDate}{2026-10-17}
-% results/2026-10-17-repeat-execution/meta.json: commit.hash (7 characters) -- repeat-execution: commit of the code under test
-\newcommand{\RepeatCommit}{c1d0660}
-% results/2026-10-17-repeat-execution/meta.json: runs -- repeat-execution: repetitions in the invocation
+% results/2026-10-17-repeat-execution-2/meta.json: commit.hash (7 characters) -- repeat-execution: commit of the code under test
+\newcommand{\RepeatCommit}{e05c037}
+% results/2026-10-17-repeat-execution-2 -- repeat-execution: results directory quoted
+\newcommand{\RepeatDir}{2026-10-17-repeat-execution-2}
+% results/2026-10-17-repeat-execution-2/meta.json: runs -- repeat-execution: repetitions in the invocation
 \newcommand{\RepeatRuns}{3}
-% results/2026-10-17-repeat-execution/meta.json: checks.passed -- repeat-execution: checks passed
+% results/2026-10-17-repeat-execution-2/meta.json: checks.passed -- repeat-execution: checks passed
 \newcommand{\RepeatChecksPassed}{75}
-% results/2026-10-17-repeat-execution/meta.json: checks.total -- repeat-execution: checks in total
+% results/2026-10-17-repeat-execution-2/meta.json: checks.total -- repeat-execution: checks in total
 \newcommand{\RepeatChecksTotal}{75}
-% results/2026-10-17-repeat-execution/checks.csv: runs whose check rows are all ok -- repeat-execution: runs with every check passed
+% results/2026-10-17-repeat-execution-2/checks.csv: runs whose check rows are all ok -- repeat-execution: runs with every check passed
 \newcommand{\RepeatRunsPassed}{3}
-% results/2026-10-17-repeat-execution/meta.json: probes -- probes
+% results/2026-10-17-repeat-execution-2/meta.json: probes -- probes
 \newcommand{\RepeatProbes}{18}
-% results/2026-10-17-repeat-execution/meta.json: passed -- probes passed
+% results/2026-10-17-repeat-execution-2/meta.json: passed -- probes passed
 \newcommand{\RepeatProbesPassed}{18}
-% results/2026-10-17-repeat-execution/meta.json: copies -- concurrent copies per commandId
+% results/2026-10-17-repeat-execution-2/meta.json: copies -- concurrent copies per commandId
 \newcommand{\RepeatCopies}{5}
-% results/2026-10-17-repeat-execution/raw.csv: case contains AFTER_COMMIT -- AFTER_COMMIT crash cases
+% results/2026-10-17-repeat-execution-2/raw.csv: case contains AFTER_COMMIT -- AFTER_COMMIT crash cases
 \newcommand{\RepeatAfterCommitCases}{6}
-% results/2026-10-17-repeat-execution/raw.csv: AFTER_COMMIT rows with ok = true -- AFTER_COMMIT cases applied once after redelivery
+% results/2026-10-17-repeat-execution-2/raw.csv: AFTER_COMMIT rows with ok = true -- AFTER_COMMIT cases applied once after redelivery
 \newcommand{\RepeatAfterCommitPassed}{6}
-% results/2026-10-17-repeat-execution/raw.csv: case without AFTER_COMMIT (rows) -- duplicate-submission probes
+% results/2026-10-17-repeat-execution-2/raw.csv: case without AFTER_COMMIT (rows) -- duplicate-submission probes
 \newcommand{\RepeatDupProbes}{12}
-% results/2026-10-17-repeat-execution/raw.csv: case without AFTER_COMMIT, ok = true -- duplicate-submission probes applied once
+% results/2026-10-17-repeat-execution-2/raw.csv: case without AFTER_COMMIT, ok = true -- duplicate-submission probes applied once
 \newcommand{\RepeatDupProbesPassed}{12}
-% results/2026-10-17-repeat-execution/raw.csv: copies of the duplicate-submission probes (single value) -- concurrent copies per duplicate-submission probe
+% results/2026-10-17-repeat-execution-2/raw.csv: copies of the duplicate-submission probes (single value) -- concurrent copies per duplicate-submission probe
 \newcommand{\RepeatDupCopies}{5}
-% results/2026-10-17-repeat-execution/raw.csv: copies of the AFTER_COMMIT probes (single value) -- POSTs per AFTER_COMMIT probe
+% results/2026-10-17-repeat-execution-2/raw.csv: copies of the AFTER_COMMIT probes (single value) -- POSTs per AFTER_COMMIT probe
 \newcommand{\RepeatAfterCommitCopies}{1}
 
 % ==============================================================================================
 % Expiry race (dev)
-%   source: runId e1be2b0b-85f6-41d5-b50a-4410abb7cb07, target dev, started 2026-10-17T15:46:25.018Z, commit 00faa52984fa
+%   source: runId 597e46dd-58fe-44d9-be35-af4bac764e98, target dev, started 2026-10-17T18:38:13.141Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-expiry-race-4/meta.json: ok -- expiry-race: verdict (PASS/FAIL)
+% results/2026-10-17-expiry-race-5/meta.json: ok -- expiry-race: verdict (PASS/FAIL)
 \newcommand{\ExpiryRaceVerdict}{PASS}
-% results/2026-10-17-expiry-race-4/meta.json: runId (first 8 characters) -- expiry-race: run id
-\newcommand{\ExpiryRaceRunId}{e1be2b0b}
-% results/2026-10-17-expiry-race-4/meta.json: startedAt (UTC date) -- expiry-race: date of the run
+% results/2026-10-17-expiry-race-5/meta.json: runId (first 8 characters) -- expiry-race: run id
+\newcommand{\ExpiryRaceRunId}{597e46dd}
+% results/2026-10-17-expiry-race-5/meta.json: startedAt (UTC date) -- expiry-race: date of the run
 \newcommand{\ExpiryRaceDate}{2026-10-17}
-% results/2026-10-17-expiry-race-4/meta.json: commit.hash (7 characters) -- expiry-race: commit of the code under test
-\newcommand{\ExpiryRaceCommit}{00faa52}
-% results/2026-10-17-expiry-race-4/meta.json: runs -- expiry-race: repetitions in the invocation
+% results/2026-10-17-expiry-race-5/meta.json: commit.hash (7 characters) -- expiry-race: commit of the code under test
+\newcommand{\ExpiryRaceCommit}{e05c037}
+% results/2026-10-17-expiry-race-5 -- expiry-race: results directory quoted
+\newcommand{\ExpiryRaceDir}{2026-10-17-expiry-race-5}
+% results/2026-10-17-expiry-race-5/meta.json: runs -- expiry-race: repetitions in the invocation
 \newcommand{\ExpiryRaceRuns}{3}
-% results/2026-10-17-expiry-race-4/meta.json: checks.passed -- expiry-race: checks passed
+% results/2026-10-17-expiry-race-5/meta.json: checks.passed -- expiry-race: checks passed
 \newcommand{\ExpiryRaceChecksPassed}{27}
-% results/2026-10-17-expiry-race-4/meta.json: checks.total -- expiry-race: checks in total
+% results/2026-10-17-expiry-race-5/meta.json: checks.total -- expiry-race: checks in total
 \newcommand{\ExpiryRaceChecksTotal}{27}
-% results/2026-10-17-expiry-race-4/checks.csv: runs whose check rows are all ok -- expiry-race: runs with every check passed
+% results/2026-10-17-expiry-race-5/checks.csv: runs whose check rows are all ok -- expiry-race: runs with every check passed
 \newcommand{\ExpiryRaceRunsPassed}{3}
-% results/2026-10-17-expiry-race-4/meta.json: params.marginMs -- ACCEPT offset from expiresAt (ms)
+% results/2026-10-17-expiry-race-5/meta.json: params.marginMs -- ACCEPT offset from expiresAt (ms)
 \newcommand{\ExpiryRaceMarginMs}{200}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = early (rows) -- early ACCEPT attempts
+% results/2026-10-17-expiry-race-5/raw.csv: variant = early (rows) -- early ACCEPT attempts
 \newcommand{\ExpiryRaceEarlyAttempts}{3}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = PASS -- early ACCEPTs applied
+% results/2026-10-17-expiry-race-5/raw.csv: variant = early, verdict = PASS -- early ACCEPTs applied
 \newcommand{\ExpiryRaceEarlyApplied}{3}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = INCONCLUSIVE -- early ACCEPTs delayed past expiresAt by the queue (repeated)
+% results/2026-10-17-expiry-race-5/raw.csv: variant = early, verdict = INCONCLUSIVE -- early ACCEPTs delayed past expiresAt by the queue (repeated)
 \newcommand{\ExpiryRaceEarlyInconclusive}{0}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) -- early ACCEPTs that reached the API after expiresAt (client send timing)
+% results/2026-10-17-expiry-race-5/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) -- early ACCEPTs that reached the API after expiresAt (client send timing)
 \newcommand{\ExpiryRaceEarlyArrivedLate}{0}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = late (rows) -- late ACCEPT trials
+% results/2026-10-17-expiry-race-5/raw.csv: variant = late (rows) -- late ACCEPT trials
 \newcommand{\ExpiryRaceLateTrials}{3}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED -- late ACCEPTs rejected OFFER_EXPIRED
+% results/2026-10-17-expiry-race-5/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED -- late ACCEPTs rejected OFFER_EXPIRED
 \newcommand{\ExpiryRaceLateRejected}{3}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' -- late trials where the timer tick processed before the ACCEPT arrived
+% results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' -- late trials where the timer tick processed before the ACCEPT arrived
 \newcommand{\ExpiryRaceOrderTimerFirst}{3}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' -- late trials where the timer tick processed while the ACCEPT was queued
+% results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' -- late trials where the timer tick processed while the ACCEPT was queued
 \newcommand{\ExpiryRaceOrderTimerWhileQueued}{0}
-% results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' -- late trials where the the ACCEPT's own tick-first pass relayed the seat
+% results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' -- late trials where the the ACCEPT's own tick-first pass relayed the seat
 \newcommand{\ExpiryRaceOrderAcceptTickFirst}{0}
-% results/2026-10-17-expiry-race-4/meta.json: lateTicks -- stale TICKs injected
+% results/2026-10-17-expiry-race-5/meta.json: lateTicks -- stale TICKs injected
 \newcommand{\ExpiryRaceLateTicks}{3}
-% results/2026-10-17-expiry-race-4/late-tick.csv: ok = true -- stale TICKs without any effect
+% results/2026-10-17-expiry-race-5/late-tick.csv: ok = true -- stale TICKs without any effect
 \newcommand{\ExpiryRaceLateTicksNoEffect}{3}
 
 % ==============================================================================================
 % Failure recovery (dev)
-%   source: runId 3a7ac99e-663f-4bb0-99d7-bec8de3a7b84, target dev, started 2026-10-17T13:44:40.315Z, commit c1d066056b2c (dirty)
+%   source: runId da47da60-1692-40f3-83eb-40dfcc2cd673, target dev, started 2026-10-17T18:39:47.442Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-failure-recovery/meta.json: ok -- failure-recovery: verdict (PASS/FAIL)
+% results/2026-10-17-failure-recovery-2/meta.json: ok -- failure-recovery: verdict (PASS/FAIL)
 \newcommand{\FailureVerdict}{PASS}
-% results/2026-10-17-failure-recovery/meta.json: runId (first 8 characters) -- failure-recovery: run id
-\newcommand{\FailureRunId}{3a7ac99e}
-% results/2026-10-17-failure-recovery/meta.json: startedAt (UTC date) -- failure-recovery: date of the run
+% results/2026-10-17-failure-recovery-2/meta.json: runId (first 8 characters) -- failure-recovery: run id
+\newcommand{\FailureRunId}{da47da60}
+% results/2026-10-17-failure-recovery-2/meta.json: startedAt (UTC date) -- failure-recovery: date of the run
 \newcommand{\FailureDate}{2026-10-17}
-% results/2026-10-17-failure-recovery/meta.json: commit.hash (7 characters) -- failure-recovery: commit of the code under test
-\newcommand{\FailureCommit}{c1d0660}
-% results/2026-10-17-failure-recovery/meta.json: runs -- failure-recovery: repetitions in the invocation
+% results/2026-10-17-failure-recovery-2/meta.json: commit.hash (7 characters) -- failure-recovery: commit of the code under test
+\newcommand{\FailureCommit}{e05c037}
+% results/2026-10-17-failure-recovery-2 -- failure-recovery: results directory quoted
+\newcommand{\FailureDir}{2026-10-17-failure-recovery-2}
+% results/2026-10-17-failure-recovery-2/meta.json: runs -- failure-recovery: repetitions in the invocation
 \newcommand{\FailureRuns}{3}
-% results/2026-10-17-failure-recovery/meta.json: checks.passed -- failure-recovery: checks passed
+% results/2026-10-17-failure-recovery-2/meta.json: checks.passed -- failure-recovery: checks passed
 \newcommand{\FailureChecksPassed}{52}
-% results/2026-10-17-failure-recovery/meta.json: checks.total -- failure-recovery: checks in total
+% results/2026-10-17-failure-recovery-2/meta.json: checks.total -- failure-recovery: checks in total
 \newcommand{\FailureChecksTotal}{52}
-% results/2026-10-17-failure-recovery/checks.csv: runs whose check rows are all ok -- failure-recovery: runs with every check passed
+% results/2026-10-17-failure-recovery-2/checks.csv: runs whose check rows are all ok -- failure-recovery: runs with every check passed
 \newcommand{\FailureRunsPassed}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT (rows) -- BEFORE_COMMIT cases
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT (rows) -- BEFORE_COMMIT cases
 \newcommand{\FailureBeforeCommitCases}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, ok = true -- BEFORE_COMMIT cases recovered exactly once
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, ok = true -- BEFORE_COMMIT cases recovered exactly once
 \newcommand{\FailureBeforeCommitPassed}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, serverSettleMs (median) -- BEFORE_COMMIT: median server settle incl. redelivery (s)
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, serverSettleMs (median) -- BEFORE_COMMIT: median server settle incl. redelivery (s)
 \newcommand{\FailureBeforeCommitSettleMedianS}{120.1}
-% results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, deliveries (min) -- BEFORE_COMMIT: fewest deliveries observed
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, deliveries (min) -- BEFORE_COMMIT: fewest deliveries observed
 \newcommand{\FailureBeforeCommitDeliveriesMin}{2}
-% results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT (rows) -- AFTER_COMMIT cases
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT (rows) -- AFTER_COMMIT cases
 \newcommand{\FailureAfterCommitCases}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, ok = true -- AFTER_COMMIT cases recovered exactly once
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, ok = true -- AFTER_COMMIT cases recovered exactly once
 \newcommand{\FailureAfterCommitPassed}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, serverSettleMs (median) -- AFTER_COMMIT: median server settle incl. redelivery (s)
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, serverSettleMs (median) -- AFTER_COMMIT: median server settle incl. redelivery (s)
 \newcommand{\FailureAfterCommitSettleMedianS}{0.1}
-% results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, deliveries (min) -- AFTER_COMMIT: fewest deliveries observed
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, deliveries (min) -- AFTER_COMMIT: fewest deliveries observed
 \newcommand{\FailureAfterCommitDeliveriesMin}{2}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND (rows) -- TIMER_SEND cases
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND (rows) -- TIMER_SEND cases
 \newcommand{\FailureTimerSendCases}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, ok = true -- TIMER_SEND cases recovered exactly once
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, ok = true -- TIMER_SEND cases recovered exactly once
 \newcommand{\FailureTimerSendPassed}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, serverSettleMs (median) -- TIMER_SEND: median server settle incl. redelivery (s)
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, serverSettleMs (median) -- TIMER_SEND: median server settle incl. redelivery (s)
 \newcommand{\FailureTimerSendSettleMedianS}{120.1}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, deliveries (min) -- TIMER_SEND: fewest deliveries observed
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, deliveries (min) -- TIMER_SEND: fewest deliveries observed
 \newcommand{\FailureTimerSendDeliveriesMin}{2}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage, recoverySeconds (max) -- notifier backlog drained after the restore (s, worst run)
-\newcommand{\FailureNotifierOutageMaxS}{52}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage (rows) -- notifier outage runs
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, recoverySeconds (max) -- notifier backlog drained after the restore (s, worst run)
+\newcommand{\FailureNotifierOutageMaxS}{54}
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage (rows) -- notifier outage runs
 \newcommand{\FailureNotifierOutageRuns}{3}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage, notifications -- notifications per outage run
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, notifications -- notifications per outage run
 \newcommand{\FailureNotifierOutageNotifications}{10}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage, sent (sum over runs) -- notifications sent in the outage runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, sent (sum over runs) -- notifications sent in the outage runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierOutageSent}{0}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage, skipped (sum over runs) -- notifications skipped in the outage runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, skipped (sum over runs) -- notifications skipped in the outage runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierOutageSkipped}{30}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = outage, failed (sum over runs) -- notifications failed in the outage runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, failed (sum over runs) -- notifications failed in the outage runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierOutageFailed}{0}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, recoverySeconds (max) -- notifier backlog drained after settlement, no outage (s, worst run)
-\newcommand{\FailureNotifierBaselineMaxS}{3}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline (rows) -- notifier baseline runs
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, recoverySeconds (max) -- notifier backlog drained after settlement, no outage (s, worst run)
+\newcommand{\FailureNotifierBaselineMaxS}{4}
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline (rows) -- notifier baseline runs
 \newcommand{\FailureNotifierBaselineRuns}{3}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, notifications -- notifications per baseline run
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, notifications -- notifications per baseline run
 \newcommand{\FailureNotifierBaselineNotifications}{10}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, sent (sum over runs) -- notifications sent in the baseline runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, sent (sum over runs) -- notifications sent in the baseline runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierBaselineSent}{0}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, skipped (sum over runs) -- notifications skipped in the baseline runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, skipped (sum over runs) -- notifications skipped in the baseline runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierBaselineSkipped}{30}
-% results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, failed (sum over runs) -- notifications failed in the baseline runs (SKIPPED: e-mail disabled on the stage)
+% results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, failed (sum over runs) -- notifications failed in the baseline runs (SKIPPED: e-mail disabled on the stage)
 \newcommand{\FailureNotifierBaselineFailed}{0}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, effect 'EXPIRED backfill relayed ... after <n> ms' (count) -- expiry relays through the timer path observed in the TIMER_SEND cases
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, effect 'EXPIRED backfill relayed ... after <n> ms' (count) -- expiry relays through the timer path observed in the TIMER_SEND cases
 \newcommand{\FailureTimerRelayN}{3}
-% results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, effect 'relayed ... after <n> ms' (max) -- largest of those relay latencies (ms)
-\newcommand{\FailureTimerRelayMaxMs}{982}
-% results/2026-10-17-failure-recovery/checks.csv: step 'dead letters', actual (max over runs) -- messages in the DLQs after the run
+% results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, effect 'relayed ... after <n> ms' (max) -- largest of those relay latencies (ms)
+\newcommand{\FailureTimerRelayMaxMs}{144}
+% results/2026-10-17-failure-recovery-2/checks.csv: step 'dead letters', actual (max over runs) -- messages in the DLQs after the run
 \newcommand{\FailureDeadLetters}{0}
 
 % ==============================================================================================
 % Access control (dev)
-%   source: runId 361341fa-d332-43a1-97db-57dc9c1a2166, target dev, started 2026-10-17T14:15:28.545Z, commit c1d066056b2c (dirty)
+%   source: runId 6dacbc7a-bf40-49f4-b172-bd19168138f3, target dev, started 2026-10-17T19:10:49.064Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-access-control/meta.json: ok -- access-control: verdict (PASS/FAIL)
+% results/2026-10-17-access-control-2/meta.json: ok -- access-control: verdict (PASS/FAIL)
 \newcommand{\AccessVerdict}{PASS}
-% results/2026-10-17-access-control/meta.json: runId (first 8 characters) -- access-control: run id
-\newcommand{\AccessRunId}{361341fa}
-% results/2026-10-17-access-control/meta.json: startedAt (UTC date) -- access-control: date of the run
+% results/2026-10-17-access-control-2/meta.json: runId (first 8 characters) -- access-control: run id
+\newcommand{\AccessRunId}{6dacbc7a}
+% results/2026-10-17-access-control-2/meta.json: startedAt (UTC date) -- access-control: date of the run
 \newcommand{\AccessDate}{2026-10-17}
-% results/2026-10-17-access-control/meta.json: commit.hash (7 characters) -- access-control: commit of the code under test
-\newcommand{\AccessCommit}{c1d0660}
-% results/2026-10-17-access-control/meta.json: runs -- access-control: repetitions in the invocation
+% results/2026-10-17-access-control-2/meta.json: commit.hash (7 characters) -- access-control: commit of the code under test
+\newcommand{\AccessCommit}{e05c037}
+% results/2026-10-17-access-control-2 -- access-control: results directory quoted
+\newcommand{\AccessDir}{2026-10-17-access-control-2}
+% results/2026-10-17-access-control-2/meta.json: runs -- access-control: repetitions in the invocation
 \newcommand{\AccessRuns}{3}
-% results/2026-10-17-access-control/meta.json: checks.passed -- access-control: checks passed
+% results/2026-10-17-access-control-2/meta.json: checks.passed -- access-control: checks passed
 \newcommand{\AccessChecksPassed}{177}
-% results/2026-10-17-access-control/meta.json: checks.total -- access-control: checks in total
+% results/2026-10-17-access-control-2/meta.json: checks.total -- access-control: checks in total
 \newcommand{\AccessChecksTotal}{177}
-% results/2026-10-17-access-control/checks.csv: runs whose check rows are all ok -- access-control: runs with every check passed
+% results/2026-10-17-access-control-2/checks.csv: runs whose check rows are all ok -- access-control: runs with every check passed
 \newcommand{\AccessRunsPassed}{3}
-% results/2026-10-17-access-control/meta.json: probes -- negative probes
+% results/2026-10-17-access-control-2/meta.json: probes -- negative probes
 \newcommand{\AccessProbes}{165}
-% results/2026-10-17-access-control/meta.json: passed -- probes answered as expected
+% results/2026-10-17-access-control-2/meta.json: passed -- probes answered as expected
 \newcommand{\AccessProbesPassed}{165}
-% results/2026-10-17-access-control/raw.csv: group (distinct) -- probe groups
+% results/2026-10-17-access-control-2/raw.csv: group (distinct) -- probe groups
 \newcommand{\AccessProbeGroups}{7}
-% results/2026-10-17-access-control/raw.csv: expected starts with 401 -- probes expecting HTTP 401
+% results/2026-10-17-access-control-2/raw.csv: expected starts with 401 -- probes expecting HTTP 401
 \newcommand{\AccessExpectedFourHundredOne}{48}
-% results/2026-10-17-access-control/raw.csv: expected starts with 403 -- probes expecting HTTP 403
+% results/2026-10-17-access-control-2/raw.csv: expected starts with 403 -- probes expecting HTTP 403
 \newcommand{\AccessExpectedFourHundredThree}{72}
-% results/2026-10-17-access-control/raw.csv: expected starts with 404 -- probes expecting HTTP 404
+% results/2026-10-17-access-control-2/raw.csv: expected starts with 404 -- probes expecting HTTP 404
 \newcommand{\AccessExpectedFourHundredFour}{21}
 
 % ==============================================================================================
 % Backfill latency (dev)
-%   source: runId 3393de39-7f0b-4404-994e-cc912749aec4, target dev, started 2026-10-17T14:16:25.938Z, commit c1d066056b2c (dirty)
+%   source: runId 983158fd-059e-4c78-a5be-acd0e94b46d0, target dev, started 2026-10-17T19:11:42.100Z, commit e05c037d485d (dirty)
 % ==============================================================================================
-% results/2026-10-17-backfill/meta.json: ok -- backfill: verdict (PASS/FAIL)
-\newcommand{\BackfillVerdict}{FAIL}
-% results/2026-10-17-backfill/meta.json: runId (first 8 characters) -- backfill: run id
-\newcommand{\BackfillRunId}{3393de39}
-% results/2026-10-17-backfill/meta.json: startedAt (UTC date) -- backfill: date of the run
+% results/2026-10-17-backfill-2/meta.json: ok -- backfill: verdict (PASS/FAIL)
+\newcommand{\BackfillVerdict}{PASS}
+% results/2026-10-17-backfill-2/meta.json: runId (first 8 characters) -- backfill: run id
+\newcommand{\BackfillRunId}{983158fd}
+% results/2026-10-17-backfill-2/meta.json: startedAt (UTC date) -- backfill: date of the run
 \newcommand{\BackfillDate}{2026-10-17}
-% results/2026-10-17-backfill/meta.json: commit.hash (7 characters) -- backfill: commit of the code under test
-\newcommand{\BackfillCommit}{c1d0660}
-% results/2026-10-17-backfill/meta.json: runs -- backfill: repetitions in the invocation
+% results/2026-10-17-backfill-2/meta.json: commit.hash (7 characters) -- backfill: commit of the code under test
+\newcommand{\BackfillCommit}{e05c037}
+% results/2026-10-17-backfill-2 -- backfill: results directory quoted
+\newcommand{\BackfillDir}{2026-10-17-backfill-2}
+% results/2026-10-17-backfill-2/meta.json: runs -- backfill: repetitions in the invocation
 \newcommand{\BackfillRuns}{3}
-% results/2026-10-17-backfill/meta.json: checks.passed -- backfill: checks passed
-\newcommand{\BackfillChecksPassed}{0}
-% results/2026-10-17-backfill/meta.json: checks.total -- backfill: checks in total
-\newcommand{\BackfillChecksTotal}{1}
-% results/2026-10-17-backfill/raw.csv: runs whose check rows are all ok -- backfill: runs with every check passed
-\newcommand{\BackfillRunsPassed}{0}
-% results/2026-10-17-backfill/meta.json: holdSeconds -- holdSeconds of the experiment workshops
+% results/2026-10-17-backfill-2/meta.json: checks.passed -- backfill: checks passed
+\newcommand{\BackfillChecksPassed}{124}
+% results/2026-10-17-backfill-2/meta.json: checks.total -- backfill: checks in total
+\newcommand{\BackfillChecksTotal}{124}
+% results/2026-10-17-backfill-2/checks.csv: runs whose check rows are all ok -- backfill: runs with every check passed
+\newcommand{\BackfillRunsPassed}{3}
+% results/2026-10-17-backfill-2/meta.json: holdSeconds -- holdSeconds of the experiment workshops
 \newcommand{\BackfillHoldSeconds}{60}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: N
-\newcommand{\BackfillExpiredN}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PFiftyMs
-\newcommand{\BackfillExpiredPFiftyMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyFiveMs
-\newcommand{\BackfillExpiredPNinetyFiveMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyNineMs
-\newcommand{\BackfillExpiredPNinetyNineMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: MaxMs
-\newcommand{\BackfillExpiredMaxMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: MeanMs
-\newcommand{\BackfillExpiredMeanMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PFifty in seconds
-\newcommand{\BackfillExpiredPFiftyS}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyFive in seconds
-\newcommand{\BackfillExpiredPNinetyFiveS}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: Max in seconds
-\newcommand{\BackfillExpiredMaxS}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = EXPIRED without reallocatedAt -- expired offers never relayed
-\newcommand{\BackfillExpiredUnrelayed}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = CANCELLED_* (rows) -- cancellation-driven backfills
-\newcommand{\BackfillCancelN}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/raw.csv: cause = CANCELLED_*, latencyMs (max) -- cancellation-driven backfill latency, largest (ms)
-\newcommand{\BackfillCancelMaxMs}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/meta.json: outliers -- samples above max(outlier threshold, p95)
-\newcommand{\BackfillOutliers}{\pending{backfill (dev) not yet run}}
-% results/2026-10-17-backfill/meta.json: sweepLateExpiries -- SweepLateExpiries in the run window
-\newcommand{\BackfillSweepLateExpiries}{\pending{SweepLateExpiries not fetched (CloudWatch read skipped)}}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: N
+\newcommand{\BackfillExpiredN}{300}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PFiftyMs
+\newcommand{\BackfillExpiredPFiftyMs}{49}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyFiveMs
+\newcommand{\BackfillExpiredPNinetyFiveMs}{100}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyNineMs
+\newcommand{\BackfillExpiredPNinetyNineMs}{136}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: MaxMs
+\newcommand{\BackfillExpiredMaxMs}{328}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: MeanMs
+\newcommand{\BackfillExpiredMeanMs}{47}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PFifty in seconds
+\newcommand{\BackfillExpiredPFiftyS}{0.05}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: PNinetyFive in seconds
+\newcommand{\BackfillExpiredPNinetyFiveS}{0.10}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) -- expiry-driven backfill latency reallocatedAt - releasedAt: Max in seconds
+\newcommand{\BackfillExpiredMaxS}{0.33}
+% results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED without reallocatedAt -- expired offers never relayed
+\newcommand{\BackfillExpiredUnrelayed}{0}
+% results/2026-10-17-backfill-2/raw.csv: cause = CANCELLED_* (rows) -- cancellation-driven backfills
+\newcommand{\BackfillCancelN}{60}
+% results/2026-10-17-backfill-2/raw.csv: cause = CANCELLED_*, latencyMs (max) -- cancellation-driven backfill latency, largest (ms)
+\newcommand{\BackfillCancelMaxMs}{0}
+% results/2026-10-17-backfill-2/meta.json: outliers -- samples above max(outlier threshold, p95)
+\newcommand{\BackfillOutliers}{0}
+% results/2026-10-17-backfill-2/meta.json: sweepLateExpiries -- SweepLateExpiries in the run window
+\newcommand{\BackfillSweepLateExpiries}{0}
 
 % ==============================================================================================
 % Table 3 series (dev): failures and commits
-%   source: correctness: results/2026-10-17-correctness
-%   source: preference-order: results/2026-10-17-preference-order
-%   source: concurrency: results/2026-10-17-concurrency
-%   source: repeat-execution: results/2026-10-17-repeat-execution
-%   source: expiry-race: results/2026-10-17-expiry-race-4
-%   source: failure-recovery: results/2026-10-17-failure-recovery
-%   source: access-control: results/2026-10-17-access-control
-%   source: backfill: results/2026-10-17-backfill
+%   source: correctness: results/2026-10-17-correctness-2
+%   source: preference-order: results/2026-10-17-preference-order-2
+%   source: concurrency: results/2026-10-17-concurrency-2
+%   source: repeat-execution: results/2026-10-17-repeat-execution-2
+%   source: expiry-race: results/2026-10-17-expiry-race-5
+%   source: failure-recovery: results/2026-10-17-failure-recovery-2
+%   source: access-control: results/2026-10-17-access-control-2
+%   source: backfill: results/2026-10-17-backfill-2
 % ==============================================================================================
 % meta.json of each selected run -- Table 3 experiments with a complete run
 \newcommand{\SeriesExperiments}{8}
 % meta.json ok = false of each selected run -- experiments whose run failed a check
-\newcommand{\SeriesFailed}{2}
+\newcommand{\SeriesFailed}{0}
 % meta.json ok = true of each selected run -- experiments whose run passed every check
-\newcommand{\SeriesPassed}{6}
+\newcommand{\SeriesPassed}{8}
 % meta.json ok = false of each selected run -- names of the failed experiments
-\newcommand{\SeriesFailedNames}{concurrency, backfill}
+\newcommand{\SeriesFailedNames}{\pending{Table 3 series (dev) not yet run}}
 % meta.json commit.hash of each selected run (in run order) -- commits recorded by the series
-\newcommand{\SeriesCommits}{227de3d, ec54916, c1d0660, 00faa52}
+\newcommand{\SeriesCommits}{e05c037}
 % meta.json commit.hash (distinct) -- distinct commits recorded by the series
-\newcommand{\SeriesCommitCount}{4}
+\newcommand{\SeriesCommitCount}{1}
 % meta.json commit.dirty = true -- runs recorded with uncommitted changes in the working tree
-\newcommand{\SeriesDirtyRuns}{7}
+\newcommand{\SeriesDirtyRuns}{8}
+
+% ==============================================================================================
+% First series (dev) under the Lambda concurrency quota of 10
+%   source: results/2026-10-17-throttling-evidence
+% ==============================================================================================
+% results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_503_in_access_log -- concurrency window: HTTP 503 responses in the API access log
+\newcommand{\ThrottleConcurrencyServiceUnavailable}{76}
+% results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_lambda_throttles -- concurrency window: throttles of the API function (AWS/Lambda Throttles, Sum)
+\newcommand{\ThrottleConcurrencyApiThrottles}{76}
+% results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_requests_metric -- concurrency window: API requests (AWS/ApiGateway Count)
+\newcommand{\ThrottleConcurrencyRequests}{888}
+% results/2026-10-17-throttling-evidence/lambda-metrics.csv: concurrency, ACCOUNT(all functions), concurrent_max -- concurrency window: account-wide concurrent executions (max)
+\newcommand{\ThrottleConcurrencyAccountConcurrencyMax}{10}
+% results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_503_in_access_log -- backfill window: HTTP 503 responses in the API access log
+\newcommand{\ThrottleBackfillServiceUnavailable}{63}
+% results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_lambda_throttles -- backfill window: throttles of the API function (AWS/Lambda Throttles, Sum)
+\newcommand{\ThrottleBackfillApiThrottles}{63}
+% results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_requests_metric -- backfill window: API requests (AWS/ApiGateway Count)
+\newcommand{\ThrottleBackfillRequests}{1{,}142}
+% results/2026-10-17-throttling-evidence/lambda-metrics.csv: backfill, ACCOUNT(all functions), concurrent_max -- backfill window: account-wide concurrent executions (max)
+\newcommand{\ThrottleBackfillAccountConcurrencyMax}{10}
+% results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_503_in_access_log -- k6-matrix window: HTTP 503 responses in the API access log
+\newcommand{\ThrottleKsixServiceUnavailable}{5{,}580}
+% results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_lambda_throttles -- k6-matrix window: throttles of the API function (AWS/Lambda Throttles, Sum)
+\newcommand{\ThrottleKsixApiThrottles}{5{,}580}
+% results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_requests_metric -- k6-matrix window: API requests (AWS/ApiGateway Count)
+\newcommand{\ThrottleKsixRequests}{104{,}656}
+% results/2026-10-17-throttling-evidence/lambda-metrics.csv: k6-matrix, ACCOUNT(all functions), concurrent_max -- k6-matrix window: account-wide concurrent executions (max)
+\newcommand{\ThrottleKsixAccountConcurrencyMax}{10}
+% results/2026-10-17-throttling-evidence/api-503.csv: rows with 503 = 5xx = API throttles -- windows in which the 503s, the 5xx metric and the API function's throttles are equal
+\newcommand{\ThrottleWindowsExactMatch}{3}
+% results/2026-10-17-throttling-evidence/api-503.csv: rows -- windows examined
+\newcommand{\ThrottleWindows}{3}
+% results/2026-10-17-throttling-evidence/lambda-metrics.csv: k6-matrix, seatrelay-dev-worker, throttles_sum -- k6 window: throttles of the worker function
+\newcommand{\ThrottleKsixWorkerThrottles}{416}
+% results/2026-10-17-concurrency/meta.json: checks.passed -- first concurrency run: checks passed
+\newcommand{\ThrottleFirstConcurrencyChecksPassed}{22}
+% results/2026-10-17-concurrency/meta.json: checks.total -- first concurrency run: checks in total
+\newcommand{\ThrottleFirstConcurrencyChecksTotal}{39}
+% results/2026-10-17-concurrency/meta.json: commit.hash -- first concurrency run: commit
+\newcommand{\ThrottleFirstConcurrencyCommit}{ec54916}
 
 % ==============================================================================================
 % Timer-path relays seen outside the backfill experiment (dev)
-%   source: results/2026-10-17-smoke
-%   source: results/2026-10-17-failure-recovery
+%   source: results/2026-10-17-smoke-2
+%   source: results/2026-10-17-failure-recovery-2
 % ==============================================================================================
 % smoke meta.json expiryBackfillLatencyMs + failure-recovery raw.csv TIMER_SEND effect -- expiry relays through the timer path
 \newcommand{\TimerPathRelaysN}{4}
 % same samples (max) -- largest timer-path relay latency, releasedAt = expiresAt (ms)
-\newcommand{\TimerPathRelayMaxMs}{982}
-% results/2026-10-17-smoke/checks.csv: step 'backfill CANCELLED_CONFIRMED', actual latencyMs -- cancellation-driven relay latency in the smoke test (ms)
+\newcommand{\TimerPathRelayMaxMs}{144}
+% results/2026-10-17-smoke-2/checks.csv: step 'backfill CANCELLED_CONFIRMED', actual latencyMs -- cancellation-driven relay latency in the smoke test (ms)
 \newcommand{\SmokeCancelBackfillMs}{0}
 
 % ==============================================================================================
@@ -2528,6 +2587,8 @@
 \newcommand{\RehearsalDate}{2026-10-17}
 % results/2026-10-17-pilot-rehearsal-3/meta.json: commit.hash (7 characters) -- staged pilot rehearsal: commit of the code under test
 \newcommand{\RehearsalCommit}{b8b8f3a}
+% results/2026-10-17-pilot-rehearsal-3 -- staged pilot rehearsal: results directory quoted
+\newcommand{\RehearsalDir}{2026-10-17-pilot-rehearsal-3}
 % results/2026-10-17-pilot-rehearsal-3/meta.json: runs -- staged pilot rehearsal: repetitions in the invocation
 \newcommand{\RehearsalRuns}{1}
 % results/2026-10-17-pilot-rehearsal-3/meta.json: checks.passed -- staged pilot rehearsal: checks passed

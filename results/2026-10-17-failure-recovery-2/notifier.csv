@@ -1,0 +1,7 @@
+run,phase,notifications,pendingAtRestore,recoverySeconds,sent,skipped,failed,pending,detail,ok
+1,baseline,10,,3.949,0,10,0,0,workshop b1a4684f-5415-42ba-9ef4-25321e5c5afc; 10/10 REGISTER applied,true
+1,outage,10,10,53.898,0,10,0,0,"PutFunctionConcurrency(seatrelay-dev-notifier, 0); DeleteFunctionConcurrency(seatrelay-dev-notifier); workshop b18f7e9e-1305-4395-8bb8-2a6ccf8b577a",true
+2,baseline,10,,1.92,0,10,0,0,workshop a962a989-9663-4c0e-9e64-ef244a8d8b68; 10/10 REGISTER applied,true
+2,outage,10,10,44.389,0,10,0,0,"PutFunctionConcurrency(seatrelay-dev-notifier, 0); DeleteFunctionConcurrency(seatrelay-dev-notifier); workshop e13f7382-388f-47d8-824a-d9bfcd40b403",true
+3,baseline,10,,2.472,0,10,0,0,workshop ee35b2e4-a63f-4e3c-aaa4-1720c6dcb9d1; 10/10 REGISTER applied,true
+3,outage,10,10,38.425,0,10,0,0,"PutFunctionConcurrency(seatrelay-dev-notifier, 0); DeleteFunctionConcurrency(seatrelay-dev-notifier); workshop 170c270e-6adc-412c-a414-177623e2fc12",true

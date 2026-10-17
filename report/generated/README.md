@@ -68,84 +68,87 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1282 macros, 1168 with data, 114 pending.
+1310 macros, 1209 with data, 101 pending.
 
 ### Acceptance smoke test (dev)
 
-Source: `runId c527cac7-5cf1-4e4a-a6e7-6cfa5ce16ad9, target dev, started 2026-10-17T13:19:10.386Z, commit 227de3d12b0f` — 18/18 with data.
+Source: `runId 3aabe3fe-c5be-49d8-aa99-46b12dd28242, target dev, started 2026-10-17T18:14:45.190Z, commit e05c037d485d` — 19/19 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\SmokeVerdict` | PASS | results/2026-10-17-smoke/meta.json: ok |
-| `\SmokeRunId` | c527cac7 | results/2026-10-17-smoke/meta.json: runId (first 8 characters) |
-| `\SmokeDate` | 2026-10-17 | results/2026-10-17-smoke/meta.json: startedAt (UTC date) |
-| `\SmokeCommit` | 227de3d | results/2026-10-17-smoke/meta.json: commit.hash (7 characters) |
-| `\SmokeRuns` | 1 | results/2026-10-17-smoke/meta.json: runs |
-| `\SmokeChecksPassed` | 13 | results/2026-10-17-smoke/meta.json: checks.passed |
-| `\SmokeChecksTotal` | 13 | results/2026-10-17-smoke/meta.json: checks.total |
-| `\SmokeRunsPassed` | 1 | results/2026-10-17-smoke/checks.csv: runs whose check rows are all ok |
-| `\SmokeHoldSeconds` | 60 | results/2026-10-17-smoke/meta.json: holdSeconds |
-| `\SmokeSettleClientN` | 6 | results/2026-10-17-smoke/meta.json: settleMs.count |
-| `\SmokeSettleClientPFiftyMs` | 848 | results/2026-10-17-smoke/meta.json: settleMs.p50 |
-| `\SmokeSettleClientPNinetyFiveMs` | 1,815 | results/2026-10-17-smoke/meta.json: settleMs.p95 |
-| `\SmokeSettleClientMaxMs` | 1,815 | results/2026-10-17-smoke/meta.json: settleMs.max |
-| `\SmokeSettleServerPFiftyMs` | 45 | results/2026-10-17-smoke/meta.json: serverSettleMs.p50 |
-| `\SmokeSettleServerPNinetyFiveMs` | 904 | results/2026-10-17-smoke/meta.json: serverSettleMs.p95 |
-| `\SmokeSettleServerMaxMs` | 904 | results/2026-10-17-smoke/meta.json: serverSettleMs.max |
-| `\SmokeExpiryBackfillN` | 1 | results/2026-10-17-smoke/meta.json: expiryBackfillLatencyMs (count) |
-| `\SmokeExpiryBackfillMaxMs` | 117 | results/2026-10-17-smoke/meta.json: expiryBackfillLatencyMs (max) |
+| `\SmokeVerdict` | PASS | results/2026-10-17-smoke-2/meta.json: ok |
+| `\SmokeRunId` | 3aabe3fe | results/2026-10-17-smoke-2/meta.json: runId (first 8 characters) |
+| `\SmokeDate` | 2026-10-17 | results/2026-10-17-smoke-2/meta.json: startedAt (UTC date) |
+| `\SmokeCommit` | e05c037 | results/2026-10-17-smoke-2/meta.json: commit.hash (7 characters) |
+| `\SmokeDir` | 2026-10-17-smoke-2 | results/2026-10-17-smoke-2 |
+| `\SmokeRuns` | 1 | results/2026-10-17-smoke-2/meta.json: runs |
+| `\SmokeChecksPassed` | 13 | results/2026-10-17-smoke-2/meta.json: checks.passed |
+| `\SmokeChecksTotal` | 13 | results/2026-10-17-smoke-2/meta.json: checks.total |
+| `\SmokeRunsPassed` | 1 | results/2026-10-17-smoke-2/checks.csv: runs whose check rows are all ok |
+| `\SmokeHoldSeconds` | 60 | results/2026-10-17-smoke-2/meta.json: holdSeconds |
+| `\SmokeSettleClientN` | 6 | results/2026-10-17-smoke-2/meta.json: settleMs.count |
+| `\SmokeSettleClientPFiftyMs` | 858 | results/2026-10-17-smoke-2/meta.json: settleMs.p50 |
+| `\SmokeSettleClientPNinetyFiveMs` | 1,765 | results/2026-10-17-smoke-2/meta.json: settleMs.p95 |
+| `\SmokeSettleClientMaxMs` | 1,765 | results/2026-10-17-smoke-2/meta.json: settleMs.max |
+| `\SmokeSettleServerPFiftyMs` | 57 | results/2026-10-17-smoke-2/meta.json: serverSettleMs.p50 |
+| `\SmokeSettleServerPNinetyFiveMs` | 767 | results/2026-10-17-smoke-2/meta.json: serverSettleMs.p95 |
+| `\SmokeSettleServerMaxMs` | 767 | results/2026-10-17-smoke-2/meta.json: serverSettleMs.max |
+| `\SmokeExpiryBackfillN` | 1 | results/2026-10-17-smoke-2/meta.json: expiryBackfillLatencyMs (count) |
+| `\SmokeExpiryBackfillMaxMs` | 108 | results/2026-10-17-smoke-2/meta.json: expiryBackfillLatencyMs (max) |
 
 ### Core correctness (dev)
 
-Source: `runId fe64a545-028a-44dd-8988-073b8bd2dfd0, target dev, started 2026-10-17T13:21:12.236Z, commit 227de3d12b0f (dirty)` — 22/22 with data.
+Source: `runId d179d40d-6148-41b2-8a5d-1a4df8ae0ac5, target dev, started 2026-10-17T18:16:07.202Z, commit e05c037d485d (dirty)` — 23/23 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\CorrectnessVerdict` | PASS | results/2026-10-17-correctness/meta.json: ok |
-| `\CorrectnessRunId` | fe64a545 | results/2026-10-17-correctness/meta.json: runId (first 8 characters) |
-| `\CorrectnessDate` | 2026-10-17 | results/2026-10-17-correctness/meta.json: startedAt (UTC date) |
-| `\CorrectnessCommit` | 227de3d | results/2026-10-17-correctness/meta.json: commit.hash (7 characters) |
-| `\CorrectnessRuns` | 3 | results/2026-10-17-correctness/meta.json: runs |
-| `\CorrectnessChecksPassed` | 672 | results/2026-10-17-correctness/meta.json: checks.passed |
-| `\CorrectnessChecksTotal` | 672 | results/2026-10-17-correctness/meta.json: checks.total |
-| `\CorrectnessRunsPassed` | 3 | results/2026-10-17-correctness/raw.csv: runs whose check rows are all ok |
-| `\CorrectnessScenarios` | 9 | results/2026-10-17-correctness/meta.json: scenarios[].name (distinct) |
-| `\CorrectnessScenarioRuns` | 27 | results/2026-10-17-correctness/meta.json: scenarios (entries) |
-| `\CorrectnessScenarioRunsPassed` | 27 | results/2026-10-17-correctness/meta.json: scenarios[].failed == 0 |
-| `\CorrectnessOverCapacity` | 0 | results/2026-10-17-correctness/meta.json: overCapacity |
-| `\CorrectnessDoubleHolds` | 0 | results/2026-10-17-correctness/meta.json: doubleHolds |
-| `\CorrectnessVerifications` | 234 | results/2026-10-17-correctness/meta.json: verifications |
-| `\CorrectnessVerifyFailures` | 0 | results/2026-10-17-correctness/meta.json: verifyFailures |
-| `\CorrectnessSettleClientN` | 207 | results/2026-10-17-correctness/meta.json: settleMs.count |
-| `\CorrectnessSettleClientPFiftyMs` | 799 | results/2026-10-17-correctness/meta.json: settleMs.p50 |
-| `\CorrectnessSettleClientPNinetyFiveMs` | 837 | results/2026-10-17-correctness/meta.json: settleMs.p95 |
-| `\CorrectnessSettleClientMaxMs` | 1,009 | results/2026-10-17-correctness/meta.json: settleMs.max |
-| `\CorrectnessSettleServerPFiftyMs` | 39 | results/2026-10-17-correctness/meta.json: serverSettleMs.p50 |
-| `\CorrectnessSettleServerPNinetyFiveMs` | 59 | results/2026-10-17-correctness/meta.json: serverSettleMs.p95 |
-| `\CorrectnessSettleServerMaxMs` | 239 | results/2026-10-17-correctness/meta.json: serverSettleMs.max |
+| `\CorrectnessVerdict` | PASS | results/2026-10-17-correctness-2/meta.json: ok |
+| `\CorrectnessRunId` | d179d40d | results/2026-10-17-correctness-2/meta.json: runId (first 8 characters) |
+| `\CorrectnessDate` | 2026-10-17 | results/2026-10-17-correctness-2/meta.json: startedAt (UTC date) |
+| `\CorrectnessCommit` | e05c037 | results/2026-10-17-correctness-2/meta.json: commit.hash (7 characters) |
+| `\CorrectnessDir` | 2026-10-17-correctness-2 | results/2026-10-17-correctness-2 |
+| `\CorrectnessRuns` | 3 | results/2026-10-17-correctness-2/meta.json: runs |
+| `\CorrectnessChecksPassed` | 672 | results/2026-10-17-correctness-2/meta.json: checks.passed |
+| `\CorrectnessChecksTotal` | 672 | results/2026-10-17-correctness-2/meta.json: checks.total |
+| `\CorrectnessRunsPassed` | 3 | results/2026-10-17-correctness-2/raw.csv: runs whose check rows are all ok |
+| `\CorrectnessScenarios` | 9 | results/2026-10-17-correctness-2/meta.json: scenarios[].name (distinct) |
+| `\CorrectnessScenarioRuns` | 27 | results/2026-10-17-correctness-2/meta.json: scenarios (entries) |
+| `\CorrectnessScenarioRunsPassed` | 27 | results/2026-10-17-correctness-2/meta.json: scenarios[].failed == 0 |
+| `\CorrectnessOverCapacity` | 0 | results/2026-10-17-correctness-2/meta.json: overCapacity |
+| `\CorrectnessDoubleHolds` | 0 | results/2026-10-17-correctness-2/meta.json: doubleHolds |
+| `\CorrectnessVerifications` | 234 | results/2026-10-17-correctness-2/meta.json: verifications |
+| `\CorrectnessVerifyFailures` | 0 | results/2026-10-17-correctness-2/meta.json: verifyFailures |
+| `\CorrectnessSettleClientN` | 207 | results/2026-10-17-correctness-2/meta.json: settleMs.count |
+| `\CorrectnessSettleClientPFiftyMs` | 793 | results/2026-10-17-correctness-2/meta.json: settleMs.p50 |
+| `\CorrectnessSettleClientPNinetyFiveMs` | 852 | results/2026-10-17-correctness-2/meta.json: settleMs.p95 |
+| `\CorrectnessSettleClientMaxMs` | 1,024 | results/2026-10-17-correctness-2/meta.json: settleMs.max |
+| `\CorrectnessSettleServerPFiftyMs` | 38 | results/2026-10-17-correctness-2/meta.json: serverSettleMs.p50 |
+| `\CorrectnessSettleServerPNinetyFiveMs` | 54 | results/2026-10-17-correctness-2/meta.json: serverSettleMs.p95 |
+| `\CorrectnessSettleServerMaxMs` | 215 | results/2026-10-17-correctness-2/meta.json: serverSettleMs.max |
 
 ### Preference, order: deployment replay (dev) and core property test
 
-Source: `runId 5d51b310-256c-4ca0-bf48-c6e3e9840d0f, target dev, started 2026-10-17T13:25:36.174Z, commit ec54916a2dcb (dirty)`; `core-tests: none` — 16/23 with data.
+Source: `runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10-17T18:20:35.647Z, commit e05c037d485d (dirty)`; `core-tests: none` — 17/24 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\PrefOrderVerdict` | PASS | results/2026-10-17-preference-order/meta.json: ok |
-| `\PrefOrderRunId` | 5d51b310 | results/2026-10-17-preference-order/meta.json: runId (first 8 characters) |
-| `\PrefOrderDate` | 2026-10-17 | results/2026-10-17-preference-order/meta.json: startedAt (UTC date) |
-| `\PrefOrderCommit` | ec54916 | results/2026-10-17-preference-order/meta.json: commit.hash (7 characters) |
-| `\PrefOrderRuns` | 3 | results/2026-10-17-preference-order/meta.json: runs |
-| `\PrefOrderChecksPassed` | 204 | results/2026-10-17-preference-order/meta.json: checks.passed |
-| `\PrefOrderChecksTotal` | 204 | results/2026-10-17-preference-order/meta.json: checks.total |
-| `\PrefOrderRunsPassed` | 3 | results/2026-10-17-preference-order/checks.csv: runs whose check rows are all ok |
-| `\PrefOrderCases` | 60 | results/2026-10-17-preference-order/meta.json: cases |
-| `\PrefOrderCasesPassed` | 60 | results/2026-10-17-preference-order/meta.json: passed |
-| `\PrefOrderNonAcceptable` | 0 | results/2026-10-17-preference-order/meta.json: offeredNonAcceptable |
-| `\PrefOrderDistinctCases` | 20 | results/2026-10-17-preference-order/raw.csv: case (distinct) |
-| `\PrefOrderSettleClientN` | 84 | results/2026-10-17-preference-order/meta.json: settleMs.count |
-| `\PrefOrderSettleClientPFiftyMs` | 795 | results/2026-10-17-preference-order/meta.json: settleMs.p50 |
-| `\PrefOrderSettleClientPNinetyFiveMs` | 849 | results/2026-10-17-preference-order/meta.json: settleMs.p95 |
-| `\PrefOrderSettleServerPNinetyFiveMs` | 85 | results/2026-10-17-preference-order/latency.csv: serverSettleMs (nearest-rank p95) |
+| `\PrefOrderVerdict` | PASS | results/2026-10-17-preference-order-2/meta.json: ok |
+| `\PrefOrderRunId` | 4b65ed89 | results/2026-10-17-preference-order-2/meta.json: runId (first 8 characters) |
+| `\PrefOrderDate` | 2026-10-17 | results/2026-10-17-preference-order-2/meta.json: startedAt (UTC date) |
+| `\PrefOrderCommit` | e05c037 | results/2026-10-17-preference-order-2/meta.json: commit.hash (7 characters) |
+| `\PrefOrderDir` | 2026-10-17-preference-order-2 | results/2026-10-17-preference-order-2 |
+| `\PrefOrderRuns` | 3 | results/2026-10-17-preference-order-2/meta.json: runs |
+| `\PrefOrderChecksPassed` | 204 | results/2026-10-17-preference-order-2/meta.json: checks.passed |
+| `\PrefOrderChecksTotal` | 204 | results/2026-10-17-preference-order-2/meta.json: checks.total |
+| `\PrefOrderRunsPassed` | 3 | results/2026-10-17-preference-order-2/checks.csv: runs whose check rows are all ok |
+| `\PrefOrderCases` | 60 | results/2026-10-17-preference-order-2/meta.json: cases |
+| `\PrefOrderCasesPassed` | 60 | results/2026-10-17-preference-order-2/meta.json: passed |
+| `\PrefOrderNonAcceptable` | 0 | results/2026-10-17-preference-order-2/meta.json: offeredNonAcceptable |
+| `\PrefOrderDistinctCases` | 20 | results/2026-10-17-preference-order-2/raw.csv: case (distinct) |
+| `\PrefOrderSettleClientN` | 84 | results/2026-10-17-preference-order-2/meta.json: settleMs.count |
+| `\PrefOrderSettleClientPFiftyMs` | 782 | results/2026-10-17-preference-order-2/meta.json: settleMs.p50 |
+| `\PrefOrderSettleClientPNinetyFiveMs` | 812 | results/2026-10-17-preference-order-2/meta.json: settleMs.p95 |
+| `\PrefOrderSettleServerPNinetyFiveMs` | 61 | results/2026-10-17-preference-order-2/latency.csv: serverSettleMs (nearest-rank p95) |
 | `\CoreTestsPassed` | PENDING: core property-test results (results/<date>-core-tests) not yet recorded | results/<date>-core-tests/run.log: 'Tests N passed' |
 | `\CoreTestsTotal` | PENDING: core property-test results (results/<date>-core-tests) not yet recorded | results/<date>-core-tests/run.log: 'Tests ... (total)' |
 | `\CoreTestFiles` | PENDING: core property-test results (results/<date>-core-tests) not yet recorded | results/<date>-core-tests/run.log: 'Test Files ... (total)' |
@@ -156,206 +159,237 @@ Source: `runId 5d51b310-256c-4ca0-bf48-c6e3e9840d0f, target dev, started 2026-10
 
 ### Concurrency (dev)
 
-Source: `runId a6983ff8-cf1d-44c5-9b89-94751e701ca4, target dev, started 2026-10-17T13:26:18.893Z, commit ec54916a2dcb (dirty)` — 28/28 with data.
+Source: `runId 08262972-5e6e-4436-af51-36893adf38c3, target dev, started 2026-10-17T18:21:17.132Z, commit e05c037d485d (dirty)` — 29/29 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\ConcurrencyVerdict` | FAIL | results/2026-10-17-concurrency/meta.json: ok |
-| `\ConcurrencyRunId` | a6983ff8 | results/2026-10-17-concurrency/meta.json: runId (first 8 characters) |
-| `\ConcurrencyDate` | 2026-10-17 | results/2026-10-17-concurrency/meta.json: startedAt (UTC date) |
-| `\ConcurrencyCommit` | ec54916 | results/2026-10-17-concurrency/meta.json: commit.hash (7 characters) |
-| `\ConcurrencyRuns` | 3 | results/2026-10-17-concurrency/meta.json: runs |
-| `\ConcurrencyChecksPassed` | 22 | results/2026-10-17-concurrency/meta.json: checks.passed |
-| `\ConcurrencyChecksTotal` | 39 | results/2026-10-17-concurrency/meta.json: checks.total |
-| `\ConcurrencyRunsPassed` | 0 | results/2026-10-17-concurrency/checks.csv: runs whose check rows are all ok |
-| `\ConcurrencyAccounts` | 50 | results/2026-10-17-concurrency/meta.json: params.accounts |
-| `\ConcurrencySessions` | 3 | results/2026-10-17-concurrency/meta.json: params.sessions |
-| `\ConcurrencySeats` | 5 | results/2026-10-17-concurrency/meta.json: params.capacityTotal |
-| `\ConcurrencyMetaRetries` | 0 | results/2026-10-17-concurrency/meta.json: metaConflictRetries |
-| `\ConcurrencyCommands` | 209 | results/2026-10-17-concurrency/raw.csv: rows |
-| `\ConcurrencyTransportErrors` | 76 | results/2026-10-17-concurrency/raw.csv: error (non-empty) |
-| `\ConcurrencySettleClientN` | 133 | results/2026-10-17-concurrency/meta.json: settleMs.count |
-| `\ConcurrencySettleClientPFiftyMs` | 1,002 | results/2026-10-17-concurrency/meta.json: settleMs.p50 |
-| `\ConcurrencySettleClientPNinetyFiveMs` | 7,788 | results/2026-10-17-concurrency/meta.json: settleMs.p95 |
-| `\ConcurrencySettleClientMaxMs` | 7,839 | results/2026-10-17-concurrency/meta.json: settleMs.max |
-| `\ConcurrencySettleServerPFiftyMs` | 447 | results/2026-10-17-concurrency/meta.json: serverSettleMs.p50 |
-| `\ConcurrencySettleServerPNinetyFiveMs` | 6,349 | results/2026-10-17-concurrency/meta.json: serverSettleMs.p95 |
-| `\ConcurrencySettleServerMaxMs` | 6,593 | results/2026-10-17-concurrency/meta.json: serverSettleMs.max |
-| `\ConcurrencySameAccountRaces` | 15 | results/2026-10-17-concurrency/checks.csv: same-account race checks (rows) |
-| `\ConcurrencySameAccountConsistent` | 5 | results/2026-10-17-concurrency/checks.csv: same-account race checks with ok = true |
-| `\ConcurrencySameAccountFailed` | 10 | results/2026-10-17-concurrency/checks.csv: same-account race checks with ok = false |
-| `\ConcurrencySameAccountFailedWithServiceUnavailable` | 10 | results/2026-10-17-concurrency/checks.csv: failed same-account races whose actual value contains 'HTTP 503' |
-| `\ConcurrencyRaceFirstAccept` | 3 | results/2026-10-17-concurrency/meta.json: raceFirst.ACCEPT |
-| `\ConcurrencyRaceFirstDecline` | 5 | results/2026-10-17-concurrency/meta.json: raceFirst.DECLINE |
-| `\ConcurrencyRaceFirstCancel` | 7 | results/2026-10-17-concurrency/meta.json: raceFirst.CANCEL |
+| `\ConcurrencyVerdict` | PASS | results/2026-10-17-concurrency-2/meta.json: ok |
+| `\ConcurrencyRunId` | 08262972 | results/2026-10-17-concurrency-2/meta.json: runId (first 8 characters) |
+| `\ConcurrencyDate` | 2026-10-17 | results/2026-10-17-concurrency-2/meta.json: startedAt (UTC date) |
+| `\ConcurrencyCommit` | e05c037 | results/2026-10-17-concurrency-2/meta.json: commit.hash (7 characters) |
+| `\ConcurrencyDir` | 2026-10-17-concurrency-2 | results/2026-10-17-concurrency-2 |
+| `\ConcurrencyRuns` | 3 | results/2026-10-17-concurrency-2/meta.json: runs |
+| `\ConcurrencyChecksPassed` | 39 | results/2026-10-17-concurrency-2/meta.json: checks.passed |
+| `\ConcurrencyChecksTotal` | 39 | results/2026-10-17-concurrency-2/meta.json: checks.total |
+| `\ConcurrencyRunsPassed` | 3 | results/2026-10-17-concurrency-2/checks.csv: runs whose check rows are all ok |
+| `\ConcurrencyAccounts` | 50 | results/2026-10-17-concurrency-2/meta.json: params.accounts |
+| `\ConcurrencySessions` | 3 | results/2026-10-17-concurrency-2/meta.json: params.sessions |
+| `\ConcurrencySeats` | 5 | results/2026-10-17-concurrency-2/meta.json: params.capacityTotal |
+| `\ConcurrencyMetaRetries` | 0 | results/2026-10-17-concurrency-2/meta.json: metaConflictRetries |
+| `\ConcurrencyCommands` | 210 | results/2026-10-17-concurrency-2/raw.csv: rows |
+| `\ConcurrencyTransportErrors` | 0 | results/2026-10-17-concurrency-2/raw.csv: error (non-empty) |
+| `\ConcurrencySettleClientN` | 210 | results/2026-10-17-concurrency-2/meta.json: settleMs.count |
+| `\ConcurrencySettleClientPFiftyMs` | 1,599 | results/2026-10-17-concurrency-2/meta.json: settleMs.p50 |
+| `\ConcurrencySettleClientPNinetyFiveMs` | 3,384 | results/2026-10-17-concurrency-2/meta.json: settleMs.p95 |
+| `\ConcurrencySettleClientMaxMs` | 3,725 | results/2026-10-17-concurrency-2/meta.json: settleMs.max |
+| `\ConcurrencySettleServerPFiftyMs` | 656 | results/2026-10-17-concurrency-2/meta.json: serverSettleMs.p50 |
+| `\ConcurrencySettleServerPNinetyFiveMs` | 1,525 | results/2026-10-17-concurrency-2/meta.json: serverSettleMs.p95 |
+| `\ConcurrencySettleServerMaxMs` | 1,732 | results/2026-10-17-concurrency-2/meta.json: serverSettleMs.max |
+| `\ConcurrencySameAccountRaces` | 15 | results/2026-10-17-concurrency-2/checks.csv: same-account race checks (rows) |
+| `\ConcurrencySameAccountConsistent` | 15 | results/2026-10-17-concurrency-2/checks.csv: same-account race checks with ok = true |
+| `\ConcurrencySameAccountFailed` | 0 | results/2026-10-17-concurrency-2/checks.csv: same-account race checks with ok = false |
+| `\ConcurrencySameAccountFailedWithServiceUnavailable` | 0 | results/2026-10-17-concurrency-2/checks.csv: failed same-account races whose actual value contains 'HTTP 503' |
+| `\ConcurrencyRaceFirstAccept` | 7 | results/2026-10-17-concurrency-2/meta.json: raceFirst.ACCEPT |
+| `\ConcurrencyRaceFirstDecline` | 6 | results/2026-10-17-concurrency-2/meta.json: raceFirst.DECLINE |
+| `\ConcurrencyRaceFirstCancel` | 2 | results/2026-10-17-concurrency-2/meta.json: raceFirst.CANCEL |
 
 ### Repeat execution (dev)
 
-Source: `runId 3a636ec3-6a43-46f2-88ce-dd04a3288809, target dev, started 2026-10-17T13:28:23.895Z, commit c1d066056b2c (dirty)` — 17/17 with data.
+Source: `runId 668e39b5-6b98-45b3-89d9-d8872e900f13, target dev, started 2026-10-17T18:23:18.537Z, commit e05c037d485d (dirty)` — 18/18 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\RepeatVerdict` | PASS | results/2026-10-17-repeat-execution/meta.json: ok |
-| `\RepeatRunId` | 3a636ec3 | results/2026-10-17-repeat-execution/meta.json: runId (first 8 characters) |
-| `\RepeatDate` | 2026-10-17 | results/2026-10-17-repeat-execution/meta.json: startedAt (UTC date) |
-| `\RepeatCommit` | c1d0660 | results/2026-10-17-repeat-execution/meta.json: commit.hash (7 characters) |
-| `\RepeatRuns` | 3 | results/2026-10-17-repeat-execution/meta.json: runs |
-| `\RepeatChecksPassed` | 75 | results/2026-10-17-repeat-execution/meta.json: checks.passed |
-| `\RepeatChecksTotal` | 75 | results/2026-10-17-repeat-execution/meta.json: checks.total |
-| `\RepeatRunsPassed` | 3 | results/2026-10-17-repeat-execution/checks.csv: runs whose check rows are all ok |
-| `\RepeatProbes` | 18 | results/2026-10-17-repeat-execution/meta.json: probes |
-| `\RepeatProbesPassed` | 18 | results/2026-10-17-repeat-execution/meta.json: passed |
-| `\RepeatCopies` | 5 | results/2026-10-17-repeat-execution/meta.json: copies |
-| `\RepeatAfterCommitCases` | 6 | results/2026-10-17-repeat-execution/raw.csv: case contains AFTER_COMMIT |
-| `\RepeatAfterCommitPassed` | 6 | results/2026-10-17-repeat-execution/raw.csv: AFTER_COMMIT rows with ok = true |
-| `\RepeatDupProbes` | 12 | results/2026-10-17-repeat-execution/raw.csv: case without AFTER_COMMIT (rows) |
-| `\RepeatDupProbesPassed` | 12 | results/2026-10-17-repeat-execution/raw.csv: case without AFTER_COMMIT, ok = true |
-| `\RepeatDupCopies` | 5 | results/2026-10-17-repeat-execution/raw.csv: copies of the duplicate-submission probes (single value) |
-| `\RepeatAfterCommitCopies` | 1 | results/2026-10-17-repeat-execution/raw.csv: copies of the AFTER_COMMIT probes (single value) |
+| `\RepeatVerdict` | PASS | results/2026-10-17-repeat-execution-2/meta.json: ok |
+| `\RepeatRunId` | 668e39b5 | results/2026-10-17-repeat-execution-2/meta.json: runId (first 8 characters) |
+| `\RepeatDate` | 2026-10-17 | results/2026-10-17-repeat-execution-2/meta.json: startedAt (UTC date) |
+| `\RepeatCommit` | e05c037 | results/2026-10-17-repeat-execution-2/meta.json: commit.hash (7 characters) |
+| `\RepeatDir` | 2026-10-17-repeat-execution-2 | results/2026-10-17-repeat-execution-2 |
+| `\RepeatRuns` | 3 | results/2026-10-17-repeat-execution-2/meta.json: runs |
+| `\RepeatChecksPassed` | 75 | results/2026-10-17-repeat-execution-2/meta.json: checks.passed |
+| `\RepeatChecksTotal` | 75 | results/2026-10-17-repeat-execution-2/meta.json: checks.total |
+| `\RepeatRunsPassed` | 3 | results/2026-10-17-repeat-execution-2/checks.csv: runs whose check rows are all ok |
+| `\RepeatProbes` | 18 | results/2026-10-17-repeat-execution-2/meta.json: probes |
+| `\RepeatProbesPassed` | 18 | results/2026-10-17-repeat-execution-2/meta.json: passed |
+| `\RepeatCopies` | 5 | results/2026-10-17-repeat-execution-2/meta.json: copies |
+| `\RepeatAfterCommitCases` | 6 | results/2026-10-17-repeat-execution-2/raw.csv: case contains AFTER_COMMIT |
+| `\RepeatAfterCommitPassed` | 6 | results/2026-10-17-repeat-execution-2/raw.csv: AFTER_COMMIT rows with ok = true |
+| `\RepeatDupProbes` | 12 | results/2026-10-17-repeat-execution-2/raw.csv: case without AFTER_COMMIT (rows) |
+| `\RepeatDupProbesPassed` | 12 | results/2026-10-17-repeat-execution-2/raw.csv: case without AFTER_COMMIT, ok = true |
+| `\RepeatDupCopies` | 5 | results/2026-10-17-repeat-execution-2/raw.csv: copies of the duplicate-submission probes (single value) |
+| `\RepeatAfterCommitCopies` | 1 | results/2026-10-17-repeat-execution-2/raw.csv: copies of the AFTER_COMMIT probes (single value) |
 
 ### Expiry race (dev)
 
-Source: `runId e1be2b0b-85f6-41d5-b50a-4410abb7cb07, target dev, started 2026-10-17T15:46:25.018Z, commit 00faa52984fa` — 20/20 with data.
+Source: `runId 597e46dd-58fe-44d9-be35-af4bac764e98, target dev, started 2026-10-17T18:38:13.141Z, commit e05c037d485d (dirty)` — 21/21 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\ExpiryRaceVerdict` | PASS | results/2026-10-17-expiry-race-4/meta.json: ok |
-| `\ExpiryRaceRunId` | e1be2b0b | results/2026-10-17-expiry-race-4/meta.json: runId (first 8 characters) |
-| `\ExpiryRaceDate` | 2026-10-17 | results/2026-10-17-expiry-race-4/meta.json: startedAt (UTC date) |
-| `\ExpiryRaceCommit` | 00faa52 | results/2026-10-17-expiry-race-4/meta.json: commit.hash (7 characters) |
-| `\ExpiryRaceRuns` | 3 | results/2026-10-17-expiry-race-4/meta.json: runs |
-| `\ExpiryRaceChecksPassed` | 27 | results/2026-10-17-expiry-race-4/meta.json: checks.passed |
-| `\ExpiryRaceChecksTotal` | 27 | results/2026-10-17-expiry-race-4/meta.json: checks.total |
-| `\ExpiryRaceRunsPassed` | 3 | results/2026-10-17-expiry-race-4/checks.csv: runs whose check rows are all ok |
-| `\ExpiryRaceMarginMs` | 200 | results/2026-10-17-expiry-race-4/meta.json: params.marginMs |
-| `\ExpiryRaceEarlyAttempts` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = early (rows) |
-| `\ExpiryRaceEarlyApplied` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = PASS |
-| `\ExpiryRaceEarlyInconclusive` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, verdict = INCONCLUSIVE |
-| `\ExpiryRaceEarlyArrivedLate` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) |
-| `\ExpiryRaceLateTrials` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late (rows) |
-| `\ExpiryRaceLateRejected` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED |
-| `\ExpiryRaceOrderTimerFirst` | 3 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' |
-| `\ExpiryRaceOrderTimerWhileQueued` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' |
-| `\ExpiryRaceOrderAcceptTickFirst` | 0 | results/2026-10-17-expiry-race-4/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' |
-| `\ExpiryRaceLateTicks` | 3 | results/2026-10-17-expiry-race-4/meta.json: lateTicks |
-| `\ExpiryRaceLateTicksNoEffect` | 3 | results/2026-10-17-expiry-race-4/late-tick.csv: ok = true |
+| `\ExpiryRaceVerdict` | PASS | results/2026-10-17-expiry-race-5/meta.json: ok |
+| `\ExpiryRaceRunId` | 597e46dd | results/2026-10-17-expiry-race-5/meta.json: runId (first 8 characters) |
+| `\ExpiryRaceDate` | 2026-10-17 | results/2026-10-17-expiry-race-5/meta.json: startedAt (UTC date) |
+| `\ExpiryRaceCommit` | e05c037 | results/2026-10-17-expiry-race-5/meta.json: commit.hash (7 characters) |
+| `\ExpiryRaceDir` | 2026-10-17-expiry-race-5 | results/2026-10-17-expiry-race-5 |
+| `\ExpiryRaceRuns` | 3 | results/2026-10-17-expiry-race-5/meta.json: runs |
+| `\ExpiryRaceChecksPassed` | 27 | results/2026-10-17-expiry-race-5/meta.json: checks.passed |
+| `\ExpiryRaceChecksTotal` | 27 | results/2026-10-17-expiry-race-5/meta.json: checks.total |
+| `\ExpiryRaceRunsPassed` | 3 | results/2026-10-17-expiry-race-5/checks.csv: runs whose check rows are all ok |
+| `\ExpiryRaceMarginMs` | 200 | results/2026-10-17-expiry-race-5/meta.json: params.marginMs |
+| `\ExpiryRaceEarlyAttempts` | 3 | results/2026-10-17-expiry-race-5/raw.csv: variant = early (rows) |
+| `\ExpiryRaceEarlyApplied` | 3 | results/2026-10-17-expiry-race-5/raw.csv: variant = early, verdict = PASS |
+| `\ExpiryRaceEarlyInconclusive` | 0 | results/2026-10-17-expiry-race-5/raw.csv: variant = early, verdict = INCONCLUSIVE |
+| `\ExpiryRaceEarlyArrivedLate` | 0 | results/2026-10-17-expiry-race-5/raw.csv: variant = early, arrivalOffsetMs > 0 (acceptedAt after expiresAt) |
+| `\ExpiryRaceLateTrials` | 3 | results/2026-10-17-expiry-race-5/raw.csv: variant = late (rows) |
+| `\ExpiryRaceLateRejected` | 3 | results/2026-10-17-expiry-race-5/raw.csv: variant = late, status REJECTED, reason OFFER_EXPIRED |
+| `\ExpiryRaceOrderTimerFirst` | 3 | results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'timer tick processed before the ACCEPT arrived' |
+| `\ExpiryRaceOrderTimerWhileQueued` | 0 | results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'timer tick processed while the ACCEPT was queued' |
+| `\ExpiryRaceOrderAcceptTickFirst` | 0 | results/2026-10-17-expiry-race-5/raw.csv: variant = late, order = 'the ACCEPT's own tick-first pass relayed the seat' |
+| `\ExpiryRaceLateTicks` | 3 | results/2026-10-17-expiry-race-5/meta.json: lateTicks |
+| `\ExpiryRaceLateTicksNoEffect` | 3 | results/2026-10-17-expiry-race-5/late-tick.csv: ok = true |
 
 ### Failure recovery (dev)
 
-Source: `runId 3a7ac99e-663f-4bb0-99d7-bec8de3a7b84, target dev, started 2026-10-17T13:44:40.315Z, commit c1d066056b2c (dirty)` — 35/35 with data.
+Source: `runId da47da60-1692-40f3-83eb-40dfcc2cd673, target dev, started 2026-10-17T18:39:47.442Z, commit e05c037d485d (dirty)` — 36/36 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\FailureVerdict` | PASS | results/2026-10-17-failure-recovery/meta.json: ok |
-| `\FailureRunId` | 3a7ac99e | results/2026-10-17-failure-recovery/meta.json: runId (first 8 characters) |
-| `\FailureDate` | 2026-10-17 | results/2026-10-17-failure-recovery/meta.json: startedAt (UTC date) |
-| `\FailureCommit` | c1d0660 | results/2026-10-17-failure-recovery/meta.json: commit.hash (7 characters) |
-| `\FailureRuns` | 3 | results/2026-10-17-failure-recovery/meta.json: runs |
-| `\FailureChecksPassed` | 52 | results/2026-10-17-failure-recovery/meta.json: checks.passed |
-| `\FailureChecksTotal` | 52 | results/2026-10-17-failure-recovery/meta.json: checks.total |
-| `\FailureRunsPassed` | 3 | results/2026-10-17-failure-recovery/checks.csv: runs whose check rows are all ok |
-| `\FailureBeforeCommitCases` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT (rows) |
-| `\FailureBeforeCommitPassed` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, ok = true |
-| `\FailureBeforeCommitSettleMedianS` | 120.1 | results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, serverSettleMs (median) |
-| `\FailureBeforeCommitDeliveriesMin` | 2 | results/2026-10-17-failure-recovery/raw.csv: fault = BEFORE_COMMIT, deliveries (min) |
-| `\FailureAfterCommitCases` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT (rows) |
-| `\FailureAfterCommitPassed` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, ok = true |
-| `\FailureAfterCommitSettleMedianS` | 0.1 | results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, serverSettleMs (median) |
-| `\FailureAfterCommitDeliveriesMin` | 2 | results/2026-10-17-failure-recovery/raw.csv: fault = AFTER_COMMIT, deliveries (min) |
-| `\FailureTimerSendCases` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND (rows) |
-| `\FailureTimerSendPassed` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, ok = true |
-| `\FailureTimerSendSettleMedianS` | 120.1 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, serverSettleMs (median) |
-| `\FailureTimerSendDeliveriesMin` | 2 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, deliveries (min) |
-| `\FailureNotifierOutageMaxS` | 52 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage, recoverySeconds (max) |
-| `\FailureNotifierOutageRuns` | 3 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage (rows) |
-| `\FailureNotifierOutageNotifications` | 10 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage, notifications |
-| `\FailureNotifierOutageSent` | 0 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage, sent (sum over runs) |
-| `\FailureNotifierOutageSkipped` | 30 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage, skipped (sum over runs) |
-| `\FailureNotifierOutageFailed` | 0 | results/2026-10-17-failure-recovery/notifier.csv: phase = outage, failed (sum over runs) |
-| `\FailureNotifierBaselineMaxS` | 3 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, recoverySeconds (max) |
-| `\FailureNotifierBaselineRuns` | 3 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline (rows) |
-| `\FailureNotifierBaselineNotifications` | 10 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, notifications |
-| `\FailureNotifierBaselineSent` | 0 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, sent (sum over runs) |
-| `\FailureNotifierBaselineSkipped` | 30 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, skipped (sum over runs) |
-| `\FailureNotifierBaselineFailed` | 0 | results/2026-10-17-failure-recovery/notifier.csv: phase = baseline, failed (sum over runs) |
-| `\FailureTimerRelayN` | 3 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, effect 'EXPIRED backfill relayed ... after <n> ms' (count) |
-| `\FailureTimerRelayMaxMs` | 982 | results/2026-10-17-failure-recovery/raw.csv: fault = TIMER_SEND, effect 'relayed ... after <n> ms' (max) |
-| `\FailureDeadLetters` | 0 | results/2026-10-17-failure-recovery/checks.csv: step 'dead letters', actual (max over runs) |
+| `\FailureVerdict` | PASS | results/2026-10-17-failure-recovery-2/meta.json: ok |
+| `\FailureRunId` | da47da60 | results/2026-10-17-failure-recovery-2/meta.json: runId (first 8 characters) |
+| `\FailureDate` | 2026-10-17 | results/2026-10-17-failure-recovery-2/meta.json: startedAt (UTC date) |
+| `\FailureCommit` | e05c037 | results/2026-10-17-failure-recovery-2/meta.json: commit.hash (7 characters) |
+| `\FailureDir` | 2026-10-17-failure-recovery-2 | results/2026-10-17-failure-recovery-2 |
+| `\FailureRuns` | 3 | results/2026-10-17-failure-recovery-2/meta.json: runs |
+| `\FailureChecksPassed` | 52 | results/2026-10-17-failure-recovery-2/meta.json: checks.passed |
+| `\FailureChecksTotal` | 52 | results/2026-10-17-failure-recovery-2/meta.json: checks.total |
+| `\FailureRunsPassed` | 3 | results/2026-10-17-failure-recovery-2/checks.csv: runs whose check rows are all ok |
+| `\FailureBeforeCommitCases` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT (rows) |
+| `\FailureBeforeCommitPassed` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, ok = true |
+| `\FailureBeforeCommitSettleMedianS` | 120.1 | results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, serverSettleMs (median) |
+| `\FailureBeforeCommitDeliveriesMin` | 2 | results/2026-10-17-failure-recovery-2/raw.csv: fault = BEFORE_COMMIT, deliveries (min) |
+| `\FailureAfterCommitCases` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT (rows) |
+| `\FailureAfterCommitPassed` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, ok = true |
+| `\FailureAfterCommitSettleMedianS` | 0.1 | results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, serverSettleMs (median) |
+| `\FailureAfterCommitDeliveriesMin` | 2 | results/2026-10-17-failure-recovery-2/raw.csv: fault = AFTER_COMMIT, deliveries (min) |
+| `\FailureTimerSendCases` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND (rows) |
+| `\FailureTimerSendPassed` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, ok = true |
+| `\FailureTimerSendSettleMedianS` | 120.1 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, serverSettleMs (median) |
+| `\FailureTimerSendDeliveriesMin` | 2 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, deliveries (min) |
+| `\FailureNotifierOutageMaxS` | 54 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, recoverySeconds (max) |
+| `\FailureNotifierOutageRuns` | 3 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage (rows) |
+| `\FailureNotifierOutageNotifications` | 10 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, notifications |
+| `\FailureNotifierOutageSent` | 0 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, sent (sum over runs) |
+| `\FailureNotifierOutageSkipped` | 30 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, skipped (sum over runs) |
+| `\FailureNotifierOutageFailed` | 0 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = outage, failed (sum over runs) |
+| `\FailureNotifierBaselineMaxS` | 4 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, recoverySeconds (max) |
+| `\FailureNotifierBaselineRuns` | 3 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline (rows) |
+| `\FailureNotifierBaselineNotifications` | 10 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, notifications |
+| `\FailureNotifierBaselineSent` | 0 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, sent (sum over runs) |
+| `\FailureNotifierBaselineSkipped` | 30 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, skipped (sum over runs) |
+| `\FailureNotifierBaselineFailed` | 0 | results/2026-10-17-failure-recovery-2/notifier.csv: phase = baseline, failed (sum over runs) |
+| `\FailureTimerRelayN` | 3 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, effect 'EXPIRED backfill relayed ... after <n> ms' (count) |
+| `\FailureTimerRelayMaxMs` | 144 | results/2026-10-17-failure-recovery-2/raw.csv: fault = TIMER_SEND, effect 'relayed ... after <n> ms' (max) |
+| `\FailureDeadLetters` | 0 | results/2026-10-17-failure-recovery-2/checks.csv: step 'dead letters', actual (max over runs) |
 
 ### Access control (dev)
 
-Source: `runId 361341fa-d332-43a1-97db-57dc9c1a2166, target dev, started 2026-10-17T14:15:28.545Z, commit c1d066056b2c (dirty)` — 14/14 with data.
+Source: `runId 6dacbc7a-bf40-49f4-b172-bd19168138f3, target dev, started 2026-10-17T19:10:49.064Z, commit e05c037d485d (dirty)` — 15/15 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\AccessVerdict` | PASS | results/2026-10-17-access-control/meta.json: ok |
-| `\AccessRunId` | 361341fa | results/2026-10-17-access-control/meta.json: runId (first 8 characters) |
-| `\AccessDate` | 2026-10-17 | results/2026-10-17-access-control/meta.json: startedAt (UTC date) |
-| `\AccessCommit` | c1d0660 | results/2026-10-17-access-control/meta.json: commit.hash (7 characters) |
-| `\AccessRuns` | 3 | results/2026-10-17-access-control/meta.json: runs |
-| `\AccessChecksPassed` | 177 | results/2026-10-17-access-control/meta.json: checks.passed |
-| `\AccessChecksTotal` | 177 | results/2026-10-17-access-control/meta.json: checks.total |
-| `\AccessRunsPassed` | 3 | results/2026-10-17-access-control/checks.csv: runs whose check rows are all ok |
-| `\AccessProbes` | 165 | results/2026-10-17-access-control/meta.json: probes |
-| `\AccessProbesPassed` | 165 | results/2026-10-17-access-control/meta.json: passed |
-| `\AccessProbeGroups` | 7 | results/2026-10-17-access-control/raw.csv: group (distinct) |
-| `\AccessExpectedFourHundredOne` | 48 | results/2026-10-17-access-control/raw.csv: expected starts with 401 |
-| `\AccessExpectedFourHundredThree` | 72 | results/2026-10-17-access-control/raw.csv: expected starts with 403 |
-| `\AccessExpectedFourHundredFour` | 21 | results/2026-10-17-access-control/raw.csv: expected starts with 404 |
+| `\AccessVerdict` | PASS | results/2026-10-17-access-control-2/meta.json: ok |
+| `\AccessRunId` | 6dacbc7a | results/2026-10-17-access-control-2/meta.json: runId (first 8 characters) |
+| `\AccessDate` | 2026-10-17 | results/2026-10-17-access-control-2/meta.json: startedAt (UTC date) |
+| `\AccessCommit` | e05c037 | results/2026-10-17-access-control-2/meta.json: commit.hash (7 characters) |
+| `\AccessDir` | 2026-10-17-access-control-2 | results/2026-10-17-access-control-2 |
+| `\AccessRuns` | 3 | results/2026-10-17-access-control-2/meta.json: runs |
+| `\AccessChecksPassed` | 177 | results/2026-10-17-access-control-2/meta.json: checks.passed |
+| `\AccessChecksTotal` | 177 | results/2026-10-17-access-control-2/meta.json: checks.total |
+| `\AccessRunsPassed` | 3 | results/2026-10-17-access-control-2/checks.csv: runs whose check rows are all ok |
+| `\AccessProbes` | 165 | results/2026-10-17-access-control-2/meta.json: probes |
+| `\AccessProbesPassed` | 165 | results/2026-10-17-access-control-2/meta.json: passed |
+| `\AccessProbeGroups` | 7 | results/2026-10-17-access-control-2/raw.csv: group (distinct) |
+| `\AccessExpectedFourHundredOne` | 48 | results/2026-10-17-access-control-2/raw.csv: expected starts with 401 |
+| `\AccessExpectedFourHundredThree` | 72 | results/2026-10-17-access-control-2/raw.csv: expected starts with 403 |
+| `\AccessExpectedFourHundredFour` | 21 | results/2026-10-17-access-control-2/raw.csv: expected starts with 404 |
 
 ### Backfill latency (dev)
 
-Source: `runId 3393de39-7f0b-4404-994e-cc912749aec4, target dev, started 2026-10-17T14:16:25.938Z, commit c1d066056b2c (dirty)` — 9/23 with data.
+Source: `runId 983158fd-059e-4c78-a5be-acd0e94b46d0, target dev, started 2026-10-17T19:11:42.100Z, commit e05c037d485d (dirty)` — 24/24 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\BackfillVerdict` | FAIL | results/2026-10-17-backfill/meta.json: ok |
-| `\BackfillRunId` | 3393de39 | results/2026-10-17-backfill/meta.json: runId (first 8 characters) |
-| `\BackfillDate` | 2026-10-17 | results/2026-10-17-backfill/meta.json: startedAt (UTC date) |
-| `\BackfillCommit` | c1d0660 | results/2026-10-17-backfill/meta.json: commit.hash (7 characters) |
-| `\BackfillRuns` | 3 | results/2026-10-17-backfill/meta.json: runs |
-| `\BackfillChecksPassed` | 0 | results/2026-10-17-backfill/meta.json: checks.passed |
-| `\BackfillChecksTotal` | 1 | results/2026-10-17-backfill/meta.json: checks.total |
-| `\BackfillRunsPassed` | 0 | results/2026-10-17-backfill/raw.csv: runs whose check rows are all ok |
-| `\BackfillHoldSeconds` | 60 | results/2026-10-17-backfill/meta.json: holdSeconds |
-| `\BackfillExpiredN` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredPFiftyMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredPNinetyFiveMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredPNinetyNineMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredMaxMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredMeanMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredPFiftyS` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredPNinetyFiveS` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredMaxS` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
-| `\BackfillExpiredUnrelayed` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = EXPIRED without reallocatedAt |
-| `\BackfillCancelN` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = CANCELLED_* (rows) |
-| `\BackfillCancelMaxMs` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/raw.csv: cause = CANCELLED_*, latencyMs (max) |
-| `\BackfillOutliers` | PENDING: backfill (dev) not yet run | results/2026-10-17-backfill/meta.json: outliers |
-| `\BackfillSweepLateExpiries` | PENDING: SweepLateExpiries not fetched (CloudWatch read skipped) | results/2026-10-17-backfill/meta.json: sweepLateExpiries |
+| `\BackfillVerdict` | PASS | results/2026-10-17-backfill-2/meta.json: ok |
+| `\BackfillRunId` | 983158fd | results/2026-10-17-backfill-2/meta.json: runId (first 8 characters) |
+| `\BackfillDate` | 2026-10-17 | results/2026-10-17-backfill-2/meta.json: startedAt (UTC date) |
+| `\BackfillCommit` | e05c037 | results/2026-10-17-backfill-2/meta.json: commit.hash (7 characters) |
+| `\BackfillDir` | 2026-10-17-backfill-2 | results/2026-10-17-backfill-2 |
+| `\BackfillRuns` | 3 | results/2026-10-17-backfill-2/meta.json: runs |
+| `\BackfillChecksPassed` | 124 | results/2026-10-17-backfill-2/meta.json: checks.passed |
+| `\BackfillChecksTotal` | 124 | results/2026-10-17-backfill-2/meta.json: checks.total |
+| `\BackfillRunsPassed` | 3 | results/2026-10-17-backfill-2/checks.csv: runs whose check rows are all ok |
+| `\BackfillHoldSeconds` | 60 | results/2026-10-17-backfill-2/meta.json: holdSeconds |
+| `\BackfillExpiredN` | 300 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredPFiftyMs` | 49 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredPNinetyFiveMs` | 100 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredPNinetyNineMs` | 136 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredMaxMs` | 328 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredMeanMs` | 47 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredPFiftyS` | 0.05 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredPNinetyFiveS` | 0.10 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredMaxS` | 0.33 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED, reallocatedAt set, latencyMs (pooled over runs, nearest rank) |
+| `\BackfillExpiredUnrelayed` | 0 | results/2026-10-17-backfill-2/raw.csv: cause = EXPIRED without reallocatedAt |
+| `\BackfillCancelN` | 60 | results/2026-10-17-backfill-2/raw.csv: cause = CANCELLED_* (rows) |
+| `\BackfillCancelMaxMs` | 0 | results/2026-10-17-backfill-2/raw.csv: cause = CANCELLED_*, latencyMs (max) |
+| `\BackfillOutliers` | 0 | results/2026-10-17-backfill-2/meta.json: outliers |
+| `\BackfillSweepLateExpiries` | 0 | results/2026-10-17-backfill-2/meta.json: sweepLateExpiries |
 
 ### Table 3 series (dev): failures and commits
 
-Source: `correctness: results/2026-10-17-correctness`; `preference-order: results/2026-10-17-preference-order`; `concurrency: results/2026-10-17-concurrency`; `repeat-execution: results/2026-10-17-repeat-execution`; `expiry-race: results/2026-10-17-expiry-race-4`; `failure-recovery: results/2026-10-17-failure-recovery`; `access-control: results/2026-10-17-access-control`; `backfill: results/2026-10-17-backfill` — 7/7 with data.
+Source: `correctness: results/2026-10-17-correctness-2`; `preference-order: results/2026-10-17-preference-order-2`; `concurrency: results/2026-10-17-concurrency-2`; `repeat-execution: results/2026-10-17-repeat-execution-2`; `expiry-race: results/2026-10-17-expiry-race-5`; `failure-recovery: results/2026-10-17-failure-recovery-2`; `access-control: results/2026-10-17-access-control-2`; `backfill: results/2026-10-17-backfill-2` — 6/7 with data.
 
 | Macro | Value | Source |
 |---|---|---|
 | `\SeriesExperiments` | 8 | meta.json of each selected run |
-| `\SeriesFailed` | 2 | meta.json ok = false of each selected run |
-| `\SeriesPassed` | 6 | meta.json ok = true of each selected run |
-| `\SeriesFailedNames` | concurrency, backfill | meta.json ok = false of each selected run |
-| `\SeriesCommits` | 227de3d, ec54916, c1d0660, 00faa52 | meta.json commit.hash of each selected run (in run order) |
-| `\SeriesCommitCount` | 4 | meta.json commit.hash (distinct) |
-| `\SeriesDirtyRuns` | 7 | meta.json commit.dirty = true |
+| `\SeriesFailed` | 0 | meta.json ok = false of each selected run |
+| `\SeriesPassed` | 8 | meta.json ok = true of each selected run |
+| `\SeriesFailedNames` | PENDING: Table 3 series (dev) not yet run | meta.json ok = false of each selected run |
+| `\SeriesCommits` | e05c037 | meta.json commit.hash of each selected run (in run order) |
+| `\SeriesCommitCount` | 1 | meta.json commit.hash (distinct) |
+| `\SeriesDirtyRuns` | 8 | meta.json commit.dirty = true |
+
+### First series (dev) under the Lambda concurrency quota of 10
+
+Source: `results/2026-10-17-throttling-evidence` — 18/18 with data.
+
+| Macro | Value | Source |
+|---|---|---|
+| `\ThrottleConcurrencyServiceUnavailable` | 76 | results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_503_in_access_log |
+| `\ThrottleConcurrencyApiThrottles` | 76 | results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_lambda_throttles |
+| `\ThrottleConcurrencyRequests` | 888 | results/2026-10-17-throttling-evidence/api-503.csv: concurrency, api_requests_metric |
+| `\ThrottleConcurrencyAccountConcurrencyMax` | 10 | results/2026-10-17-throttling-evidence/lambda-metrics.csv: concurrency, ACCOUNT(all functions), concurrent_max |
+| `\ThrottleBackfillServiceUnavailable` | 63 | results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_503_in_access_log |
+| `\ThrottleBackfillApiThrottles` | 63 | results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_lambda_throttles |
+| `\ThrottleBackfillRequests` | 1,142 | results/2026-10-17-throttling-evidence/api-503.csv: backfill, api_requests_metric |
+| `\ThrottleBackfillAccountConcurrencyMax` | 10 | results/2026-10-17-throttling-evidence/lambda-metrics.csv: backfill, ACCOUNT(all functions), concurrent_max |
+| `\ThrottleKsixServiceUnavailable` | 5,580 | results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_503_in_access_log |
+| `\ThrottleKsixApiThrottles` | 5,580 | results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_lambda_throttles |
+| `\ThrottleKsixRequests` | 104,656 | results/2026-10-17-throttling-evidence/api-503.csv: k6-matrix, api_requests_metric |
+| `\ThrottleKsixAccountConcurrencyMax` | 10 | results/2026-10-17-throttling-evidence/lambda-metrics.csv: k6-matrix, ACCOUNT(all functions), concurrent_max |
+| `\ThrottleWindowsExactMatch` | 3 | results/2026-10-17-throttling-evidence/api-503.csv: rows with 503 = 5xx = API throttles |
+| `\ThrottleWindows` | 3 | results/2026-10-17-throttling-evidence/api-503.csv: rows |
+| `\ThrottleKsixWorkerThrottles` | 416 | results/2026-10-17-throttling-evidence/lambda-metrics.csv: k6-matrix, seatrelay-dev-worker, throttles_sum |
+| `\ThrottleFirstConcurrencyChecksPassed` | 22 | results/2026-10-17-concurrency/meta.json: checks.passed |
+| `\ThrottleFirstConcurrencyChecksTotal` | 39 | results/2026-10-17-concurrency/meta.json: checks.total |
+| `\ThrottleFirstConcurrencyCommit` | ec54916 | results/2026-10-17-concurrency/meta.json: commit.hash |
 
 ### Timer-path relays seen outside the backfill experiment (dev)
 
-Source: `results/2026-10-17-smoke`; `results/2026-10-17-failure-recovery` — 3/3 with data.
+Source: `results/2026-10-17-smoke-2`; `results/2026-10-17-failure-recovery-2` — 3/3 with data.
 
 | Macro | Value | Source |
 |---|---|---|
 | `\TimerPathRelaysN` | 4 | smoke meta.json expiryBackfillLatencyMs + failure-recovery raw.csv TIMER_SEND effect |
-| `\TimerPathRelayMaxMs` | 982 | same samples (max) |
-| `\SmokeCancelBackfillMs` | 0 | results/2026-10-17-smoke/checks.csv: step 'backfill CANCELLED_CONFIRMED', actual latencyMs |
+| `\TimerPathRelayMaxMs` | 144 | same samples (max) |
+| `\SmokeCancelBackfillMs` | 0 | results/2026-10-17-smoke-2/checks.csv: step 'backfill CANCELLED_CONFIRMED', actual latencyMs |
 
 ### Performance: k6 matrix
 
@@ -1402,7 +1436,7 @@ Source: none yet — 0/8 with data.
 
 ### Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)
 
-Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-10-17T16:51:30.226Z, commit b8b8f3ae3480 (dirty)` — 78/78 with data.
+Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-10-17T16:51:30.226Z, commit b8b8f3ae3480 (dirty)` — 79/79 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -1410,6 +1444,7 @@ Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-
 | `\RehearsalRunId` | 60453144 | results/2026-10-17-pilot-rehearsal-3/meta.json: runId (first 8 characters) |
 | `\RehearsalDate` | 2026-10-17 | results/2026-10-17-pilot-rehearsal-3/meta.json: startedAt (UTC date) |
 | `\RehearsalCommit` | b8b8f3a | results/2026-10-17-pilot-rehearsal-3/meta.json: commit.hash (7 characters) |
+| `\RehearsalDir` | 2026-10-17-pilot-rehearsal-3 | results/2026-10-17-pilot-rehearsal-3 |
 | `\RehearsalRuns` | 1 | results/2026-10-17-pilot-rehearsal-3/meta.json: runs |
 | `\RehearsalChecksPassed` | 85 | results/2026-10-17-pilot-rehearsal-3/meta.json: checks.passed |
 | `\RehearsalChecksTotal` | 85 | results/2026-10-17-pilot-rehearsal-3/meta.json: checks.total |
@@ -1487,11 +1522,12 @@ Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-
 
 ## Notes from the last run
 
-- results/2026-10-17-access-control: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-backfill: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-concurrency: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-correctness: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-failure-recovery: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-access-control-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-backfill-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-concurrency-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-correctness-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-expiry-race-5: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-failure-recovery-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-pilot-rehearsal-3: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-preference-order: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-repeat-execution: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-preference-order-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
+- results/2026-10-17-repeat-execution-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run

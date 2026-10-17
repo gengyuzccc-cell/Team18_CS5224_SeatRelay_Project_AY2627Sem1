@@ -213,6 +213,7 @@ def run_header(book: Book, prefix: str, run, what: str) -> None:
     book.text(f"{prefix}RunId", (meta.get("runId") or "")[:8] or None, src_of(run, "meta.json", "runId (first 8 characters)"), f"{what}: run id")
     book.text(f"{prefix}Date", (meta.get("startedAt") or "")[:10] or None, src_of(run, "meta.json", "startedAt (UTC date)"), f"{what}: date of the run")
     book.text(f"{prefix}Commit", (commit.get("hash") or "")[:7] or None, src_of(run, "meta.json", "commit.hash (7 characters)"), f"{what}: commit of the code under test")
+    book.text(f"{prefix}Dir", run.path.name if run else None, rel(run.path) if run else "results/<date>-<experiment>", f"{what}: results directory quoted")
     book.num(f"{prefix}Runs", meta.get("runs"), 0, src_of(run, "meta.json", "runs"), f"{what}: repetitions in the invocation")
     book.num(f"{prefix}ChecksPassed", checks.get("passed"), 0, src_of(run, "meta.json", "checks.passed"), f"{what}: checks passed")
     book.num(f"{prefix}ChecksTotal", checks.get("total"), 0, src_of(run, "meta.json", "checks.total"), f"{what}: checks in total")
@@ -465,6 +466,54 @@ def section_series(book: Book, runs, target: str) -> None:
     book.num("SeriesCommitCount", len(commits) if commits else None, 0, "meta.json commit.hash (distinct)", "distinct commits recorded by the series")
     dirty = sum(1 for _, run in present if (run.meta.get("commit") or {}).get("dirty"))
     book.num("SeriesDirtyRuns", dirty if present else None, 0, "meta.json commit.dirty = true", "runs recorded with uncommitted changes in the working tree")
+
+
+THROTTLE_WINDOWS = (("concurrency", "Concurrency"), ("backfill", "Backfill"), ("k6-matrix", "Ksix"))
+
+
+def section_throttling(book: Book, runs, results: Path, target: str) -> None:
+    """The first series on dev under the account's Lambda concurrency quota of 10: the HTTP 503s
+    against the API function's throttles (results/<date>-throttling-evidence/), and the first,
+    throttled concurrency run's check count (the earliest concurrency run on the target)."""
+    folder = db.latest_dir(results, "*-throttling-evidence")
+    book.section("throttling", f"First series ({target}) under the Lambda concurrency quota of 10",
+                 "throttling evidence (results/<date>-throttling-evidence) not yet recorded", [rel(folder) if folder else "none"])
+    api = db.read_csv(folder / "api-503.csv", book.notes) if folder else None
+    lam = db.read_csv(folder / "lambda-metrics.csv", book.notes) if folder else None
+    src_api = f"{rel(folder)}/api-503.csv" if folder else "results/<date>-throttling-evidence/api-503.csv"
+    src_lam = f"{rel(folder)}/lambda-metrics.csv" if folder else "results/<date>-throttling-evidence/lambda-metrics.csv"
+    exact = 0
+    for window, name in THROTTLE_WINDOWS:
+        row = api[api["window"] == window] if api is not None else None
+        row = row.iloc[0] if row is not None and len(row) else None
+        get = (lambda column: None if row is None else row[column])
+        book.num(f"Throttle{name}ServiceUnavailable", get("api_503_in_access_log"), 0, f"{src_api}: {window}, api_503_in_access_log",
+                 f"{window} window: HTTP 503 responses in the API access log")
+        book.num(f"Throttle{name}ApiThrottles", get("api_lambda_throttles"), 0, f"{src_api}: {window}, api_lambda_throttles",
+                 f"{window} window: throttles of the API function (AWS/Lambda Throttles, Sum)")
+        book.num(f"Throttle{name}Requests", get("api_requests_metric"), 0, f"{src_api}: {window}, api_requests_metric",
+                 f"{window} window: API requests (AWS/ApiGateway Count)")
+        if row is not None and row["api_503_in_access_log"] == row["api_5xx_metric"] == row["api_lambda_throttles"]:
+            exact += 1
+        account = lam[(lam["window"] == window) & lam["function"].astype(str).str.startswith("ACCOUNT")] if lam is not None else None
+        book.num(f"Throttle{name}AccountConcurrencyMax", None if account is None or not len(account) else account.iloc[0]["concurrent_max"], 0,
+                 f"{src_lam}: {window}, ACCOUNT(all functions), concurrent_max", f"{window} window: account-wide concurrent executions (max)")
+    book.num("ThrottleWindowsExactMatch", exact if api is not None else None, 0, f"{src_api}: rows with 503 = 5xx = API throttles",
+             "windows in which the 503s, the 5xx metric and the API function's throttles are equal")
+    book.num("ThrottleWindows", len(api) if api is not None else None, 0, f"{src_api}: rows", "windows examined")
+    worker = lam[(lam["window"] == "k6-matrix") & (lam["function"] == "seatrelay-dev-worker")] if lam is not None else None
+    book.num("ThrottleKsixWorkerThrottles", None if worker is None or not len(worker) else worker.iloc[0]["throttles_sum"], 0,
+             f"{src_lam}: k6-matrix, seatrelay-dev-worker, throttles_sum", "k6 window: throttles of the worker function")
+    first = sorted((r for r in runs.get("concurrency", []) if r.target == target and r.complete),
+                   key=lambda r: (r.date, r.suffix, r.started))
+    first = first[0] if first else None
+    checks = (first.meta.get("checks") or {}) if first else {}
+    book.num("ThrottleFirstConcurrencyChecksPassed", checks.get("passed"), 0, src_of(first, "meta.json", "checks.passed"),
+             "first concurrency run: checks passed")
+    book.num("ThrottleFirstConcurrencyChecksTotal", checks.get("total"), 0, src_of(first, "meta.json", "checks.total"),
+             "first concurrency run: checks in total")
+    book.text("ThrottleFirstConcurrencyCommit", (first.commit.get("hash") or "")[:7] if first else None, src_of(first, "meta.json", "commit.hash"),
+              "first concurrency run: commit")
 
 
 def section_timer_path(book: Book, runs, target: str) -> None:
@@ -1636,6 +1685,7 @@ def main(argv=None) -> int:
     section_access(book, runs, args.target)
     section_backfill(book, runs, args.target)
     section_series(book, runs, args.target)
+    section_throttling(book, runs, results, args.target)
     section_timer_path(book, runs, args.target)
     section_loadtest(book, results)
     section_cost(book, results)

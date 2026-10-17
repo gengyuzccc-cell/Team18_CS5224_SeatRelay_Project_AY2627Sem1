@@ -10,8 +10,8 @@
 % and timer settings), configuration (the account's Lambda quota) and the recording's chapter times
 % are typed: they are not measurements. Figures: the report's TikZ files (figures/*.tex) and
 % charts (figures/generated/*.pdf), and the staged walkthrough screenshots in docs/demo/screenshots.
-% Speaker notes: docs/walkthrough/part-1.md ... part-6.md (parts 1-6 = the six members in the
-% order of the title block; the footer tag of every slide names its speaker).
+% Speaker notes: docs/walkthrough/part-1.md ... part-6.md (each member presents their own work line
+% of the Preliminary report, docs/walkthrough/README.md; the footer tag of every slide names its speaker).
 % Student numbers: as in Final.tex, only the submission build prints them, from the git-ignored
 % team-ids.tex:  ./report/build.sh -t Slides -m 30 -s  ->  Slides-submission.pdf (git-ignored).
 % Without -s, or without team-ids.tex, the title slide shows names only.
@@ -247,7 +247,7 @@
 \end{frame}
 
 % =============================================================================== Part 4 (demo)
-\speaker{ZHU GENGYU \textperiodcentered{} operator LIANG ZIHAN}
+\speaker{ZHANG TIANYI \textperiodcentered{} operator LI ZONGZE}
 \begin{frame}{Live demo on the dev stage}
   \vspace{0.10in}
   \beat{D1}{Register for Session 3, then 1 \textrightarrow{} seat offered \textrightarrow{} accept}
@@ -265,24 +265,24 @@
 \end{frame}
 
 % =============================================================================== Part 5
-\speaker{LIANG ZIHAN}
+\speaker{ZHU GENGYU}
 \begin{frame}{Results against Prelim.\ Table 3 (Final report Table 5)}
   \vspace{0.06in}
   \tileL{\CorrectnessVerdict}{Core correctness}{\CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks}\hfill
   \tile{\FailureVerdict}{Failure recovery}{\FailureBeforeCommitSettleMedianS\,s median}\par\vspace{0.20in}
   \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable {\small\mute{(dev)}}}\hfill
   \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} refused}\par\vspace{0.20in}
-  \tileL{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyTransportErrors{} HTTP 503s}\hfill
+  \tileL{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyAccounts{} accounts, \ConcurrencySeats{} seats}\hfill
   \tile{\PerfDevVerdict}{Performance}{met up to \PerfDevMaxVUsMet{} users}\par\vspace{0.20in}
   \tileL{\RepeatVerdict}{Repeat execution}{\RepeatProbesPassed/\RepeatProbes{} probes}\hfill
   \tile{\BackfillVerdict}{Backfill latency}{\IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{p95 \BackfillExpiredPNinetyFiveS\,s}}\par\vspace{0.20in}
   \tileL{\ExpiryRaceVerdict}{Expiry race}{\ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks{} stale ticks inert}\hfill
   \tile{MODEL}{Cost}{\usd\CostUnitOneKCloudListUsd{} \textrightarrow{} \CostUnitHundredKCloudListUsd{} per 1k}\par\vspace{0.34in}
   \SeriesPassed{} of \SeriesExperiments{} scripted experiments pass; the k6 load test meets its targets only at \PerfDevMaxVUsMet{} users
-  \source{Dev stage, 3 runs per experiment; failures are reported as failures. HTTP 503s: cause not yet found
-    (a concurrent deployment and the account's Lambda quota of 10 are being ruled out; re-runs wait for a quota
-    increase). Preference order: dev part only, engine property-test record pending. Failure recovery on dev
-    without e-mail. No \code{verify} call found a violation. Final report Table 5; \code{results/2026-10-17-*/}.}
+  \source{Dev stage, 3 runs per experiment, re-run after the Lambda quota rose from 10 to 1{,}000: in the first
+    series the quota throttled the API (HTTP 503 = Lambda throttles, \ThrottleConcurrencyApiThrottles{} and
+    \ThrottleBackfillApiThrottles), failing concurrency and backfill; kept in \code{results/}. Failure recovery
+    on dev without e-mail. No \code{verify} call found a violation. Final report Table 5; \code{results/2026-10-17-*/}.}
 \end{frame}
 
 \begin{frame}{Latency, backfill and the mechanism comparison}
@@ -300,9 +300,10 @@
       people served \ReplayDistinctUnifiedMean{} vs \ReplayDistinctPerSessionMean
     \end{column}
   \end{columns}\par\vspace{0.12in}
-  \textbf{Backfill p95} \IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{\BackfillExpiredPNinetyFiveS\,s}
-  \textperiodcentered{} timer relays on dev so far: \TimerPathRelaysN, $\leq$\,\TimerPathRelayMaxMs\,ms
+  \textbf{Backfill p95} \IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{\BackfillExpiredPNinetyFiveS\,s
+  (n = \BackfillExpiredN, max \BackfillExpiredMaxS\,s; target 120\,s)}
   \textperiodcentered{} cancel \SmokeCancelBackfillMs\,ms
+  \textperiodcentered{} sweep never needed
   \source{k6: median of \PerfRoundsPerLevel{} rounds per level (cross-workshop / one hot workshop); 202 p95 lies on the read
     line. Replay: the same engine, one queue vs per-session forms, assumed behaviour model; not live traffic.
     Final report \S4.2--4.3.}
@@ -336,7 +337,7 @@
 \end{frame}
 
 % =============================================================================== Part 6
-\speaker{ZHANG TIANYI}
+\speaker{LIANG ZIHAN}
 \begin{frame}{User study and pilot: status, and a staged rehearsal}
   \vspace{0.06in}
   \textbf{Independent users} \mute{(Preliminary report \S5; planned, not yet run)}\par\vspace{0.08in}
@@ -385,7 +386,7 @@
 
 % =============================================================================== backup
 \appendix
-\speaker{ZHU GENGYU}
+\speaker{ZHANG TIANYI}
 \begin{frame}{Backup: demo recording (staged)}
   \vspace{0.06in}
   \code{docs/demo/backup-demo.mp4}: 2:43, silent, captions say who acts\par\vspace{0.10in}
@@ -398,7 +399,8 @@
     injection (D5 is a terminal step; see B6). Recorded by \code{tools/e2e} on 2026-10-17 (UTC).}
 \end{frame}
 
-\speaker{ZHU GENGYU \textperiodcentered{} LIANG ZIHAN}
+% B2-B6: the demo narrator (Plan D, and B6 for beat D5)
+\speaker{ZHANG TIANYI}
 
 % #1 title, #2/#5 trims, #3/#6 files, #4/#7 captions, #8 note
 \newcommand{\shotslide}[8]{%
@@ -430,7 +432,6 @@
   {190 540 480 85}{26-dashboard-verify-ok.png}{CSV export; all invariants hold}
   {Dashboard values in a demo are demo values, not measurements.}
 
-\speaker{LIANG ZIHAN}
 \begin{frame}{Demo beat D5: crash after commit, applied once}
   \vspace{0.06in}
   No screenshot: a terminal step. What the experiments recorded on dev:\par\vspace{0.20in}

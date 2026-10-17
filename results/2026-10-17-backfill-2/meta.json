@@ -1,0 +1,87 @@
+{
+  "runId": "983158fd-059e-4c78-a5be-acd0e94b46d0",
+  "name": "backfill",
+  "tableRow": "Backfill latency (plan §4, Table 3)",
+  "criterion": "expiry-driven backfill p95 ≤ 120 s (reallocatedAt − releasedAt; single-digit seconds expected), every expiry relayed, outliers listed; cancellation-driven backfills reported separately (≈ 0 ms); SweepLateExpiries = 0",
+  "startedAt": "2026-10-17T19:11:42.100Z",
+  "finishedAt": "2026-10-17T19:16:36.604Z",
+  "durationMs": 294504,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "e05c037d485dc9e64ca0e45552a530bba7ba43b0",
+    "short": "e05c037d485d",
+    "dirty": true
+  },
+  "runs": 3,
+  "holdSeconds": 60,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 23,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "layout": {
+      "workshops": 10,
+      "sessions": 2,
+      "capacity": 5,
+      "rounds": 1,
+      "seats": 10,
+      "offers": 100,
+      "extraPerWorkshop": 2,
+      "registrantsPerWorkshop": 22
+    },
+    "outlierMs": 10000,
+    "waitExtraSeconds": 420,
+    "seed": 1,
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1"
+  },
+  "checks": {
+    "total": 124,
+    "passed": 124,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "expiredLatencyMs": {
+    "count": 300,
+    "min": 0,
+    "max": 328,
+    "mean": 46.74333333333333,
+    "p50": 49,
+    "p95": 100,
+    "p99": 136,
+    "stdev": 36.30496920380029
+  },
+  "cancelLatencyMs": {
+    "count": 60,
+    "min": 0,
+    "max": 0,
+    "mean": 0,
+    "p50": 0,
+    "p95": 0,
+    "p99": 0,
+    "stdev": 0
+  },
+  "outliers": 0,
+  "sweepLateExpiries": 0,
+  "layout": {
+    "workshops": 10,
+    "sessions": 2,
+    "capacity": 5,
+    "rounds": 1,
+    "seats": 10,
+    "offers": 100,
+    "extraPerWorkshop": 2,
+    "registrantsPerWorkshop": 22
+  }
+}
