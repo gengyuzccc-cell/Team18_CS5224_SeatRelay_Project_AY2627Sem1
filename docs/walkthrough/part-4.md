@@ -1,11 +1,12 @@
 # Part 4: live demo
 
-- **Speaker:** (team member), narrator for beats D1, D2, D5a and D3
-- **Operator:** the Part 5 speaker drives every window and the terminal. They also narrate D5b and
+- **Speaker:** ZHU GENGYU, narrator for beats D1, D2, D5a and D3
+- **Operator:** LIANG ZIHAN (the Part 5 speaker) drives every window and the terminal. They also narrate D5b and
   D4, then continue straight into Part 5.
 - **Clock:** 6:00–11:00 (5:00)
 - **Slide:** 8 "Live demo" (dev stage URL `https://d2ni5e1z674t04.cloudfront.net`). Backup: B1
-  recording with chapter marks, B2–B7 one screenshot per beat.
+  recording with chapter marks, B2–B5 screenshots of the expected states of D1–D4, B6 what the
+  experiments recorded for D5 (a terminal step, so no screenshot).
 - **Script:** `docs/DEMO.md` is the authority for setup (§3), click path (§5), fallback (§6), reset
   (§7) and troubleshooting (§8). This file compresses its §5 to 5:00 and assigns the lines.
 
@@ -23,12 +24,12 @@
 
 | Talk clock | Beat | Operator does | Narrator |
 |---|---|---|---|
-| 6:00–6:50 | D1 register → offer → accept | Window A: tick Session 3, then Session 1 → Register; then Accept seat; Window O: Refresh | Speaker 4 |
-| 6:50–7:40 | D2 cancellation → instant backfill | Window B: Session 1 → Register (queued #1); Window A: Cancel my seat → Yes; Window B: Accept seat; Window O: Refresh, point at the backfill log | Speaker 4 |
-| 7:40–8:20 | D5a crash after commit | Terminal: the three `curl` commands of DEMO.md D5a (POST at about 7:45) | Speaker 4 |
-| 8:20–10:00 | D3 60 s hold expires → automatic backfill | *Expiry demo* tab: A registers (offer), B registers (queued); Window O: Refresh; wait; B refreshes and accepts; Window O: Refresh, point at the backfill log | Speaker 4 |
-| 10:00–10:30 | D5b exactly once, proven | Terminal: the log query and the `GET /commands/$CMD` of DEMO.md D5b (at least 135 s after the D5a POST); Window O: Refresh | Speaker 5 |
-| 10:30–11:00 | D4 verify invariants | Window O: Verify invariants on both workshops | Speaker 5 |
+| 6:00–6:50 | D1 register → offer → accept | Window A: tick Session 3, then Session 1 → Register; then Accept seat; Window O: Refresh | ZHU GENGYU |
+| 6:50–7:40 | D2 cancellation → instant backfill | Window B: Session 1 → Register (queued #1); Window A: Cancel my seat → Yes; Window B: Accept seat; Window O: Refresh, point at the backfill log | ZHU GENGYU |
+| 7:40–8:20 | D5a crash after commit | Terminal: the three `curl` commands of DEMO.md D5a (POST at about 7:45) | ZHU GENGYU |
+| 8:20–10:00 | D3 60 s hold expires → automatic backfill | *Expiry demo* tab: A registers (offer), B registers (queued); Window O: Refresh; wait; B refreshes and accepts; Window O: Refresh, point at the backfill log | ZHU GENGYU |
+| 10:00–10:30 | D5b exactly once, proven | Terminal: the log query and the `GET /commands/$CMD` of DEMO.md D5b (at least 135 s after the D5a POST); Window O: Refresh | LIANG ZIHAN |
+| 10:30–11:00 | D4 verify invariants | Window O: Verify invariants on both workshops | LIANG ZIHAN |
 
 D5a comes before D3 on purpose. On dev the crashed message returns after the 120 s visibility
 timeout, and the expiry beat fills that wait. It also shows that a stuck message pauses only its own
@@ -36,7 +37,7 @@ workshop. Do not send any command to *Demo workshop* between D5a and D5b.
 
 ## What to say
 
-### Speaker 4 (about 340 words, spread over 4 minutes of clicking and waiting)
+### ZHU GENGYU (about 340 words, spread over 4 minutes of clicking and waiting)
 
 **D1.** On the left is the organiser's dashboard; on the right are two participants. All of this is
 running live on our dev stage on AWS. The workshop has three sessions. Session 3 is already held,
@@ -66,7 +67,7 @@ five-minute sweep is only a safety net. *(after B's offer)* Nobody pressed anyth
 on by itself, and the log records how long the hand-over took.
 Let's go back to the command we crashed.
 
-### Speaker 5 (about 110 words)
+### LIANG ZIHAN (about 110 words)
 
 **D5b.** This is the worker's log for that command. Delivery one: the injected fault after the
 commit. About two minutes later, delivery two: command already settled, acknowledged. The record
@@ -82,10 +83,10 @@ seats. Our experiments run this same check after every step. Here is what they f
 
 | Situation | Who acts | What to say and do |
 |---|---|---|
-| A step has not settled after 15 s, an error banner appears, or sign-in breaks | Speaker 4 | "Let me show this step from our recording." Operator jumps to the beat's chapter in B1. Do not debug live. |
-| The *Demo workshop* card shows "Still processing" between D5a and D5b | Speaker 4 | "Expected: this workshop's queue is waiting for the crashed message." |
+| A step has not settled after 15 s, an error banner appears, or sign-in breaks | ZHU GENGYU | "Let me show this step from our recording." Operator jumps to the beat's chapter in B1. Do not debug live. |
+| The *Demo workshop* card shows "Still processing" between D5a and D5b | ZHU GENGYU | "Expected: this workshop's queue is waiting for the crashed message." |
 | D5b would start less than 120 s after the D5a POST | Operator | Do D4 first, then D5b. |
-| Plan B (local stack) | Speaker 4 | Say once: "This is our on-premise reference deployment, same code." D5b can follow D5a directly (redelivery after about 1 s). |
+| Plan B (local stack) | ZHU GENGYU | Say once: "This is our on-premise reference deployment, same code." D5b can follow D5a directly (redelivery after about 1 s). |
 | A card does not update after the other window acted | Operator | Press F5 (the page refreshes every 10 s only while visible). |
 
 ## Key numbers
@@ -98,9 +99,9 @@ redelivery time are demo values. If you are asked, these are the measured ones:
 | Smoke on dev, 2026-10-17 (same flow, scripted) | PASS, 13/13 checks | `results/2026-10-17-smoke/summary.md` |
 | Cancellation-driven backfill | 0 ms (relayed in the same transaction; asserted) | same file, step 4 |
 | Expiry-driven backfill in that smoke run | 117 ms (n = 1, a single sample) | same file (`\SmokeExpiryBackfillMaxMs`) |
-| Expiry-driven backfill distribution | [PENDING: p50 / p95 / max] | `results/<date>-backfill/summary.md` (`\BackfillExpiredPNinetyFiveS`) |
+| Expiry-driven backfill distribution | [PENDING: p50 / p95 / max; the backfill run aborted with HTTP 503]. So far: 4 timer-path relays, at most 982 ms | `results/<date>-backfill/summary.md` (`\BackfillExpiredPNinetyFiveS`); interim `\TimerPathRelaysN`, `\TimerPathRelayMaxMs` from `results/2026-10-17-smoke/` and `-failure-recovery/` |
 | Redelivery delay after a crash | the SQS visibility timeout, 120 s (configuration) | `services/aws/templates/app.yaml` |
-| Repeat execution with crash after commit | [PENDING: probes passed] | `results/<date>-repeat-execution/summary.md` (`\RepeatAfterCommitPassed`) |
+| Repeat execution with crash after commit | 6 of 6 probes: redelivery acknowledged, one record, one effect (PASS) | `results/2026-10-17-repeat-execution/summary.md` (`\RepeatAfterCommitPassed`, `\RepeatAfterCommitCases`) |
 
 ## Likely questions
 
@@ -115,8 +116,10 @@ It would be rejected with `OFFER_EXPIRED`, whether or not the timer tick had alr
 Every decision first expires everything due by the server clock (`tickFirst()` in
 `packages/core/src/tick.ts`). If her click reaches the worker before the tick, her own command
 performs the expiry and the seat still goes to Demo 2 in the same transaction. The expiry-race
-experiment sends ACCEPTs 200 ms before and after `expiresAt` to check exactly this: [PENDING:
-results/<date>-expiry-race/summary.md].
+experiment sends ACCEPTs 200 ms before and after `expiresAt` to check exactly this: 3 of 3 early
+ones applied, 3 of 3 late ones rejected with `OFFER_EXPIRED`, and 3 of 3 stale ticks had no effect
+(`results/2026-10-17-expiry-race-4/summary.md`). In all three late trials the timer had already
+expired the offer, so the other order was not seen on dev; the engine's unit tests cover it.
 
 **Q3. Why did the crash pause only that one workshop?**
 The FIFO message group is the workshop. SQS delivers the next message of a group only after the one

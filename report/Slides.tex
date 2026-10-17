@@ -10,7 +10,9 @@
 % charts (figures/generated/*.pdf), and the staged walkthrough screenshots in docs/demo/screenshots.
 % Speaker notes: docs/walkthrough/part-1.md ... part-6.md (parts 1-6 = the six members in the
 % order of the title block; the footer tag of every slide names its speaker).
-% Names only, no student numbers: this PDF is tracked in the public repository.
+% Student numbers: as in Final.tex, only the submission build prints them, from the git-ignored
+% team-ids.tex:  ./report/build.sh -t Slides -m 30 -s  ->  Slides-submission.pdf (git-ignored).
+% Without -s, or without team-ids.tex, the title slide shows names only.
 \documentclass[t,20pt]{beamer}
 \geometry{papersize={13.333in,7.5in}}
 \setbeamersize{text margin left=0.6in,text margin right=0.6in}
@@ -61,7 +63,7 @@
     {\fontsize{40}{46}\selectfont\bfseries\color{srBlue}#1\par}\vspace{0.06in}#2\end{minipage}}
 \newcommand{\rid}[1]{\textbf{\color{srBlue}#1}\enspace}
 \newcommand{\beat}[2]{\textbf{\color{srBlue}#1}\enspace #2\par\vspace{0.10in}}
-\newcommand{\side}[2]{\begin{minipage}[c]{3.7in}\raggedright\textbf{#1}\par\vspace{0.06in}#2\end{minipage}}
+\newcommand{\side}[2]{\begin{minipage}[c]{3.9in}\raggedright\textbf{#1}\par\vspace{0.06in}#2\end{minipage}}
 \newcommand{\role}[2]{\parbox[t]{5.95in}{\textbf{#1}\enspace\mute{#2}}}
 \newcommand{\chap}[3]{\textbf{\color{srBlue}#1}\enspace\code{#2}\enspace #3\par\vspace{0.06in}}
 \newcommand{\fm}[2]{\textbf{#1}\enspace\textrightarrow\enspace #2\par\vspace{0.12in}}
@@ -69,7 +71,7 @@
 % the report's TikZ figures at a given width (their text is a fixed 7 pt, so it scales with them)
 \newcommand{\tikzfig}[2]{\resizebox{#1}{!}{\input{figures/#2}}}
 % a region of a staged-walkthrough screenshot (1440 x 900 px; trim = left bottom right top, in px)
-\newcommand{\shot}[3]{\adjustbox{trim=#1, clip, width=#2, cfbox=srGrid 0.8pt 0pt}{%
+\newcommand{\shot}[3]{\adjustbox{trim=#1, clip, width=\dimexpr#2-1.6pt\relax, cfbox=srGrid 0.8pt 0pt, valign=c}{%
   \includegraphics{../docs/demo/screenshots/#3}}}
 
 % ----------------------------------------------------------------------------- theme (minimal)
@@ -79,9 +81,9 @@
 \setbeamercolor{alerted text}{fg=srRed}
 \setbeamerfont{frametitle}{size=\fontsize{30}{36},series=\bfseries}
 \setbeamertemplate{frametitle}{%
-  \vbox to 1.0in{\vspace*{0.32in}%
-    \hbox{\usebeamerfont{frametitle}\color{srInk}\insertframetitle}%
-    \vspace{0.07in}\hbox{\color{srBlue}\rule{1.0in}{3pt}}\vfill}}
+  \vbox to 1.0in{\offinterlineskip\vspace*{0.34in}%
+    \hbox to\textwidth{\usebeamerfont{frametitle}\color{srInk}\insertframetitle\hfil}%
+    \vspace{0.13in}\hbox{\color{srBlue}\rule{1.0in}{3pt}}\vfill}}
 \setbeamertemplate{itemize item}{\raisebox{0.14em}{\color{srBlue}\rule{0.40em}{0.40em}}}
 \setbeamertemplate{itemize/enumerate body begin}{\setlength{\itemsep}{0.30em}}
 \setlength{\leftmargini}{1.0em}
@@ -101,6 +103,15 @@
     \hfill\parbox[b]{4.4in}{\raggedleft\srfootfont\color{srMuted}\srpagelabel}%
     \hspace*{0.6in}}\vspace*{0.22in}}
 
+% team members (student numbers only in the submission build, see the header)
+\providecommand{\SRSubmission}{0}
+\newif\ifsrids
+\ifnum\SRSubmission=1
+  \InputIfFileExists{team-ids.tex}{\sridstrue}%
+    {\typeout{SEATRELAY: team-ids.tex not found; title slide shows names only}}
+\fi
+\newcommand{\who}[2]{\parbox[t]{3.95in}{\textbf{#1}\enspace\mute{#2}}}
+
 \title{SeatRelay}
 \hypersetup{pdftitle={SeatRelay: CS5224 Group 18 presentation}, pdfauthor={CS5224 Group 18}}
 
@@ -117,8 +128,13 @@
   \vspace{0.18in}{\color{srBlue}\rule{1.6in}{4pt}}\par\vspace{0.30in}
   CS5224 Cloud Computing \textperiodcentered{} Group 18 \textperiodcentered{} AY2026/27 Semester 1\par
   \vspace{0.14in}
-  \textbf{LI ZONGZE \textperiodcentered{} CHEN YANG \textperiodcentered{} LIN JIE \textperiodcentered{}
-    ZHU GENGYU \textperiodcentered{} LIANG ZIHAN \textperiodcentered{} ZHANG TIANYI}\par
+  \ifsrids
+    \who{LI ZONGZE}{\IdLiZongze}\hfill\who{CHEN YANG}{\IdChenYang}\hfill\who{LIN JIE}{\IdLinJie}\par
+    \who{ZHU GENGYU}{\IdZhuGengyu}\hfill\who{LIANG ZIHAN}{\IdLiangZihan}\hfill\who{ZHANG TIANYI}{\IdZhangTianyi}\par
+  \else
+    \textbf{LI ZONGZE \textperiodcentered{} CHEN YANG \textperiodcentered{} LIN JIE \textperiodcentered{}
+      ZHU GENGYU \textperiodcentered{} LIANG ZIHAN \textperiodcentered{} ZHANG TIANYI}\par
+  \fi
   \vspace{0.14in}
   \mute{\url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}}\par
 \end{frame}
@@ -161,7 +177,7 @@
   \begin{tabular}{@{}p{5.95in}@{\hspace{0.23in}}p{5.95in}@{}}
     \rid{R1}At most one hold or seat per workshop & \rid{R5}Decline or expiry drops only that session\\
     \rid{R2}Queue order = server's acceptance order & \rid{R6}Cancel leaves the whole workshop\\
-    \rid{R3}Most-preferred listed session with a seat & \rid{R7}A confirmed seat is never reassigned\\
+    \rid{R3}Most-preferred listed session with a seat & \rid{R7}Confirmed seats are never auto-reassigned\\
     \rid{R4}Hold 15 min by default, never past cut-off & \\
   \end{tabular}\par\vspace{0.10in}
   \rid{C1}never over capacity \textperiodcentered{} \rid{C2}never two seats at once \textperiodcentered{} \rid{C3}a repeat never applies twice\par
@@ -263,9 +279,9 @@
 \end{frame}
 
 \begin{frame}{Latency, backfill and the mechanism comparison}
-  \includegraphics[width=8.2in,valign=c]{figures/generated/loadtest-p95}\hfill
-  \side{Load test on dev}{all targets met only at \PerfDevMaxVUsMet{} users}\par\vspace{0.02in}
-  \includegraphics[width=8.2in,valign=c]{figures/generated/replay-comparison}\hfill
+  \includegraphics[width=8.0in,valign=c]{figures/generated/loadtest-p95}\hfill
+  \side{Load test (dev)}{targets met at \PerfDevMaxVUsMet{} users}\par\vspace{0.02in}
+  \includegraphics[width=8.0in,valign=c]{figures/generated/replay-comparison}\hfill
   \side{Simulation}{duplicate holds \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean}\par
   \vspace{0.10in}
   \textbf{Backfill p95} \IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{\BackfillExpiredPNinetyFiveS\,s}
@@ -287,8 +303,8 @@
         \midrule
         Cloud, list price & \CostTierOneKCloudListUsd & \CostTierTenKCloudListUsd & \CostTierHundredKCloudListUsd\\
         Cloud, after free tier & \CostTierOneKCloudAfterFreeUsd & \CostTierTenKCloudAfterFreeUsd & \CostTierHundredKCloudAfterFreeUsd\\
-        On-prem, hardware only & \CostTierOneKOnpremIncrementThreeYearUsd & \CostTierTenKOnpremIncrementThreeYearUsd & \CostTierHundredKOnpremIncrementThreeYearUsd\\
-        On-prem, fully costed & \CostTierOneKOnpremFullThreeYearUsd & \CostTierTenKOnpremFullThreeYearUsd & \CostTierHundredKOnpremFullThreeYearUsd\\
+        On-prem, increment only & \CostTierOneKOnpremIncrementThreeYearUsd & \CostTierTenKOnpremIncrementThreeYearUsd & \CostTierHundredKOnpremIncrementThreeYearUsd\\
+        On-prem, fully amortised & \CostTierOneKOnpremFullThreeYearUsd & \CostTierTenKOnpremFullThreeYearUsd & \CostTierHundredKOnpremFullThreeYearUsd\\
         \bottomrule
       \end{tabular}\par\vspace{0.30in}
       Cloud dearer above \hl{\CostCrossoverListIncrementRegs} / \hl{\CostCrossoverListFullRegs} a month
@@ -299,7 +315,7 @@
   \end{columns}
   \source{Modelled usage $\times$ Singapore list prices (\CostPricesVerified{} of \CostPricesTotal{}
     from the AWS Price List API); after credits \usd\CostTierOneKCloudAfterCreditsUsd. On-prem: one
-    mini-PC, \CostAmortisationYears-year amortisation; fully costed adds a business line and labour; no
+    mini-PC, \CostAmortisationYears-year amortisation; increment = hardware, power, static IP, e-mail; fully amortised adds a business line and labour; no
     failover. Final report Table 3.}
 \end{frame}
 
@@ -328,7 +344,7 @@
   \vspace{0.06in}
   \textbf{Limits:} one writer per workshop \textperiodcentered{} HTTP 503s \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
   \textbf{Next:} batch commands per workshop \textperiodcentered{} SES production \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
-  \textbf{AI use:} an AI coding assistant generated the code and drafts; we set and reviewed\par\vspace{0.34in}
+  \textbf{AI use:} code and drafts generated by an AI assistant; we directed and reviewed\par\vspace{0.34in}
   \role{LI ZONGZE}{product, front end}\hfill\role{CHEN YANG}{allocation logic, API}\par\vspace{0.10in}
   \role{LIN JIE}{AWS, monitoring}\hfill\role{ZHU GENGYU}{data, on-prem reference}\par\vspace{0.10in}
   \role{LIANG ZIHAN}{user research, evaluation}\hfill\role{ZHANG TIANYI}{dashboard, QA, docs}\par
@@ -367,31 +383,31 @@
 % #1 title, #2/#5 trims, #3/#6 files, #4/#7 captions, #8 note
 \newcommand{\shotslide}[8]{%
   \begin{frame}{#1}
-    \vspace{0.10in}
-    \parbox[t]{5.95in}{\shot{#2}{5.95in}{#3}\par\vspace{0.12in}#4}\hfill
-    \parbox[t]{5.95in}{\shot{#5}{5.95in}{#6}\par\vspace{0.12in}#7}
+    \vspace{0.04in}
+    \shot{#2}{6.7in}{#3}\hfill\parbox[c]{5.0in}{\raggedright #4}\par\vspace{0.22in}
+    \shot{#5}{6.7in}{#6}\hfill\parbox[c]{5.0in}{\raggedright #7}
     \source{Staged walkthrough on dev, 2026-10-17: synthetic accounts named ``(staged)'', scripted
-      clicks; \code{docs/demo/screenshots/}. #8}
+      clicks; crops of \code{docs/demo/screenshots/}. #8}
   \end{frame}}
 
 \shotslide{Backup D1: register \textrightarrow{} offer}
-  {170 0 10 445}{11-request-received.png}{202 back at once; the page polls}
-  {170 0 10 445}{12-offer-countdown.png}{First choice held, countdown running}
-  {Alice ticks Session 1, then moves Session 2 to the top.}
+  {190 95 540 565}{11-request-received.png}{Alice: 202 back at once, the page polls}
+  {190 215 540 445}{12-offer-countdown.png}{Her first choice is held; countdown running}
+  {Alice ticked Session 1, then moved Session 2 to the top.}
 
 \shotslide{Backup D2: cancellation \textrightarrow{} instant backfill}
-  {170 130 170 435}{17-offer-after-cancellation.png}{Bob: the cancelled seat is held for him}
-  {170 80 170 485}{19-dashboard-queue-offer.png}{Organiser: Carol queued behind Bob's offer}
+  {190 215 540 445}{17-offer-after-cancellation.png}{Bob: Alice's cancelled seat is now held for him}
+  {190 85 190 495}{19-dashboard-queue-offer.png}{Organiser: Carol queued behind Bob's offer}
   {Bob's page shows the offer on its 10\,s refresh, without a reload; the relay is logged with 0\,ms.}
 
 \shotslide{Backup D3: the hold expires \textrightarrow{} automatic backfill}
-  {170 175 170 440}{20-offer-expiring.png}{Bob's 60\,s hold, last seconds}
-  {170 175 170 440}{22-offer-after-expiry.png}{Carol: relayed by the timer}
+  {190 215 540 445}{20-offer-expiring.png}{Bob does not answer: last seconds of his 60\,s hold}
+  {190 215 540 445}{22-offer-after-expiry.png}{Carol: the seat was relayed by the timer}
   {Nobody acted between the two screens.}
 
 \shotslide{Backup D4: backfill log and verify invariants}
-  {170 105 170 515}{24-dashboard-backfill-log.png}{Both relays with their latency}
-  {170 540 170 80}{26-dashboard-verify-ok.png}{All invariants hold}
+  {190 145 360 560}{24-dashboard-backfill-log.png}{Both relays with their latency}
+  {190 540 480 85}{26-dashboard-verify-ok.png}{CSV export; all invariants hold}
   {Dashboard values in a demo are demo values, not measurements.}
 
 \begin{frame}{Backup D5: crash after commit, applied once}
@@ -420,7 +436,7 @@
   \source{\code{docs/ARCHITECTURE.md} \S12; alarms and redrive: \code{docs/RUNBOOK.md}.}
 \end{frame}
 
-\begin{frame}{Backup: one partition per workshop, one transaction per decision}
+\begin{frame}{Backup: data model, one partition per workshop}
   \vspace{0.06in}
   \key{WS\#\{id\} / L\#META}{seq, version (the lock), holdSeconds, next due time}
   \key{WS\#\{id\} / L\#S\#\{session\}}{capacity, confirmed, held, cut-off}

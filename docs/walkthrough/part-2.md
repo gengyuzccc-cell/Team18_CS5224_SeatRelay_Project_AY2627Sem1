@@ -1,8 +1,8 @@
 # Part 2: mechanism and rules
 
-- **Speaker:** (team member)
+- **Speaker:** CHEN YANG
 - **Clock:** 2:00–4:00 (2:00)
-- **Slide:** 4 Mechanism and rules: the Figure 1 flow on the left; R1–R7 one line each and
+- **Slide:** 4 Mechanism and rules (`report/Slides.tex`): the Figure 1 flow on the left; R1–R7 one line each and
   C1, C2, C3, C5, C7 one line each on the right
 - **Hands over to:** Part 3 (architecture)
 
@@ -41,7 +41,7 @@ Organisers can check C1 and C2 at any moment with the *Verify invariants* button
 experiments call the same check after every step. *(optional)* The same engine can also run a per-session mode
 that behaves like today's separate forms. We use it as the baseline in the evaluation.
 
-Next, [Speaker 3] shows how this runs on AWS.
+Next, LIN JIE shows how this runs on AWS.
 
 ## Key numbers
 
@@ -52,7 +52,7 @@ Next, [Speaker 3] shows how this runs on AWS.
 | Sessions per workshop | 2–5 | same file |
 | Offers per decision | at most 12, then a REALLOCATE continuation | `packages/core/src/state.ts` (`DEFAULT_DECISION_LIMITS`) |
 | Engine property test | 2,000 random command sequences, invariants after every step; result [PENDING: pass and branch coverage] | `results/<date>-core-tests/` (`\CorePropertySequences`, `\CoreBranchCoveragePct`; to be produced per `docs/EXPERIMENTS.md` §3.2) |
-| Preference order on AWS | 20 fixed cases × 3 runs; [PENDING: cases as predicted, non-acceptable offers] | `results/<date>-preference-order/summary.md` (`\PrefOrderCasesPassed`, `\PrefOrderNonAcceptable`) |
+| Preference order on AWS | 20 fixed cases × 3 runs: 60 of 60 as predicted, 0 offers of an unacceptable session (PASS) | `results/2026-10-17-preference-order/summary.md` (`\PrefOrderCasesPassed`, `\PrefOrderNonAcceptable`) |
 | Duplicate-hold events per workshop (simulation, 1,000 seeds) | 0.00 with one queue, 34.57 with per-session forms | `results/replay/summary.md` |
 
 The configuration values above are design parameters, not measurements. Say so if you are asked.

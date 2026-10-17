@@ -1,8 +1,8 @@
 # Part 1: problem, market, business model
 
-- **Speaker:** (team member)
+- **Speaker:** LI ZONGZE
 - **Clock:** 0:00–2:00 (2:00)
-- **Slides:** 1 Title, 2 Problem and market, 3 Business model
+- **Slides:** 1 Title, 2 Problem and market, 3 Business model (`report/Slides.tex`)
 - **Hands over to:** Part 2 (mechanism and rules)
 
 ## What to say (about 330 words)
@@ -29,8 +29,9 @@ titles. The share of organisers who run multi-session sign-ups, which we call p,
 interviews: [PENDING: p, from results/interviews/summary.md].
 
 **Slide 3, business model.**
-We plan to charge S$10 per organisation per month, S$120 a year. The campus market is then
-693 × p × S$120, about S$83,000 times p per year. That market is small, so our case rests on the
+We plan a free tier with one open workshop at a time, and an organiser plan at S$10 per
+organisation per month, S$120 a year. The campus market is then 693 × p × S$120, about S$83,200
+times p per year. That market is small, so our case rests on the
 hours an organiser saves on each multi-session event: [PENDING: median hours per event and
 willingness to pay, from results/interviews/summary.md].
 
@@ -38,7 +39,7 @@ On competition, Eventbrite does relay a released ticket with a claim window, but
 date. *(optional)* None of the tools we scanned ties several acceptable sessions to one queue
 position with one seat per person.
 
-Next, [Speaker 2] explains the rules that make this work.
+Next, CHEN YANG explains the rules that make this work.
 
 ## Key numbers
 
@@ -54,7 +55,7 @@ Next, [Speaker 2] explains the rules that make this work.
 | Interviews held (organisers / participants) | [PENDING] | `results/interviews/summary.md` (`\InterviewN`, `\InterviewOrganisers`, `\InterviewParticipants`) |
 | Hours of coordination per multi-session event | [PENDING] | `results/interviews/summary.md` (`\InterviewHoursMedian`) |
 | Willingness to pay (van Westendorp medians) | [PENDING] | `results/interviews/summary.md` (`\InterviewWtpBargainMedian`, `\InterviewWtpExpensiveMedian`) |
-| Free tier and plan details | [PENDING: as written in Final report §2] | Final report §2 |
+| Free tier and plan details | free tier: one open workshop at a time; organiser plan S$10/month (S$120/year) with any number of open workshops and co-organisers; the prototype does not enforce plan limits | Final report §2 (a design decision, not data) |
 | Duplicate confirmed seats left for the organiser, per workshop (simulation) | 3.87 with per-session forms, 0.00 with one queue | `results/replay/summary.md` (headline table) |
 
 Do not quote the illustrative p = 0.2 / 0.4 rows of `docs/market-sizing.md` §4. They are not data.

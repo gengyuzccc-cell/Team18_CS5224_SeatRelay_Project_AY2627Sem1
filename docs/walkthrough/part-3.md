@@ -1,9 +1,9 @@
 # Part 3: architecture, request path, timers, transactions
 
-- **Speaker:** (team member)
+- **Speaker:** LIN JIE
 - **Clock:** 4:00–6:00 (2:00)
-- **Slides:** 5 Architecture (Figure A), 6 Request path and transaction (Figure B), 7 Timers and
-  sweep (Figure C). Sources: `docs/ARCHITECTURE.md` §1.2, §3.2, §5.3.
+- **Slides:** 5 Architecture (Figure A; Final report Fig. 2), 6 Request path and transaction
+  (Figure B; Fig. 3a), 7 Timers and sweep (Figure C; Fig. 3b), in `report/Slides.tex`. Sources: `docs/ARCHITECTURE.md` §1.2, §3.2, §5.3.
 - **Hands over to:** Part 4 (live demo)
 
 ## What to say (about 340 words)
@@ -45,7 +45,7 @@ A late or duplicate tick finds nothing to do. The five-minute sweep is only a sa
 count every expiry it performs. *(optional)* The same engine also runs on-premise, on
 PostgreSQL and Keycloak, for the cost comparison.
 
-Now let's see it live. Over to [Speaker 4].
+Now let's see it live. Over to ZHU GENGYU.
 
 ## Key numbers
 
@@ -59,7 +59,7 @@ Now let's see it live. Over to [Speaker 4].
 | Sweep | every 5 min, sparse DUE index | `app.yaml` (`ScheduleV2`), `packages/service/src/worker/sweep.ts` |
 | Smoke test on dev, 2026-10-17 | PASS, 13/13 checks | `results/2026-10-17-smoke/summary.md` |
 | Settle latency in that smoke run (n = 6, one run, not a statistic) | server-side p50 45 ms, max 904 ms; client-observed p50 848 ms, max 1,815 ms | `results/2026-10-17-smoke/summary.md` (`\SmokeSettleServerPFiftyMs`, `\SmokeSettleClientPFiftyMs`) |
-| Settle and read latency under load | [PENDING: k6 matrix] | `results/loadtest/<date>/summary.md` (Part 5 quotes these) |
+| Read and settle latency under load (k6, dev) | reads and 202 responses p95 at most 315 ms at every level; settle p95 under 5 s only at 10 virtual users (Part 5 quotes these) | `results/loadtest/2026-10-17/summary.md` (`\PerfDevCrossVUTenAcceptPNinetyFiveMs`, `\PerfDevMaxVUsMet`) |
 
 ## Likely questions
 
