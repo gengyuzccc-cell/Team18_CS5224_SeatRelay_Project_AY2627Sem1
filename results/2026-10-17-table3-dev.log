@@ -1,0 +1,528 @@
+[13:21:09] === correctness (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 correctness /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/correctness.ts --target dev --runs 3
+
+[13:21:12] correctness: Core correctness (plan §4, Table 3) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":900,"faults":true,"dir":"results/2026-10-17-correctness","commit":"227de3d12b0f"}
+[13:21:13] --- run 1/3
+[13:21:13] scenario register-confirm: workshop b0c8948d-fcd5-4518-acf4-020fdb760e74
+[13:21:14] PASS register-confirm / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:15] PASS register-confirm / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 815 ms
+[13:21:15] PASS register-confirm / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:21:15] PASS register-confirm / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:16] PASS register-confirm / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 806 ms
+[13:21:16] PASS register-confirm / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:21:16] PASS register-confirm / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:17] PASS register-confirm / 08 A REGISTER again (R1) — expected REJECTED(ALREADY_REGISTERED), got REJECTED(ALREADY_REGISTERED) none — 796 ms
+[13:21:17] PASS register-confirm / 09 verify after A REGISTER again (R1) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:19] PASS register-confirm / 10 B REGISTER [S2,S1] — expected APPLIED, got APPLIED OFFERED@S2 — 1009 ms
+[13:21:19] PASS register-confirm / 11 B REGISTER [S2,S1]: result — expected OFFERED@S2, got OFFERED@S2
+[13:21:19] PASS register-confirm / 12 verify after B REGISTER [S2,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:20] PASS register-confirm / 13 C REGISTER [S1] (full) — expected APPLIED, got APPLIED QUEUED#1 — 800 ms
+[13:21:20] PASS register-confirm / 14 C REGISTER [S1] (full): result — expected QUEUED#1, got QUEUED#1
+[13:21:20] PASS register-confirm / 15 verify after C REGISTER [S1] (full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:21] PASS register-confirm / 16 B ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S2 — 801 ms
+[13:21:21] PASS register-confirm / 17 B ACCEPT_OFFER: result — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:21:21] PASS register-confirm / 18 verify after B ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:21] PASS register-confirm / 19 dashboard counts — expected confirmed 2, distinct served 2, queued 1, offered 0, got confirmed 2, distinct served 2, queued 1, offered 0
+[13:21:22] scenario rejections: workshop 556d3979-908e-4dd9-ab14-8378b3b3db74
+[13:21:22] PASS rejections / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:23] PASS rejections / 02 A REGISTER [S1,S1] — expected REJECTED(DUPLICATE_SESSION_IN_PREFERENCES), got REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none — 845 ms
+[13:21:23] PASS rejections / 03 verify after A REGISTER [S1,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:24] PASS rejections / 04 A REGISTER [unknown] — expected REJECTED(UNKNOWN_SESSION_IN_PREFERENCES), got REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none — 797 ms
+[13:21:24] PASS rejections / 05 verify after A REGISTER [unknown] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:25] PASS rejections / 06 A ACCEPT_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 835 ms
+[13:21:25] PASS rejections / 07 verify after A ACCEPT_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:26] PASS rejections / 08 A DECLINE_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 902 ms
+[13:21:26] PASS rejections / 09 verify after A DECLINE_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:27] PASS rejections / 10 A CANCEL_REGISTRATION (not registered) — expected REJECTED(NOT_REGISTERED), got REJECTED(NOT_REGISTERED) none — 805 ms
+[13:21:28] PASS rejections / 11 verify after A CANCEL_REGISTRATION (not registered) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:28] PASS rejections / 12 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 803 ms
+[13:21:28] PASS rejections / 13 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:21:29] PASS rejections / 14 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:29] PASS rejections / 15 rejected commands consumed no seq — expected seq 1, got seq 1
+[13:21:29] scenario decline: workshop 7b6809b7-4a86-4990-9937-4bda78903ac9
+[13:21:29] PASS decline / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:30] PASS decline / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 802 ms
+[13:21:30] PASS decline / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:21:30] PASS decline / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:31] PASS decline / 05 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 805 ms
+[13:21:31] PASS decline / 06 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:21:31] PASS decline / 07 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:32] PASS decline / 08 A DECLINE_OFFER S1 — expected APPLIED, got APPLIED OFFERED@S2 — 797 ms
+[13:21:32] PASS decline / 09 A DECLINE_OFFER S1: result — expected OFFERED@S2, got OFFERED@S2
+[13:21:32] PASS decline / 10 verify after A DECLINE_OFFER S1 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:33] PASS decline / 11 B gets the declined S1 seat — expected OFFERED@S1, got OFFERED@S1
+[13:21:33] PASS decline / 12 backfill DECLINED relayed in the same settlement — expected 1 × DECLINED, latencyMs 0, one to loaduser-2@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:21:34] PASS decline / 13 A DECLINE_OFFER S2 (last preference) — expected APPLIED, got APPLIED ENDED(NO_ACCEPTABLE_SESSION) — 804 ms
+[13:21:34] PASS decline / 14 A DECLINE_OFFER S2 (last preference): result — expected ENDED(NO_ACCEPTABLE_SESSION), got ENDED(NO_ACCEPTABLE_SESSION)
+[13:21:34] PASS decline / 15 verify after A DECLINE_OFFER S2 (last preference) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:34] PASS decline / 16 A has no live registration — expected none, got none
+[13:21:35] PASS decline / 17 A DECLINE_OFFER S1 again — expected REJECTED(OFFER_NOT_ACTIVE), got REJECTED(OFFER_NOT_ACTIVE) none — 792 ms
+[13:21:35] PASS decline / 18 verify after A DECLINE_OFFER S1 again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:36] PASS decline / 19 B still OFFERED S1 — expected OFFERED@S1, got OFFERED@S1
+[13:21:36] PASS decline / 20 B ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 790 ms
+[13:21:36] PASS decline / 21 B ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:21:37] PASS decline / 22 verify after B ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:37] scenario cancel: workshop 45b936da-9c1f-49d2-9285-7ebde5635637
+[13:21:37] PASS cancel / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:38] PASS cancel / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 819 ms
+[13:21:38] PASS cancel / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:21:38] PASS cancel / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:39] PASS cancel / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 803 ms
+[13:21:39] PASS cancel / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:21:39] PASS cancel / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:40] PASS cancel / 08 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 807 ms
+[13:21:40] PASS cancel / 09 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:21:40] PASS cancel / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:41] PASS cancel / 11 C REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#2 — 878 ms
+[13:21:41] PASS cancel / 12 C REGISTER [S1]: result — expected QUEUED#2, got QUEUED#2
+[13:21:42] PASS cancel / 13 verify after C REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:42] PASS cancel / 14 A CANCEL_REGISTRATION (confirmed) — expected APPLIED, got APPLIED CANCELLED — 804 ms
+[13:21:42] PASS cancel / 15 A CANCEL_REGISTRATION (confirmed): result — expected CANCELLED, got CANCELLED
+[13:21:43] PASS cancel / 16 verify after A CANCEL_REGISTRATION (confirmed) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:43] PASS cancel / 17 B gets the seat — expected OFFERED@S1, got OFFERED@S1
+[13:21:43] PASS cancel / 18 C moves up — expected QUEUED#1, got QUEUED#1
+[13:21:43] PASS cancel / 19 backfill CANCELLED_CONFIRMED relayed in the same settlement — expected 1 × CANCELLED_CONFIRMED, latencyMs 0, one to loaduser-2@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:21:44] PASS cancel / 20 B CANCEL_REGISTRATION (offered) — expected APPLIED, got APPLIED CANCELLED — 808 ms
+[13:21:44] PASS cancel / 21 B CANCEL_REGISTRATION (offered): result — expected CANCELLED, got CANCELLED
+[13:21:45] PASS cancel / 22 verify after B CANCEL_REGISTRATION (offered) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:45] PASS cancel / 23 C gets the seat — expected OFFERED@S1, got OFFERED@S1
+[13:21:45] PASS cancel / 24 backfill CANCELLED_OFFER relayed in the same settlement — expected 1 × CANCELLED_OFFER, latencyMs 0, one to loaduser-3@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:21:46] PASS cancel / 25 D REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 798 ms
+[13:21:46] PASS cancel / 26 D REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:21:46] PASS cancel / 27 verify after D REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:47] PASS cancel / 28 D CANCEL_REGISTRATION (queued) — expected APPLIED, got APPLIED CANCELLED — 793 ms
+[13:21:47] PASS cancel / 29 D CANCEL_REGISTRATION (queued): result — expected CANCELLED, got CANCELLED
+[13:21:47] PASS cancel / 30 verify after D CANCEL_REGISTRATION (queued) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:47] PASS cancel / 31 D has no live registration — expected none, got none
+[13:21:48] PASS cancel / 32 D CANCEL_REGISTRATION again — expected REJECTED(NOT_REGISTERED), got REJECTED(NOT_REGISTERED) none — 786 ms
+[13:21:48] PASS cancel / 33 verify after D CANCEL_REGISTRATION again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:49] PASS cancel / 34 A REGISTER [S1] again — expected APPLIED, got APPLIED QUEUED#1 — 801 ms
+[13:21:49] PASS cancel / 35 A REGISTER [S1] again: result — expected QUEUED#1, got QUEUED#1
+[13:21:50] PASS cancel / 36 verify after A REGISTER [S1] again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:50] PASS cancel / 37 re-registration gets a new seq at the tail (R6) — expected seq > 4, got seq 5
+[13:21:50] scenario capacity-up: workshop b77c8ddc-47f1-47ea-8f4f-12650c9fb628
+[13:21:50] PASS capacity-up / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:51] PASS capacity-up / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 813 ms
+[13:21:51] PASS capacity-up / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:21:51] PASS capacity-up / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:52] PASS capacity-up / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 800 ms
+[13:21:52] PASS capacity-up / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:21:52] PASS capacity-up / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:53] PASS capacity-up / 08 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 799 ms
+[13:21:53] PASS capacity-up / 09 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:21:53] PASS capacity-up / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:54] PASS capacity-up / 11 C REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#2 — 829 ms
+[13:21:54] PASS capacity-up / 12 C REGISTER [S1]: result — expected QUEUED#2, got QUEUED#2
+[13:21:54] PASS capacity-up / 13 verify after C REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:55] PASS capacity-up / 14 D REGISTER [S2,S1] — expected APPLIED, got APPLIED OFFERED@S2 — 809 ms
+[13:21:55] PASS capacity-up / 15 D REGISTER [S2,S1]: result — expected OFFERED@S2, got OFFERED@S2
+[13:21:55] PASS capacity-up / 16 verify after D REGISTER [S2,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:56] PASS capacity-up / 17 SET_CAPACITY S1 1 → 3 — expected APPLIED, got APPLIED none — 796 ms
+[13:21:57] PASS capacity-up / 18 verify after SET_CAPACITY S1 1 → 3 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:57] PASS capacity-up / 19 two offers created by the capacity increase — expected offersCreated 2, got offersCreated 2
+[13:21:57] PASS capacity-up / 20 B offered — expected OFFERED@S1, got OFFERED@S1
+[13:21:57] PASS capacity-up / 21 C offered — expected OFFERED@S1, got OFFERED@S1
+[13:21:57] PASS capacity-up / 22 D keeps S2 — expected OFFERED@S2, got OFFERED@S2
+[13:21:57] PASS capacity-up / 23 S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms — expected capacity 3, free 0, 2 × CAPACITY_UP latency 0, got capacity 3, free 0, [0,0]
+[13:21:58] PASS capacity-up / 24 SET_CAPACITY S1 3 → 4 (nobody waiting) — expected APPLIED, got APPLIED none — 791 ms
+[13:21:59] PASS capacity-up / 25 verify after SET_CAPACITY S1 3 → 4 (nobody waiting) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:21:59] PASS capacity-up / 26 no offer without demand — expected offersCreated 0, got offersCreated 0
+[13:21:59] scenario capacity-down: workshop f68f8851-310d-46d9-afc1-b99fcd1fe7f0
+[13:21:59] PASS capacity-down / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:00] PASS capacity-down / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 869 ms
+[13:22:00] PASS capacity-down / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:00] PASS capacity-down / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:01] PASS capacity-down / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 799 ms
+[13:22:01] PASS capacity-down / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:22:01] PASS capacity-down / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:02] PASS capacity-down / 08 B REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 828 ms
+[13:22:02] PASS capacity-down / 09 B REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:02] PASS capacity-down / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:03] PASS capacity-down / 11 SET_CAPACITY S1 3 → 1 (below usage 2) — expected REJECTED(CAPACITY_BELOW_USAGE), got REJECTED(CAPACITY_BELOW_USAGE) none — 811 ms
+[13:22:03] PASS capacity-down / 12 verify after SET_CAPACITY S1 3 → 1 (below usage 2) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:04] PASS capacity-down / 13 SET_CAPACITY S1 → 0 — expected REJECTED(INVALID_CAPACITY), got REJECTED(INVALID_CAPACITY) none — 795 ms
+[13:22:05] PASS capacity-down / 14 verify after SET_CAPACITY S1 → 0 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:05] PASS capacity-down / 15 capacity unchanged after rejections — expected capacity 3, got capacity 3
+[13:22:06] PASS capacity-down / 16 SET_CAPACITY S1 3 → 2 (= usage) — expected APPLIED, got APPLIED none — 789 ms
+[13:22:06] PASS capacity-down / 17 verify after SET_CAPACITY S1 3 → 2 (= usage) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:06] PASS capacity-down / 18 S1 capacity 2, free 0 — expected capacity 2, free 0, got capacity 2, free 0
+[13:22:07] PASS capacity-down / 19 C REGISTER [S1] (now full) — expected APPLIED, got APPLIED QUEUED#1 — 805 ms
+[13:22:07] PASS capacity-down / 20 C REGISTER [S1] (now full): result — expected QUEUED#1, got QUEUED#1
+[13:22:07] PASS capacity-down / 21 verify after C REGISTER [S1] (now full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:08] PASS capacity-down / 22 SET_CAPACITY unknown session — expected REJECTED(SESSION_NOT_FOUND), got REJECTED(SESSION_NOT_FOUND) none — 804 ms
+[13:22:08] PASS capacity-down / 23 verify after SET_CAPACITY unknown session — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:09] scenario cancel-session: workshop aafec673-2b75-47c3-8a21-ac07e6a399cc
+[13:22:09] PASS cancel-session / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:10] PASS cancel-session / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 794 ms
+[13:22:10] PASS cancel-session / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:10] PASS cancel-session / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:11] PASS cancel-session / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 795 ms
+[13:22:11] PASS cancel-session / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:22:11] PASS cancel-session / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:12] PASS cancel-session / 08 B REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 791 ms
+[13:22:12] PASS cancel-session / 09 B REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:12] PASS cancel-session / 10 verify after B REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:13] PASS cancel-session / 11 C REGISTER [S2] — expected APPLIED, got APPLIED OFFERED@S2 — 827 ms
+[13:22:13] PASS cancel-session / 12 C REGISTER [S2]: result — expected OFFERED@S2, got OFFERED@S2
+[13:22:13] PASS cancel-session / 13 verify after C REGISTER [S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:14] PASS cancel-session / 14 C ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S2 — 837 ms
+[13:22:14] PASS cancel-session / 15 C ACCEPT_OFFER: result — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:22:14] PASS cancel-session / 16 verify after C ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:15] PASS cancel-session / 17 D REGISTER [S1,S2] (both full) — expected APPLIED, got APPLIED QUEUED#1 — 798 ms
+[13:22:15] PASS cancel-session / 18 D REGISTER [S1,S2] (both full): result — expected QUEUED#1, got QUEUED#1
+[13:22:15] PASS cancel-session / 19 verify after D REGISTER [S1,S2] (both full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:16] PASS cancel-session / 20 CANCEL_SESSION S1 — expected APPLIED, got APPLIED none — 798 ms
+[13:22:16] PASS cancel-session / 21 verify after CANCEL_SESSION S1 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:17] PASS cancel-session / 22 S1 CANCELLED with no seats in use — expected CANCELLED, confirmed 0, held 0, got CANCELLED, confirmed 0, held 0
+[13:22:17] PASS cancel-session / 23 A (was confirmed in S1) queues for S2 — expected QUEUED#1, got QUEUED#1
+[13:22:17] PASS cancel-session / 24 B (offer revoked) queues for S2 — expected QUEUED#2, got QUEUED#2
+[13:22:17] PASS cancel-session / 25 D queues for S2 — expected QUEUED#3, got QUEUED#3
+[13:22:18] PASS cancel-session / 26 C keeps S2 — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:22:18] PASS cancel-session / 27 B ACCEPT_OFFER revoked offer — expected REJECTED(OFFER_NOT_ACTIVE), got REJECTED(OFFER_NOT_ACTIVE) none — 783 ms
+[13:22:19] PASS cancel-session / 28 verify after B ACCEPT_OFFER revoked offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:19] PASS cancel-session / 29 E REGISTER [S1] (cancelled) — expected REJECTED(NO_ACCEPTABLE_SESSION), got REJECTED(NO_ACCEPTABLE_SESSION) none — 803 ms
+[13:22:20] PASS cancel-session / 30 verify after E REGISTER [S1] (cancelled) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:21] PASS cancel-session / 31 SET_CAPACITY S1 (cancelled) — expected REJECTED(SESSION_CANCELLED), got REJECTED(SESSION_CANCELLED) none — 799 ms
+[13:22:21] PASS cancel-session / 32 verify after SET_CAPACITY S1 (cancelled) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:22] PASS cancel-session / 33 C CANCEL_REGISTRATION — expected APPLIED, got APPLIED CANCELLED — 802 ms
+[13:22:22] PASS cancel-session / 34 C CANCEL_REGISTRATION: result — expected CANCELLED, got CANCELLED
+[13:22:22] PASS cancel-session / 35 verify after C CANCEL_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:22] PASS cancel-session / 36 A (lowest seq) gets S2 — expected OFFERED@S2, got OFFERED@S2
+[13:22:22] PASS cancel-session / 37 B moves up — expected QUEUED#1, got QUEUED#1
+[13:22:23] PASS cancel-session / 38 D moves up — expected QUEUED#2, got QUEUED#2
+[13:22:23] scenario cancel-workshop: workshop 150d0724-387a-4d71-b7bf-6a6eb9cf0f36
+[13:22:23] PASS cancel-workshop / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:24] PASS cancel-workshop / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 795 ms
+[13:22:24] PASS cancel-workshop / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:24] PASS cancel-workshop / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:25] PASS cancel-workshop / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 795 ms
+[13:22:25] PASS cancel-workshop / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:22:25] PASS cancel-workshop / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:26] PASS cancel-workshop / 08 B REGISTER [S2] — expected APPLIED, got APPLIED OFFERED@S2 — 803 ms
+[13:22:26] PASS cancel-workshop / 09 B REGISTER [S2]: result — expected OFFERED@S2, got OFFERED@S2
+[13:22:26] PASS cancel-workshop / 10 verify after B REGISTER [S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:27] PASS cancel-workshop / 11 C REGISTER [S1,S2] — expected APPLIED, got APPLIED QUEUED#1 — 800 ms
+[13:22:27] PASS cancel-workshop / 12 C REGISTER [S1,S2]: result — expected QUEUED#1, got QUEUED#1
+[13:22:27] PASS cancel-workshop / 13 verify after C REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:28] PASS cancel-workshop / 14 CANCEL_WORKSHOP — expected APPLIED, got APPLIED none — 800 ms
+[13:22:28] PASS cancel-workshop / 15 verify after CANCEL_WORKSHOP — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:29] PASS cancel-workshop / 16 workshop and sessions CANCELLED, nothing live — expected CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations, got CANCELLED; sessions CANCELLED/0/0 CANCELLED/0/0; live 0
+[13:22:29] PASS cancel-workshop / 17 A has no live registration — expected none, got none
+[13:22:29] PASS cancel-workshop / 18 B has no live registration — expected none, got none
+[13:22:29] PASS cancel-workshop / 19 C has no live registration — expected none, got none
+[13:22:30] PASS cancel-workshop / 20 A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations — expected ENDED(WORKSHOP_CANCELLED), got ENDED(WORKSHOP_CANCELLED)
+[13:22:31] PASS cancel-workshop / 21 D REGISTER after cancel — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 805 ms
+[13:22:31] PASS cancel-workshop / 22 verify after D REGISTER after cancel — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:32] PASS cancel-workshop / 23 B ACCEPT_OFFER after cancel — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 835 ms
+[13:22:32] PASS cancel-workshop / 24 verify after B ACCEPT_OFFER after cancel — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:33] PASS cancel-workshop / 25 CANCEL_WORKSHOP again — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 858 ms
+[13:22:33] PASS cancel-workshop / 26 verify after CANCEL_WORKSHOP again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:33] scenario close-open: workshop 1d8dd864-8422-4b3a-828c-7b8176349837
+[13:22:34] PASS close-open / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:34] PASS close-open / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 788 ms
+[13:22:34] PASS close-open / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:35] PASS close-open / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:35] PASS close-open / 05 CLOSE_REGISTRATION — expected APPLIED, got APPLIED none — 793 ms
+[13:22:36] PASS close-open / 06 verify after CLOSE_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:37] PASS close-open / 07 B REGISTER while closed — expected REJECTED(WORKSHOP_NOT_OPEN), got REJECTED(WORKSHOP_NOT_OPEN) none — 813 ms
+[13:22:37] PASS close-open / 08 verify after B REGISTER while closed — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:38] PASS close-open / 09 A ACCEPT_OFFER while closed — expected APPLIED, got APPLIED CONFIRMED@S1 — 814 ms
+[13:22:38] PASS close-open / 10 A ACCEPT_OFFER while closed: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:22:38] PASS close-open / 11 verify after A ACCEPT_OFFER while closed — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:39] PASS close-open / 12 CLOSE_REGISTRATION again — expected REJECTED(INVALID_STATE), got REJECTED(INVALID_STATE) none — 791 ms
+[13:22:39] PASS close-open / 13 verify after CLOSE_REGISTRATION again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:40] PASS close-open / 14 OPEN_REGISTRATION — expected APPLIED, got APPLIED none — 895 ms
+[13:22:40] PASS close-open / 15 verify after OPEN_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:41] PASS close-open / 16 B REGISTER after reopening — expected APPLIED, got APPLIED OFFERED@S2 — 830 ms
+[13:22:41] PASS close-open / 17 B REGISTER after reopening: result — expected OFFERED@S2, got OFFERED@S2
+[13:22:41] PASS close-open / 18 verify after B REGISTER after reopening — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:41] --- run 2/3
+[13:22:41] scenario register-confirm: workshop 1e7246e3-95ff-4d8c-88ce-2e81962475bd
+[13:22:42] PASS register-confirm / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:43] PASS register-confirm / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 797 ms
+[13:22:43] PASS register-confirm / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:43] PASS register-confirm / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:44] PASS register-confirm / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 803 ms
+[13:22:44] PASS register-confirm / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:22:44] PASS register-confirm / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:45] PASS register-confirm / 08 A REGISTER again (R1) — expected REJECTED(ALREADY_REGISTERED), got REJECTED(ALREADY_REGISTERED) none — 793 ms
+[13:22:45] PASS register-confirm / 09 verify after A REGISTER again (R1) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:46] PASS register-confirm / 10 B REGISTER [S2,S1] — expected APPLIED, got APPLIED OFFERED@S2 — 786 ms
+[13:22:46] PASS register-confirm / 11 B REGISTER [S2,S1]: result — expected OFFERED@S2, got OFFERED@S2
+[13:22:46] PASS register-confirm / 12 verify after B REGISTER [S2,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:47] PASS register-confirm / 13 C REGISTER [S1] (full) — expected APPLIED, got APPLIED QUEUED#1 — 793 ms
+[13:22:47] PASS register-confirm / 14 C REGISTER [S1] (full): result — expected QUEUED#1, got QUEUED#1
+[13:22:47] PASS register-confirm / 15 verify after C REGISTER [S1] (full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:48] PASS register-confirm / 16 B ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S2 — 796 ms
+[13:22:48] PASS register-confirm / 17 B ACCEPT_OFFER: result — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:22:48] PASS register-confirm / 18 verify after B ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:48] PASS register-confirm / 19 dashboard counts — expected confirmed 2, distinct served 2, queued 1, offered 0, got confirmed 2, distinct served 2, queued 1, offered 0
+[13:22:49] scenario rejections: workshop e873f6d9-d007-42db-bd3f-73f2aa69519d
+[13:22:49] PASS rejections / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:50] PASS rejections / 02 A REGISTER [S1,S1] — expected REJECTED(DUPLICATE_SESSION_IN_PREFERENCES), got REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none — 796 ms
+[13:22:50] PASS rejections / 03 verify after A REGISTER [S1,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:51] PASS rejections / 04 A REGISTER [unknown] — expected REJECTED(UNKNOWN_SESSION_IN_PREFERENCES), got REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none — 790 ms
+[13:22:51] PASS rejections / 05 verify after A REGISTER [unknown] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:52] PASS rejections / 06 A ACCEPT_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 803 ms
+[13:22:52] PASS rejections / 07 verify after A ACCEPT_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:53] PASS rejections / 08 A DECLINE_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 799 ms
+[13:22:53] PASS rejections / 09 verify after A DECLINE_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:54] PASS rejections / 10 A CANCEL_REGISTRATION (not registered) — expected REJECTED(NOT_REGISTERED), got REJECTED(NOT_REGISTERED) none — 798 ms
+[13:22:54] PASS rejections / 11 verify after A CANCEL_REGISTRATION (not registered) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:55] PASS rejections / 12 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 810 ms
+[13:22:55] PASS rejections / 13 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:55] PASS rejections / 14 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:55] PASS rejections / 15 rejected commands consumed no seq — expected seq 1, got seq 1
+[13:22:56] scenario decline: workshop 5409f1ba-8cbb-4ac5-a7bf-47ed2130426a
+[13:22:56] PASS decline / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:57] PASS decline / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 793 ms
+[13:22:57] PASS decline / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:22:57] PASS decline / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:58] PASS decline / 05 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 792 ms
+[13:22:58] PASS decline / 06 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:22:58] PASS decline / 07 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:59] PASS decline / 08 A DECLINE_OFFER S1 — expected APPLIED, got APPLIED OFFERED@S2 — 789 ms
+[13:22:59] PASS decline / 09 A DECLINE_OFFER S1: result — expected OFFERED@S2, got OFFERED@S2
+[13:22:59] PASS decline / 10 verify after A DECLINE_OFFER S1 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:22:59] PASS decline / 11 B gets the declined S1 seat — expected OFFERED@S1, got OFFERED@S1
+[13:23:00] PASS decline / 12 backfill DECLINED relayed in the same settlement — expected 1 × DECLINED, latencyMs 0, one to loaduser-2@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:23:00] PASS decline / 13 A DECLINE_OFFER S2 (last preference) — expected APPLIED, got APPLIED ENDED(NO_ACCEPTABLE_SESSION) — 807 ms
+[13:23:00] PASS decline / 14 A DECLINE_OFFER S2 (last preference): result — expected ENDED(NO_ACCEPTABLE_SESSION), got ENDED(NO_ACCEPTABLE_SESSION)
+[13:23:01] PASS decline / 15 verify after A DECLINE_OFFER S2 (last preference) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:01] PASS decline / 16 A has no live registration — expected none, got none
+[13:23:02] PASS decline / 17 A DECLINE_OFFER S1 again — expected REJECTED(OFFER_NOT_ACTIVE), got REJECTED(OFFER_NOT_ACTIVE) none — 798 ms
+[13:23:02] PASS decline / 18 verify after A DECLINE_OFFER S1 again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:02] PASS decline / 19 B still OFFERED S1 — expected OFFERED@S1, got OFFERED@S1
+[13:23:03] PASS decline / 20 B ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 777 ms
+[13:23:03] PASS decline / 21 B ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:03] PASS decline / 22 verify after B ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:03] scenario cancel: workshop 4f4f785d-16c8-4a92-b4b8-df40b5da2413
+[13:23:04] PASS cancel / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:05] PASS cancel / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 802 ms
+[13:23:05] PASS cancel / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:05] PASS cancel / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:06] PASS cancel / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 795 ms
+[13:23:06] PASS cancel / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:06] PASS cancel / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:07] PASS cancel / 08 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 805 ms
+[13:23:07] PASS cancel / 09 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:23:07] PASS cancel / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:08] PASS cancel / 11 C REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#2 — 821 ms
+[13:23:08] PASS cancel / 12 C REGISTER [S1]: result — expected QUEUED#2, got QUEUED#2
+[13:23:08] PASS cancel / 13 verify after C REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:09] PASS cancel / 14 A CANCEL_REGISTRATION (confirmed) — expected APPLIED, got APPLIED CANCELLED — 805 ms
+[13:23:09] PASS cancel / 15 A CANCEL_REGISTRATION (confirmed): result — expected CANCELLED, got CANCELLED
+[13:23:09] PASS cancel / 16 verify after A CANCEL_REGISTRATION (confirmed) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:10] PASS cancel / 17 B gets the seat — expected OFFERED@S1, got OFFERED@S1
+[13:23:10] PASS cancel / 18 C moves up — expected QUEUED#1, got QUEUED#1
+[13:23:10] PASS cancel / 19 backfill CANCELLED_CONFIRMED relayed in the same settlement — expected 1 × CANCELLED_CONFIRMED, latencyMs 0, one to loaduser-2@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:23:11] PASS cancel / 20 B CANCEL_REGISTRATION (offered) — expected APPLIED, got APPLIED CANCELLED — 786 ms
+[13:23:11] PASS cancel / 21 B CANCEL_REGISTRATION (offered): result — expected CANCELLED, got CANCELLED
+[13:23:11] PASS cancel / 22 verify after B CANCEL_REGISTRATION (offered) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:11] PASS cancel / 23 C gets the seat — expected OFFERED@S1, got OFFERED@S1
+[13:23:12] PASS cancel / 24 backfill CANCELLED_OFFER relayed in the same settlement — expected 1 × CANCELLED_OFFER, latencyMs 0, one to loaduser-3@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:23:12] PASS cancel / 25 D REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 805 ms
+[13:23:12] PASS cancel / 26 D REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:23:13] PASS cancel / 27 verify after D REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:14] PASS cancel / 28 D CANCEL_REGISTRATION (queued) — expected APPLIED, got APPLIED CANCELLED — 842 ms
+[13:23:14] PASS cancel / 29 D CANCEL_REGISTRATION (queued): result — expected CANCELLED, got CANCELLED
+[13:23:14] PASS cancel / 30 verify after D CANCEL_REGISTRATION (queued) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:14] PASS cancel / 31 D has no live registration — expected none, got none
+[13:23:15] PASS cancel / 32 D CANCEL_REGISTRATION again — expected REJECTED(NOT_REGISTERED), got REJECTED(NOT_REGISTERED) none — 779 ms
+[13:23:15] PASS cancel / 33 verify after D CANCEL_REGISTRATION again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:16] PASS cancel / 34 A REGISTER [S1] again — expected APPLIED, got APPLIED QUEUED#1 — 792 ms
+[13:23:16] PASS cancel / 35 A REGISTER [S1] again: result — expected QUEUED#1, got QUEUED#1
+[13:23:16] PASS cancel / 36 verify after A REGISTER [S1] again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:16] PASS cancel / 37 re-registration gets a new seq at the tail (R6) — expected seq > 4, got seq 5
+[13:23:17] scenario capacity-up: workshop 1617ce0c-e226-4046-943f-11bcb1f2e1d6
+[13:23:17] PASS capacity-up / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:18] PASS capacity-up / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 790 ms
+[13:23:18] PASS capacity-up / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:18] PASS capacity-up / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:19] PASS capacity-up / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 792 ms
+[13:23:19] PASS capacity-up / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:19] PASS capacity-up / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:20] PASS capacity-up / 08 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 783 ms
+[13:23:20] PASS capacity-up / 09 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:23:20] PASS capacity-up / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:21] PASS capacity-up / 11 C REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#2 — 799 ms
+[13:23:21] PASS capacity-up / 12 C REGISTER [S1]: result — expected QUEUED#2, got QUEUED#2
+[13:23:21] PASS capacity-up / 13 verify after C REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:22] PASS capacity-up / 14 D REGISTER [S2,S1] — expected APPLIED, got APPLIED OFFERED@S2 — 803 ms
+[13:23:22] PASS capacity-up / 15 D REGISTER [S2,S1]: result — expected OFFERED@S2, got OFFERED@S2
+[13:23:22] PASS capacity-up / 16 verify after D REGISTER [S2,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:23] PASS capacity-up / 17 SET_CAPACITY S1 1 → 3 — expected APPLIED, got APPLIED none — 800 ms
+[13:23:23] PASS capacity-up / 18 verify after SET_CAPACITY S1 1 → 3 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:23] PASS capacity-up / 19 two offers created by the capacity increase — expected offersCreated 2, got offersCreated 2
+[13:23:23] PASS capacity-up / 20 B offered — expected OFFERED@S1, got OFFERED@S1
+[13:23:24] PASS capacity-up / 21 C offered — expected OFFERED@S1, got OFFERED@S1
+[13:23:24] PASS capacity-up / 22 D keeps S2 — expected OFFERED@S2, got OFFERED@S2
+[13:23:24] PASS capacity-up / 23 S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms — expected capacity 3, free 0, 2 × CAPACITY_UP latency 0, got capacity 3, free 0, [0,0]
+[13:23:25] PASS capacity-up / 24 SET_CAPACITY S1 3 → 4 (nobody waiting) — expected APPLIED, got APPLIED none — 803 ms
+[13:23:25] PASS capacity-up / 25 verify after SET_CAPACITY S1 3 → 4 (nobody waiting) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:25] PASS capacity-up / 26 no offer without demand — expected offersCreated 0, got offersCreated 0
+[13:23:26] scenario capacity-down: workshop a975562f-cd66-4a9c-9406-7ffab958dc51
+[13:23:26] PASS capacity-down / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:27] PASS capacity-down / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 829 ms
+[13:23:27] PASS capacity-down / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:27] PASS capacity-down / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:28] PASS capacity-down / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 791 ms
+[13:23:28] PASS capacity-down / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:28] PASS capacity-down / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:29] PASS capacity-down / 08 B REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 814 ms
+[13:23:29] PASS capacity-down / 09 B REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:29] PASS capacity-down / 10 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:30] PASS capacity-down / 11 SET_CAPACITY S1 3 → 1 (below usage 2) — expected REJECTED(CAPACITY_BELOW_USAGE), got REJECTED(CAPACITY_BELOW_USAGE) none — 852 ms
+[13:23:30] PASS capacity-down / 12 verify after SET_CAPACITY S1 3 → 1 (below usage 2) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:31] PASS capacity-down / 13 SET_CAPACITY S1 → 0 — expected REJECTED(INVALID_CAPACITY), got REJECTED(INVALID_CAPACITY) none — 823 ms
+[13:23:31] PASS capacity-down / 14 verify after SET_CAPACITY S1 → 0 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:32] PASS capacity-down / 15 capacity unchanged after rejections — expected capacity 3, got capacity 3
+[13:23:32] PASS capacity-down / 16 SET_CAPACITY S1 3 → 2 (= usage) — expected APPLIED, got APPLIED none — 811 ms
+[13:23:33] PASS capacity-down / 17 verify after SET_CAPACITY S1 3 → 2 (= usage) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:33] PASS capacity-down / 18 S1 capacity 2, free 0 — expected capacity 2, free 0, got capacity 2, free 0
+[13:23:34] PASS capacity-down / 19 C REGISTER [S1] (now full) — expected APPLIED, got APPLIED QUEUED#1 — 777 ms
+[13:23:34] PASS capacity-down / 20 C REGISTER [S1] (now full): result — expected QUEUED#1, got QUEUED#1
+[13:23:34] PASS capacity-down / 21 verify after C REGISTER [S1] (now full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:35] PASS capacity-down / 22 SET_CAPACITY unknown session — expected REJECTED(SESSION_NOT_FOUND), got REJECTED(SESSION_NOT_FOUND) none — 804 ms
+[13:23:35] PASS capacity-down / 23 verify after SET_CAPACITY unknown session — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:35] scenario cancel-session: workshop 4b222fd7-617b-4648-a9eb-99afc5d477c1
+[13:23:36] PASS cancel-session / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:36] PASS cancel-session / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 801 ms
+[13:23:36] PASS cancel-session / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:37] PASS cancel-session / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:37] PASS cancel-session / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 786 ms
+[13:23:37] PASS cancel-session / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:38] PASS cancel-session / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:39] PASS cancel-session / 08 B REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 796 ms
+[13:23:39] PASS cancel-session / 09 B REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:39] PASS cancel-session / 10 verify after B REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:40] PASS cancel-session / 11 C REGISTER [S2] — expected APPLIED, got APPLIED OFFERED@S2 — 791 ms
+[13:23:40] PASS cancel-session / 12 C REGISTER [S2]: result — expected OFFERED@S2, got OFFERED@S2
+[13:23:40] PASS cancel-session / 13 verify after C REGISTER [S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:41] PASS cancel-session / 14 C ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S2 — 800 ms
+[13:23:41] PASS cancel-session / 15 C ACCEPT_OFFER: result — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:23:41] PASS cancel-session / 16 verify after C ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:42] PASS cancel-session / 17 D REGISTER [S1,S2] (both full) — expected APPLIED, got APPLIED QUEUED#1 — 833 ms
+[13:23:42] PASS cancel-session / 18 D REGISTER [S1,S2] (both full): result — expected QUEUED#1, got QUEUED#1
+[13:23:42] PASS cancel-session / 19 verify after D REGISTER [S1,S2] (both full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:43] PASS cancel-session / 20 CANCEL_SESSION S1 — expected APPLIED, got APPLIED none — 805 ms
+[13:23:43] PASS cancel-session / 21 verify after CANCEL_SESSION S1 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:43] PASS cancel-session / 22 S1 CANCELLED with no seats in use — expected CANCELLED, confirmed 0, held 0, got CANCELLED, confirmed 0, held 0
+[13:23:44] PASS cancel-session / 23 A (was confirmed in S1) queues for S2 — expected QUEUED#1, got QUEUED#1
+[13:23:44] PASS cancel-session / 24 B (offer revoked) queues for S2 — expected QUEUED#2, got QUEUED#2
+[13:23:44] PASS cancel-session / 25 D queues for S2 — expected QUEUED#3, got QUEUED#3
+[13:23:44] PASS cancel-session / 26 C keeps S2 — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:23:45] PASS cancel-session / 27 B ACCEPT_OFFER revoked offer — expected REJECTED(OFFER_NOT_ACTIVE), got REJECTED(OFFER_NOT_ACTIVE) none — 795 ms
+[13:23:45] PASS cancel-session / 28 verify after B ACCEPT_OFFER revoked offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:46] PASS cancel-session / 29 E REGISTER [S1] (cancelled) — expected REJECTED(NO_ACCEPTABLE_SESSION), got REJECTED(NO_ACCEPTABLE_SESSION) none — 789 ms
+[13:23:46] PASS cancel-session / 30 verify after E REGISTER [S1] (cancelled) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:47] PASS cancel-session / 31 SET_CAPACITY S1 (cancelled) — expected REJECTED(SESSION_CANCELLED), got REJECTED(SESSION_CANCELLED) none — 801 ms
+[13:23:47] PASS cancel-session / 32 verify after SET_CAPACITY S1 (cancelled) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:48] PASS cancel-session / 33 C CANCEL_REGISTRATION — expected APPLIED, got APPLIED CANCELLED — 790 ms
+[13:23:48] PASS cancel-session / 34 C CANCEL_REGISTRATION: result — expected CANCELLED, got CANCELLED
+[13:23:48] PASS cancel-session / 35 verify after C CANCEL_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:49] PASS cancel-session / 36 A (lowest seq) gets S2 — expected OFFERED@S2, got OFFERED@S2
+[13:23:49] PASS cancel-session / 37 B moves up — expected QUEUED#1, got QUEUED#1
+[13:23:49] PASS cancel-session / 38 D moves up — expected QUEUED#2, got QUEUED#2
+[13:23:49] scenario cancel-workshop: workshop 64a7942e-f9fa-4d12-9393-26eaa2270c15
+[13:23:50] PASS cancel-workshop / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:51] PASS cancel-workshop / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 812 ms
+[13:23:51] PASS cancel-workshop / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:23:51] PASS cancel-workshop / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:52] PASS cancel-workshop / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 802 ms
+[13:23:52] PASS cancel-workshop / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:23:52] PASS cancel-workshop / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:53] PASS cancel-workshop / 08 B REGISTER [S2] — expected APPLIED, got APPLIED OFFERED@S2 — 795 ms
+[13:23:53] PASS cancel-workshop / 09 B REGISTER [S2]: result — expected OFFERED@S2, got OFFERED@S2
+[13:23:53] PASS cancel-workshop / 10 verify after B REGISTER [S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:54] PASS cancel-workshop / 11 C REGISTER [S1,S2] — expected APPLIED, got APPLIED QUEUED#1 — 791 ms
+[13:23:54] PASS cancel-workshop / 12 C REGISTER [S1,S2]: result — expected QUEUED#1, got QUEUED#1
+[13:23:54] PASS cancel-workshop / 13 verify after C REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:55] PASS cancel-workshop / 14 CANCEL_WORKSHOP — expected APPLIED, got APPLIED none — 814 ms
+[13:23:55] PASS cancel-workshop / 15 verify after CANCEL_WORKSHOP — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:55] PASS cancel-workshop / 16 workshop and sessions CANCELLED, nothing live — expected CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations, got CANCELLED; sessions CANCELLED/0/0 CANCELLED/0/0; live 0
+[13:23:56] PASS cancel-workshop / 17 A has no live registration — expected none, got none
+[13:23:56] PASS cancel-workshop / 18 B has no live registration — expected none, got none
+[13:23:56] PASS cancel-workshop / 19 C has no live registration — expected none, got none
+[13:23:56] PASS cancel-workshop / 20 A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations — expected ENDED(WORKSHOP_CANCELLED), got ENDED(WORKSHOP_CANCELLED)
+[13:23:57] PASS cancel-workshop / 21 D REGISTER after cancel — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 796 ms
+[13:23:57] PASS cancel-workshop / 22 verify after D REGISTER after cancel — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:58] PASS cancel-workshop / 23 B ACCEPT_OFFER after cancel — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 793 ms
+[13:23:59] PASS cancel-workshop / 24 verify after B ACCEPT_OFFER after cancel — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:23:59] PASS cancel-workshop / 25 CANCEL_WORKSHOP again — expected REJECTED(WORKSHOP_CANCELLED), got REJECTED(WORKSHOP_CANCELLED) none — 795 ms
+[13:24:00] PASS cancel-workshop / 26 verify after CANCEL_WORKSHOP again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:00] scenario close-open: workshop a80e2883-6944-476d-a16d-b76fb8b253b8
+[13:24:00] PASS close-open / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:01] PASS close-open / 02 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 794 ms
+[13:24:01] PASS close-open / 03 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:24:01] PASS close-open / 04 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:02] PASS close-open / 05 CLOSE_REGISTRATION — expected APPLIED, got APPLIED none — 808 ms
+[13:24:02] PASS close-open / 06 verify after CLOSE_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:03] PASS close-open / 07 B REGISTER while closed — expected REJECTED(WORKSHOP_NOT_OPEN), got REJECTED(WORKSHOP_NOT_OPEN) none — 794 ms
+[13:24:03] PASS close-open / 08 verify after B REGISTER while closed — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:04] PASS close-open / 09 A ACCEPT_OFFER while closed — expected APPLIED, got APPLIED CONFIRMED@S1 — 804 ms
+[13:24:04] PASS close-open / 10 A ACCEPT_OFFER while closed: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:24:04] PASS close-open / 11 verify after A ACCEPT_OFFER while closed — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:05] PASS close-open / 12 CLOSE_REGISTRATION again — expected REJECTED(INVALID_STATE), got REJECTED(INVALID_STATE) none — 802 ms
+[13:24:05] PASS close-open / 13 verify after CLOSE_REGISTRATION again — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:06] PASS close-open / 14 OPEN_REGISTRATION — expected APPLIED, got APPLIED none — 791 ms
+[13:24:06] PASS close-open / 15 verify after OPEN_REGISTRATION — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:07] PASS close-open / 16 B REGISTER after reopening — expected APPLIED, got APPLIED OFFERED@S2 — 789 ms
+[13:24:07] PASS close-open / 17 B REGISTER after reopening: result — expected OFFERED@S2, got OFFERED@S2
+[13:24:07] PASS close-open / 18 verify after B REGISTER after reopening — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:07] --- run 3/3
+[13:24:08] scenario register-confirm: workshop e7dd53e0-d16b-4da3-a4c9-7035a9347e28
+[13:24:08] PASS register-confirm / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:09] PASS register-confirm / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 801 ms
+[13:24:09] PASS register-confirm / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:24:09] PASS register-confirm / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:10] PASS register-confirm / 05 A ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S1 — 792 ms
+[13:24:10] PASS register-confirm / 06 A ACCEPT_OFFER: result — expected CONFIRMED@S1, got CONFIRMED@S1
+[13:24:10] PASS register-confirm / 07 verify after A ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:11] PASS register-confirm / 08 A REGISTER again (R1) — expected REJECTED(ALREADY_REGISTERED), got REJECTED(ALREADY_REGISTERED) none — 823 ms
+[13:24:11] PASS register-confirm / 09 verify after A REGISTER again (R1) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:12] PASS register-confirm / 10 B REGISTER [S2,S1] — expected APPLIED, got APPLIED OFFERED@S2 — 799 ms
+[13:24:12] PASS register-confirm / 11 B REGISTER [S2,S1]: result — expected OFFERED@S2, got OFFERED@S2
+[13:24:12] PASS register-confirm / 12 verify after B REGISTER [S2,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:13] PASS register-confirm / 13 C REGISTER [S1] (full) — expected APPLIED, got APPLIED QUEUED#1 — 852 ms
+[13:24:13] PASS register-confirm / 14 C REGISTER [S1] (full): result — expected QUEUED#1, got QUEUED#1
+[13:24:13] PASS register-confirm / 15 verify after C REGISTER [S1] (full) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:14] PASS register-confirm / 16 B ACCEPT_OFFER — expected APPLIED, got APPLIED CONFIRMED@S2 — 806 ms
+[13:24:14] PASS register-confirm / 17 B ACCEPT_OFFER: result — expected CONFIRMED@S2, got CONFIRMED@S2
+[13:24:14] PASS register-confirm / 18 verify after B ACCEPT_OFFER — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:15] PASS register-confirm / 19 dashboard counts — expected confirmed 2, distinct served 2, queued 1, offered 0, got confirmed 2, distinct served 2, queued 1, offered 0
+[13:24:15] scenario rejections: workshop f15ff303-9201-4386-8b45-7f3e93921472
+[13:24:15] PASS rejections / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:16] PASS rejections / 02 A REGISTER [S1,S1] — expected REJECTED(DUPLICATE_SESSION_IN_PREFERENCES), got REJECTED(DUPLICATE_SESSION_IN_PREFERENCES) none — 788 ms
+[13:24:16] PASS rejections / 03 verify after A REGISTER [S1,S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:17] PASS rejections / 04 A REGISTER [unknown] — expected REJECTED(UNKNOWN_SESSION_IN_PREFERENCES), got REJECTED(UNKNOWN_SESSION_IN_PREFERENCES) none — 797 ms
+[13:24:17] PASS rejections / 05 verify after A REGISTER [unknown] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:18] PASS rejections / 06 A ACCEPT_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 792 ms
+[13:24:18] PASS rejections / 07 verify after A ACCEPT_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:19] PASS rejections / 08 A DECLINE_OFFER unknown offer — expected REJECTED(OFFER_NOT_FOUND), got REJECTED(OFFER_NOT_FOUND) none — 809 ms
+[13:24:19] PASS rejections / 09 verify after A DECLINE_OFFER unknown offer — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:20] PASS rejections / 10 A CANCEL_REGISTRATION (not registered) — expected REJECTED(NOT_REGISTERED), got REJECTED(NOT_REGISTERED) none — 802 ms
+[13:24:21] PASS rejections / 11 verify after A CANCEL_REGISTRATION (not registered) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:21] PASS rejections / 12 A REGISTER [S1] — expected APPLIED, got APPLIED OFFERED@S1 — 836 ms
+[13:24:21] PASS rejections / 13 A REGISTER [S1]: result — expected OFFERED@S1, got OFFERED@S1
+[13:24:22] PASS rejections / 14 verify after A REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:22] PASS rejections / 15 rejected commands consumed no seq — expected seq 1, got seq 1
+[13:24:22] scenario decline: workshop 3e7758d4-2a37-4b94-87e8-7c4d0e22d3c9
+[13:24:22] PASS decline / 01 verify after workshop creation — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:23] PASS decline / 02 A REGISTER [S1,S2] — expected APPLIED, got APPLIED OFFERED@S1 — 789 ms
+[13:24:23] PASS decline / 03 A REGISTER [S1,S2]: result — expected OFFERED@S1, got OFFERED@S1
+[13:24:23] PASS decline / 04 verify after A REGISTER [S1,S2] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:24] PASS decline / 05 B REGISTER [S1] — expected APPLIED, got APPLIED QUEUED#1 — 797 ms
+[13:24:24] PASS decline / 06 B REGISTER [S1]: result — expected QUEUED#1, got QUEUED#1
+[13:24:24] PASS decline / 07 verify after B REGISTER [S1] — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:25] PASS decline / 08 A DECLINE_OFFER S1 — expected APPLIED, got APPLIED OFFERED@S2 — 797 ms
+[13:24:25] PASS decline / 09 A DECLINE_OFFER S1: result — expected OFFERED@S2, got OFFERED@S2
+[13:24:25] PASS decline / 10 verify after A DECLINE_OFFER S1 — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:26] PASS decline / 11 B gets the declined S1 seat — expected OFFERED@S1, got OFFERED@S1
+[13:24:26] PASS decline / 12 backfill DECLINED relayed in the same settlement — expected 1 × DECLINED, latencyMs 0, one to loaduser-2@example.com, got [{"session":"S1","latencyMs":0,"toCaller":true}]
+[13:24:27] PASS decline / 13 A DECLINE_OFFER S2 (last preference) — expected APPLIED, got APPLIED ENDED(NO_ACCEPTABLE_SESSION) — 795 ms
+[13:24:27] PASS decline / 14 A DECLINE_OFFER S2 (last preference): result — expected ENDED(NO_ACCEPTABLE_SESSION), got ENDED(NO_ACCEPTABLE_SESSION)
+[13:24:27] PASS decline / 15 verify after A DECLINE_OFFER S2 (last preference) — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:24:27] PASS decline / 16 A has no live registration — expected none, got none
