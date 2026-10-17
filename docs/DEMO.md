@@ -209,18 +209,11 @@ message pauses only *its own* workshop: the expiry runs on another workshop's qu
 Notation: **Do** = operator action, **Expect** = what appears (exact UI text where it matters),
 **Say** = narrator line. Times are relative to the start of the demo block.
 
-> **Requires an API + SPA redeploy after the Table 3 run.** The *Expect* lines of D2 and D3 about
-> the ended-status card (its wording, **Register again**) and the named *New holder* in the backfill
-> log need both the API that returns `ending` and `newHolderEmail` and the SPA that shows them. The
-> dev stack is not redeployed while the Table 3 run is in progress. Until it is, the deployed build
-> behaves as in the 2026-10-17 walkthrough: after a cancellation or an expiry the card vanishes and
-> the empty registration form returns (the reason is under **Notifications** and **My registrations
-> → Past**), and the *New holder* column shows the first 8 characters of the user id (section 8).
-> After the redeploy, re-run the browser walkthrough (section 9) to refresh `docs/demo/screenshots/`,
-> `docs/demo/backup-demo.mp4` and the timings quoted below. Until then the backup recording (B1) and
-> the screenshots (B2–B5, e.g. `16-cancelled.png` and `21-after-expiry.png` with the empty form,
-> `24-dashboard-backfill-log.png` with truncated user ids) show the earlier UI: narrate them with
-> the fallback script in `docs/walkthrough/part-4.md`, which does not describe the ended card.
+> **Deployed build.** Dev and pilot run commit `d34e0ac` since 2026-10-17 21:08 / 21:19 UTC (ended-status
+> card with **Register again**, named *New holder* in the backfill log). The browser walkthrough re-ran
+> against it at 21:21 UTC and refreshed `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and the
+> timings below (`results/2026-10-17-web-walkthrough-dev-2/`). The first walkthrough
+> (`results/2026-10-17-web-walkthrough-dev/`) shows the earlier UI and is kept as history.
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 
@@ -310,11 +303,8 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
     not what makes this fast."
 - At 00:00 A's countdown reads *expired*. **Accept seat** stays enabled, because the server decides.
   The page refreshes once at zero. On dev the timer usually relays the seat within a second, and
-  A's offered card is gone about 2 s after 00:00 (1,975 ms in the published browser walkthrough,
-  `results/2026-10-17-web-walkthrough-dev/`, earlier UI, timed once the registration form was back).
-  The *Ended* card follows once *My registrations* has the ending (one more round trip; not yet
-  measured on dev: after the redeploy, the walkthrough's `bobEndedCardAfterExpiryMs` replaces the
-  1,975 ms here).
+  A's offered card gives way to the *Ended* card about 2 s after 00:00 (1,976 ms in the published
+  browser walkthrough, `results/2026-10-17-web-walkthrough-dev-2/`, `bobEndedCardAfterExpiryMs`).
 - **Do (Window A), optional, at 00:00 while the Accept button is still visible:** **Accept seat**.
   Skip this if the card is already gone.
 - **Expect:** *Accept rejected — The offer expired before your answer arrived.* At the next refresh
@@ -439,7 +429,7 @@ over it.
 | Symptom | Likely cause | Action (≤ 10 s, otherwise Plan C) |
 |---|---|---|
 | A status card does not change after the other window acted | auto-refresh runs every 10 s (30 s once confirmed) and only while the tab is visible | press F5 in that window |
-| After an offer expired or a cancellation, the card vanished and the empty registration form is back, with no message | the deployed SPA/API predate the ended-status card (fixed after the 2026-10-17 walkthrough; see the note at the top of section 5) | say "her registration ended because the hold ran out" and open **Notifications**; redeploy before the next rehearsal |
+| After an offer expired or a cancellation, the card vanished and the empty registration form is back, with no message | the browser still runs an SPA build from before 2026-10-17 21:08 UTC (cached) | hard refresh (Ctrl+Shift+R); otherwise say "her registration ended because the hold ran out" and open **Notifications** |
 | *Checking your registrations…* under the sessions table for a few seconds after the card vanished | expected: the page waits for *My registrations* (up to about 6 s) instead of showing the empty form | wait; F5 if it stays |
 | The ended card says that the registration was cancelled or has ended, but not for which session or what happened to the seat (it starts *You cancelled your registration at ‹time›* or *Your registration has ended at ‹time›*) | *My registrations* (an eventually consistent index on AWS) has not caught up yet; the page asks again for a few seconds | wait 2 s or press F5 |
 | The counters on a confirmed participant's page (*Free*, *Waiting*) lag behind | the page refreshes every 30 s while the seat is confirmed (10 s while queued or offered) | **Refresh** button or F5 |
@@ -482,18 +472,18 @@ Outputs, overwritten only by a passing run:
   user evidence).
 
 Observed in the published run (dev, 2026-10-17, 45 checks passed, evidence
-`results/2026-10-17-web-walkthrough-dev/`):
+`results/2026-10-17-web-walkthrough-dev-2/`, after the redeploy; the first run is `results/2026-10-17-web-walkthrough-dev/`):
 
 - All four sign-ins used the authorization code flow with PKCE (S256) through the hosted UI. Each
   returned to the page it started from, with no `code`/`state` left in the address bar. Sign-out
   cleared the stored user, and the hosted UI asked for the password again.
 - Register: 1.8 s from the click (*Sending…*) to the offer card. The 202 came back in 0.4–0.8 s;
   the first poll, about 0.3 s later, already saw every command settled.
-- Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 6 s later, on
+- Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 5.4 s later, on
   its 10 s refresh.
-- Expiry backfill: latency 179 ms on the dashboard (103–189 ms over three runs). Carol's page
-  showed the relayed offer 7 s after `expiresAt`. Bob's offered card was gone and the registration
-  form back 2.0 s after `expiresAt` (`bobCardGoneAfterExpiryMs` 1,975 in `meta.json`).
+- Expiry backfill: latency 186 ms on the dashboard (179 ms in the first walkthrough). Carol's page
+  showed the relayed offer 9.0 s after `expiresAt`, on its 10 s refresh. Bob's offered card gave way
+  to the *Ended* card 2.0 s after `expiresAt` (`bobEndedCardAfterExpiryMs` 1,976 in `meta.json`).
 - 0 API responses ≥ 400, 0 browser console errors.
 
 ---

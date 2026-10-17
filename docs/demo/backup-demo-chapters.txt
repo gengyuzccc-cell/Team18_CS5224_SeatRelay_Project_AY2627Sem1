@@ -1,26 +1,26 @@
 # Chapters of backup-demo.mp4 (staged walkthrough; times rounded, about ±1 s)
 0:00  Intro card
 0:05  Organiser · Opens SeatRelay (dev stage) and signs in through the Cognito hosted UI
-0:21  Organiser · Creates an organisation
-0:28  Organiser · Creates a workshop: unified queue, 60 s hold, 3 sessions (capacities 2 / 1 / 1)
-0:37  Alice · Opens the share link and signs in to register
-0:53  Alice · Ticks Session 1, then Session 2, and moves Session 2 up: her first choice
-0:56  Alice · Registers: request accepted at once (202), the page polls until the seat is decided
-1:00  Alice · Accepts: seat confirmed
-1:03  Bob · Signs in, registers for Session 2 only: it is full, so he is queued
-1:22  Alice · Her plans change: she cancels her confirmed seat
-1:27  Bob · His page refreshes every 10 s while queued: the freed seat is now held for him
-1:33  Carol · Registers for Session 2: the seat is held for Bob, so she is queued
-1:51  Organiser · Dashboard: seat held for Bob, Carol queued, cancellation backfill logged (0 ms)
-1:53  Bob · Does not answer: the 60 s hold runs out
-1:59  Bob · The last seconds of the hold
-2:09  Carol · Her page refreshes every 10 s: the expired seat was relayed to her automatically
-2:11  Carol · Nobody pressed anything: the seat moved on to her by itself
-2:13  Carol · Accepts: seat confirmed
-2:16  Organiser · Dashboard: both backfills with their latency, distinct participants served
-2:18  Organiser · Ticks attendance for the confirmed participant
-2:23  Organiser · Exports CSV, then "Verify invariants": no over-capacity, no double holds
-2:28  Alice · My registrations: her cancelled registration is listed under Past
-2:30  Bob · My registrations: his registration ended when the hold expired
-2:33  Bob · In-app notifications (e-mail is off on dev): the offer, then its expiry
-2:35  Alice · Signs out: the app forgets her and the hosted UI session ends too
+0:23  Organiser · Creates an organisation
+0:30  Organiser · Creates a workshop: unified queue, 60 s hold, 3 sessions (capacities 2 / 1 / 1)
+0:39  Alice · Opens the share link and signs in to register
+0:56  Alice · Ticks Session 1, then Session 2, and moves Session 2 up: her first choice
+0:59  Alice · Registers: request accepted at once (202), the page polls until the seat is decided
+1:02  Alice · Accepts: seat confirmed
+1:06  Bob · Signs in, registers for Session 2 only: it is full, so he is queued
+1:23  Alice · Her plans change: she cancels her confirmed seat
+1:29  Bob · His page refreshes every 10 s while queued: the freed seat is now held for him
+1:34  Carol · Registers for Session 2: the seat is held for Bob, so she is queued
+1:53  Organiser · Dashboard: seat held for Bob, Carol queued, cancellation backfill logged (0 ms)
+1:55  Bob · Does not answer: the 60 s hold runs out
+2:01  Bob · The last seconds of the hold
+2:11  Carol · Her page refreshes every 10 s: the expired seat was relayed to her automatically
+2:14  Carol · Nobody pressed anything: the seat moved on to her by itself
+2:15  Carol · Accepts: seat confirmed
+2:19  Organiser · Dashboard: both backfills with their latency, distinct participants served
+2:21  Organiser · Ticks attendance for the confirmed participant
+2:26  Organiser · Exports CSV, then "Verify invariants": no over-capacity, no double holds
+2:31  Alice · My registrations: her cancelled registration is listed under Past
+2:32  Bob · My registrations: his registration ended when the hold expired
+2:34  Bob · In-app notifications (e-mail is off on dev): the offer, then its expiry
+2:36  Alice · Signs out: the app forgets her and the hosted UI session ends too

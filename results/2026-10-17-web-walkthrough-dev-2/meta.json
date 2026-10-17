@@ -1,0 +1,130 @@
+{
+  "script": "tools/e2e/src/walkthrough.ts",
+  "verdict": "PASS",
+  "staged": true,
+  "stage": "dev",
+  "web": "https://d2ni5e1z674t04.cloudfront.net",
+  "api": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+  "startedAt": "2026-10-17T21:21:17.227Z",
+  "finishedAt": "2026-10-17T21:24:55.979Z",
+  "seconds": 219,
+  "commit": "a563d9289ecd13c9da8fbcfd4afc1c2873fbed95 (dirty)",
+  "browser": "141.0.7390.37 (/opt/pw-browsers/chromium-1194/chrome-linux/chrome)",
+  "accounts": [
+    {
+      "who": "Organiser",
+      "email": "walkthrough-organiser@example.com",
+      "displayName": "Organiser (staged)"
+    },
+    {
+      "who": "Alice",
+      "email": "walkthrough-alice@example.com",
+      "displayName": "Alice (staged)"
+    },
+    {
+      "who": "Bob",
+      "email": "walkthrough-bob@example.com",
+      "displayName": "Bob (staged)"
+    },
+    {
+      "who": "Carol",
+      "email": "walkthrough-carol@example.com",
+      "displayName": "Carol (staged)"
+    }
+  ],
+  "facts": {
+    "browser": "141.0.7390.37 (/opt/pw-browsers/chromium-1194/chrome-linux/chrome)",
+    "api": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "hostedUi": "https://seatrelay-379549361891.auth.ap-southeast-1.amazoncognito.com",
+    "workshopId": "db2499a9-1a91-404c-83f9-a5d0fd85cda7",
+    "orgName": "Staged walkthrough 18 Oct, 05:21",
+    "aliceClickToOfferMs": 1843,
+    "bobSawBackfillAfterMs": 5413,
+    "bobOfferExpiresAt": "2026-10-17T21:23:40.327Z",
+    "cancellationBackfillLatency": "0 ms",
+    "bobCardGoneAfterExpiryMs": 1969,
+    "bobEndedCardAfterExpiryMs": 1976,
+    "carolSawOfferAfterExpiryMs": 9011,
+    "expiryBackfillLatency": "186 ms",
+    "backfillHeader": "2/2 reallocated · p50 0 ms · p95 186 ms · max 186 ms",
+    "csvHeader": "seq,userId,email,displayName,status,endReason,acceptable,confirmedSessionId,confirmedSessionTitle,currentOfferId,offerSessionId,offerExpiresAt,attended,createdAt,updatedAt",
+    "csvLines": 4,
+    "alicePastRow": "Cloud Computing Workshop (staged demo) cancelled: you gave up your seat in Session 2 · 18 Oct 2026, 5:22 am",
+    "bobPastRow": "Cloud Computing Workshop (staged demo) ended: your hold on Session 2 expired · 18 Oct 2026, 5:23 am",
+    "videoSeconds": 164,
+    "videoMb": 2
+  },
+  "commands": [
+    {
+      "actor": "alice",
+      "type": "REGISTER",
+      "status": 202,
+      "postMs": 798,
+      "pollOffsetsMs": [
+        295
+      ]
+    },
+    {
+      "actor": "alice",
+      "type": "ACCEPT_OFFER",
+      "status": 202,
+      "postMs": 379,
+      "pollOffsetsMs": [
+        302
+      ]
+    },
+    {
+      "actor": "bob",
+      "type": "REGISTER",
+      "status": 202,
+      "postMs": 739,
+      "pollOffsetsMs": [
+        304
+      ]
+    },
+    {
+      "actor": "alice",
+      "type": "CANCEL_REGISTRATION",
+      "status": 202,
+      "postMs": 376,
+      "pollOffsetsMs": [
+        301
+      ]
+    },
+    {
+      "actor": "carol",
+      "type": "REGISTER",
+      "status": 202,
+      "postMs": 722,
+      "pollOffsetsMs": [
+        298
+      ]
+    },
+    {
+      "actor": "carol",
+      "type": "ACCEPT_OFFER",
+      "status": 202,
+      "postMs": 381,
+      "pollOffsetsMs": [
+        297
+      ]
+    }
+  ],
+  "statusPageRefreshGapsMs": [
+    10345,
+    10347,
+    10342,
+    10399,
+    10343,
+    10352
+  ],
+  "checks": {
+    "passed": 45,
+    "failed": 0
+  },
+  "apiErrors": [],
+  "consoleErrors": [],
+  "observations": [
+    "Bob's page around the expiry (status card states): none@21:22:20 → none@21:22:22 → none@21:22:26 → none@21:22:31 → queued@21:22:36 → offered@21:22:47 → none@21:23:41 → ended@21:23:41; offer expiresAt 2026-10-17T21:23:40.327Z."
+  ]
+}

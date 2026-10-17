@@ -21,7 +21,7 @@ Generated from the run directories; the notes column is written by hand. Failed 
 | 2026-10-17T16:37:51.206Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | a633cb25 | 1 | PASS 84/84 | 2026-10-17-pilot-rehearsal | staged rehearsal on pilot, synthetic accounts (not user evidence) |
 | 2026-10-17T16:46:21.309Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | 12f30c90 | 1 | PASS 85/85 | 2026-10-17-pilot-rehearsal-2 | staged rehearsal on pilot, synthetic accounts (not user evidence) |
 | 2026-10-17T16:51:30.226Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | 60453144 | 1 | PASS 85/85 | 2026-10-17-pilot-rehearsal-3 | staged rehearsal on pilot, synthetic accounts (not user evidence); quoted in the report |
-| 2026-10-17T17:27:04.217Z | web-walkthrough-dev | dev | b8b8f3a (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev | real-browser walkthrough with test accounts (Playwright); not user evidence |
+| 2026-10-17T17:27:04.217Z | web-walkthrough-dev | dev | b8b8f3a (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev | real-browser walkthrough with test accounts (Playwright), UI before d34e0ac; not user evidence |
 | 2026-10-17T18:14:45.190Z | smoke | dev | e05c037 | 3aabe3fe | 1 | PASS 13/13 | 2026-10-17-smoke-2 | re-run series at quota 1000; deployed bundles = build of e05c037 (results/2026-10-17-table3-dev-q1000-provenance.md) |
 | 2026-10-17T18:16:07.202Z | correctness | dev | e05c037 (dirty) | d179d40d | 3 | PASS 672/672 | 2026-10-17-correctness-2 | re-run series at quota 1000; quoted in the report; dirty = runner status log under results/ only |
 | 2026-10-17T18:20:35.647Z | preference-order | dev | e05c037 (dirty) | 4b65ed89 | 3 | PASS 204/204 | 2026-10-17-preference-order-2 | re-run series at quota 1000; quoted; dirty = status log only |
@@ -31,6 +31,10 @@ Generated from the run directories; the notes column is written by hand. Failed 
 | 2026-10-17T18:39:47.442Z | failure-recovery | dev | e05c037 (dirty) | da47da60 | 3 | PASS 52/52 | 2026-10-17-failure-recovery-2 | re-run series at quota 1000; quoted; dirty = status log only |
 | 2026-10-17T19:10:49.064Z | access-control | dev | e05c037 (dirty) | 6dacbc7a | 3 | PASS 177/177 | 2026-10-17-access-control-2 | re-run series at quota 1000; quoted; dirty = status log only |
 | 2026-10-17T19:11:42.100Z | backfill | dev | e05c037 (dirty) | 983158fd | 3 | PASS 124/124 | 2026-10-17-backfill-2 | re-run series at quota 1000; quoted; dirty = status log only |
+| 2026-10-17T21:10:07.748Z | smoke | dev | d34e0ac | 5a063ea6 | 1 | PASS 13/13 | 2026-10-17-smoke-3 | regression after deploying d34e0ac to dev (report/series.json regression) |
+| 2026-10-17T21:11:33.047Z | correctness | dev | d34e0ac | 211a1a57 | 3 | PASS 672/672 | 2026-10-17-correctness-3 | regression after deploying d34e0ac to dev |
+| 2026-10-17T21:16:19.960Z | access-control | dev | d34e0ac | d65305fd | 3 | PASS 177/177 | 2026-10-17-access-control-3 | regression after deploying d34e0ac to dev |
+| 2026-10-17T21:21:17.227Z | web-walkthrough-dev | dev | a563d92 (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev-2 | real-browser walkthrough after deploying d34e0ac (ended card, named holders); screenshots and backup video in docs/demo/; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 

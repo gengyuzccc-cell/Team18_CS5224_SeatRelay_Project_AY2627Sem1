@@ -21,12 +21,12 @@ scripted actions; not user evidence. Regenerate with `pnpm --filter @seatrelay/e
 | `13-confirmed.png` | Alice | Seat confirmed; "Cancel my seat" is the only action left |
 | `14-queued.png` | Bob | Bob is queued at position 1 for Session 2; the page refreshes every 10 s while queued |
 | `15-cancel-confirm.png` | Alice | Cancelling asks for confirmation inline |
-| `16-cancelled.png` | Alice | After the cancellation the page offers the registration form again |
+| `16-cancelled.png` | Alice | After the cancellation the page says what happened and offers "Register again" |
 | `17-offer-after-cancellation.png` | Bob | Bob's page, without a reload: the cancelled seat is now held for him |
 | `18-queued.png` | Carol | Carol is queued at position 1 behind the seat held for Bob |
 | `19-dashboard-queue-offer.png` | Organiser | Dashboard: Carol queued, the seat held for Bob with its countdown, the backfill log |
 | `20-offer-expiring.png` | Bob | Bob's hold in its last seconds |
-| `21-after-expiry.png` | Bob | After the expiry Bob's page shows the registration form again |
+| `21-after-expiry.png` | Bob | After the expiry Bob's page says his hold expired and offers "Register again" |
 | `22-offer-after-expiry.png` | Carol | Carol's page: the expired seat was relayed to her without anyone acting |
 | `23-confirmed.png` | Carol | Carol confirmed in Session 2 |
 | `24-dashboard-backfill-log.png` | Organiser | Backfill log: cancellation relayed in the same transaction, expiry relayed by the timer path |
