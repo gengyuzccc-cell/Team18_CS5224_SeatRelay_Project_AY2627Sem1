@@ -1,0 +1,70 @@
+import { describe, expect, test } from 'vitest';
+import { AuthError, bearerToken, toAuthUser } from '../src/auth';
+import { loadConfig } from '../src/config';
+
+describe('auth claims mapping', () => {
+  test('maps sub/email/name of a Keycloak ID token', () => {
+    expect(
+      toAuthUser({
+        sub: '4c9461ff-59d8-4f3b-826e-fd81eba4d6e6',
+        email: 'alice@example.com',
+        name: 'Alice Participant',
+        preferred_username: 'alice@example.com',
+      }),
+    ).toEqual({
+      userId: '4c9461ff-59d8-4f3b-826e-fd81eba4d6e6',
+      email: 'alice@example.com',
+      name: 'Alice Participant',
+    });
+  });
+
+  test('falls back to given/family name and preferred_username', () => {
+    expect(
+      toAuthUser({ sub: 'u1', preferred_username: 'bob@example.com', given_name: 'Bob', family_name: 'P' }),
+    ).toEqual({ userId: 'u1', email: 'bob@example.com', name: 'Bob P' });
+    expect(toAuthUser({ sub: 'u2', email: 'c@example.com' })).toEqual({ userId: 'u2', email: 'c@example.com' });
+  });
+
+  test('rejects tokens without subject or email', () => {
+    expect(() => toAuthUser({ email: 'x@example.com' })).toThrow(AuthError);
+    expect(() => toAuthUser({ sub: 'u3' })).toThrow(AuthError);
+  });
+
+  test('extracts bearer tokens', () => {
+    expect(bearerToken('Bearer abc.def.ghi')).toBe('abc.def.ghi');
+    expect(bearerToken('bearer   abc')).toBe('abc');
+    expect(bearerToken('Basic abc')).toBeUndefined();
+    expect(bearerToken(undefined)).toBeUndefined();
+    expect(bearerToken('Bearer ')).toBeUndefined();
+  });
+});
+
+describe('configuration', () => {
+  test('parses the compose environment', () => {
+    const config = loadConfig({
+      DATABASE_URL: 'postgres://seatrelay:seatrelay@postgres:5432/seatrelay',
+      OIDC_ISSUER: 'http://localhost:8080/realms/seatrelay',
+      OIDC_JWKS_URL: 'http://keycloak:8080/realms/seatrelay/protocol/openid-connect/certs',
+      OIDC_AUDIENCE: 'seatrelay-web, tooling',
+      SMTP_URL: 'smtp://mailpit:1025',
+      EMAIL_ENABLED: 'true',
+      ALLOW_FAULT_FLAGS: 'false',
+      WEB_ORIGIN: 'http://localhost:8081,http://localhost:5173',
+      WORKER_POLL_MS: '200',
+    });
+    expect(config).toMatchObject({
+      port: 3000,
+      oidc: { audience: ['seatrelay-web', 'tooling'] },
+      emailEnabled: true,
+      allowFaultFlags: false,
+      webOrigins: ['http://localhost:8081', 'http://localhost:5173'],
+      workerPollMs: 200,
+      timerPollMs: 1000,
+      smtpUrl: 'smtp://mailpit:1025',
+    });
+  });
+
+  test('reports missing variables', () => {
+    expect(() => loadConfig({})).toThrow(/DATABASE_URL/);
+  });
+});

@@ -14,22 +14,23 @@
     "validate": "for t in templates/auth.yaml templates/app.yaml templates/web.yaml; do sam validate --lint -t $t || exit 1; done"
   },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "2.36.0",
+    "@aws-lambda-powertools/metrics": "2.36.0",
+    "@aws-sdk/client-dynamodb": "3.1152.0",
+    "@aws-sdk/client-ses": "3.1152.0",
+    "@aws-sdk/client-sqs": "3.1152.0",
+    "@aws-sdk/lib-dynamodb": "3.1152.0",
+    "@aws-sdk/util-dynamodb": "3.996.9",
     "@seatrelay/contracts": "workspace:*",
     "@seatrelay/core": "workspace:*",
     "@seatrelay/service": "workspace:*",
-    "@aws-sdk/client-dynamodb": "3.1152.0",
-    "@aws-sdk/lib-dynamodb": "3.1152.0",
-    "@aws-sdk/client-sqs": "3.1152.0",
-    "@aws-sdk/client-ses": "3.1152.0",
-    "@aws-lambda-powertools/logger": "2.36.0",
-    "@aws-lambda-powertools/metrics": "2.36.0",
     "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/aws-lambda": "8.10.164",
     "aws-sdk-client-mock": "4.1.0",
     "esbuild": "0.25.12",
-    "vitest": "3.2.7",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }
