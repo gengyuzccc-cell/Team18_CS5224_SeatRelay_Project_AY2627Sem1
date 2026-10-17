@@ -1,7 +1,7 @@
 # SeatRelay live demo script
 
 The script for the live demo inside the 15-minute presentation on 11/13 (plan §7.2: every member
-speaks; the live demo takes about 5½ minutes). It covers:
+speaks; the live demo has a 5-minute slot, 6:00–11:00 of the talk). It covers:
 
 - the preset data;
 - the two browsers and their accounts;
@@ -178,18 +178,15 @@ workshop* still shows held 1/1/1 and an empty queue. Leave the tabs on the dashb
 
 ## 4. Run of show (15:00)
 
-| Time | Block | Slides / screen |
-|---|---|---|
-| 0:00–1:00 | Problem and market size | slides |
-| 1:00–2:00 | Business model and pricing | slides |
-| 2:00–3:00 | Mechanism and rules R1–R7 | slides |
-| 3:00–4:00 | Architecture (Figure A) | slides |
-| 4:00–5:30 | Request path, timers, transaction (Figures B, C) | slides |
-| **5:30–11:00** | **Live demo**: D1 → D2 → D5a → D3 → D5b → D4 (section 5) | browsers + terminal |
-| 11:00–12:45 | System evaluation results (Table 3) | slides |
-| 12:45–13:30 | Cloud vs on-prem cost | slides |
-| 13:30–14:15 | User study and pilot | slides |
-| 14:15–15:00 | Limitations, future work, AI use, roles | slides |
+The one running order of the talk is the part table in `docs/walkthrough/README.md`; it is not repeated
+here, so the narrator and the operator follow the same clock. The demo is Part 4, **6:00–11:00 (5:00)**,
+between Part 3 (slides 5–7, architecture, request path and timers) and Part 5 (slides 9–11, results and
+cost). Inside the slot the beats run D1 → D2 → D5a → D3 → D5b → D4 with the times of §5 (demo clock 0:00
+= talk clock 6:00; the walkthrough's beat table in `docs/walkthrough/part-4.md` gives the same times on the
+talk clock).
+
+If D5b runs late, shorten D4 to one *Verify invariants* click on *Demo workshop* (about 10 s). If any beat
+fails, switch to Plan C (§6) at once: the slot has no slack for debugging.
 
 The order D5a before D3 is deliberate. On dev the crashed message comes back after the 120 s SQS
 visibility timeout, and the expiry beat fills exactly that wait. The beat also shows that a stuck
@@ -202,7 +199,7 @@ message pauses only *its own* workshop: the expiry runs on another workshop's qu
 Notation: **Do** = operator action, **Expect** = what appears (exact UI text where it matters),
 **Say** = narrator line. Times are relative to the start of the demo block.
 
-### D1 (0:00–1:00): register → offer → accept (Window A, *Demo workshop*)
+### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 
 - **Say:** "Three sessions of the same workshop. Session 3 is already taken; sessions 1 and 2 have
   one seat each. Demo 1 can attend Session 3 or Session 1, and prefers Session 3."
@@ -222,7 +219,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 - **Do (Window O):** **Refresh**. *Session 1* now shows confirmed 1, held 1, free 0, and Demo 1 is
   in *Confirmed (1)*.
 
-### D2 (1:00–2:00): second person cancels → instant backfill (Windows B, A, O)
+### D2 (0:50–1:40): second person cancels → instant backfill (Windows B, A, O)
 
 - **Do (Window B):** Tick only *Session 1* → **Register (1 session)**.
 - **Expect:** toast *Registration applied — You are queued at position 1.*; the card reads *Queued at
@@ -243,7 +240,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 - **Say:** "The cancellation and the hand-over to the next person are one transaction: zero
   milliseconds, nobody had to email anyone."
 
-### D5a (2:00–2:45): fault injection, crash after commit (terminal)
+### D5a (1:40–2:20): fault injection, crash after commit (terminal)
 
 - **Say:** "Now we crash the worker on purpose, right **after** it has committed but **before** it
   could acknowledge the message, the worst moment for double booking. This flag only works on the
@@ -269,14 +266,14 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 - **Rule:** send **no command to *Demo workshop*** until D5b. Its FIFO group waits for the
   redelivery. Dashboard reads are fine.
 
-### D3 (2:45–4:30): 60 s hold expires → automatic backfill (*Expiry demo*)
+### D3 (2:20–4:00): 60 s hold expires → automatic backfill (*Expiry demo*)
 
 - **Do (Window A, tab 2):** Tick *Session A* → **Register (1 session)**.
 - **Expect:** *A seat in Session A is held for you — confirm within 00:59.*
 - **Do (Window B, tab 2):** Tick *Session A* → **Register (1 session)** → *You are queued at position 1.*
 - **Do (Window O, tab 2):** **Refresh**. *Offered (1)* lists Demo 1 with a live countdown; *Queue
   (1)* lists Demo 2.
-- **Say during the wait** (about 50 s; Figure C on the slide if the projector can switch):
+- **Say during the wait** (about 50 s; Final report Fig. 3b, slide 7, if the projector can switch):
   - "When the offer was created, the worker put a one-minute timer on an SQS delay queue, before it
     committed.
   - When the timer fires, a small Lambda forwards a 'tick' into this workshop's ordered queue. The
@@ -304,7 +301,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   when the tick was processed; three browser walkthroughs on dev, 2026-10-17: 103–189 ms).
 - **Say:** "Nobody pressed anything: the seat moved on by itself, within a second or two."
 
-### D5b (4:30–5:00): exactly-once, proven (terminal + Window O)
+### D5b (4:00–4:30): exactly-once, proven (terminal + Window O)
 
 At least 120 s must have passed since D5a. If not, do D4 first and come back.
 
@@ -337,7 +334,7 @@ At least 120 s must have passed since D5a. If not, do D4 first and come back.
   that transaction only succeeds while the command is still 'accepted'. The second delivery found it
   settled and simply acknowledged it."
 
-### D4 (5:00–5:30): verify invariants (Window O)
+### D4 (4:30–5:00): verify invariants (Window O; shorten to one click if D5b ran late)
 
 - **Do:** On *Demo workshop*, click **Verify invariants**; then on *Expiry demo*.
 - **Expect:** a green banner *All invariants hold — checked ‹date, time› — C1 no over-capacity, C2 no
@@ -363,7 +360,7 @@ At least 120 s must have passed since D5a. If not, do D4 first and come back.
 |---|---|---|
 | **Plan B: local stack** | Before the slot: AWS health check fails or campus Wi-Fi blocks AWS, but the laptop runs Docker. | Same script against `http://localhost:8081` / `http://localhost:3000`. Seed with `--target local`. The D5 redelivery takes about 1 s, so D5b can follow D5a directly. Mention "this is our on-prem reference deployment, same code". |
 | **Plan C: recorded video** | Before the slot: neither A nor B is ready. During the demo: a step has not settled after 15 s, or an error banner appears, or sign-in breaks. | Say "let me show you this step from our recording" and jump to the chapter of the failing beat. Do not debug live. Afterwards, return to the slides. Primary: the narrated OBS recording below. Backup if that is missing: `docs/demo/backup-demo.mp4` (section 9). |
-| **Plan D: screenshots** | Video playback fails. | Backup slides with one screenshot per expected state (D1–D4 "Expect" lines), taken from `docs/demo/screenshots/` (section 9). D5 has no screenshot, since it is a terminal step. |
+| **Plan D: screenshots** | Video playback fails. | Backup slides B2–B5 with two screenshots per beat D1–D4. They come from the staged browser walkthrough (section 9), not from this click path: other accounts (Alice, Bob, Carol), one workshop with capacities 2/1/1 and Session 2 ranked first. Narrate them with the fallback script in `docs/walkthrough/part-4.md`, not with the lines of section 5. D5 has no screenshot, since it is a terminal step (B6 lists what the experiments recorded). |
 
 Recording the video (second rehearsal, 11/12):
 

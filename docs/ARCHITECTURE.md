@@ -51,7 +51,7 @@ Two deployments run the same application layer and engine:
 | Notifier | Streams (filter `INSERT` + `entityType = NOTIFICATION`) → `notifier` Lambda → SES | `handlers/notifier.ts`, `adapters/ses.ts` | E-mail for in-app notifications, paced at ≤ 1 e-mail/s. Records SENT / FAILED / SKIPPED. |
 | Observability | CloudWatch Logs (14 d), EMF metrics (`SeatRelay` namespace), alarms → SNS, dashboard, X-Ray | `services/aws/src/lib/{logger,metrics}.ts`, `templates/app.yaml` | `CommandSettledLatency`, `BackfillLatency`, `OffersCreated/Expired`, `SweepLateExpiries`, `MetaConflictRetries`, `NotificationFailures`. |
 
-### 1.2 Figure A — architecture (cloud)
+### 1.2 Figure A — architecture (cloud; Final report Fig. 2, slide 5)
 
 ```mermaid
 flowchart LR
@@ -175,7 +175,7 @@ Latency definitions used everywhere (plan §1.3):
 - **backfill latency** = `reallocatedAt − releasedAt` on the `BackfillRecord`, emitted as
   `BackfillLatency`. For an expiry, `releasedAt` is the offer's `expiresAt`.
 
-### 3.2 Figure B — command sequence (202 → poll → settled)
+### 3.2 Figure B — command sequence (202 → poll → settled; Final report Fig. 3a, slide 6)
 
 ```mermaid
 sequenceDiagram
@@ -352,7 +352,7 @@ The latency distribution is the backfill experiment's job (`docs/EXPERIMENTS.md`
   (`latencyMs = 0`) and is reported separately. The 120 s target (Table 3) is an acceptance ceiling;
   the measured values come from `results/<date>-backfill/`.
 
-### 5.3 Figure C — offer → timer → tick → backfill
+### 5.3 Figure C — offer → timer → tick → backfill (Final report Fig. 3b, slide 7)
 
 ```mermaid
 sequenceDiagram

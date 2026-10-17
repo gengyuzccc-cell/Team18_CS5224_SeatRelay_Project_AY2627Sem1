@@ -640,6 +640,11 @@ PERF_METRICS = (
     ("AcceptPNinetyFiveMs", "commandP95", "median", 0, "202 response p95 (POST commands), median of rounds (ms)"),
     ("SettlePNinetyFiveMs", "settleP95", "median", 0, "client-observed settle p95, median of rounds (ms)"),
     ("ServerSettlePNinetyFiveMs", "serverSettleP95", "median", 0, "server settle p95 (settledAt - acceptedAt), median of rounds (ms)"),
+    ("SettlePFiftyMs", "settleP50", "median", 0, "client-observed settle p50, median of rounds (ms)"),
+    ("ServerSettlePFiftyMs", "serverSettleP50", "median", 0, "server settle p50 (settledAt - acceptedAt), median of rounds (ms)"),
+    ("ReadPFiftyMs", "readP50", "median", 0, "read p50 (GET /workshops), median of rounds (ms)"),
+    ("AcceptPFiftyMs", "commandP50", "median", 0, "202 response p50 (POST commands), median of rounds (ms)"),
+    ("QueueDepthMax", "sqsDepthMax", "max", 0, "messages on commands.fifo, worst round"),
     ("CloudWatchSettlePNinetyFiveMs", "cwSettleP95", "median", 0, "CloudWatch CommandSettledLatency p95, median of rounds (ms)"),
     ("ErrorPct", "httpReqFailedRate", "max", 2, "HTTP error rate, worst round (%)"),
     ("QueueAgeMaxS", "sqsOldestAgeMax", "max", 0, "oldest message age on commands.fifo, worst round (s)"),
@@ -703,7 +708,7 @@ def section_loadtest(book: Book, results: Path) -> None:
                     # command settled within the client's budget: the round's p95 is above the budget,
                     # not zero. It enters the median as +infinity (right-censored), so the median is
                     # the middle of the measured rounds only when at most one round is censored.
-                    if column in ("settleP95", "serverSettleP95"):
+                    if column in ("settleP95", "serverSettleP95", "settleP50", "serverSettleP50"):
                         numbers = [math.inf if (n is None or n <= 0) and t > 0 else n
                                    for n, t in zip(numbers, timeouts or [0] * len(numbers))]
                     numbers = [v for v in numbers if v is not None]
@@ -898,6 +903,47 @@ def section_cost(book: Book, results: Path) -> None:
     book.raw("CostMeasuredUnitListUsd", summary_number(u.group(1)) if u else None, f"{usrc}: 'Unit cost'", "measured cost per 1,000 registrations, list (USD)", reason)
     book.raw("CostMeasuredUnitAfterFreeUsd", summary_number(u.group(2)) if u else None, f"{usrc}: 'Unit cost'", "measured cost per 1,000 registrations, after free tier (USD)", reason)
     book.raw("CostMeasuredRegistrations", summary_number(u.group(3)) if u else None, f"{usrc}: 'Unit cost ... for N registrations'", "registrations in the measured period", reason)
+    # The bill itself (Prelim. Table 3, Cost row: "Cloud bill"): the latest Cost Explorer snapshot of
+    # tools/scripts/bin/cost-snapshot.sh, daily costs by service over 30 days. Filtered to the cost
+    # allocation tag Project=SeatRelay, it sees only usage after the tag became active, so the number
+    # of days with tagged usage is reported with it.
+    import json
+    snaps = sorted((cost / "snapshots").glob("*.json")) if (cost / "snapshots").is_dir() else []
+    bill = snaps[-1] if snaps else None
+    breason = "Cost Explorer snapshot not yet taken (tools/scripts/bin/cost-snapshot.sh)"
+    bsrc = rel(bill) if bill else "results/cost/snapshots/<date>.json"
+    periods, unblended, net, services, tagged = [], 0.0, 0.0, set(), []
+    captured = filtered = None
+    if bill is not None:
+        try:
+            data = json.loads(bill.read_text(encoding="utf-8"))
+            captured = str(data.get("capturedAt") or "")[:10] or None
+            filtered = (data.get("filter") or {}).get("byService")
+            for day in (data.get("byService") or {}).get("ResultsByTime") or []:
+                periods.append(day["TimePeriod"]["Start"])
+                if day.get("Groups"):
+                    tagged.append(day["TimePeriod"]["Start"])
+                for group in day.get("Groups") or []:
+                    metrics = group.get("Metrics") or {}
+                    services.add(group["Keys"][0])
+                    unblended += float((metrics.get("UnblendedCost") or {}).get("Amount") or 0)
+                    net += float((metrics.get("NetUnblendedCost") or {}).get("Amount") or 0)
+        except (OSError, ValueError, KeyError, TypeError) as exc:
+            book.notes.append(f"{bsrc}: unreadable ({exc})")
+            periods = []
+    ok = bool(periods)
+    book.text("CostBillSnapshotDate", captured if ok else None, f"{bsrc}: capturedAt", "date of the Cost Explorer snapshot", breason)
+    book.text("CostBillFrom", periods[0] if ok else None, f"{bsrc}: first TimePeriod.Start", "first day covered by the snapshot", breason)
+    book.text("CostBillTo", periods[-1] if ok else None, f"{bsrc}: last TimePeriod.Start", "last day covered by the snapshot", breason)
+    book.text("CostBillFilter", ("Project=SeatRelay tag" if filtered else "whole account") if ok else None, f"{bsrc}: filter.byService",
+              "what the snapshot's cost query was filtered to", breason)
+    book.num("CostBillTaggedDays", len(tagged) if ok else None, 0, f"{bsrc}: days with at least one service group",
+             "days with billed usage in the snapshot (the tag filter sees only days after tag activation)", breason)
+    book.text("CostBillFirstDay", tagged[0] if tagged else None, f"{bsrc}: first day with a service group", "first day with billed usage in the snapshot",
+              breason if not ok else "no billed usage in the snapshot")
+    book.num("CostBillServices", len(services) if ok else None, 0, f"{bsrc}: distinct SERVICE keys", "services with billed usage in the snapshot", breason)
+    book.num("CostBillListUsd", unblended if ok else None, 5, f"{bsrc}: sum of UnblendedCost over days and services", "billed usage before credits (USD)", breason)
+    book.num("CostBillNetUsd", net if ok else None, 5, f"{bsrc}: sum of NetUnblendedCost over days and services", "billed usage net of discounts and credits (USD)", breason)
 
 
 # ----------------------------------------------------------------------------- replay

@@ -26,9 +26,15 @@ on \CostPricingDate~\cite{aws-pricelist-bulk-api}; the main ones are on the API 
 DynamoDB pricing pages~\cite{aws-pricing-apigw,aws-pricing-lambda,aws-pricing-dynamodb}. The layers are (1)~list
 price, (2)~after the always-free allowances~\cite{aws-free-tier}, and (3)~after credits, which is
 \usd0 while the account's credits last. Layer~3 is why billing tools show a net cost of zero; our
-budget alarms therefore exclude credits, whose inclusion is the default~\cite{aws-budgets-costtypes}. Budget
-data are updated only up to three times a day~\cite{aws-budgets}, so, as planned, throttling, log
-retention and teardown, not the alarms, bound spend.
+budget alarms (\usd20 a month, \usd60 a year) therefore exclude credits, whose inclusion is the
+default~\cite{aws-budgets-costtypes}. The Preliminary report planned \usd15 a month for three months
+plus \usd15 for re-runs, a \usd60 ceiling; the execution plan set the monthly alarm at \usd20 and
+kept that ceiling as the annual alarm. Budget data are updated only up to three times a
+day~\cite{aws-budgets}, so, as planned, throttling, log retention and teardown, not the alarms, bound
+spend. The bill so far is small but incomplete: Cost Explorer, filtered to the project's cost
+allocation tag, shows \usd\CostBillListUsd{} (net \usd\CostBillNetUsd) for the \CostBillTaggedDays{}
+day with tagged usage, \CostBillFirstDay, when the tag became active; earlier usage and the
+experiments of 17~October are not in it (snapshot \CostBillSnapshotDate, \code{results/cost/snapshots/}).
 Until measured usage is priced (\CostMeasuredListUsd), usage per registration is modelled from the
 design: \CostAssumeCommandsPerRegistration{} commands and \CostAssumeOffersPerRegistration{} offers
 per registration, \CostAssumeReadsPerCommand{} API reads per command including polling, and

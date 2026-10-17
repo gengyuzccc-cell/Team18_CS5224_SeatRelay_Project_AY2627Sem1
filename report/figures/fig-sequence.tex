@@ -16,9 +16,10 @@
 \begin{tikzpicture}[x=1cm, y=1cm]
   \def\lifeline#1#2{\draw[srMuted!70, line width=0.4pt, dash pattern=on 1.6pt off 1.2pt] (#1,-0.28) -- (#1,#2);}
   \def\head#1#2#3#4{\node[#3, minimum height=0.48cm, minimum width=1.05cm, inner ysep=1pt] at (#1,#2) {#4};}
-  \def\msg#1#2#3#4{\draw[sr/flow] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
-  \def\rmsg#1#2#3#4{\draw[sr/reply] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
-  \def\amsg#1#2#3#4{\draw[sr/async] (#1,#3) -- node[sr/lbl, above=0.2pt] {#4} (#2,#3);}
+  % message labels are drawn on white so that a lifeline they cross does not run through the text
+  \def\msg#1#2#3#4{\draw[sr/flow] (#1,#3) -- node[sr/lbl, fill=white, inner sep=0.5pt, above=0.6pt] {#4} (#2,#3);}
+  \def\rmsg#1#2#3#4{\draw[sr/reply] (#1,#3) -- node[sr/lbl, fill=white, inner sep=0.5pt, above=0.6pt] {#4} (#2,#3);}
+  \def\amsg#1#2#3#4{\draw[sr/async] (#1,#3) -- node[sr/lbl, fill=white, inner sep=0.5pt, above=0.6pt] {#4} (#2,#3);}
   \def\actbar#1#2#3#4{\fill[#4] (#1-0.065,#2) rectangle (#1+0.065,#3);}
   \def\swatch#1#2#3{\fill[#3] (#1,#2-0.07) rectangle (#1+0.22,#2+0.07);}
   \def\note#1#2#3#4{\node[sr/base, fill=white, minimum height=0.34cm, inner ysep=1pt, #3] at (#1,#2) {#4};}
@@ -39,7 +40,7 @@
     \msg{\C}{\A}{-0.62}{POST}
     \msg{\A}{\D}{-1.00}{put ACCEPTED}
     \node[sr/note, anchor=north west] at (\D+0.08,-1.03) {acceptedAt};
-    \draw[sr/flow] (\A,-1.46) -- node[sr/lbl, below=0.2pt, pos=0.80] {SendMessage} (\Q,-1.46);
+    \draw[sr/flow] (\A,-1.46) -- node[sr/lbl, fill=white, inner sep=0.5pt, below=0.6pt, pos=0.80] {SendMessage} (\Q,-1.46);
     \rmsg{\A}{\C}{-1.82}{202 + href}
     \msg{\C}{\A}{-2.24}{GET (poll)}
     \msg{\Q}{\W}{-2.20}{deliver}

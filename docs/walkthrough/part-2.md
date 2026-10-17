@@ -2,44 +2,33 @@
 
 - **Speaker:** CHEN YANG
 - **Clock:** 2:00–4:00 (2:00)
-- **Slide:** 4 Mechanism and rules (`report/Slides.tex`): the Figure 1 flow on the left; R1–R7 one line each and
-  C1, C2, C3, C5, C7 one line each on the right
+- **Slide:** 4 Mechanism and rules (`report/Slides.tex`): the Fig. 1 flow at the top; below it R1–R7 and
+  C1–C7, one line each, abridged from the Preliminary report (full wording: Final report Table 4)
 - **Hands over to:** Part 3 (architecture)
 
-## What to say (about 340 words)
+## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
-Let me follow one participant, Mei; every rule shows up on her way.
+Let me follow one participant, Mei, through the flow at the top of the slide.
 
-Mei opens the workshop page and ticks the sessions she can attend, in order: Session 3 first, then
-Session 1. She can have only one live registration per workshop; that is **R1**. The system gives
-her a sequence number in the order her request reaches the workshop's queue. That number is her
-place in line, **R2**.
+Mei ticks the sessions she can attend, in order: Session 3 first, then Session 1. She can have only
+one live registration per workshop, **R1**. Her place in line is the order her request reached the
+workshop's queue, **R2**.
 
-Whenever a seat may be free, the engine scans the queue in that order. Each person is offered the
-first session on their own list that still has a seat, **R3**. So Mei is never offered a session she
-did not list. Someone who only wants a full session does not block the people behind them who
-accept another one.
+Whenever a seat may be free, the engine scans the queue in that order and offers each person the first
+session on their own list that still has a seat, **R3**, so Mei never gets a session she did not list.
 
-An offer is a timed hold. It expires after the workshop's hold time, 15 minutes by default, or at
-the registration cut-off half an hour before the session starts, whichever comes first. Nothing is
-offered after the cut-off, **R4**.
+An offer is a timed hold: 15 minutes by default, and never past the cut-off half an hour before the
+session, **R4**. If Mei declines or lets it expire, only that session
+leaves her list and she keeps her number; with no session left, her registration ends, **R5**. If she
+cancels, she leaves the whole workshop, and her seat goes to the next person in the same step, **R6**.
+A confirmed seat is never taken away automatically, and organisers cannot cut capacity below the seats
+in use; added seats are offered at once, **R7**.
 
-If Mei declines, or lets the offer expire, that session is taken off her list and she goes back to
-the queue with the same number. If no session is left, her registration ends, **R5**. If she
-cancels, she leaves completely, and her seat is offered to the next person in the same step, **R6**.
-Organisers can add seats, which are offered at once. They cannot cut capacity below the seats
-already held or confirmed, **R7**.
-
-Under the rules sit the constraints we test:
-- **C1**: a session is never over capacity.
-- **C2**: one person never holds two seats in the same workshop.
-- **C3**: repeating a request never applies it twice.
-- **C5**: expiry follows the server clock at processing time, not message order.
-- **C7**: only members of the organising organisation can manage a workshop.
-
-Organisers can check C1 and C2 at any moment with the *Verify invariants* button, and our
-experiments call the same check after every step. *(optional)* The same engine can also run a per-session mode
-that behaves like today's separate forms. We use it as the baseline in the evaluation.
+Below the rules are the seven constraints. A session is never over capacity, **C1**; nobody holds two
+seats in one workshop, **C2**; a repeated request never applies twice, **C3**; each decision is one
+transaction, **C4**; expiry follows the server clock, so a stale timer does nothing, **C5**; a failed
+e-mail never undoes a seat, **C6**; and only the owning organisation can manage a workshop, **C7**.
+Organisers can check them with *Verify invariants*; our experiments run that check after every step.
 
 Next, LIN JIE shows how this runs on AWS.
 

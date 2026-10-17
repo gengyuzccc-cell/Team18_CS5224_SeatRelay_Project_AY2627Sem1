@@ -35,7 +35,7 @@ Note-taker types the answers into `interview-notes.md` under the participant ID 
 
 | # | Question | Record |
 |---|---|---|
-| B1 | Are you a student or staff? Faculty / year? | text |
+| B1 | Faculty and year of study? | text |
 | B2 | In the last 2 years, how many events with sign-ups have you **organised**? Which tools (Google Forms, Eventbrite, Telegram poll, Luma, other)? | number + tools |
 | B3 | How often do you **sign up** for workshops or events via Google Forms? (never / a few times a year / monthly / weekly) | category |
 | B4 | How comfortable are you with spreadsheets, 1 (not at all) to 5 (very)? | 1–5 |

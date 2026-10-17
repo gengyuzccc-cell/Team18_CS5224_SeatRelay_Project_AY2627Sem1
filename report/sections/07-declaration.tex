@@ -16,46 +16,25 @@
 \end{itemize}
 
 \section*{AI usage declaration}
-\emph{Where} (as promised in the Preliminary report). The implementation code (engine, API and Lambda handlers, on-prem server, React SPA), the
-infrastructure-as-code templates, the tests, the experiment, load-test, replay, analysis and
-cost-model scripts, the market captures and counts, the competitor scan and other desk research, the
-documentation, and the first drafts of this
-report and the slides were generated with an AI coding assistant (Claude Code) working from the
-team's Preliminary report and execution plan; earlier, as the Preliminary report declared, AI
-helped compare topics, locate vendor documentation, discuss architecture options and draft prose.
-\emph{How.} The team planned the work and set the scope,
-rules, constraints and acceptance targets, reviewed the generated code, documents and figures, owns
-the AWS account and the repository, and approved each deployment; the assistant ran the deployment,
-experiment, load-test, replay and cost scripts with the team's credentials. The team runs the interviews, the user study and the pilot, and checks every reported
-number against \code{results/} before submission (\pending{name of the member who did the check}).
-No measured value was typed by hand: every measured, simulated and own-count number is written by
-a script from a raw file in \code{results/}, external facts are cited, and missing data are marked
-pending. \emph{What we learned} (first drafted by the assistant from each member's work line and the
-project record; each member confirmed or rewrote their own: \pending{confirmation by each member,
-docs/ai-declaration-drafts.md}).
-
-{\footnotesize
-\noindent\textbf{LI ZONGZE} (product, front end). A 202 response is not a result. I learned to build
-the interface around three states (request received, queued with a position, seat confirmed), to
-poll with back-off rather than add WebSockets, and to check generated code against the rules before
-accepting it.
-\textbf{CHEN YANG} (allocation logic, API). I learned that DynamoDB allows 100 actions per
-transaction, so a decision is capped (12 offers, 12 expiries) and continues as a follow-up command,
-and that judging expiry by server time at processing makes a late or duplicate timer harmless to
-newer offers.
-\textbf{LIN JIE} (AWS, monitoring). During the load tests we found that the account's Lambda
-concurrency quota was 10, shared by every function of both stages; I learned to check service quotas
-before measuring. A second stage failed to deploy because SAM gave both stages' sweep schedules the
-same name.
-\textbf{ZHU GENGYU} (data, local reference). Running our engine on PostgreSQL showed me that a fair
-cloud versus on-premise comparison needs equal load, retention and function, and that labour and the
-network line, not hardware, dominate a small self-hosted service. Two prices I used had changed a day
-later.
-\textbf{LIANG ZIHAN} (user research, evaluation tooling). Timing an expiry race at $\pm$200\,ms
-taught me that network delay is part of the experiment: an \enquote{early} probe arrived late and was
-rightly rejected, so the harness calibrates send times. Preparing the study, I learned to report the
-real sample, whatever its size.
-\textbf{ZHANG TIANYI} (organiser dashboard, QA, documentation). SES production access was denied
-while our sender address was still unverified, so pilot participants rely on in-app notifications; I
-learned to plan such approvals early. In QA I learned to report failed experiments as failures and
-to give organisers a one-click invariant check.\par}
+\emph{Where.} As the Preliminary report declared, AI assistance was used before it to compare
+candidate topics, locate vendor documentation, discuss architecture options and draft prose. Since
+then, as it promised to declare, an AI coding assistant (Claude Code) generated, from the team's
+Preliminary report and decisions: the execution plan; the implementation code (engine, API and Lambda
+handlers, on-prem server, React SPA); the infrastructure-as-code templates; the tests; the
+experiment, load-test, replay, analysis and cost-model scripts; the market captures and counts, the
+competitor scan and other desk research; the documentation; and the first drafts of this report and
+the slides. \emph{How.} The scope, rules R1--R7, constraints C1--C7 and acceptance targets are the
+team's, from the Preliminary report; the team owns the AWS account and the repository; the assistant
+ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials. The
+interviews, the user study and the pilot are the team's to run (none had run when this PDF was
+built). Every measured, simulated and own-count number is written by a script from a raw file in
+\code{results/}; configuration values (hold times, poll intervals, the account's Lambda quota) come
+from the code and \code{docs/deployment-state.md}, external facts are cited, and missing data are
+marked pending. A named member checks every number against \code{results/} before submission
+(\pending{name of the member who did the check}). \emph{What we learned.} As the Preliminary
+report promised, each member records their own learning; only statements a member has written or
+approved appear here: \pending{each member's own statement of what they learned and how they reviewed
+the generated code and approved deployments (drafts to confirm or rewrite: docs/ai-declaration-drafts.md)}.
+% When a member has confirmed or rewritten their statement in docs/ai-declaration-drafts.md, add it
+% here as  \textbf{NAME} (work line). Statement in the first person, at most 45 words.  and remove
+% that member from the \pending{...} above; delete the marker when all six are in.

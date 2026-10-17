@@ -355,7 +355,28 @@ export function writeMatrixState(file: string, state: MatrixState): void {
 /* ---------- summary.md ---------- */
 
 function ms(value: number | undefined): string {
-  return value === undefined ? '–' : value.toFixed(0);
+  if (value === undefined) {
+    return '–';
+  }
+  return Number.isFinite(value) ? value.toFixed(0) : 'none settled';
+}
+
+/**
+ * A round in which no command settled within the k6 client budget reports settle p95 = 0 (or no
+ * value) together with settle timeouts. Its true p95 is above the budget, so it enters the
+ * per-level median as +Infinity, never as 0 (the same rule as report/tools/report_numbers.py and
+ * make_figures.py).
+ */
+export function isUnsettledRound(row: RunRow): boolean {
+  return row.settleTimeouts > 0 && (row.settleP95 === undefined || row.settleP95 <= 0);
+}
+
+function settleValue(row: RunRow, field: 'settleP95' | 'serverSettleP95'): number | undefined {
+  const value = row[field];
+  if (row.settleTimeouts > 0 && (value === undefined || value <= 0)) {
+    return Number.POSITIVE_INFINITY;
+  }
+  return value;
 }
 
 function pct(value: number): string {
@@ -381,6 +402,8 @@ export interface LevelAggregate {
   commandP95?: number;
   settleP95?: number;
   serverSettleP95?: number;
+  /** rounds in which no command settled within the client budget (counted as +Infinity) */
+  unsettledRounds: number;
   errorRate: number;
   pass: boolean;
 }
@@ -388,6 +411,7 @@ export interface LevelAggregate {
 /**
  * Median of the per-round p95s per (scenario, VUs) over the active rows; pass = every target
  * met by the medians. `settleP95` is the client-observed k6 figure (never the CloudWatch one).
+ * A round in which nothing settled counts as +Infinity in the settle medians (isUnsettledRound).
  */
 export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
   const groups = new Map<string, RunRow[]>();
@@ -401,12 +425,15 @@ export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
       median(group.map((row) => row[field]).filter((v): v is number => typeof v === 'number'));
     const readP95 = pick('readP95');
     const commandP95 = pick('commandP95');
-    const settleP95 = pick('settleP95');
+    const pickSettle = (field: 'settleP95' | 'serverSettleP95'): number | undefined =>
+      median(group.map((row) => settleValue(row, field)).filter((v): v is number => typeof v === 'number'));
+    const settleP95 = pickSettle('settleP95');
     const errorRate = Math.max(...group.map((row) => row.httpReqFailedRate));
     const aggregate: LevelAggregate = {
       scenario: first.scenario,
       vus: first.vus,
       rounds: group.length,
+      unsettledRounds: group.filter(isUnsettledRound).length,
       errorRate,
       pass:
         readP95 !== undefined &&
@@ -420,7 +447,7 @@ export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
     if (readP95 !== undefined) aggregate.readP95 = readP95;
     if (commandP95 !== undefined) aggregate.commandP95 = commandP95;
     if (settleP95 !== undefined) aggregate.settleP95 = settleP95;
-    const serverP95 = pick('serverSettleP95');
+    const serverP95 = pickSettle('serverSettleP95');
     if (serverP95 !== undefined) aggregate.serverSettleP95 = serverP95;
     return aggregate;
   });
@@ -490,19 +517,21 @@ export function renderSummaryMarkdown(state: MatrixState): string {
       lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
       for (const row of scenarioRows) {
         lines.push(
-          `| ${row.vus} | ${row.round} | ${attempts.get(rowKey(row)) ?? 1} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${ms(row.settleP50)} / ${ms(row.settleP95)} | ${ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : row.failedThresholds.length === 0 ? 'FAIL' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} / ${row.cwSettleCount ?? '–'} |${row.note === undefined ? '' : ` ${row.note}`}`,
+          `| ${row.vus} | ${row.round} | ${attempts.get(rowKey(row)) ?? 1} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${isUnsettledRound(row) ? 'none settled' : `${ms(row.settleP50)} / ${ms(row.settleP95)}`} | ${isUnsettledRound(row) ? 'none settled' : ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : row.failedThresholds.length === 0 ? 'FAIL' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} / ${row.cwSettleCount ?? '–'} |${row.note === undefined ? '' : ` ${row.note}`}`,
         );
       }
       lines.push('');
-      lines.push('Per level (median of the rounds; errors = worst round):');
+      lines.push(
+        'Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):',
+      );
       lines.push('');
       lines.push(
-        '| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |',
+        '| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |',
       );
-      lines.push('|---|---|---|---|---|---|---|---|');
+      lines.push('|---|---|---|---|---|---|---|---|---|');
       for (const level of aggregateByLevel(scenarioRows)) {
         lines.push(
-          `| ${level.vus} | ${level.rounds} | ${ms(level.readP95)} | ${ms(level.commandP95)} | ${ms(level.settleP95)} | ${ms(level.serverSettleP95)} | ${pct(level.errorRate)} | ${level.pass ? 'met' : 'NOT met'} |`,
+          `| ${level.vus} | ${level.rounds} | ${ms(level.readP95)} | ${ms(level.commandP95)} | ${ms(level.settleP95)} | ${ms(level.serverSettleP95)} | ${level.unsettledRounds} | ${pct(level.errorRate)} | ${level.pass ? 'met' : 'NOT met'} |`,
         );
       }
       lines.push('');

@@ -80,6 +80,8 @@ Options
                          metrics are pulled (ingestion delay; default 180)
   --refetch-cloudwatch   only pull CloudWatch again for this target's rows of <out>/runs.json
                          that have a window but no CloudWatch figures yet (e.g. after Ctrl-C)
+  --rebuild-summary      run nothing: rebuild <out>/raw.csv and <out>/summary.md from
+                         <out>/runs.json (after a change to the summary rules)
   --out DIR              output directory (default results/loadtest/<date>)
   --date YYYY-MM-DD      date used in the default output directory (default today, UTC)
   --k6 PATH              k6 binary (default k6 on PATH, or K6_BIN)
@@ -207,6 +209,7 @@ runMain(async () => {
       stage: { type: 'string' },
       'metrics-wait': { type: 'string' },
       'refetch-cloudwatch': { type: 'boolean' },
+      'rebuild-summary': { type: 'boolean' },
       'dry-run': { type: 'boolean' },
     },
     USAGE,
@@ -241,6 +244,14 @@ runMain(async () => {
   const dockerStats = targetName === 'local' && values['no-docker-stats'] !== true;
   const cloudWatch = targetName !== 'local' && values['no-cloudwatch'] !== true;
   const stage = stringOption(values, 'stage') ?? targetName;
+
+  if (values['rebuild-summary'] === true) {
+    const state = readMatrixState(stateFile, date);
+    fs.writeFileSync(path.join(outDir, 'raw.csv'), toCsv(state.rows));
+    fs.writeFileSync(path.join(outDir, 'summary.md'), renderSummaryMarkdown(state));
+    process.stdout.write(`${JSON.stringify({ outDir, rows: state.rows.length }, null, 2)}\n`);
+    return;
+  }
 
   if (values['refetch-cloudwatch'] === true) {
     if (targetName === 'local') {

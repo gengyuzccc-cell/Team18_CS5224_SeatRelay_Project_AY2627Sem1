@@ -25,13 +25,13 @@
 | 50 | 2 | 1 | 273 / 293 | 285 / 300 | 289 | 14930 / 28625 | 28180 | 9.81 % | 15 | 26 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 38 | 17 | – / – |
 | 50 | 3 | 1 | 273 / 284 | 284 / 306 | 290 | 11650 / 29370 | 28888 | 9.40 % | 27 | 35 | FAIL (http_req_failed rate<0.01; settle_ms p(95)<5000) | 36 | 17 | – / – |
 
-Per level (median of the rounds; errors = worst round):
+Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
-| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
-|---|---|---|---|---|---|---|---|
-| 10 | 3 | 290 | 315 | 803 | 65 | 0.00 % | met |
-| 25 | 3 | 288 | 306 | 6912 | 6302 | 1.57 % | NOT met |
-| 50 | 3 | 284 | 300 | 29127 | 28460 | 9.81 % | NOT met |
+| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
+|---|---|---|---|---|---|---|---|---|
+| 10 | 3 | 290 | 315 | 803 | 65 | 0 | 0.00 % | met |
+| 25 | 3 | 288 | 306 | 6912 | 6302 | 0 | 1.57 % | NOT met |
+| 50 | 3 | 284 | 300 | 29127 | 28460 | 0 | 9.81 % | NOT met |
 
 ### dev · hotspot
 
@@ -43,17 +43,17 @@ Per level (median of the rounds; errors = worst round):
 | 25 | 1 | 1 | 271 / 289 | 282 / 305 | 286 | 1246 / 7245 | 6650 | 0.22 % | 3 | 0 | FAIL (settle_ms p(95)<5000) | 11 | 0 | – / – |
 | 25 | 2 | 1 | 274 / 292 | 284 / 306 | 288 | 1234 / 7405 | 6791 | 0.47 % | 9 | 0 | FAIL (settle_ms p(95)<5000) | 24 | 3 | – / – |
 | 25 | 3 | 1 | 275 / 294 | 285 / 306 | 292 | 1237 / 7398 | 6852 | 0.47 % | 8 | 0 | FAIL (settle_ms p(95)<5000) | 12 | 0 | – / – |
-| 50 | 1 | 1 | 276 / 314 | 284 / 305 | 285 | 0 / 0 | – | 7.61 % | 0 | 63 | FAIL (http_req_failed rate<0.01) | 73 | 25 | – / – |
+| 50 | 1 | 1 | 276 / 314 | 284 / 305 | 285 | none settled | none settled | 7.61 % | 0 | 63 | FAIL (http_req_failed rate<0.01) | 73 | 25 | – / – |
 | 50 | 2 | 1 | 275 / 307 | 283 / 298 | 285 | 25989 / 29943 | 29335 | 8.01 % | 8 | 60 | FAIL (http_req_failed rate<0.01; settle_ms p(95)<5000) | 49 | 12 | – / – |
 | 50 | 3 | 1 | 276 / 287 | 286 / 310 | 285 | 20061 / 28644 | 28242 | 7.08 % | 2 | 76 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 48 | 17 | – / – |
 
-Per level (median of the rounds; errors = worst round):
+Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
-| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
-|---|---|---|---|---|---|---|---|
-| 10 | 3 | 284 | 300 | 780 | 120 | 0.00 % | met |
-| 25 | 3 | 292 | 306 | 7398 | 6791 | 0.47 % | NOT met |
-| 50 | 3 | 307 | 305 | 28644 | 28788 | 8.01 % | NOT met |
+| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
+|---|---|---|---|---|---|---|---|---|
+| 10 | 3 | 284 | 300 | 780 | 120 | 0 | 0.00 % | met |
+| 25 | 3 | 292 | 306 | 7398 | 6791 | 0 | 0.47 % | NOT met |
+| 50 | 3 | 307 | 305 | 29943 | 29335 | 1 | 8.01 % | NOT met |
 
 ## Target `local`
 
@@ -75,13 +75,13 @@ Per level (median of the rounds; errors = worst round):
 | 50 | 2 | 1 | 5 / 14 | 5 / 11 | 5 | 2035 / 2840 | 2663 | 0.00 % | 0 | 0 | pass | – | – | – / – |
 | 50 | 3 | 1 | 5 / 11 | 4 / 10 | 5 | 2028 / 2875 | 2807 | 0.00 % | 0 | 0 | pass | – | – | – / – |
 
-Per level (median of the rounds; errors = worst round):
+Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
-| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
-|---|---|---|---|---|---|---|---|
-| 10 | 3 | 11 | 10 | 414 | 250 | 0.00 % | met |
-| 25 | 3 | 17 | 14 | 426 | 365 | 0.00 % | met |
-| 50 | 3 | 13 | 10 | 2875 | 2807 | 0.00 % | met |
+| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
+|---|---|---|---|---|---|---|---|---|
+| 10 | 3 | 11 | 10 | 414 | 250 | 0 | 0.00 % | met |
+| 25 | 3 | 17 | 14 | 426 | 365 | 0 | 0.00 % | met |
+| 50 | 3 | 13 | 10 | 2875 | 2807 | 0 | 0.00 % | met |
 
 ### local · hotspot
 
@@ -97,10 +97,10 @@ Per level (median of the rounds; errors = worst round):
 | 50 | 2 | 1 | 5 / 12 | 4 / 10 | 6 | 2460 / 2879 | 2784 | 0.00 % | 0 | 0 | pass | – | – | – / – |
 | 50 | 3 | 1 | 5 / 11 | 4 / 10 | 5 | 3852 / 5947 | 5868 | 0.00 % | 0 | 0 | FAIL (settle_ms p(95)<5000) | – | – | – / – |
 
-Per level (median of the rounds; errors = worst round):
+Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
-| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
-|---|---|---|---|---|---|---|---|
-| 10 | 3 | 11 | 9 | 413 | 236 | 0.00 % | met |
-| 25 | 3 | 16 | 12 | 424 | 368 | 0.00 % | met |
-| 50 | 3 | 12 | 10 | 2879 | 2784 | 0.00 % | met |
+| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
+|---|---|---|---|---|---|---|---|---|
+| 10 | 3 | 11 | 9 | 413 | 236 | 0 | 0.00 % | met |
+| 25 | 3 | 16 | 12 | 424 | 368 | 0 | 0.00 % | met |
+| 50 | 3 | 12 | 10 | 2879 | 2784 | 0 | 0.00 % | met |

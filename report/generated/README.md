@@ -68,7 +68,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1213 macros, 1105 with data, 108 pending.
+1282 macros, 1168 with data, 114 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -359,7 +359,7 @@ Source: `results/2026-10-17-smoke`; `results/2026-10-17-failure-recovery` — 3/
 
 ### Performance: k6 matrix
 
-Source: `results/loadtest/2026-10-17` — 107/125 with data.
+Source: `results/loadtest/2026-10-17` — 161/185 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -374,6 +374,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevCrossVUTenAcceptPNinetyFiveMs` | 315 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenSettlePNinetyFiveMs` | 803 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenServerSettlePNinetyFiveMs` | 65 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTenSettlePFiftyMs` | 770 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTenServerSettlePFiftyMs` | 34 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTenReadPFiftyMs` | 277 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTenAcceptPFiftyMs` | 290 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTenQueueDepthMax` | 0 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTenQueueAgeMaxS` | 0 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -383,6 +388,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevCrossVUTwentyFiveAcceptPNinetyFiveMs` | 306 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs` | 6,912 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs` | 6,302 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTwentyFiveSettlePFiftyMs` | 786 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTwentyFiveServerSettlePFiftyMs` | 98 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTwentyFiveReadPFiftyMs` | 275 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTwentyFiveAcceptPFiftyMs` | 287 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUTwentyFiveQueueDepthMax` | 13 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTwentyFiveErrorPct` | 1.57 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUTwentyFiveQueueAgeMaxS` | 3 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -392,6 +402,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevCrossVUFiftyAcceptPNinetyFiveMs` | 300 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUFiftySettlePNinetyFiveMs` | 29,127 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs` | 28,460 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUFiftySettlePFiftyMs` | 14,930 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUFiftyServerSettlePFiftyMs` | 14,117 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUFiftyReadPFiftyMs` | 273 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUFiftyAcceptPFiftyMs` | 284 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevCrossVUFiftyQueueDepthMax` | 38 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUFiftyErrorPct` | 9.81 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevCrossVUFiftyQueueAgeMaxS` | 17 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -401,6 +416,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevHotspotVUTenAcceptPNinetyFiveMs` | 300 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTenSettlePNinetyFiveMs` | 780 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTenServerSettlePNinetyFiveMs` | 120 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTenSettlePFiftyMs` | 757 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTenServerSettlePFiftyMs` | 41 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTenReadPFiftyMs` | 273 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTenAcceptPFiftyMs` | 283 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTenQueueDepthMax` | 0 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 10 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTenErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTenQueueAgeMaxS` | 0 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -410,6 +430,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevHotspotVUTwentyFiveAcceptPNinetyFiveMs` | 306 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTwentyFiveSettlePNinetyFiveMs` | 7,398 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTwentyFiveServerSettlePNinetyFiveMs` | 6,791 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTwentyFiveSettlePFiftyMs` | 1,237 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTwentyFiveServerSettlePFiftyMs` | 634 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTwentyFiveReadPFiftyMs` | 274 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTwentyFiveAcceptPFiftyMs` | 284 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUTwentyFiveQueueDepthMax` | 24 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 25 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTwentyFiveErrorPct` | 0.47 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUTwentyFiveQueueAgeMaxS` | 3 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -419,6 +444,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfDevHotspotVUFiftyAcceptPNinetyFiveMs` | 305 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftySettlePNinetyFiveMs` | 29,943 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs` | 29,335 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUFiftySettlePFiftyMs` | 25,989 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUFiftyServerSettlePFiftyMs` | 25,328 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUFiftyReadPFiftyMs` | 276 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUFiftyAcceptPFiftyMs` | 284 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfDevHotspotVUFiftyQueueDepthMax` | 73 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 50 VUs on dev: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyErrorPct` | 8.01 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfDevHotspotVUFiftyQueueAgeMaxS` | 25 | results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -428,6 +458,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalCrossVUTenAcceptPNinetyFiveMs` | 10 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTenSettlePNinetyFiveMs` | 414 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTenServerSettlePNinetyFiveMs` | 250 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenSettlePFiftyMs` | 210 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenServerSettlePFiftyMs` | 157 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenReadPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenAcceptPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTenQueueDepthMax` | PENDING: k6 cross-workshop at 10 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 10 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTenErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTenQueueAgeMaxS` | PENDING: k6 cross-workshop at 10 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -437,6 +472,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalCrossVUTwentyFiveAcceptPNinetyFiveMs` | 14 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTwentyFiveSettlePNinetyFiveMs` | 426 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTwentyFiveServerSettlePNinetyFiveMs` | 365 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveSettlePFiftyMs` | 214 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveServerSettlePFiftyMs` | 182 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveReadPFiftyMs` | 6 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveAcceptPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUTwentyFiveQueueDepthMax` | PENDING: k6 cross-workshop at 25 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 25 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTwentyFiveErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUTwentyFiveQueueAgeMaxS` | PENDING: k6 cross-workshop at 25 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -446,6 +486,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalCrossVUFiftyAcceptPNinetyFiveMs` | 10 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUFiftySettlePNinetyFiveMs` | 2,875 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUFiftyServerSettlePNinetyFiveMs` | 2,807 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftySettlePFiftyMs` | 2,035 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyServerSettlePFiftyMs` | 1,896 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyReadPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyAcceptPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalCrossVUFiftyQueueDepthMax` | PENDING: k6 cross-workshop at 50 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 cross-workshop at 50 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUFiftyErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalCrossVUFiftyQueueAgeMaxS` | PENDING: k6 cross-workshop at 50 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -455,6 +500,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalHotspotVUTenAcceptPNinetyFiveMs` | 9 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenSettlePNinetyFiveMs` | 413 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenServerSettlePNinetyFiveMs` | 236 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTenSettlePFiftyMs` | 209 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTenServerSettlePFiftyMs` | 137 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTenReadPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTenAcceptPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTenQueueDepthMax` | PENDING: k6 hotspot at 10 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 10 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTenQueueAgeMaxS` | PENDING: k6 hotspot at 10 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -464,6 +514,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalHotspotVUTwentyFiveAcceptPNinetyFiveMs` | 12 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTwentyFiveSettlePNinetyFiveMs` | 424 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTwentyFiveServerSettlePNinetyFiveMs` | 368 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTwentyFiveSettlePFiftyMs` | 217 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTwentyFiveServerSettlePFiftyMs` | 190 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTwentyFiveReadPFiftyMs` | 6 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTwentyFiveAcceptPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUTwentyFiveQueueDepthMax` | PENDING: k6 hotspot at 25 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 25 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTwentyFiveErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUTwentyFiveQueueAgeMaxS` | PENDING: k6 hotspot at 25 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -473,6 +528,11 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 | `\PerfLocalHotspotVUFiftyAcceptPNinetyFiveMs` | 10 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftySettlePNinetyFiveMs` | 2,879 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyServerSettlePNinetyFiveMs` | 2,784 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUFiftySettlePFiftyMs` | 2,460 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUFiftyServerSettlePFiftyMs` | 2,428 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUFiftyReadPFiftyMs` | 5 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUFiftyAcceptPFiftyMs` | 4 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) |
+| `\PerfLocalHotspotVUFiftyQueueDepthMax` | PENDING: k6 hotspot at 50 VUs on local: sqsDepthMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyCloudWatchSettlePNinetyFiveMs` | PENDING: k6 hotspot at 50 VUs on local: cwSettleP95 not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyErrorPct` | 0.00 | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) |
 | `\PerfLocalHotspotVUFiftyQueueAgeMaxS` | PENDING: k6 hotspot at 50 VUs on local: sqsOldestAgeMax not recorded | results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) |
@@ -491,7 +551,7 @@ Source: `results/loadtest/2026-10-17` — 107/125 with data.
 
 ### Cost model (cloud three layers vs on-prem)
 
-Source: `results/cost/model-summary.md` — 231/237 with data.
+Source: `results/cost/model-summary.md` — 240/246 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -732,6 +792,15 @@ Source: `results/cost/model-summary.md` — 231/237 with data.
 | `\CostMeasuredUnitListUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost' |
 | `\CostMeasuredUnitAfterFreeUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost' |
 | `\CostMeasuredRegistrations` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost ... for N registrations' |
+| `\CostBillSnapshotDate` | 2026-10-17 | results/cost/snapshots/2026-10-17.json: capturedAt |
+| `\CostBillFrom` | 2026-09-17 | results/cost/snapshots/2026-10-17.json: first TimePeriod.Start |
+| `\CostBillTo` | 2026-10-16 | results/cost/snapshots/2026-10-17.json: last TimePeriod.Start |
+| `\CostBillFilter` | Project=SeatRelay tag | results/cost/snapshots/2026-10-17.json: filter.byService |
+| `\CostBillTaggedDays` | 1 | results/cost/snapshots/2026-10-17.json: days with at least one service group |
+| `\CostBillFirstDay` | 2026-10-16 | results/cost/snapshots/2026-10-17.json: first day with a service group |
+| `\CostBillServices` | 3 | results/cost/snapshots/2026-10-17.json: distinct SERVICE keys |
+| `\CostBillListUsd` | 0.00005 | results/cost/snapshots/2026-10-17.json: sum of UnblendedCost over days and services |
+| `\CostBillNetUsd` | 0.00005 | results/cost/snapshots/2026-10-17.json: sum of NetUnblendedCost over days and services |
 
 ### Mechanism comparison (replay, UNIFIED vs PER_SESSION)
 

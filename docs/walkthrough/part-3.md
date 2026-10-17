@@ -2,48 +2,32 @@
 
 - **Speaker:** LIN JIE
 - **Clock:** 4:00–6:00 (2:00)
-- **Slides:** 5 Architecture (Figure A; Final report Fig. 2), 6 Request path and transaction
-  (Figure B; Fig. 3a), 7 Timers and sweep (Figure C; Fig. 3b), in `report/Slides.tex`. Sources: `docs/ARCHITECTURE.md` §1.2, §3.2, §5.3.
+- **Slides:** 5 Architecture (Final report Fig. 2), 6 Request path and transaction (Fig. 3a), 7 Timers
+  and sweep (Fig. 3b), in `report/Slides.tex`. Sources: `docs/ARCHITECTURE.md` §1.2, §3.2, §5.3.
 - **Hands over to:** Part 4 (live demo)
 
-## What to say (about 340 words)
+## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
-**Slide 5, Figure A.** SeatRelay is built from three CloudFormation templates in the Singapore region
-(the auth stack is deployed once; the web and app stacks once per stage, dev and pilot):
-- a web stack: a private S3 bucket behind CloudFront;
-- an auth stack: a Cognito user pool;
-- an app stack with everything else: an HTTP API with a JWT authorizer, five Lambda functions, a
-  FIFO command queue, a delay queue, one DynamoDB table, and SES for e-mail.
+**Slide 5, Fig. 2.** SeatRelay is built from three CloudFormation templates in the Singapore region: an
+auth stack with the Cognito user pool, deployed once, and a web stack and an app stack for each stage,
+dev and pilot. The web stack is a private S3 bucket behind CloudFront; the app stack holds the HTTP
+API, five Lambda functions, two queues, one DynamoDB table and SES, all pay-per-request.
 
-*(optional)* Everything is pay-per-request, so a workshop nobody is using costs almost nothing.
+**Slide 6, Fig. 3a.** The TA asked how the browser learns that a 202 has settled. The browser posts a command
+with its own id. The API records it, puts it on the FIFO queue with the workshop as
+the message group, and answers 202. The browser polls that record, first after 300 milliseconds, then
+backing off to every two seconds, until it turns APPLIED or REJECTED, with the new status. At our
+scale, WebSockets would only add a connection table and a failure point.
 
-**Slide 6, Figure B.** The TA asked how the browser learns that a 202 has settled.
-1. The browser makes up a command id and posts the command.
-2. The API writes a command record, puts the command on the FIFO queue with the workshop as the
-   message group, and answers 202 Accepted.
-3. The browser polls that record, first after 300 milliseconds, then backing off to every two
-   seconds.
-4. The record turns APPLIED or REJECTED. The answer carries the participant's new status, so the
-   page updates from the poll alone.
+The message group gives each workshop one writer. The worker commits seats, offers, notifications and
+the command's result in one transaction, which succeeds only if the workshop's version is unchanged and
+the command is still ACCEPTED, so a redelivered command is harmless.
 
-We chose polling over WebSockets. At our scale a socket adds a connection table and another failure
-point, and gains nothing we could measure.
-
-The message group gives each workshop exactly one writer at a time. The worker runs our decision
-function on the workshop's live state, then commits seats, offers, notifications and the command's
-result in one DynamoDB transaction. It succeeds only if the workshop's version is unchanged and the
-command is still unsettled, which makes a retried or redelivered command harmless.
-
-**Slide 7, Figure C.** The TA also noted that a periodic sweep would limit how fast a freed seat
-moves on. So every offer now gets its own timer:
-- Before committing, the worker puts a tick on an SQS delay queue, due when the offer expires.
-- A small forwarder moves the tick into the workshop's FIFO group.
-- The worker always expires whatever is due by the server clock first, then offers the seat to the
-  next person.
-
-A late or duplicate tick finds nothing to do. The five-minute sweep is only a safety net, and we
-count every expiry it performs. *(optional)* The same engine also runs on-premise, on
-PostgreSQL and Keycloak, for the cost comparison.
+**Slide 7, Fig. 3b.** The TA also noted that a sweep would slow the relay. So every offer now
+gets its own timer on an SQS delay queue, sent before the commit. A small
+forwarder moves the due tick into the workshop's FIFO group, and the worker first expires whatever is
+due by the server clock, then offers the seat to the next person. A late or duplicate tick finds
+nothing to do. The five-minute sweep is only a safety net, and we count every expiry it performs.
 
 Now let's see it live. Over to ZHU GENGYU.
 

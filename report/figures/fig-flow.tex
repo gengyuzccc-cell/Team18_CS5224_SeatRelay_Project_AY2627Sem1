@@ -8,7 +8,7 @@
   \tikzset{sr/state/.style={minimum height=8mm}}
   \node[sr/base, sr/state, fill=white, minimum width=2.55cm] (sel) at (1.275,1.95) {Select acceptable\\sessions + preference};
   \node[sr/client, sr/state, minimum width=2.10cm] (que) at (5.05,1.95)  {\textbf{Queued}};
-  \node[sr/client, sr/state, minimum width=2.30cm] (off) at (9.10,1.95)  {\textbf{Offered}\\hold $\leq$ 15\,min (default)};
+  \node[sr/client, sr/state, minimum width=2.30cm] (off) at (9.10,1.95)  {\textbf{Offered}\\hold: 15\,min by default,\\never past the cut-off};
   \node[sr/base, sr/state, fill=srGrid!45, minimum width=2.30cm] (con) at (13.55,1.95) {\textbf{Confirmed}};
   \node[sr/base, fill=srGrid!45, minimum width=10.20cm, minimum height=0.50cm] (can) at (9.30,3.00)
     {\textbf{Cancelled} \textemdash{} leaves the whole workshop; re-registering re-enters the queue at the back};

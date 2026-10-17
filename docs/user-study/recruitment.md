@@ -1,6 +1,6 @@
 # Recruitment
 
-> 团队摘要：从 10/20 起招募 12 位非组员（NUS 学生或教职员，其中 ≥ 4 位有活动组织经验），另约 2 位预试（10/29，不计入）。
+> 团队摘要：从 10/20 起招募 12 位非组员的在读大学生（Prelim §5：twelve university students who are not team members；不招教职员，其中 ≥ 4 位有活动组织经验），另约 2 位预试（10/29，不计入）。
 > 用下面的消息模板发 Telegram/WhatsApp/邮件；用筛选问题确认资格与组织经验，然后按 `counterbalance.csv` 的顺序分配 ID 和场次。
 > 每场 40 分钟，间隔 50 分钟；排期表在 §5，排好后把日期写回 `counterbalance.csv`。
 
@@ -8,7 +8,7 @@
 
 | Criterion | Rule |
 |---|---|
-| Affiliation | Current NUS student or staff (any faculty) |
+| Affiliation | Current NUS student, any faculty and year (the Preliminary report commits to "twelve university students who are not team members"; staff are not eligible) |
 | Not a team member | Not in Team 18, not a flatmate/partner of a team member, not someone who has already seen SeatRelay |
 | Count | 12 participants + 2 pilot people (pilot not counted) |
 | Organiser experience | **At least 4** of the 12 have organised ≥ 1 event with sign-ups in the last 2 years → organiser track (`counterbalance.csv` rows P03, P06, P09, P12). The other 8 → participant track (organiser experience allowed but not required). |
@@ -22,9 +22,9 @@ Aim for a mix of faculties and years. Do not recruit only CS students — the co
 
 Subject (e-mail): *40-min usability session: workshop sign-up tools (NUS CS5224 project)*
 
-> Hi! I'm part of a 4-person NUS CS5224 team building **SeatRelay**, a sign-up tool for workshops that run several identical sessions (e.g. "same talk, Mon / Tue / Wed").
+> Hi! I'm part of a 6-person NUS CS5224 team building **SeatRelay**, a sign-up tool for workshops that run several identical sessions (e.g. "same talk, Mon / Tue / Wed").
 >
-> We're looking for **NUS students or staff** for a **40-minute** session between **30 Oct and 5 Nov** (on campus, [building/room]). You'll try two sign-up tools with made-up data, do a few small tasks (sign up, check your waitlist spot, confirm a seat…) and fill in a short questionnaire. No preparation needed, nothing is recorded except anonymous task results.
+> We're looking for **NUS students** for a **40-minute** session between **30 Oct and 5 Nov** (on campus, [building/room]). You'll try two sign-up tools with made-up data, do a few small tasks (sign up, check your waitlist spot, confirm a seat…) and fill in a short questionnaire. No preparation needed, nothing is recorded except anonymous task results.
 >
 > **If you've ever organised an event with sign-ups**, we especially want to hear from you — we have a short organiser version.
 >
@@ -38,7 +38,7 @@ Follow-up reminder (day before): *"Reminder: your session is tomorrow at [time] 
 
 | # | Question | Qualifies if |
 |---|---|---|
-| S1 | Are you currently an NUS student or staff member? | yes |
+| S1 | Are you currently an NUS student? | yes |
 | S2 | Are you a member of, or closely related to, CS5224 Team 18? Have you seen SeatRelay before? | no / no |
 | S3 | In the last 2 years, have you organised an event, workshop or class that needed sign-ups? If yes: roughly how many, and which tools did you use? | any answer; **yes with ≥ 1 event** → eligible for the organiser track |
 | S4 | Have you signed up for something via Google Forms before? | yes |

@@ -7,7 +7,7 @@ deployed system \SeriesPassed{} of the \SeriesExperiments{} system experiments m
 (preference order on its dev part; failure recovery without e-mail, which is off on \code{dev}), no
 \code{verify} call found an invariant violation, and the load test met its targets only up to
 \PerfDevMaxVUsMet{} virtual users. Per-offer timers with tick-first semantics take the sweep interval
-off the backfill path (\TimerPathRelaysN{} timer-path relays so far, at most \TimerPathRelayMaxMs\,ms),
+off the backfill path (\TimerPathRelaysN{} timer-path relays on \code{dev} so far, at most \TimerPathRelayMaxMs\,ms),
 and the 202 protocol is settled by bounded polling. In our usage model the cloud build costs
 \usd\CostTierOneKCloudListUsd{} a month at list price for 1{,}000 registrations and is cheaper than a
 self-hosted machine that pays for its line and operations up to \CostCrossoverListFullRegs{}
@@ -18,7 +18,7 @@ study}{\pending{H1 and H3 verdicts with the user-study results}}.
 
 Open items: the HTTP 503 responses of the concurrency and backfill runs, the settle backlog under
 load, the backfill measurement, \IfPending{\PerfLocalCpuPeakPct}{the on-prem load test, }{}the
-interviews ($p$, price), the user study and the pilot. Future work: (i)~batch several commands of one
+student and organiser interviews ($p$, price), the user study and the pilot. Future work: (i)~batch several commands of one
 workshop per worker invocation with a shared snapshot to raise throughput; (ii)~server push only if
 the user study shows that the 10\,s status refresh is too slow; (iii)~plan limits and billing for the
 organiser plan; (iv)~a second region with table replication and a replicated identity store, if an

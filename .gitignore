@@ -45,15 +45,17 @@ report/missfont.log
 report/ecsx*.log
 report/*.xdv
 
-# student numbers stay out of the public repository (see report/README.md)
+# student numbers stay out of the public repository (see docs/SUBMISSION-CHECKLIST.md, step 3.2)
 report/team-ids.tex
 
 # submission build of the report (student numbers; see report/build.sh -s)
 report/*-submission.pdf
 
-# built PDFs carry student numbers; they are delivered directly, not published
+# built PDFs are delivered directly, not published (only the -s build carries student numbers)
 report/Final.pdf
 report/Slides.pdf
+# latexmk/biber crash leftovers
+report/*-SAVE-ERROR
 report/*.nav
 report/*.snm
 report/*.vrb

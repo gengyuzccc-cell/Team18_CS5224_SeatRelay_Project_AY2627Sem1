@@ -7,6 +7,10 @@
 > person**, and keep it about something that really happened (the "Grounded in" column lists the
 > project record each draft uses). When all six boxes are ticked, copy the final text into
 > `report/sections/07-declaration.tex` and delete the `\pending{...}` after "What we learned".
+> Until then the report prints **none** of these drafts and no name-to-line mapping (Final report, AI
+> usage declaration; slide 13 shows the mapping as provisional). In the same statement, say how you
+> reviewed the generated code and whether you approved deployments: the report no longer asserts
+> either on the members' behalf.
 
 The Preliminary report (§4) lists six work lines but does not assign them to names. The drafts
 below assign the lines **in the order the names appear on the title page**. **If the real

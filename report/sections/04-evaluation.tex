@@ -60,17 +60,17 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels (\PerfDevMaxVUsMet{} VUs). 25 VUs, cross-workshop: settle \PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUTwentyFiveErrorPct\,\%. 50 VUs: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevCrossVUFiftyErrorPct\,\% (hot spot: settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%); Fig.~\ref{fig:perf}}
  & \IfPending{\PerfDevVerdict}{--}{\PerfDevVerdict}\\
 \textbf{Backfill latency}: Time from hold expiry to reallocation under normal operation & p95 $\leq$\,120\,s; outliers reported
- & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, from the smoke and failure-recovery runs: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms}{p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed; cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries}
+ & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, smoke and failure-recovery runs on dev: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms. Staged rehearsal on pilot (\S\ref{sec:pilot}): \RehearsalBackfillExpiredN{} more, \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms}{p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed; cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries}
  & \IfPending{\BackfillVerdict}{--}{\BackfillVerdict}\\
 \textbf{Cost}: Cloud bill, resource usage, and the local reference under the same load model & Unit cost and its trend with scale
- & Model: \usd\CostUnitOneKCloudListUsd{} $\to$ \usd\CostUnitHundredKCloudListUsd{} per 1{,}000 registrations at list price (1k $\to$ 100k a month), three layers, crossovers in \S\ref{sec:business}. Measured usage: \CostMeasuredListUsd. On-prem reference: \IfPending{\PerfLocalCpuPeakPct}{not load-tested (\S\ref{sec:business})}{peak \PerfLocalCpuPeakPct\,\% CPU, \PerfLocalMemPeakMiB\,MiB under k6}
+ & Model: \usd\CostUnitOneKCloudListUsd{} $\to$ \usd\CostUnitHundredKCloudListUsd{} per 1{,}000 registrations at list price (1k $\to$ 100k a month), three layers, crossovers in \S\ref{sec:business}. Bill (Cost Explorer, project tag): \usd\CostBillListUsd{} over \CostBillTaggedDays{} tagged day, incomplete (\S\ref{sec:business}). On-prem reference: \IfPending{\PerfLocalCpuPeakPct}{not load-tested (\S\ref{sec:business})}{peak \PerfLocalCpuPeakPct\,\% CPU, \PerfLocalMemPeakMiB\,MiB under k6}
  & model\\
 \midrule
 \textbf{Mechanism comparison} (Prelim.\ \S4): one fixed sequence through per-session waitlists and the unified queue & No target: duplicate holds, distinct served, backfill time
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
-\textbf{User study} (Prelim.\ \S5): 12 non-team students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
- & \IfPending{\StudyParticipants}{\pending{user study not yet run}}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
+\textbf{User study} (Prelim.\ \S5): 4--6 student interviews, then 12 non-team university students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
+ & \IfPending{\StudyParticipants}{\pending{interviews and user study not yet run}}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
  & --\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
  & \IfPending{\PilotWorkshops}{\pending{pilot not yet run}}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
@@ -90,7 +90,8 @@ version-conflict metric read \ConcurrencyMetaRetries, but CloudWatch returned no
 in that window, so that reading is inconclusive. The \emph{backfill} run aborted at its first request
 (creating a workshop) with the same kind of 503 and produced no latency samples. The pilot stack was
 deployed during the concurrency run window, a possible confounder for the re-run to exclude, and the
-account's Lambda concurrency quota is 10, shared by both stages' functions (an increase is pending).
+account's Lambda concurrency quota is 10, shared by both stages' functions (an increase is pending);
+neither is established as the cause.
 \pending{root cause of the HTTP 503 responses, then clean concurrency and backfill re-runs}. An
 earlier \emph{expiry-race} run failed one check: a probe meant to arrive 200\,ms before
 \code{expiresAt} arrived after it (client send-timing jitter) and was rejected as expired, as the
@@ -109,9 +110,16 @@ serialised by design, the server p95 rose to \ConcurrencySettleServerPNinetyFive
 the recovery of a stalled workshop (Table~\ref{tab:results}).
 \ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf}),
 reads and 202 responses stayed fast, but settlement did not keep up above \PerfDevMaxVUsMet{} VUs, in
-the cross-workshop scenario as in the hot spot: the commands queue backed up (oldest message
-\PerfDevCrossVUFiftyQueueAgeMaxS\,s at 50 VUs over 10 workshops), so per-workshop serialisation
-alone does not explain it. \pending{cause of the settle backlog and HTTP errors at 25--50 VUs}.
+the cross-workshop scenario as in the hot spot: the commands queue backed up (up to
+\PerfDevCrossVUFiftyQueueDepthMax{} messages, the oldest \PerfDevCrossVUFiftyQueueAgeMaxS\,s, at 50
+VUs over 10 workshops), so per-workshop serialisation alone does not explain it. The client-observed
+settle p50 rose from \PerfDevCrossVUTenSettlePFiftyMs{} to \PerfDevCrossVUTwentyFiveSettlePFiftyMs{}
+and \PerfDevCrossVUFiftySettlePFiftyMs\,ms at 10, 25 and 50 VUs across workshops
+(hot spot \PerfDevHotspotVUTenSettlePFiftyMs, \PerfDevHotspotVUTwentyFiveSettlePFiftyMs,
+\PerfDevHotspotVUFiftySettlePFiftyMs\,ms). Outlier: in \PerfDevHotspotVUFiftyUnsettledRounds{} of the
+\PerfDevHotspotVUFiftyRounds{} hot-spot rounds at 50 VUs no command settled within the client's
+polling budget; such a round enters the medians as $+\infty$, not as 0.
+\pending{cause of the settle backlog and HTTP errors at 25--50 VUs}.
 \else Fig.~\ref{fig:perf} shows the settle-latency distributions of the functional runs; the k6 load
 test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) is not complete yet.\fi{}
 
@@ -133,13 +141,17 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
   \label{fig:perf}
 \end{figure}
 
+% Fig. 5 is printed only once the backfill re-run exists: while it does not, Table 5 and "Failed
+% checks" carry the [PENDING] marker, and an empty 4.4 cm frame would only cost space the 10-page limit
+% needs. When the chart arrives, shorten the interim sentence of the Backfill row to make room.
+\IfFileExists{figures/generated/backfill-latency.pdf}{%
 \begin{figure}[t]
-  \centering\resultfig{backfill-latency}{4.4cm}{backfill-latency chart (results/<date>-backfill)}
+  \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
   \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{expiresAt}) on dev with
   $\text{holdSeconds} = 60$, histogram and empirical cumulative distribution against the 120\,s target. Source:
   \code{results/<date>-backfill/raw.csv}.}
   \label{fig:backfill}
-\end{figure}
+\end{figure}}{}
 
 \subsection{Mechanism comparison: one queue vs per-session forms}\label{sec:mechanism}
 The replay tool runs the production engine with a simulated clock and ideal timers on
@@ -173,42 +185,57 @@ Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was 
 \end{figure}
 
 \subsection{User study}\label{sec:study}
-Twelve people outside the team (at least four with organising experience) use SeatRelay and a
-control that mirrors current practice, one Google Form per session plus a shared Sheet with
-duplicate-detection formulas, in counterbalanced order with equivalent data sets; a two-person pilot
-run precedes them and is excluded, and if recruitment falls short we report the real sample and its
-limits. Participants perform five tasks (choose acceptable sessions, join the waitlist, interpret
-their status, confirm, cancel) and organisers four (create a multi-session workshop, handle a
-cancellation, inspect the backfill, read the distinct count and export). We measure completion,
-paired task time (Wilcoxon signed-rank test~\cite{wilcoxon1945}), the original ten-item
-SUS~\cite{brooke1996sus}, erroneous actions, help requests and the organiser's manual steps.
+\IfPending{\StudyParticipants}{\emph{Not yet run.} }{}The protocol (\code{docs/user-study/}),
+as in the Preliminary report: four to six student interviews come first, with a record of what the
+pilot organisers do today (\IfPending{\InterviewParticipants}{\pending{neither done yet}}{\InterviewParticipants{}
+students interviewed, \code{results/interviews/}}). The study then recruits twelve non-team university
+students, at least four with organising experience, and a two-person pilot run that is excluded; each
+uses SeatRelay and a control that mirrors current practice, one Google Form per session plus a shared
+Sheet with duplicate-detection formulas, in counterbalanced order with equivalent data sets. If
+recruitment falls short, the real sample and its limits are reported. Participants do five tasks
+(choose acceptable sessions, join the waitlist, interpret their status, confirm, cancel) and
+organisers four (create a multi-session workshop, handle a cancellation, inspect the backfill, read
+the distinct count and export). The measures are completion, paired task time (Wilcoxon signed-rank
+test~\cite{wilcoxon1945}), the original ten-item SUS~\cite{brooke1996sus}, erroneous actions, help
+requests, the organiser's manual steps and a short interview.
 \IfPending{\StudyParticipants}{\pending{user-study results: completion, paired time with Wilcoxon $p$,
 SUS with 95\,\% CI, errors and help requests per condition, organiser manual steps}}{With
-\StudyParticipants{} participants, completion was \StudyCompletionSRPct\,\% with SeatRelay and
+\StudyParticipants{} participants (\StudyOrganiserTrack{} on the organiser track), completion was \StudyCompletionSRPct\,\% with SeatRelay and
 \StudyCompletionCtrlPct\,\% with the control; the median paired task time was
 \StudyTimeImprovementPct\,\% lower (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS was \StudySusSRMean{}
 [\StudySusSRLo, \StudySusSRHi] against \StudySusCtrlMean{} [\StudySusCtrlLo, \StudySusCtrlHi];
 participants made \StudyErrorsSR{} erroneous actions and \StudyHelpSR{} help requests with SeatRelay
 against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control.}
 
+% Fig. 7 is printed only once docs/user-study/analysis.py has drawn the charts (the results
+% sentence above carries the [PENDING] marker until then). It needs about 5 cm: when the study data
+% arrive, the protocol paragraph above is the text to shorten.
+\IfFileExists{figures/generated/study-time.pdf}{%
 \begin{figure}[t]
   \centering
-  \IfFileExists{figures/generated/study-time.pdf}{%
-    \includegraphics[width=0.49\textwidth]{figures/generated/study-time}\hfill
-    \includegraphics[width=0.49\textwidth]{figures/generated/study-sus}}{%
-    \fbox{\parbox[c][\dimexpr5.0cm-2\fboxsep-2\fboxrule\relax][c]{\dimexpr\textwidth-2\fboxsep-2\fboxrule\relax}{%
-      \centering\small\pending{user-study charts: paired task time and SUS (results/user-study/)}\par}}}
+  \includegraphics[width=0.49\textwidth]{figures/generated/study-time}\hfill
+  \includegraphics[width=0.49\textwidth]{figures/generated/study-sus}
   \caption{User study: total task time per participant in both conditions (left) and SUS scores
   (right), SeatRelay vs one form per session plus a Sheet.}
   \label{fig:study}
-\end{figure}
+\end{figure}}{}
 
-\subsection{Real pilot}\label{sec:pilot}
+\subsection{Real pilot, and a staged rehearsal reported separately}\label{sec:pilot}
 The \code{pilot} stage (fault injection disabled, e-mail enabled; while SES is in the sandbox only
 verified addresses receive mail and others rely on in-app notifications) is deployed to serve a real
 workshop in two sessions with registration open for at least five days; the organiser's CSV exports
 and the dashboard's backfill log will be the evidence. \pending{pilot workshop, dates and
 observations: natural cancellations, backfills, notifications, attendance, organiser feedback}.
+\emph{Staged, not user evidence:} before the pilot, a scripted rehearsal on the pilot stage with
+\RehearsalParticipants{} synthetic accounts (\code{results/2026-10-17-pilot-rehearsal-3/}) applied
+\RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
+(\RehearsalBackfillExpiredN{} expiries through the timer path in
+\RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms; declines, cancellations and a
+capacity increase in their own transaction), sent \RehearsalNotificationsSent{} e-mails to the SES
+mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks, with the
+invariants holding at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires,
+these rehearsed events are logged apart from the pilot's natural events; they are operational
+evidence only.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}
@@ -221,7 +248,7 @@ observations: natural cancellations, backfills, notifications, attendance, organ
   found a C2 violation.
 \item \textbf{H3} (automatic backfill reduces the organiser's manual handling): \emph{partly
   supported.} Every release is relayed in the same decision with no organiser step
-  (\TimerPathRelaysN{} timer-path relays took at most \TimerPathRelayMaxMs\,ms; a cancellation is
+  (\TimerPathRelaysN{} timer-path relays on \code{dev} took at most \TimerPathRelayMaxMs\,ms; a cancellation is
   relayed inside its own transaction, \SmokeCancelBackfillMs\,ms), and in simulation per-session forms left
   \ReplayDupConfirmedPerSessionMean{} duplicate confirmed seats per workshop to clean up, against
   \ReplayDupConfirmedUnifiedMean{} with one queue. Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the

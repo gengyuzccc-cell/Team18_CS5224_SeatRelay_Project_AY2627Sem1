@@ -5,39 +5,34 @@
 - **Slides:** 1 Title, 2 Problem and market, 3 Business model (`report/Slides.tex`)
 - **Hands over to:** Part 2 (mechanism and rules)
 
-## What to say (about 330 words)
+## What to say (about 270 spoken words, 1:50 at 150 words a minute)
 
 **Slide 1, title (5 s).** Good afternoon. We are Team 18, and this is SeatRelay.
 
 **Slide 2, problem and market.**
-Many campus workshops run the same content several times. A library orientation runs on three
-mornings, and a career workshop runs on two evenings. Today the organiser usually opens one form per
-session and keeps a spreadsheet. Students who could attend two sessions sign up for both, to be safe.
-So one person holds two seats, and the organiser has to find the duplicates by hand. When someone
-drops out, the seat stays empty unless somebody e-mails the next person on a waiting list.
+Many campus workshops run the same content several times. Today the organiser opens one form per
+session and keeps a spreadsheet. Students sign up for two sessions to be safe, so one person holds two
+seats, and the organiser finds the duplicates by hand. When someone drops out, the seat stays empty
+unless somebody e-mails the waiting list.
 
-SeatRelay replaces this with one registration per workshop. You list every session you can attend,
-in order of preference, and you join one queue. You hold at most one seat at a time. When a seat
-frees up, it is offered to the next person in the queue who accepts that session, and they have a
-time limit to confirm. If they do not answer in time, the seat moves on by itself.
+SeatRelay replaces this with one registration per workshop. You rank every session you can attend and
+join one queue, and you hold at most one seat. A freed seat is offered to the next person in the queue
+who accepts that session, for a limited time; unanswered, it moves on by itself.
 
-How many organisers have this problem? We sized the market bottom-up from official counts. Five of
-Singapore's autonomous universities list at least 693 student organisations. That is a lower bound:
-it leaves out the polytechnics and university departments. Repeated sessions do happen. On the NUS
-Libraries calendar from August to mid-October, 11 of the 37 workshop events were repeats of just two
-titles. The share of organisers who run multi-session sign-ups, which we call p, comes from our
-interviews: [PENDING: p, from results/interviews/summary.md].
+Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of the 37 workshop
+events were repeats. Five universities list at least 693 student
+organisations, a lower bound. At our price the campus market is 693 times p times S$120, about S$83,200
+times p a year, where p is the share of organisers with multi-session sign-ups, from our interviews:
+[PENDING: p, from results/interviews/summary.md].
 
 **Slide 3, business model.**
-We plan a free tier with one open workshop at a time, and an organiser plan at S$10 per
-organisation per month, S$120 a year. The campus market is then 693 × p × S$120, about S$83,200
-times p per year. That market is small, so our case rests on the
-hours an organiser saves on each multi-session event: [PENDING: median hours per event and
-willingness to pay, from results/interviews/summary.md].
-
-On competition, Eventbrite does relay a released ticket with a claim window, but only within one
-date. *(optional)* None of the tools we scanned ties several acceptable sessions to one queue
-position with one seat per person.
+Organisers pay; participants never do. There is a free tier, and the organiser plan costs S$10 a
+month. The market is small, so the case rests on the hours an organiser saves
+per multi-session event: [PENDING: median hours per event and willingness to pay, from
+results/interviews/summary.md]. In our simulation, per-session forms left 3.87 duplicate confirmed
+seats per workshop to chase; one queue left none. Eventbrite relays tickets, but only within one date;
+no tool we scanned ties sessions to one queue place. Our first users would be NUS student organisations, starting with the
+organiser of our planned pilot.
 
 Next, CHEN YANG explains the rules that make this work.
 
@@ -65,8 +60,9 @@ Do not quote the illustrative p = 0.2 / 0.4 rows of `docs/market-sizing.md` §4.
 **Q1. How did you get p, and how reliable is it?**
 p is the event-weighted share of organisers' events that run two or more equivalent sessions. It is
 computed from interview questions A1 and A2 (`docs/interviews/guide-organiser.md`) as Σ multi-session
-events ÷ Σ events. We interviewed [PENDING: n] organisers, a convenience sample from our network,
-which the report states as a limitation. The organisation counts are lower bounds: "more than X"
+events ÷ Σ events. On 2026-10-17 no interview had taken place; on the day, give the real number
+([PENDING: n organisers]). They will be a convenience sample from our network, and the report states
+that as a limitation. The organisation counts are lower bounds: "more than X"
 counts as X, and SUSS and the polytechnics are excluded. That is why we give the TAM as a formula
 in p instead of guessing it.
 

@@ -91,8 +91,9 @@
 \IfFileExists{figures/generated/loadtest-p95.pdf}{\loadtesttrue}{\loadtestfalse}
 % Team members. Student numbers live only in the git-ignored team-ids.tex (\IdLiZongze ...) and
 % are printed only in the submission build (build.sh -s, jobname Final-submission, also
-% git-ignored): report/Final.pdf is tracked in the public repository and shows names only.
-% Without team-ids.tex the submission build also falls back to names only.
+% git-ignored). The default build, report/Final.pdf, shows names only; it is git-ignored too and is
+% delivered directly, not published in the repository. Without team-ids.tex the submission build
+% also falls back to names only.
 \providecommand{\SRSubmission}{0}
 \newcommand{\memberNameOnly}[2]{#1}
 \newcommand{\memberWithId}[2]{#1 (#2)}

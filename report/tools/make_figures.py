@@ -59,7 +59,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter  # noqa: E402
+from matplotlib.ticker import FixedLocator, FuncFormatter, LogLocator, NullFormatter  # noqa: E402
 
 CM = 1 / 2.54
 WIDE, NARROW = 17 * CM, 8.5 * CM
@@ -69,6 +69,12 @@ WIDE, NARROW = 17 * CM, 8.5 * CM
 BLUE, ORANGE, GREEN, YELLOW, PURPLE, PINK = "#2A78D6", "#EB6834", "#1BAF7A", "#EDA100", "#6250D6", "#E87BA4"
 INK, MUTED, GRID = "#1F1F1D", "#52514E", "#E4E3DF"
 MODE_COLOR = {"UNIFIED": BLUE, "PER_SESSION": ORANGE}
+SCENARIO_LABEL = {"cross-workshop": "cross-workshop", "hotspot": "hot spot"}
+# slide charts: drawn at their size on the 13.33 x 7.5 in slide, so the point sizes are what is projected
+SLIDE_SIZE = (6.0, 3.5)
+SLIDE_RC = {"font.size": 16, "axes.labelsize": 16, "xtick.labelsize": 15, "ytick.labelsize": 15,
+            "legend.fontsize": 14, "axes.linewidth": 1.0, "xtick.major.width": 1.0, "ytick.major.width": 1.0,
+            "xtick.major.size": 5, "ytick.major.size": 5}
 COND_COLOR = {"SR": BLUE, "CTRL": ORANGE}
 # Settle-latency series: colour follows the experiment, never its rank.
 EXPERIMENT_STYLE = {
@@ -192,8 +198,8 @@ def chart_replay(run: Run, runs, results: Path) -> None:
     ax = axes[0]
     box(ax, [by[m]["dup_hold_events"].to_numpy(float) for m in modes], colors, modes)
     if (by["UNIFIED"]["dup_hold_events"] == 0).all():
-        ax.annotate("0 in every run (C2)", xy=(0, 0), xytext=(-0.22, 9), textcoords=("data", "offset points"), ha="left", fontsize=7.5, color=MUTED)
-    ax.set_ylabel("duplicate-hold events per run")
+        ax.annotate("0 in every workshop (C2)", xy=(0, 0), xytext=(-0.22, 9), textcoords=("data", "offset points"), ha="left", fontsize=7.5, color=MUTED)
+    ax.set_ylabel("duplicate-hold events per workshop")
     ax.set_ylim(bottom=-2)
     style(ax)
     panel_letter(ax, "a")
@@ -211,7 +217,7 @@ def chart_replay(run: Run, runs, results: Path) -> None:
     ax.set_yscale("log")
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _p: f"{v:g}"))
     ax.yaxis.set_minor_formatter(NullFormatter())
-    ax.set_ylabel("seat refill time, run mean (min)")
+    ax.set_ylabel("mean seat refill time per workshop (min)")
     style(ax)
     panel_letter(ax, "c")
     zero = sum(int((by[m]["seat_refill_min_mean"] == 0).sum()) for m in modes)
@@ -219,6 +225,19 @@ def chart_replay(run: Run, runs, results: Path) -> None:
         run.notes.append(f"replay-comparison (c): {zero} run(s) with a refill mean of exactly 0 min not drawn on the log axis")
     run.save(fig, "replay-comparison", "UNIFIED vs PER_SESSION per seed (box p25-p75, median line, whiskers p5-p95, diamond = mean)",
              [f"{rel(directory)}/raw.csv: dup_hold_events, fill_rate, seat_refill_min_mean by mode"])
+
+    # Slide version (report/Slides.tex, slide 10): panel (a) alone, drawn at the size it is shown on
+    # the 13.33 in slide (6.0 x 3.5 in) with 16 pt text, so nothing is scaled down when projected.
+    with plt.rc_context(SLIDE_RC):
+        fig, ax = plt.subplots(figsize=SLIDE_SIZE, constrained_layout=True)
+        box(ax, [by[m]["dup_hold_events"].to_numpy(float) for m in modes], colors, ["one queue", "per-session forms"])
+        if (by["UNIFIED"]["dup_hold_events"] == 0).all():
+            ax.annotate("0 in every\nworkshop", xy=(0, 0), xytext=(-0.25, 14), textcoords=("data", "offset points"), ha="left", color=MUTED)
+        ax.set_ylabel("duplicate holds\nper workshop")
+        ax.set_ylim(bottom=-2)
+        style(ax)
+        run.save(fig, "slide-replay", "slide 10: duplicate-hold events per simulated workshop by mode (box p25-p75, median, whiskers p5-p95, diamond = mean)",
+                 [f"{rel(directory)}/raw.csv: dup_hold_events by mode"])
 
     # paired scatter
     wide = frame.pivot_table(index="seed", columns="mode", values=["distinct_served", "seat_refill_min_mean"], aggfunc="first")
@@ -512,7 +531,7 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
             ax.yaxis.set_minor_formatter(NullFormatter())
             if not part.empty:
                 ax.set_xticks(sorted(part["vus"].unique()))
-            ax.set_xlabel(f"virtual users ({target}, {scenario})")
+            ax.set_xlabel(f"virtual users ({target}, {SCENARIO_LABEL.get(scenario, scenario)})")
             if c == 0:
                 ax.set_ylabel("p95 latency (ms)")
             style(ax, "both")
@@ -522,6 +541,34 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
         fig.legend(handles, labels, loc="outside upper center", ncol=len(handles))
     run.save(fig, "loadtest-p95", "k6 matrix, median over rounds of each run's p95, dashed lines = 1 s and 5 s targets",
              [f"{rel(date_dir)}/raw.csv: " + ", ".join(c for c, *_ in present) + " (active rounds, median per VU level)"])
+
+    # Slide version (report/Slides.tex, slide 10): the report target only, client-observed settle p95
+    # of both scenarios plus the read p95 (the 202 p95 lies on top of it), at slide size with 16 pt text.
+    slide = levels[levels["target"].astype(str) == target]
+    with plt.rc_context(SLIDE_RC):
+        fig, ax = plt.subplots(figsize=SLIDE_SIZE, constrained_layout=True)
+        lines = (("settleP95", "cross-workshop", "settle, 10 workshops", GREEN, "solid", "^"),
+                 ("settleP95", "hotspot", "settle, one hot workshop", PURPLE, (0, (4, 1.5)), "D"),
+                 ("readP95", "cross-workshop", "reads", BLUE, "solid", "o"))
+        for column, scenario, label, color, dash, marker in lines:
+            part = slide[slide["scenario"].astype(str) == scenario].sort_values("vus")
+            if column in part.columns and not part[column].isna().all():
+                ax.plot(part["vus"], part[column], color=color, linestyle=dash, marker=marker, markersize=8, linewidth=2.4, label=label)
+        for value, text in ((1000, "1 s"), (5000, "5 s target")):
+            ax.axhline(value, color=MUTED, linewidth=1.2, linestyle=(0, (2, 2)))
+            ax.text(0.99, value * 1.12, text, transform=ax.get_yaxis_transform(), ha="right", va="bottom", color=MUTED)
+        ax.set_yscale("log")
+        ax.set_ylim(150, 60000)
+        ax.yaxis.set_major_locator(FixedLocator([300, 1000, 5000, 30000]))
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _p: f"{v / 1000:g} s" if v >= 1000 else f"{v:g} ms"))
+        ax.yaxis.set_minor_formatter(NullFormatter())
+        ax.set_xticks(sorted(slide["vus"].unique()))
+        ax.set_xlabel(f"virtual users ({target})")
+        ax.set_ylabel("p95, median of rounds")
+        ax.legend(loc="upper left", fontsize=13)
+        style(ax, "y")
+        run.save(fig, "slide-loadtest", "slide 10: k6 client-observed settle p95 (both scenarios) and read p95 by virtual users, median of rounds",
+                 [f"{rel(date_dir)}/raw.csv: settleP95, readP95 (target {target}; same +inf rule)"])
 
 
 # ============================================================================ user study

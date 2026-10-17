@@ -196,7 +196,7 @@ describe('CloudWatch round metrics', () => {
     // the plan §4 verdict uses the client figure: 6.2 s fails the 5 s target
     expect(aggregateByLevel([row])[0]).toMatchObject({ settleP95: 6200, pass: false });
     const md = renderSummaryMarkdown({ version: 1, date: '2026-10-17', targets: {}, rows: [row] });
-    expect(md).toContain('| 50 | 1 | 55 | 80 | 6200 | 600 | 0.20 % | NOT met |');
+    expect(md).toContain('| 50 | 1 | 55 | 80 | 6200 | 600 | 0 | 0.20 % | NOT met |');
     expect(md).toContain('| 40 | 9 | 240 / 1020 |');
   });
 

@@ -3,7 +3,8 @@
 #   ./report/build.sh [-t Final] [-m 10] [-s]
 # -s: submission build with the student numbers of the git-ignored team-ids.tex in the title block;
 #     writes <target>-submission.pdf (git-ignored), which is the file uploaded to Canvas as <target>.pdf.
-#     Without -s the PDF shows names only, because report/<target>.pdf is tracked in the public repository.
+#     Without -s the PDF (report/<target>.pdf) shows names only. Both PDFs are git-ignored and delivered
+#     directly; neither is published in the repository.
 # Fails when: page count > MAXPAGES, any overfull box, undefined references/citations, or a
 # placeholder survives in the PDF text: a visible \pending{...} ("[PENDING: ...]", data that does
 # not exist yet) or a token TODO, TBD, XXX, [citation], ??.

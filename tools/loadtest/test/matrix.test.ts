@@ -159,6 +159,25 @@ describe('matrix', () => {
     expect(levels[1]).toMatchObject({ vus: 50, rounds: 1, readP95: 1200, pass: false });
   });
 
+  it('counts a round in which nothing settled as +Infinity in the settle medians, not as 0', () => {
+    const rows = [
+      row({ vus: 50, round: 1, settleP95: 0, settleP50: 0, settleTimeouts: 63, serverSettleP95: undefined }),
+      row({ vus: 50, round: 2, settleP95: 29943, serverSettleP95: 29335, settleTimeouts: 60 }),
+      row({ vus: 50, round: 3, settleP95: 28644, serverSettleP95: 28242, settleTimeouts: 76 }),
+    ];
+    const [level] = aggregateByLevel(rows);
+    expect(level).toMatchObject({ vus: 50, unsettledRounds: 1, settleP95: 29943, serverSettleP95: 29335, pass: false });
+    const md = renderSummaryMarkdown({
+      version: 1,
+      date: '2026-10-17',
+      targets: { local: { apiBase: 'http://localhost:3000', notes: [] } },
+      rows,
+    });
+    expect(md).toContain('| 50 | 3 | 55 | ');
+    expect(md).toContain('| 29943 | 29335 | 1 |');
+    expect(md).toContain('none settled');
+  });
+
   it('renders summary.md per target and scenario, with per-level medians and notes', () => {
     const md = renderSummaryMarkdown({
       version: 1,
@@ -193,7 +212,7 @@ describe('matrix', () => {
       '| 10 | 1 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | – | – | – / – |',
     );
     expect(md).not.toContain('## Superseded runs');
-    expect(md).toContain('| 10 | 1 | 55 | 80 | 1400 | 600 | 0.20 % | met |');
+    expect(md).toContain('| 10 | 1 | 55 | 80 | 1400 | 600 | 0 | 0.20 % | met |');
     expect(md).toContain('- Note: CloudWatch metrics skipped: no credentials');
   });
 

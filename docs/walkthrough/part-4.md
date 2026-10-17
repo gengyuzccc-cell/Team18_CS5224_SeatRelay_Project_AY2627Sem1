@@ -5,8 +5,9 @@
   D4, then continue straight into Part 5.
 - **Clock:** 6:00–11:00 (5:00)
 - **Slide:** 8 "Live demo" (dev stage URL `https://d2ni5e1z674t04.cloudfront.net`). Backup: B1
-  recording with chapter marks, B2–B5 screenshots of the expected states of D1–D4, B6 what the
-  experiments recorded for D5 (a terminal step, so no screenshot).
+  recording with chapter marks and B2–B5 screenshots of D1–D4, both from the **staged** browser
+  walkthrough (other accounts and data than the live click path: narrate them with the fallback
+  script below), and B6, what the experiments recorded for D5 (a terminal step, so no screenshot).
 - **Script:** `docs/DEMO.md` is the authority for setup (§3), click path (§5), fallback (§6), reset
   (§7) and troubleshooting (§8). This file compresses its §5 to 5:00 and assigns the lines.
 
@@ -89,6 +90,24 @@ seats. Our experiments run this same check after every step. Here is what they f
 | Plan B (local stack) | ZHU GENGYU | Say once: "This is our on-premise reference deployment, same code." D5b can follow D5a directly (redelivery after about 1 s). |
 | A card does not update after the other window acted | Operator | Press F5 (the page refreshes every 10 s only while visible). |
 
+## Fallback script for the staged recording and screenshots (Plan C from B1, Plan D on B2–B5)
+
+The recording and the screenshots come from the staged browser walkthrough, not from the live click
+path: accounts Alice, Bob and Carol "(staged)", one workshop with capacities 2 / 1 / 1, Alice ranks
+Session 2 first, and the 60 s hold is in the same workshop. Say once: "This is our staged recording on
+the dev stage, with scripted accounts." Then narrate what is on screen, not the live lines above:
+
+| Beat | Recording (B1) | Screenshots | Say |
+|---|---|---|---|
+| D1 | 0:37–1:03 | B2 | "Alice ranks Session 2 first. The request comes back at once with a 202, the page polls, and her first choice is held for her with a countdown. She accepts." |
+| D2 | 1:03–1:33 | B3 | "Bob wants Session 2 only; it is full, so he queues. Alice cancels, and the seat is held for Bob in the same transaction: the backfill log shows 0 ms. Carol queues behind Bob's offer." |
+| D5a/D5b | none | B6 | "The recording has no fault injection. What the experiments recorded for a crash after commit is on this backup slide: six of six probes, one record, one effect." |
+| D3 | 1:33–2:13 | B4 | "Bob does not answer. When his 60-second hold runs out, the timer relays the seat to Carol. Nobody pressed anything." |
+| D4 | 2:16–2:23 | B5 | "The backfill log has both relays with their latency, and Verify invariants confirms: no session over capacity, nobody holding two seats." |
+
+The screens show 18 Oct (Singapore time); the walkthrough ran on 17 Oct UTC. Values on screen are
+demo values, not measurements.
+
 ## Key numbers
 
 Do not quote numbers from the screen as results. The backfill latency on the dashboard and the
@@ -99,7 +118,7 @@ redelivery time are demo values. If you are asked, these are the measured ones:
 | Smoke on dev, 2026-10-17 (same flow, scripted) | PASS, 13/13 checks | `results/2026-10-17-smoke/summary.md` |
 | Cancellation-driven backfill | 0 ms (relayed in the same transaction; asserted) | same file, step 4 |
 | Expiry-driven backfill in that smoke run | 117 ms (n = 1, a single sample) | same file (`\SmokeExpiryBackfillMaxMs`) |
-| Expiry-driven backfill distribution | [PENDING: p50 / p95 / max; the backfill run aborted with HTTP 503]. So far: 4 timer-path relays, at most 982 ms | `results/<date>-backfill/summary.md` (`\BackfillExpiredPNinetyFiveS`); interim `\TimerPathRelaysN`, `\TimerPathRelayMaxMs` from `results/2026-10-17-smoke/` and `-failure-recovery/` |
+| Expiry-driven backfill distribution | [PENDING: p50 / p95 / max; the backfill run aborted with HTTP 503]. So far on dev: 4 timer-path relays, at most 982 ms; the staged rehearsal on pilot adds 2 (72–74 ms), reported separately as staged | `results/<date>-backfill/summary.md` (`\BackfillExpiredPNinetyFiveS`); interim `\TimerPathRelaysN`, `\TimerPathRelayMaxMs` from `results/2026-10-17-smoke/` and `-failure-recovery/`; `\RehearsalBackfillExpiredMinMs`–`MaxMs` from `results/2026-10-17-pilot-rehearsal-3/` |
 | Redelivery delay after a crash | the SQS visibility timeout, 120 s (configuration) | `services/aws/templates/app.yaml` |
 | Repeat execution with crash after commit | 6 of 6 probes: redelivery acknowledged, one record, one effect (PASS) | `results/2026-10-17-repeat-execution/summary.md` (`\RepeatAfterCommitPassed`, `\RepeatAfterCommitCases`) |
 

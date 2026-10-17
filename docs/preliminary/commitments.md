@@ -69,8 +69,14 @@ holds, distinct participants served, backfill time; "not a performance measureme
 
 ## User evaluation (Prelim §5)
 
+Verbatim: "Four to six students are interviewed first to ground the task design, alongside a record of
+what the team's own pilot organisers do today. The formal task test recruits twelve university students
+who are not team members, aiming for at least four with experience organising activities; a small pilot
+run precedes the sessions and is excluded from the reported sample."
+
 - 4–6 student interviews first, plus a record of what the team's pilot organisers do today.
 - 12 non-team university students (≥ 4 with organising experience); a pilot run precedes and is excluded.
+  Staff are not in the committed sample (`docs/user-study/recruitment.md` screens for students only).
 - **"If recruitment falls short we report the real sample and its limitations; we do not fabricate participants,
   and we do not mix team members into the independent sample."**
 - Control = one form per session + spreadsheet; counterbalanced order; equivalent different data in round 2.
@@ -84,13 +90,25 @@ holds, distinct participants served, backfill time; "not a performance measureme
 
 Three layers (metered, after free tier, paid after credits). Budget US$15/month × 3 + US$15 reruns, ceiling US$60
 against US$120 credits; Budgets alerts are delayed, so throttling, log retention and teardown bound spend.
+Final: the deployed alarms are US$20/month and US$60/year with credits excluded (execution plan §2.4;
+`services/aws/templates/auth.yaml`), disclosed in Final §2 next to the Prelim plan; the bill so far comes from
+the Cost Explorer snapshots in `results/cost/snapshots/` (tag-filtered, so only days after tag activation).
 On-prem: hardware amortisation + electricity + network + backup and e-mail + labour; hardware-only increment vs
 fully amortised; sensitivity at low/medium/high load; availability difference stated plainly.
 
 ## AI declaration (Prelim §6)
 
-"No AI-generated code appears here; **if code is generated with AI during implementation, the Final report
-declares that specifically.** Each member records their own learning from this work."
+Verbatim (the submitted PDF opens the paragraph with the bracketed drafting note "[Team to finalise—must
+describe actual use.]", which is not repeated here): "AI assistance was used to compare candidate topics,
+locate vendor documentation, discuss architecture options and draft prose. Every factual claim about
+competing services was checked by the team against the cited vendor pages, and judgements about FIFO
+ordering, transactions and TTL behaviour were verified against AWS documentation before being written
+down. No AI-generated code appears here; **if code is generated with AI during implementation, the Final
+report declares that specifically.** Each member records their own learning from this work."
+
+The Final's declaration (`report/sections/07-declaration.tex`) quotes the first sentence as what the
+Preliminary report declared, and prints a member's learning statement only after that member has written
+or confirmed it (`docs/ai-declaration-drafts.md`).
 
 ## Prelim references to keep
 

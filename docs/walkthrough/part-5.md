@@ -3,45 +3,36 @@
 - **Speaker:** LIANG ZIHAN. You are also the demo operator, and you narrate D5b and D4 in
   [part-4.md](part-4.md) before this part.
 - **Clock:** 11:00–13:00 (2:00)
-- **Slides:** 9 System results (Table 3 verdicts, one tile per aspect), 10 Latency, backfill and
+- **Slides:** 9 System results (Prelim. Table 3 = Final Table 5 verdicts, one tile per aspect), 10 Latency, backfill and
   mechanism comparison (k6 p95 by virtual users, replay charts, backfill line), 11 Cloud vs on-prem
   cost (table and crossover chart), in `report/Slides.tex`
 - **Hands over to:** Part 6 (user study, pilot, limitations)
 
-## What to say (about 350 words)
+## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
-**Slide 9, system results.** We ran every Table 3 experiment on the dev stage, three runs each,
-with scripts that use the public API exactly like the browser. Every number here is generated from
-a results file in our repository, and failed runs are kept, not deleted. Six of the eight pass:
-- Correctness: nine scenarios, 672 of 672 checks, no session over capacity, no double hold.
-- Preference order: 60 of 60 fixed cases as predicted; never an unacceptable session.
-- Repeat execution: 18 of 18 probes applied once, also after a crash right after the commit.
-- Expiry race, failure recovery and access control pass: stale ticks did nothing, a crashed
-  command settled on redelivery after about two minutes, and all 165 unauthorised requests were
-  refused.
+**Slide 9, system results.** We ran every experiment of the Preliminary report's Table 3, our Table 5,
+on the dev stage, three runs each, through the public API like the browser; failed runs are kept. Six
+of the eight scripted experiments pass: correctness, with 672 of 672 checks and no session over capacity; preference order, on its dev
+part, because the engine's property-test record is still pending; and repeat execution, expiry race,
+failure recovery and access control.
 
 Two fail, and we report them as failures. In the concurrency test, 76 of 209 requests got HTTP 503
-responses, although no invariant was ever violated. The backfill run aborted at its first request
-with the same error. We have not found the cause yet. The account's Lambda concurrency quota is
-only 10, and the re-runs wait for an increase.
+responses, although no invariant was violated, and the backfill run aborted at its first request with
+the same error. We have not found the cause yet; the re-runs wait for a Lambda quota increase.
 
-**Slide 10, latency.** Under load, reads and 202 responses stayed near 300 milliseconds at every
-level. Settling met the 5-second target only at 10 virtual users; at 50 its 95th percentile was
-about 28 to 30 seconds, across workshops as well as in the hot spot. So the backfill-latency target
-is still open. So far, four timer relays took at most 982 milliseconds, and a cancellation hands
-the seat on inside its own transaction.
+**Slide 10, latency.** Under load, reads stayed near 300 milliseconds at every level, but settling met
+the 5-second target only at 10 virtual users; at 50, its 95th percentile was 29 to 30 seconds, across
+workshops as well as in the hot spot. So far, four timer relays on dev took at most 982 milliseconds.
+In our simulation of 1,000 workshops, one queue never let anyone hold two seats, against 34.6
+duplicate holds per workshop with per-session forms. That part is a simulation, not live traffic.
 
-We also replayed 1,000 simulated workshops through the same engine. With one queue nobody ever held
-two seats, against 34.6 duplicate-hold events per workshop with per-session forms, and one queue
-served 58.1 people instead of 54.0. This part is a simulation, not live traffic.
+**Slide 11, cost.** At 1,000 registrations a month the modelled cloud costs US$13.30 at list price, 52
+cents after the free tier, and nothing after credits. One on-prem mini-PC costs about US$29 a month, or
+US$324 with a business line and labour. The cloud costs more than the bare machine above about 3,900
+registrations a month, and more than the fully costed one above about 57,300. The machine has no
+failover.
 
-**Slide 11, cost.** At 1,000 registrations a month the modelled cloud costs US$13.30 at list
-price, US$0.52 after the free tier, and zero after credits. One on-prem mini-PC costs about US$29 a
-month as an increment, or about US$324 with a business line and labour. The list-price cloud costs
-more than the bare machine above about 3,900 registrations a month, and more than the fully
-amortised one, with its line and labour, above about 57,300. The machine also has no failover.
-
-Next, ZHANG TIANYI presents the user study.
+Next, ZHANG TIANYI.
 
 ## Key numbers
 
@@ -91,7 +82,10 @@ But at 50 virtual users the cross-workshop settle p95 (28,460 ms server side) wa
 the hot spot's (29,335 ms), with commands up to 17 s old in the queue, so per-workshop serialisation
 alone does not explain it (Final report §4.2). One factor we know of is the account's Lambda
 concurrency quota of 10, shared by both stages; the cause is not confirmed, and the re-run waits
-for the quota increase. The local stack met every target up to 50 users with the same engine. The
+for the quota increase. On the median of three rounds the local stack met the targets up to 50 VUs
+with the same engine, although two single rounds at 50 VUs exceeded 5 s (cross-workshop round 1,
+hot-spot round 3); it also has no network hop between client and server, so it is not a like-for-like
+comparison. The
 documented next step is batching up to 10 messages per group with one shared snapshot.
 
 **Q2. Is the cost measured or modelled?**

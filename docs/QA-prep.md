@@ -16,7 +16,7 @@ How to answer:
 | Topic | Value | Source |
 |---|---|---|
 | Dev smoke test, 2026-10-17 | PASS, 13/13 checks; server-side settle p50 45 ms (n = 6); expiry backfill 117 ms (n = 1) | `results/2026-10-17-smoke/summary.md` |
-| Table 3 rows (correctness … backfill) | [PENDING: verdicts and headline numbers of the dev report runs] | `results/<date>-<experiment>/summary.md`; macros in `report/generated/numbers.tex` |
+| Prelim. Table 3 rows, Final Table 5 (correctness … backfill) | [PENDING: verdicts and headline numbers of the dev report runs] | `results/<date>-<experiment>/summary.md`; macros in `report/generated/numbers.tex` |
 | Performance (k6, 50 VUs, cross-workshop and hot spot) | [PENDING] | `results/loadtest/<date>/summary.md` |
 | Mechanism comparison (1,000 seeds, UNIFIED vs PER_SESSION) | distinct served 58.08 vs 54.03; duplicate-hold events 0.00 vs 34.57; mean per-run p95 refill time 9.45 vs 63.31 min | `results/replay/summary.md` |
 | Cloud cost at 1k registrations per month: list / after free tier / after credits | US$13.30 / 0.52 / 0.00 | `results/cost/model-summary.md` |
@@ -283,13 +283,17 @@ than 10 pages, overfull boxes, undefined references or leftover placeholders.
 
 ### 20. How did you use AI, and how did you make sure the result is correct?
 
-Answer from the AI usage declaration in the Final report: where AI assistance was used, how the team
-directed and reviewed it, and what each member learned. The team made the design decisions, reviewed
-the changes, deployed the stacks, and ran the experiments, the user study and the pilot. Correctness
-does not rest on trusting generated code; it rests on independent checks:
+Answer from the AI usage declaration in the Final report, and say no more than it says. An AI coding
+assistant generated the code, templates, tests, scripts, desk research, documentation and first drafts,
+and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
+The scope, rules R1–R7, constraints C1–C7 and acceptance targets are the team's, from the Preliminary
+report. The interviews, the user study and the pilot are run by the team: [PENDING: their status on
+the day; none had run on 2026-10-17]. How each member reviewed the generated work and what they
+learned is in their own statement in the declaration ([PENDING: each member's confirmed statement]).
+Correctness does not rest on trusting generated code; it rests on independent checks:
 - the engine's property test and 95 % coverage threshold;
 - CI on every push;
-- the Table 3 experiments against the deployed system, with `verify` after every step;
+- the Prelim. Table 3 experiments (Final Table 5) against the deployed system, with `verify` after every step;
 - report numbers generated only from `results/`.
 
 Failed runs are kept and reported.

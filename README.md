@@ -13,7 +13,7 @@ This README is the source of Final report §6 (Code Explanation). The design as 
 | What | URL | Notes |
 |---|---|---|
 | Public repository | https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 | this code |
-| Web app, pilot stage | https://diiztwl34x7s1.cloudfront.net | real participants; fault flags off, e-mail on |
+| Web app, pilot stage | https://diiztwl34x7s1.cloudfront.net | for the live pilot (not yet run; so far it holds only the staged rehearsal with synthetic accounts); fault flags off, e-mail on |
 | Web app, dev stage | https://d2ni5e1z674t04.cloudfront.net | experiments and demo; fault flags on, e-mail off |
 | API, dev | https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com | `GET /health` is public; everything else needs a Cognito ID token |
 | API, pilot | https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com | as above |
@@ -256,6 +256,8 @@ replay on dev.
 | `results/<date>-table3-<target>.{log,status}` | Console log and one status line per experiment from `run-table3.sh` |
 | `results/<date>-core-tests/` | vitest log, `coverage-summary.json`, `commit.txt` (property test and coverage; EXPERIMENTS §3.2) |
 | `results/2026-10-17-smoke-dev/` | the first manual smoke on dev (`run.log`, `meta.json`, script copy) |
+| `results/<date>-pilot-rehearsal[-<n>]/` | **staged** rehearsal on the pilot stage (`tools/experiments/src/pilot-rehearsal.ts`): synthetic accounts and scripted actions, operational evidence only, never user evidence; logged apart from the live pilot (Prelim §5). The quoted run is `results/2026-10-17-pilot-rehearsal-3/` |
+| `results/<date>-web-walkthrough-<stage>/` | **staged** browser walkthrough by `tools/e2e` (synthetic accounts named "(staged)"); source of `docs/demo/screenshots/` and `docs/demo/backup-demo.mp4` |
 | `results/loadtest/<date>/` | k6 matrix: `raw.csv`, `summary.md`, `runs.json`, per-run k6 JSON and logs, `docker-stats.csv` (local) |
 | `results/replay/` | mechanism comparison, 1,000 seeds: `raw.csv`, `summary.md`, SVG charts |
 | `results/cost/` | `model-summary.md`, `crossover.png`, `unit-cost.png`, `crossover-curve.csv`; `snapshots/<date>.json` and `usage-priced.md` from measured usage |

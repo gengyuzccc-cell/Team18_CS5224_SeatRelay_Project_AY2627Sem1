@@ -1,9 +1,9 @@
 % Final §6 -- Code explanation and public URL (plan §7.1: 0.6 pages). Condensed from README.md.
 \section{Code explanation}\label{sec:code}
 The code, infrastructure templates, experiment scripts, raw results and this report's sources are
-public at \url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}
-(\code{README.md} is the long form of this section). It is a pnpm workspace in TypeScript (Node.js
-22): \code{packages/contracts} (shared zod schemas), \code{packages/core} (the pure
+public (\code{README.md} is the long form of this section):\\
+\hspace*{1.2em}{\urlstyle{tt}\url{https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1}}\\
+It is a pnpm workspace in TypeScript (Node.js 22): \code{packages/contracts} (shared zod schemas), \code{packages/core} (the pure
 engine), \code{packages/service} (API routes, worker protocol, sweep), \code{services/aws} (SAM
 templates, five Lambda handlers, DynamoDB/SQS/SES adapters), \code{services/local} (the on-prem
 reference, \S\ref{sec:business}), \code{apps/web} (React SPA),

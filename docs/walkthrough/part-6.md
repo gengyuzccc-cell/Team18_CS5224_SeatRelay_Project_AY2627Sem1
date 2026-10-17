@@ -6,56 +6,33 @@
   (`report/Slides.tex`)
 - **Hands over to:** Q&A (all members; see [../QA-prep.md](../QA-prep.md))
 
-## What to say (about 360 words; the Division-of-work line is not read out)
+## What to say (about 300 spoken words, 2:00 at 150 words a minute; the Division-of-work line is not read out)
 
-**Slide 12, user study and pilot.** We compared SeatRelay with what organisers use today: one Google
-Form per session plus a shared spreadsheet. We set that up carefully, including duplicate-detection
-formulas, so any advantage we find is a conservative one.
+**Slide 12, user study and pilot.** Our evaluation with independent users has not run yet. The plan: First come four to six student interviews and a record of what our pilot organisers do
+today. Then twelve non-team university students, at least four with organising experience, will each
+use SeatRelay and today's practice, one Google Form per session plus a spreadsheet with
+duplicate-detection formulas. Half start with each tool. The targets
+are 90 percent task completion, task times 25 percent shorter, and a usability score of at least 75.
+[PENDING: the results on the day, or say "not run yet".] The live pilot, two sessions of one real
+workshop, is also still to come: [PENDING: pilot status, from results/pilot/].
 
-[PENDING: n] people outside the team used both tools, half starting with each, with different data
-in the second round.
-- Key-task completion with SeatRelay was [PENDING], against our target of 90 percent.
-- The median paired task time changed by [PENDING] (target: 25 percent faster), with a Wilcoxon p of
-  [PENDING].
-- SeatRelay's SUS score was [PENDING], with its confidence interval, against a target of 75.
+Before the pilot we rehearsed it on the pilot stage with 20 synthetic accounts and scripted actions.
+That is **staged**, not user evidence: all 43 commands were applied, 9 released seats were relayed, and
+the invariants held throughout.
 
-*(If a target was missed, say so here, plainly.)*
+**Slide 13, limitations and future work.** One writer per workshop is the price of ordering, and under
+load settling fell behind above 10 virtual users, with HTTP 503s whose cause we have not found. We run
+in one region. E-mail reaches only verified addresses until SES production access is granted. The
+mechanism comparison is a simulation, and the cost is modelled. Next we would batch commands per
+workshop, obtain SES production access, and try a cheaper Cognito tier, our largest cost at scale.
 
-In the pilot, [PENDING: number of workshops, registrations, cancellations that were relayed,
-attendance, from results/pilot/].
+**AI use.** An AI coding assistant generated our code, tests, scripts, desk research and first drafts,
+and ran the deployments and experiments with our credentials. The scope, rules and targets are ours,
+from the Preliminary report. The report's declaration gives the details, with each member's own
+statement of what they learned.
 
-Before the pilot we rehearsed it on the pilot stage with 20 synthetic accounts and scripted
-actions. That is **staged**, not user evidence: all 43 commands were applied, 9 released seats were
-relayed, and the invariants held throughout. *(optional)* 42 e-mails went to the SES mailbox
-simulator.
-
-**Slide 13, limitations and future work.**
-- **One writer per workshop, and an open problem under load.** One workshop's writes are processed
-  one at a time; that is the price of the ordering guarantee. Under load, settling fell behind above
-  10 virtual users, across workshops too, and some requests got HTTP 503. We have not found the
-  cause yet.
-- **One region.** The managed services are multi-AZ and the table has point-in-time recovery, but a
-  regional outage would stop the service.
-- **E-mail.** SES production access was denied while our sender address was still unverified, so
-  e-mail reaches only verified addresses. Everyone else relies on in-app notifications.
-- **Simulation and model.** The mechanism comparison is a simulation, and the cost drivers are
-  modelled until our usage snapshots replace them.
-- **Small samples.** The interview and study samples are small convenience samples.
-
-Next we would batch commands per workshop to raise hot-spot throughput, obtain SES production
-access, and evaluate a cheaper Cognito tier, because Cognito is our largest cost item at scale. *(optional)*
-Push updates would only be worth adding if polling ever became the bottleneck.
-
-**AI use.** An AI coding assistant generated our code, tests, scripts, documentation and first
-drafts, and ran the deployment and experiment scripts with our credentials. We set the scope, rules
-and targets, reviewed what it produced and approved every deployment; no measured number was typed
-by hand. *(optional)* The report's AI declaration gives the details and what each of us learned.
-
-**Division of work.** Point at the slide instead of reading it out. It shows: LI ZONGZE, product
-and front end; CHEN YANG, allocation logic and API; LIN JIE, AWS and monitoring; ZHU GENGYU, data and
-the on-prem reference; LIANG ZIHAN, user research and evaluation tooling; ZHANG TIANYI, organiser
-dashboard, QA and documentation. [PENDING: each member confirms their line,
-`docs/ai-declaration-drafts.md`.]
+**Division of work.** Point at the slide instead of reading it out. The mapping of names to work lines
+is provisional until each member confirms it ([PENDING: `docs/ai-declaration-drafts.md`]).
 
 **Slide 14.** Thank you. We are happy to take questions.
 
@@ -79,8 +56,8 @@ dashboard, QA and documentation. [PENDING: each member confirms their line,
 ## Likely questions
 
 **Q1. How many people took part, and is that enough?**
-We ran [PENDING: n per track] sessions, and the report gives the real number even where it falls
-below the plan's 12. With n pairs, the smallest two-sided Wilcoxon p that can occur is 2^(1−n): with
+On 2026-10-17 the study had not run; on the day, give the real number per track: [PENDING: n per
+track, or "not run yet"]. The report gives the real number even where it falls below the plan's 12. With n pairs, the smallest two-sided Wilcoxon p that can occur is 2^(1−n): with
 4 organisers it is 0.125, so that track can never reach significance. We report that instead of
 hiding it (`docs/user-study/README.md` §7). The completion rate and SUS are reported with their n and
 confidence interval, and the pilot adds behaviour from people who were not in the lab.
@@ -97,9 +74,12 @@ Answer from the AI usage declaration in the Final report: where AI assistance wa
 directed, and what each member learned. The checks did not depend on trusting the generated code:
 - property tests and a 95 % coverage threshold on the engine;
 - CI on every push;
-- the Table 3 experiments against the deployed system, with `verify` after every step;
-- every number in the report generated from `results/`, never typed in.
+- the Prelim. Table 3 experiments (Final Table 5) against the deployed system, with `verify` after
+  every step;
+- every measured number in the report generated from `results/`, never typed in.
 
-The team set the scope, the rules and the acceptance targets, reviewed the changes and approved
-each deployment; the assistant ran the deployment and experiment scripts with the team's
-credentials. The interviews, the user study and the pilot are run by the team.
+The scope, the rules and the acceptance targets are the team's, from the Preliminary report; the
+assistant ran the deployment and experiment scripts with the team's credentials. How each member
+reviewed the generated work is in their own statement in the declaration ([PENDING: each member's
+confirmed statement]); do not claim more than it says. The interviews, the user study and the pilot
+are run by the team ([PENDING: their status on the day]).
