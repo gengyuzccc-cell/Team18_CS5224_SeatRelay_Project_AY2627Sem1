@@ -411,12 +411,14 @@
 \newcommand{\AccessChecksTotal}{177}
 % results/2026-10-17-access-control-2/checks.csv: runs whose check rows are all ok -- access-control: runs with every check passed
 \newcommand{\AccessRunsPassed}{3}
-% results/2026-10-17-access-control-2/meta.json: probes -- negative probes
+% results/2026-10-17-access-control-2/meta.json: probes -- probes (unauthorised requests and the authorised 200 controls)
 \newcommand{\AccessProbes}{165}
 % results/2026-10-17-access-control-2/meta.json: passed -- probes answered as expected
 \newcommand{\AccessProbesPassed}{165}
 % results/2026-10-17-access-control-2/raw.csv: group (distinct) -- probe groups
 \newcommand{\AccessProbeGroups}{7}
+% results/2026-10-17-access-control-2/raw.csv: expected starts with 200 -- probes expecting HTTP 200
+\newcommand{\AccessExpectedTwoHundred}{9}
 % results/2026-10-17-access-control-2/raw.csv: expected starts with 401 -- probes expecting HTTP 401
 \newcommand{\AccessExpectedFourHundredOne}{48}
 % results/2026-10-17-access-control-2/raw.csv: expected starts with 403 -- probes expecting HTTP 403
@@ -559,7 +561,7 @@
 % report/series.json regression -> meta.json of each run: commit.hash -- commit under test in the regression runs
 \newcommand{\RegressionCommit}{d34e0ac}
 % report/series.json regression -> meta.json of each run: experiment names -- experiments re-run as regression checks
-\newcommand{\RegressionExperiments}{smoke, correctness, access-control}
+\newcommand{\RegressionExperiments}{smoke, correctness and access-control}
 % report/series.json regression -> meta.json of each run: ok -- all regression runs passed
 \newcommand{\RegressionVerdict}{PASS}
 % report/series.json regression -> meta.json of each run: directory suffix -- suffix of the regression directories
@@ -975,7 +977,7 @@
 % results/cost/model-summary.md: section 9, 'electricity tariff (S cents/kWh, incl. GST)' -- on-prem input: electricity tariff (S cents/kWh, incl. GST)
 \newcommand{\CostOnpremTariffCents}{31.16}
 % results/cost/model-summary.md: section 9, 'business fibre line (S$/month)' -- on-prem input: business fibre line (S$/month)
-\newcommand{\CostOnpremLineSgd}{140}
+\newcommand{\CostOnpremLineSgd}{139.52}
 % results/cost/model-summary.md: section 9, 'off-site backup (US$/GB-month)' -- on-prem input: off-site backup (US$/GB-month)
 \newcommand{\CostOnpremBackupUsdPerGb}{0.00695}
 % results/cost/model-summary.md: section 9, 'operations labour (hours/month)' -- on-prem input: operations labour (hours/month)

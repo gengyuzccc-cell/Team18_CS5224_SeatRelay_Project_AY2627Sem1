@@ -28,15 +28,16 @@ any authenticated route~\cite{aws-apigw-jwt}. Five Lambda functions (arm64, Node
 work (Fig.~\ref{fig:arch}); two Simple Queue Service (SQS) queues, a first-in-first-out (FIFO)
 command queue and a standard delay queue, carry commands and timers; state lives in one DynamoDB
 table (on-demand, point-in-time recovery (PITR), Streams, time-to-live (TTL)). Pay-per-request
-managed services suit bursty, mostly idle registration traffic: idle cost is close to zero
-(\S\ref{sec:business}), and they span AZs without servers to patch. All business rules are in a pure
-engine, \code{decide(snapshot, command, now)} in \code{packages/core}, which returns the writes,
-notifications, timers and backfill records of one decision without I/O; thin adapters map them to
-DynamoDB items or PostgreSQL rows, so the same engine runs in the cloud, the on-prem reference and
-the replay simulator (\S\ref{sec:mechanism}).
+services suit bursty, mostly idle registration traffic: they span AZs with no servers to patch, and
+idle cost is close to zero after the free allowances (\S\ref{sec:business}). All business rules are
+in a pure engine, \code{decide(snapshot, command, now)} in \code{packages/core}, which returns the
+writes, notifications, timers and backfill records of one decision without I/O; adapters map them
+to DynamoDB or PostgreSQL, so one engine runs in the cloud, on-prem and in the replay simulator
+(\S\ref{sec:mechanism}).
 
 \subsection{Write path, data model and the single-writer lock}\label{sec:writepath}
-Reads, set-up, title edits and attendance are synchronous writes outside the fields the engine owns.
+Reads are served directly; set-up, title edits and attendance are synchronous writes outside the
+fields the engine owns.
 Every change to seats, queues or offers is a \emph{command} with a client-generated
 \code{commandId}. The API writes \code{CMD\#\{commandId\}} = ACCEPTED (conditional on absence; a
 repeat returns the existing record), enqueues the command on the FIFO queue with message group =
@@ -169,9 +170,8 @@ input is schema-validated, and organiser rights are checked in the API and again
 Each function has its own role: the sweep only reads the table and the forwarder cannot access it,
 while \code{api} and \code{worker} use SAM's table-level read-write template, which could be
 narrowed. The API is throttled per stage and admits cross-origin requests only from the stage's
-CloudFront origin and the local development origin; the experiment scripts' password sign-in client
+CloudFront and the local development origins; the experiment scripts' password sign-in client
 is also an accepted audience, and both stages share one user pool. The application stores e-mail
 address, display name and Cognito user id; access and function logs are kept for 14 days, raw
-request events never. SES in its sandbox delivers only to verified
-addresses~\cite{aws-ses-production-access}; until production access is granted, pilot participants
-rely on in-app notifications.
+request events never. In the SES sandbox only verified addresses get
+mail~\cite{aws-ses-production-access}, so pilot participants rely on in-app notifications.

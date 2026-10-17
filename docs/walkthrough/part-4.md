@@ -99,11 +99,11 @@ the dev stage, with scripted accounts." Then narrate what is on screen, not the 
 
 | Beat | Recording (B1) | Screenshots | Say |
 |---|---|---|---|
-| D1 | 0:37–1:03 | B2 | "Alice ranks Session 2 first. The request comes back at once with a 202, the page polls, and her first choice is held for her with a countdown. She accepts." |
-| D2 | 1:03–1:33 | B3 | "Bob wants Session 2 only; it is full, so he queues. Alice cancels, and the seat is held for Bob in the same transaction: the backfill log shows 0 ms. Carol queues behind Bob's offer." |
+| D1 | 0:39–1:06 | B2 | "Alice ranks Session 2 first. The request comes back at once with a 202, the page polls, and her first choice is held for her with a countdown. She accepts." |
+| D2 | 1:06–1:34 | B3 | "Bob wants Session 2 only; it is full, so he queues. Alice cancels, and the seat is held for Bob in the same transaction: the backfill log shows 0 ms. Carol queues behind Bob's offer." |
 | D5a/D5b | none | B6 | "The recording has no fault injection. What the experiments recorded for a crash after commit is on this backup slide: six of six probes, one record, one effect." |
-| D3 | 1:33–2:13 | B4 | "Bob does not answer. When his 60-second hold runs out, the timer relays the seat to Carol. Nobody pressed anything." |
-| D4 | 2:16–2:23 | B5 | "The backfill log has both relays with their latency, and Verify invariants confirms: no session over capacity, nobody holding two seats." |
+| D3 | 1:34–2:15 | B4 | "Bob does not answer. When his 60-second hold runs out, the timer relays the seat to Carol. Nobody pressed anything." |
+| D4 | 2:19–2:26 | B5 | "The backfill log has both relays with their latency, and Verify invariants confirms: no session over capacity, nobody holding two seats." |
 
 The screens show 18 Oct (Singapore time); the walkthrough ran on 17 Oct UTC. Values on screen are
 demo values, not measurements.

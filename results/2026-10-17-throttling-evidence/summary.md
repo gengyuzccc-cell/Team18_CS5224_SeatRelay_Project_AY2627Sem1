@@ -33,6 +33,7 @@
 
 Service Quotas request `48a20acceaef4f3881808f88d7b6ba06C086x7So` (support case 179224956500721) raised
 `Concurrent executions` to 1,000 (confirmed by `aws lambda get-account-settings` at 2026-10-17 18:11 UTC). The
-whole Table 3 suite and the k6 matrix were then re-run on dev from clean commit `e05c037` (results dated
-2026-10-17 with the `-2`/later suffixes and the superseding k6 attempts). The throttled first run is kept as
+whole Table 3 suite was then re-run on dev from a clean checkout of commit `e05c037` (the directories pinned in
+`report/series.json`), and the k6 matrix from clean commit `d121145` (run `20261017T192002Z`; `d121145` changes
+only the harness's provenance check, not `services/` or `packages/`). The throttled first run is kept as
 documented evidence of the failure mode; the re-run is the measurement of record.

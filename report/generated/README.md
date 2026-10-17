@@ -22,10 +22,13 @@ A macro without data expands to `\pending{<what is missing>}`; the submission bu
 
 ## Where the numbers come from
 
-* **Table 3 experiments**: for each experiment the latest *complete* directory
-  `results/<YYYY-MM-DD>-<name>[-<n>]/` (it has `meta.json`; a directory without one is still running
-  or was aborted) whose `meta.json` target is `dev` (`--target` changes it). Its run id, start time
-  and commit are listed in the section header of `numbers.tex`.
+* **Table 3 experiments**: for each experiment the run directory pinned in `report/series.json`
+  (`series`, for its `target`, default `dev`); without a pin, or if the pinned directory is missing or
+  incomplete (no `meta.json`; a directory without one is still running or was aborted), the latest
+  *complete* `results/<YYYY-MM-DD>-<name>[-<n>]/` whose `meta.json` target is `dev` (`--target`
+  changes it). The runs listed under `regression` in `report/series.json` are reported separately as
+  post-redeploy regression checks (`Regression*` macros), not quoted as the series. The quoted run's
+  id, start time and commit are listed in the section header of `numbers.tex`.
 * **Pooled latencies** (backfill, preference-order server settle) are recomputed from `raw.csv` /
   `latency.csv` with the nearest-rank percentile of `tools/experiments/src/lib/results.ts`, so they
   equal `summary.md`. Latency summaries already in `meta.json` (`settleMs`, `serverSettleMs`) are
@@ -68,7 +71,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1328 macros, 1243 with data, 85 pending.
+1329 macros, 1244 with data, 85 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -293,7 +296,7 @@ Source: `runId da47da60-1692-40f3-83eb-40dfcc2cd673, target dev, started 2026-10
 
 ### Access control (dev)
 
-Source: `runId 6dacbc7a-bf40-49f4-b172-bd19168138f3, target dev, started 2026-10-17T19:10:49.064Z, commit e05c037d485d (dirty)` — 15/15 with data.
+Source: `runId 6dacbc7a-bf40-49f4-b172-bd19168138f3, target dev, started 2026-10-17T19:10:49.064Z, commit e05c037d485d (dirty)` — 16/16 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -309,6 +312,7 @@ Source: `runId 6dacbc7a-bf40-49f4-b172-bd19168138f3, target dev, started 2026-10
 | `\AccessProbes` | 165 | results/2026-10-17-access-control-2/meta.json: probes |
 | `\AccessProbesPassed` | 165 | results/2026-10-17-access-control-2/meta.json: passed |
 | `\AccessProbeGroups` | 7 | results/2026-10-17-access-control-2/raw.csv: group (distinct) |
+| `\AccessExpectedTwoHundred` | 9 | results/2026-10-17-access-control-2/raw.csv: expected starts with 200 |
 | `\AccessExpectedFourHundredOne` | 48 | results/2026-10-17-access-control-2/raw.csv: expected starts with 401 |
 | `\AccessExpectedFourHundredThree` | 72 | results/2026-10-17-access-control-2/raw.csv: expected starts with 403 |
 | `\AccessExpectedFourHundredFour` | 21 | results/2026-10-17-access-control-2/raw.csv: expected starts with 404 |
@@ -393,7 +397,7 @@ Source: `results/2026-10-17-smoke-3`; `results/2026-10-17-correctness-3`; `resul
 | `\RegressionChecksPassed` | 862 | report/series.json regression -> meta.json of each run: checks.passed (sum) |
 | `\RegressionChecksTotal` | 862 | report/series.json regression -> meta.json of each run: checks.total (sum) |
 | `\RegressionCommit` | d34e0ac | report/series.json regression -> meta.json of each run: commit.hash |
-| `\RegressionExperiments` | smoke, correctness, access-control | report/series.json regression -> meta.json of each run: experiment names |
+| `\RegressionExperiments` | smoke, correctness and access-control | report/series.json regression -> meta.json of each run: experiment names |
 | `\RegressionVerdict` | PASS | report/series.json regression -> meta.json of each run: ok |
 | `\RegressionDirSuffix` | 3 | report/series.json regression -> meta.json of each run: directory suffix |
 
@@ -614,7 +618,7 @@ Source: `results/cost/model-summary.md` — 252/255 with data.
 | `\CostOnpremCapacityRegs` | 1,000,000 | results/cost/model-summary.md: section 9, 'server capacity (registrations/month)' |
 | `\CostOnpremLoadWatts` | 20.1 | results/cost/model-summary.md: section 9, 'power at load (W)' |
 | `\CostOnpremTariffCents` | 31.16 | results/cost/model-summary.md: section 9, 'electricity tariff (S cents/kWh, incl. GST)' |
-| `\CostOnpremLineSgd` | 140 | results/cost/model-summary.md: section 9, 'business fibre line (S$/month)' |
+| `\CostOnpremLineSgd` | 139.52 | results/cost/model-summary.md: section 9, 'business fibre line (S$/month)' |
 | `\CostOnpremBackupUsdPerGb` | 0.00695 | results/cost/model-summary.md: section 9, 'off-site backup (US$/GB-month)' |
 | `\CostOnpremLabourHours` | 4 | results/cost/model-summary.md: section 9, 'operations labour (hours/month)' |
 | `\CostOnpremLabourRateSgd` | 60 | results/cost/model-summary.md: section 9, 'labour rate (S$/hour)' |

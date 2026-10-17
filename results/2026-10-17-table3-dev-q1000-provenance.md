@@ -10,7 +10,8 @@ and why their `meta.json` says `commit.dirty = true`.
 
 ## Deployed code
 
-- Stack `seatrelay-app-dev`: last `UPDATE_COMPLETE` 2026-10-17T18:14:08Z, deployed from commit
+- Stack `seatrelay-app-dev`: last update started 2026-10-17T18:14:08Z (`LastUpdatedTime`) and completed
+  18:14:18Z (`UPDATE_COMPLETE`), deployed from commit
   `e05c037`. No stack in the account was updated after that until the end of the series
   (`seatrelay-app-pilot` last changed 13:24:27Z, `seatrelay-auth` 07:08:43Z, web stacks earlier).
 - The five functions' code (`LastModified` 13:17:54Z / 13:18:14Z: the 18:14 deploy changed the

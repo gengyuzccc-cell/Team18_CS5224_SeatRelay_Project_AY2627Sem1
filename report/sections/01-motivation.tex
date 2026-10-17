@@ -13,11 +13,11 @@ holds block seats that other people want, and the reconciliation is manual work 
 \paragraph{SeatRelay.}
 A participant registers \emph{once} per workshop with an ordered list of acceptable sessions and
 joins \emph{one} queue; an account holds at most one seat per workshop (Fig.~\ref{fig:flow}). A free
-seat is offered to the first queued person who accepts that session and held for \code{holdSeconds}
-(default 900\,s); a seat released by an expiry, a decline, a cancellation or a capacity increase goes
-to the next person in the same decision. Organisers manage 2--5 sessions and see per-session seats,
-the queue, a backfill log with latencies, distinct participants served, attendance and a CSV export;
-participants see their status and queue position and get in-app and e-mail notifications.
+seat is offered to the first queued person accepting that session and held for \code{holdSeconds}
+(default 900\,s); a seat freed by an expiry, decline, cancellation or capacity increase goes to the
+next person in the same decision. Organisers manage 2--5 sessions and see seats per session, the
+queue, a backfill log with latencies, distinct participants, attendance and a CSV export;
+participants see status and queue position and get in-app and e-mail notices.
 
 \paragraph{Hypotheses.}
 As in the Preliminary report, these are stated as hypotheses, not findings. (H1)~unified

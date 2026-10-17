@@ -9,23 +9,23 @@ Commands went through the \code{dev} stage's public API as the browser sends the
 \code{\_fault} flags that only \code{dev} honours, stale TICKs were sent directly to the FIFO queue,
 and the notifier outage was simulated by setting its reserved concurrency to 0; \code{dev} records
 notifications as SKIPPED without sending e-mail. Each script asserts its checks, calls \code{verify}
-after its scenario steps and writes \code{results/<date>-<experiment>/}; each experiment ran 3 times,
-and the latest complete run is quoted. Expiry experiments use $\text{holdSeconds} = 60$. The smoke
-test passed first (\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The
-\SeriesExperiments{} quoted runs all ran from a clean checkout of commit \code{\SeriesCommits};
-\SeriesDirtyRuns{} are flagged dirty only because the runner appended to its own status log under
-\code{results/}. After the series we downloaded the five deployed Lambda bundles: they are
-byte-identical to a build of that commit, and no stack changed during the series
-(\code{results/2026-10-17-table3-dev-q1000-provenance.md}); \code{report/series.json} pins these
-runs. After the last redeploy (commit \code{\RegressionCommit}: web interface, participant read views and notification
-wording; engine decision code unchanged) we re-ran \RegressionExperiments: \RegressionChecksPassed/\RegressionChecksTotal{}
+after its scenario steps and writes \code{results/<date>-<experiment>/}; each invocation repeats its
+scenarios 3 times, and the invocation pinned in \code{report/series.json} is quoted. Expiry
+experiments use $\text{holdSeconds} = 60$. The smoke test passed first
+(\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The \SeriesExperiments{}
+quoted invocations ran from a clean checkout of commit \code{\SeriesCommits}; all \SeriesDirtyRuns{}
+are flagged dirty only because the runner appended to its own status log under \code{results/}.
+After the series we downloaded the five deployed Lambda bundles: they are byte-identical to a build
+of that commit, and no stack changed during the series
+(\code{results/2026-10-17-table3-dev-q1000-provenance.md}). After the last redeploy (commit
+\code{\RegressionCommit}: web interface, participant read views and notification wording; engine
+decision code unchanged) we re-ran \RegressionExperiments: \RegressionChecksPassed/\RegressionChecksTotal{}
 checks passed. Run ids and commits of every number are listed in \code{report/generated/numbers.tex}.
 
 \subsection{System results against the acceptance targets}\label{sec:results}
 Table~\ref{tab:results} reproduces the Preliminary report's Table~3, the acceptance contract,
-verbatim and adds the measured values; its last three rows cover the evaluations promised in its
-\S4--5. A verdict is the result of the script's checks, which derive from these targets
-(\code{docs/EXPERIMENTS.md}).
+verbatim with the measured values; its last three rows cover its \S4--5. Verdicts come from the
+scripts' checks, derived from these targets (\code{docs/EXPERIMENTS.md}).
 
 \begin{table}[t]
 \centering\footnotesize
@@ -57,7 +57,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & Crash before commit \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} and at the timer step \FailureTimerSendPassed/\FailureTimerSendCases{} settled on the redelivery (median \FailureBeforeCommitSettleMedianS{} and \FailureTimerSendSettleMedianS\,s); after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s), redelivery acknowledged; dead letters \FailureDeadLetters; notifier backlog of \FailureNotifierOutageNotifications{} processed $\leq$\,\FailureNotifierOutageMaxS\,s after restore, all SKIPPED (no e-mail on dev)
  & \FailureVerdict{} (e-mail not sent)\\
 \textbf{Access control}: Confirming another account's offer; cross-organisation dashboard access & All unauthorised operations rejected
- & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups refused as expected (401/403/404, OFFER\_NOT\_YOURS), nothing changed}
+ & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups answered as expected: every unauthorised request refused (401/403/404/400/409, OFFER\_NOT\_YOURS), the \AccessExpectedTwoHundred{} authorised controls (health, issuer and organiser reading a command) answered 200; nothing changed}
  & \IfPending{\AccessVerdict}{--}{\AccessVerdict}\\
 \textbf{Performance}: 10\,/\,25\,/\,50 concurrent users; cross-workshop and single-workshop hot spot separately & Read/accept p95 $<$\,1\,s; settled p95 $<$\,5\,s
  & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels, up to \PerfDevMaxVUsMet{} VUs. At 50 VUs across 10 workshops: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUFiftyErrorPct\,\%; on one hot workshop: read \PerfDevHotspotVUFiftyReadPNinetyFiveMs, 202 \PerfDevHotspotVUFiftyAcceptPNinetyFiveMs, settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%; Fig.~\ref{fig:perf}}
@@ -84,26 +84,27 @@ Aspect: scenario and method & Target & Measured & Verdict\\
 
 \paragraph{The first series failed, and why.}
 The first series on \code{dev} ran under the new account's Lambda quota of
-\ThrottleConcurrencyAccountConcurrencyMax{} concurrent executions, shared by every function of both
+\ThrottleConcurrencyAccountConcurrencyMax{} concurrent executions, shared by all functions of both
 stages. Its concurrency run passed \ThrottleFirstConcurrencyChecksPassed/\ThrottleFirstConcurrencyChecksTotal{}
-checks, with HTTP 503 responses that carried no application error code; the backfill run aborted at
-its first request with the same 503; and the k6 matrix lost requests from 25 VUs on. CloudWatch shows
-the cause (\code{results/2026-10-17-throttling-evidence/}): in all \ThrottleWindows{} windows the API
-function's throttles, the API's 5xx count and the 503s in its access log are equal
+checks, with HTTP 503 responses that carried no application error code; the backfill run failed
+when one of its ten parallel workshop creations got the same 503 (the other nine lost REGISTERs
+to it, yet relayed every expiry and passed \code{verify}); and the k6 matrix lost requests
+from 25 VUs on. CloudWatch shows the cause (\code{results/2026-10-17-throttling-evidence/}): in all
+\ThrottleWindows{} windows the API function's throttles, the API's 5xx count and the 503s in its access log are equal
 (\ThrottleConcurrencyApiThrottles, \ThrottleBackfillApiThrottles{} and \ThrottleKsixApiThrottles{} of
 \ThrottleKsixRequests{} requests), and account-wide concurrency peaked at exactly
 \ThrottleKsixAccountConcurrencyMax. API Gateway answers 503 when it cannot invoke a throttled Lambda
 integration. Even then \code{verify} found no invariant violation after any phase of that
-concurrency run: throttling lost requests, not correctness. AWS then raised the quota to 1{,}000, and we re-ran the whole series,
-smoke test first, on the same deployed code (the only stack change in between renamed the sweep
-schedule). Table~\ref{tab:results} quotes these re-runs: \SeriesPassed{} of
-\SeriesExperiments{} experiments passed every check, and the failed runs remain in \code{results/}. An
-earlier \emph{expiry-race} run failed one check: a probe meant to arrive 200\,ms before
-\code{expiresAt} arrived after it (client send-timing jitter) and was rejected as expired, as the
-server clock requires; the harness now calibrates the send time, and the quoted run
-(\code{\ExpiryRaceRunId}) is a re-run. In all \ExpiryRaceOrderTimerFirst{} late trials the timer had
-expired the offer before the ACCEPT arrived, so the opposite order was not observed on \code{dev};
-the engine's unit tests cover it. No stale tick changed a newer offer.
+concurrency run: throttling lost requests, not correctness. AWS then raised the quota to 1{,}000,
+and we re-ran the whole series, smoke test first, on the same deployed code (only the sweep schedule
+was renamed in between). Table~\ref{tab:results} quotes these re-runs: \SeriesPassed{} of
+\SeriesExperiments{} experiments passed every check, and the failed runs remain in \code{results/}. The
+first series' \emph{expiry-race} run also failed one check, unrelated to the quota: a probe meant to
+arrive 200\,ms before \code{expiresAt} arrived after it (client send-timing jitter) and was rejected
+as expired, as the server clock requires; the harness was changed to calibrate the send time
+before the quoted re-run (\code{\ExpiryRaceRunId}). In all \ExpiryRaceOrderTimerFirst{} late
+trials the timer had expired the offer before the ACCEPT arrived, so the opposite order did not occur
+on \code{dev} (the engine's unit tests cover it). No stale tick changed a newer offer.
 
 \paragraph{Latency.}
 In the correctness run the server settled commands with p95 \CorrectnessSettleServerPNinetyFiveMs\,ms
@@ -113,19 +114,21 @@ trips and up to one further interval. In the concurrency run, where one workshop
 serialised by design, the server p95 was \ConcurrencySettleServerPNinetyFiveMs\,ms and the client's
 \ConcurrencySettleClientPNinetyFiveMs\,ms, within the 5\,s target. After a worker crash, the 120\,s visibility timeout bounds
 the recovery of a stalled workshop (Table~\ref{tab:results}).
-\ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf}),
-every level met every target, with no HTTP errors. Reads and 202 responses took about one network
-round trip from our test client (p95 at most \PerfDevCrossVUTenAcceptPNinetyFiveMs\,ms; its round
-trip to the region was \ExpiryRaceRttMs\,ms). Across 10 workshops the server settled commands with
-p95 \PerfDevCrossVUTenServerSettlePNinetyFiveMs--\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs\,ms,
-so the client's \PerfDevCrossVUFiftySettlePNinetyFiveMs\,ms is mostly round trips and the 200\,ms
-poll schedule. On one hot workshop, whose commands share one FIFO message group by design, the
-server p95 rose from \PerfDevHotspotVUTenServerSettlePNinetyFiveMs{} to
+\ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf};
+30\,s warm-up, then 60\,s measured per run), whose client polls every 200\,ms instead of the
+browser back-off of \S\ref{sec:timers}, every level met every target, with no HTTP errors. Reads
+and 202 responses took about one round trip from our test client (p95 at most
+\PerfDevCrossVUTenAcceptPNinetyFiveMs\,ms, read p50 \PerfDevCrossVUFiftyReadPFiftyMs\,ms at 50 VUs;
+round trip to the region \ExpiryRaceRttMs\,ms). Across 10 workshops the server settled
+commands with p95 \PerfDevCrossVUTenServerSettlePNinetyFiveMs--\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs\,ms,
+so the client's p50 / p95 of \PerfDevCrossVUFiftySettlePFiftyMs{} / \PerfDevCrossVUFiftySettlePNinetyFiveMs\,ms
+at 50 VUs is mostly round trips and that 200\,ms poll interval. On one hot workshop (one FIFO
+message group) the server p95 rose from \PerfDevHotspotVUTenServerSettlePNinetyFiveMs{} to
 \PerfDevHotspotVUTwentyFiveServerSettlePNinetyFiveMs{} and
-\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 10, 25 and 50 VUs, with up to
-\PerfDevHotspotVUFiftyQueueDepthMax{} messages waiting: the cost of one writer per workshop, still
-within the 5\,s target at 50 users on one workshop. The matrix's first, throttled attempt is kept as
-superseded rounds in \code{results/loadtest/}.
+\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 10, 25 and 50 VUs (client p50
+\PerfDevHotspotVUFiftySettlePFiftyMs\,ms at 50), with up to \PerfDevHotspotVUFiftyQueueDepthMax{}
+messages waiting: the cost of one writer per workshop, still within the 5\,s target. The first,
+throttled attempt stays in \code{results/loadtest/} as superseded rounds.
 \else Fig.~\ref{fig:perf} shows the settle-latency distributions of the functional runs; the k6 load
 test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) is not complete yet.\fi{}
 
@@ -154,7 +157,8 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
 \begin{figure}[t]
   \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
   \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{expiresAt}) on dev with
-  $\text{holdSeconds} = 60$, histogram and empirical cumulative distribution against the 120\,s target. Source:
+  $\text{holdSeconds} = 60$: (a)~histogram with the p95, (b)~empirical cumulative distribution (dotted:
+  95\,\%); the 120\,s target lies far off the scale (maximum \BackfillExpiredMaxS\,s). Source:
   \code{results/\BackfillDir/raw.csv} (run \code{\BackfillRunId}).}
   \label{fig:backfill}
 \end{figure}}{}
@@ -175,18 +179,18 @@ queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop aga
 [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; fewer under PER\_SESSION in
 \ReplayDistinctFewerSeedsPct\,\% of seeds, equal in \ReplayDistinctEqualSeedsPct\,\%), and a released
 seat reached a new participant after \ReplayRefillMeanUnifiedMean{} instead of
-\ReplayRefillMeanPerSessionMean{} minutes on average (\ReplayRefillMeanN{} seeds with refills in both
-modes). Seats left empty at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
+\ReplayRefillMeanPerSessionMean{} minutes on average (\ReplayRefillMeanN{} seeds with refills in both). Seats left empty
+at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
 [\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). This compares two modes of our own engine
 under an assumed behaviour model: it is neither a field measurement nor a test of the tools in
-Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was not carried out.
+Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was not run.
 
 \begin{figure}[t]
   \centering\resultfig{replay-comparison}{5.2cm}{replay chart}
   \caption{Mechanism comparison over \ReplaySeeds{} simulated workshops (one box per mode: p25--p75,
   median line, whiskers p5--p95, diamond = mean). (a)~Duplicate-hold events per workshop;
   (b)~distinct participants served as a share of capacity; (c)~mean seat refill time per workshop
-  (log scale). Source: \code{results/replay/raw.csv}.}
+  in minutes (log scale). Source: \code{results/replay/raw.csv}.}
   \label{fig:replay}
 \end{figure}
 
@@ -227,8 +231,8 @@ against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control.}
 \end{figure}}{}
 
 \subsection{Real pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-The \code{pilot} stage (fault injection disabled, e-mail enabled; while SES is in the sandbox only
-verified addresses receive mail and others rely on in-app notifications) is deployed to serve a real
+The \code{pilot} stage (fault injection disabled, e-mail enabled; in the SES sandbox only
+verified addresses get mail, others see in-app notifications) is deployed to serve a real
 workshop in two sessions with registration open for at least five days; the organiser's CSV exports
 and the dashboard's backfill log will be the evidence. \pending{pilot workshop, dates and
 observations: natural cancellations, backfills, notifications, attendance, organiser feedback}.
@@ -238,10 +242,11 @@ observations: natural cancellations, backfills, notifications, attendance, organ
 (\RehearsalBackfillExpiredN{} expiries through the timer path in
 \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms; declines, cancellations and a
 capacity increase in their own transaction), sent \RehearsalNotificationsSent{} e-mails to the SES
-mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks, with the
-invariants holding at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires,
-these rehearsed events are logged apart from the pilot's natural events; they are operational
-evidence only.
+mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; the invariants
+held at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, these
+rehearsed events are logged apart from the pilot's natural events and, like the team organiser's
+observations, are internal operational evidence; only independent participants' feedback is user
+evidence.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}
@@ -264,6 +269,6 @@ evidence only.
   organiser's manual steps in the user study (\S\ref{sec:study}).}{\pending{H3: compare the organiser's
   manual steps in the user study}}
 \item \textbf{H1} (unified registration reduces participant effort): \IfPending{\StudyParticipants}{\emph{not
-  tested yet}; it rests on the user study's paired task times, completion, errors and help requests
-  (\S\ref{sec:study}).}{\pending{H1 verdict from the user-study results (\S\ref{sec:study})}}
+  tested yet}; it rests on the user study's paired task times, completion, errors and help
+  requests (\S\ref{sec:study}).}{\pending{H1 verdict from the user-study results (\S\ref{sec:study})}}
 \end{itemize}

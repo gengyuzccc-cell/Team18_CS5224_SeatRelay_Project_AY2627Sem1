@@ -4,26 +4,25 @@ SeatRelay replaces one form per session with one registration, one queue and a t
 workshop, and relays every released seat automatically. Each workshop is serialised through one
 FIFO message group, and every decision commits in one conditional DynamoDB transaction. On the
 deployed system \SeriesPassed{} of the \SeriesExperiments{} system experiments met their targets
-(failure recovery without e-mail, which is off on \code{dev}), no \code{verify} call found an
+(failure recovery without e-mail, off on \code{dev}), no \code{verify} call found an
 invariant violation, and the load test met every target up to \PerfDevMaxVUsMet{} virtual users,
-also with all of them on one workshop. A first series failed under the new account's Lambda
-concurrency quota of 10; CloudWatch tied every HTTP 503 to a throttled invocation, and the series
-passed unchanged once the quota was raised. Per-offer timers with tick-first semantics take the sweep interval
-off the backfill path (\IfPending{\BackfillExpiredPNinetyFiveS}{\TimerPathRelaysN{} timer-path relays on
+also with all of them on one workshop. A first series failed under the account's Lambda quota of
+10, where CloudWatch tied every HTTP 503 to a throttled invocation, and on one late expiry-race
+probe; with the quota raised and the probe's send time calibrated, the same deployed code passed.
+Per-offer timers with tick-first semantics take the
+sweep interval off the backfill path (\IfPending{\BackfillExpiredPNinetyFiveS}{\TimerPathRelaysN{} timer-path relays on
 \code{dev} so far, at most \TimerPathRelayMaxMs\,ms}{expiry-driven backfill p95 \BackfillExpiredPNinetyFiveS\,s on
 \code{dev}, against 120\,s}),
 and the 202 protocol is settled by bounded polling. In our usage model the cloud build costs
 \usd\CostTierOneKCloudListUsd{} a month at list price for 1{,}000 registrations and is cheaper than a
 self-hosted machine that pays for its line and operations up to \CostCrossoverListFullRegs{}
-registrations a month. Of the Preliminary report's
-hypotheses (\S\ref{sec:hypotheses}), H2 is supported in simulation and H3 partly (automatic relay
+registrations a month. Of the hypotheses (\S\ref{sec:hypotheses}), H2 is supported in simulation and H3 partly (automatic relay
 shown); \IfPending{\StudyParticipants}{H1 and the organiser side of H3 await the user
 study}{\pending{H1 and H3 verdicts with the user-study results}}.
 
 Open items: \IfPending{\PerfLocalCpuPeakPct}{the on-prem load test, }{}the student and organiser
-interviews ($p$, price), the user study and the pilot. Future work: (i)~batch several commands of one
-workshop per worker invocation with a shared snapshot to raise throughput; (ii)~server push only if
-the user study shows that the 10\,s status refresh is too slow; (iii)~plan limits and billing for the
-organiser plan; (iv)~a second region with table replication and a replicated identity store, if an
-availability target beyond one region is required; (v)~the Cognito Lite tier, since Cognito
-dominates the cost at high volume.
+interviews ($p$, price), the user study and the pilot. Future work: (i)~batch commands of one
+workshop per worker invocation, with a shared snapshot, for throughput; (ii)~server push only if
+the user study finds the 10\,s status refresh too slow; (iii)~billing and limits for the
+organiser plan; (iv)~a second region with a replicated table and identity store, if one region's
+availability is not enough; (v)~the Cognito Lite tier, as Cognito dominates the cost at scale.

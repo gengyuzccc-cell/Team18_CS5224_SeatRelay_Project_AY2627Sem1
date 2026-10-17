@@ -55,11 +55,13 @@ function of both stages; I learned to check service quotas before measuring. A s
 to deploy because SAM gave both stages' sweep schedules the same name.
 
 *Grounded in:* `aws lambda get-account-settings` on 2026-10-17 (`ConcurrentExecutions: 10`, ten
-functions across `dev` and `pilot`) and the pending quota-increase request (`docs/deployment-state.md`,
-"Lambda concurrency quota"); the `ScheduleV2` name collision between the dev and pilot sweep
-schedules, fixed with `Name: !Sub seatrelay-${Stage}-sweep` (`docs/deployment-state.md`, commit
-`be219aa`). Note: the report does not yet attribute the HTTP 503 responses to the quota; do not
-claim that cause here unless the re-runs establish it.
+functions across `dev` and `pilot`) and the quota increase to 1,000, approved the same day, after
+which the whole Table 3 series was re-run (`docs/deployment-state.md`, "2026-10-17 evening: quota,
+re-run, redeploy, test-account passwords"; `results/2026-10-17-table3-dev-q1000-provenance.md`); the
+`ScheduleV2` name collision between the dev and pilot sweep schedules, fixed with
+`Name: !Sub seatrelay-${Stage}-sweep` (`docs/deployment-state.md`, commit `be219aa`). The cause of
+the HTTP 503 responses (Lambda throttling under the quota of 10) is established in Final §4.2, "The
+first series failed, and why." (`results/2026-10-17-throttling-evidence/summary.md`).
 
 ### 4. ZHU GENGYU (data and the local reference), 43 words
 
@@ -79,7 +81,7 @@ probe arrived late and was rightly rejected, so the harness calibrates send time
 study, I learned to report the real sample, whatever its size.
 
 *Grounded in:* the expiry-race run that failed one check because a probe meant to arrive 200 ms
-before `expiresAt` arrived after it (Final §4.2 "Failed checks"; commit `00faa52` "warm connection
+before `expiresAt` arrived after it (Final §4.2, paragraph "The first series failed, and why."; commit `00faa52` "warm connection
 and learn arrival error for timed expiry-race probes"); the Prelim §5 promise "we do not fabricate
 participants" and the study package in `docs/user-study/`. Do not mention study results until the
 study has run.

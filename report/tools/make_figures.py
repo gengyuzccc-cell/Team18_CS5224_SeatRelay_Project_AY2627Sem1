@@ -217,7 +217,7 @@ def chart_replay(run: Run, runs, results: Path) -> None:
     ax.set_yscale("log")
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _p: f"{v:g}"))
     ax.yaxis.set_minor_formatter(NullFormatter())
-    ax.set_ylabel("mean seat refill time per workshop (min)")
+    ax.set_ylabel("mean seat refill time (min)")
     style(ax)
     panel_letter(ax, "c")
     zero = sum(int((by[m]["seat_refill_min_mean"] == 0).sum()) for m in modes)
@@ -547,8 +547,8 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
     slide = levels[levels["target"].astype(str) == target]
     with plt.rc_context(SLIDE_RC):
         fig, ax = plt.subplots(figsize=SLIDE_SIZE, constrained_layout=True)
-        lines = (("settleP95", "cross-workshop", "settle, 10 workshops", GREEN, "solid", "^"),
-                 ("settleP95", "hotspot", "settle, one hot workshop", PURPLE, (0, (4, 1.5)), "D"),
+        lines = (("settleP95", "cross-workshop", "settle (client), 10 workshops", GREEN, "solid", "^"),
+                 ("settleP95", "hotspot", "settle (client), one hot workshop", PURPLE, (0, (4, 1.5)), "D"),
                  ("readP95", "cross-workshop", "reads", BLUE, "solid", "o"))
         for column, scenario, label, color, dash, marker in lines:
             part = slide[slide["scenario"].astype(str) == scenario].sort_values("vus")

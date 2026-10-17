@@ -5,12 +5,12 @@
   from search excerpts of the official pages because direct download was blocked
   (\pending{dated browser screenshots of these three pages}); $p$, $s$ and the value per event come
   only from the organiser interviews.
-\item \emph{Cost:} usage per registration is modelled (\S\ref{sec:business}) until measured usage is
-  priced; X-Ray is priced at 100\,\% sampling (an upper bound); operations labour and the on-prem
-  machine's capacity are assumptions\IfPending{\PerfLocalCpuPeakPct}{ (the on-prem stack has not been load-tested)}{};
-  availability is not equalised between the two builds.
-\item \emph{Experiments:} the \code{dev} stage, a 60\,s hold for expiry experiments and synthetic
-  accounts; the mechanism comparison uses an assumed behaviour model and ideal timers.
+\item \emph{Cost:} usage per registration is modelled (\S\ref{sec:business}), as CloudWatch does
+  not count registrations; X-Ray is priced at 100\,\% sampling (an upper bound); operations labour
+  and the on-prem machine's capacity are assumed\IfPending{\PerfLocalCpuPeakPct}{ (the on-prem stack has not been load-tested)}{};
+  availability is not equalised.
+\item \emph{Experiments:} \code{dev} stage, synthetic accounts, 60\,s expiry holds; the replay
+  assumes a behaviour model and ideal timers.
 \item \emph{Operations:} one AWS region; SES sandbox until production access is granted (in-app
   notifications for unverified addresses).
 \end{itemize}
@@ -22,12 +22,12 @@ then, as it promised to declare, an AI coding assistant (Claude Code) generated,
 Preliminary report and decisions: the execution plan; the implementation code (engine, API and Lambda
 handlers, on-prem server, React SPA); the infrastructure-as-code templates; the tests; the
 experiment, load-test, replay, analysis and cost-model scripts; the market captures and counts, the
-competitor scan and other desk research; the documentation; and the first drafts of this report and
-the slides. \emph{How.} The scope, rules R1--R7, constraints C1--C7 and acceptance targets are the
-team's, from the Preliminary report; the team owns the AWS account and the repository; the assistant
-ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials. The
-interviews, the user study and the pilot are the team's to run (none had run when this PDF was
-built). Every measured, simulated and own-count number is written by a script from a raw file in
+competitor scan and other desk research; the documentation; and the text of this report and the
+slides, including all revisions up to this build. \emph{How.} The scope, rules R1--R7, constraints
+C1--C7 and acceptance targets are the team's, from the Preliminary report; the team owns the AWS
+account and the repository; the assistant ran the deployment, experiment, load-test, replay and cost
+scripts with the team's credentials and built both PDFs. The interviews, the user study and the
+pilot are the team's to run (none had run when this PDF was built). Every measured, simulated and own-count number is written by a script from a raw file in
 \code{results/}; configuration values (hold times, poll intervals, the account's Lambda quota) come
 from the code and \code{docs/deployment-state.md}, external facts are cited, and missing data are
 marked pending. A named member checks every number against \code{results/} before submission

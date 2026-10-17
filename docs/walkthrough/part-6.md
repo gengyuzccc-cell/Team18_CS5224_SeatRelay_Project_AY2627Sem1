@@ -27,9 +27,9 @@ access is granted. The mechanism comparison is a simulation, and the cost is mod
 batch commands per workshop, obtain SES production access, and try a cheaper Cognito tier, our largest
 cost at scale.
 
-**AI use.** An AI coding assistant generated our code, tests, scripts, desk research and first drafts,
-and ran the deployments and experiments with our credentials. The scope, rules and targets are ours,
-from the Preliminary report. The report's declaration gives the details, with each member's own
+**AI use.** An AI coding assistant generated our code, tests, scripts, desk research, and the report
+and slide text, and ran the deployments and experiments with our credentials. The scope, rules and
+targets are ours, from the Preliminary report. The report's declaration gives the details, with each member's own
 statement of what they learned.
 
 **Division of work.** Point at the slide instead of reading it out. The mapping of names to work lines

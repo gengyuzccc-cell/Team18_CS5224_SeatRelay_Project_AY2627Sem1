@@ -1,7 +1,9 @@
 # Deployment state (live identifiers)
 
 Account `379549361891`, region `ap-southeast-1`, deployer IAM user `seatrelay-deployer`.
-Updated whenever a stack is (re)deployed. No secrets are stored here.
+Updated whenever a stack is (re)deployed. No secrets are stored here. The team's sender and alarm
+e-mail addresses are kept out of the repository: they are passed at deploy time (`SenderEmail`,
+`AlarmEmail` / `ALARM_EMAIL`) and appear below as placeholders.
 
 ## seatrelay-auth (deployed 2026-10-16, CREATE_COMPLETE)
 
@@ -12,7 +14,7 @@ Updated whenever a stack is (re)deployed. No secrets are stored here.
 | WebClientId (`web`, code + PKCE) | `6f926dm22ulrv8gfjro2db1ac` |
 | ToolingClientId (`tooling`, USER_PASSWORD_AUTH) | `203uigcnditpcmp54ir0gnsieq` |
 | HostedUiDomain | `https://seatrelay-379549361891.auth.ap-southeast-1.amazoncognito.com` |
-| SenderEmail (SES identity) | `gengyuzccc@gmail.com` — verification pending (click the SES e-mail) |
+| SenderEmail (SES identity) | `<team sender address>` — verified (2026-10-17) |
 | Budgets | `seatrelay-monthly` US$20 (IncludeCredit=false), `seatrelay-annual` US$60 |
 | Cost allocation tag | `Project` activation requested 2026-10-16 (visible in Cost Explorer after ≤ 24 h) |
 
@@ -25,12 +27,12 @@ SES: account is in the **sandbox** (200 mails/24 h, 1 mail/s, verified recipient
 access request: **submitted 2026-10-17 00:5x UTC via `sesv2 put-account-details`** (status PENDING; mail type
 TRANSACTIONAL, website URL = CloudFront URL, use case = `docs/ses-production-request.md` §3). Account-level
 suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounce/Complaint, with headers)
-published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for gengyuzccc@gmail.com is pending
-confirmation (click the SNS confirmation e-mail).
+published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for the team sender mailbox is
+pending confirmation (click the SNS confirmation e-mail).
 
 **2026-10-17 07:0x UTC: SES production access DENIED** (support case `179219791000451`). At review time the
 sender identity was still *unverified*, which is the usual cause. Next steps for the team: (1) click the SES
-verification e-mail sent to gengyuzccc@gmail.com; (2) confirm the SNS subscription e-mail; (3) reply to the case
+verification e-mail sent to the team sender mailbox; (2) confirm the SNS subscription e-mail; (3) reply to the case
 in the AWS Support Center console (Basic support cannot reply via CLI) with the use-case text of
 `docs/ses-production-request.md` §3 and the CloudFront URL. Until approved the plan §9 fallback applies:
 participants rely on in-app notifications (`/me/notifications`), e-mail goes only to verified team addresses,
@@ -49,7 +51,7 @@ Callback/logout URLs registered in Cognito: localhost:5173, the dev CloudFront U
 
 ## seatrelay-app-dev (deployed 2026-10-17, CREATE_COMPLETE)
 
-Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=false WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`.
+Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=false WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address>`.
 
 | Output | Value |
 |---|---|
@@ -92,7 +94,7 @@ Registered in Cognito as callback (`/callback`) and logout (`/`) URL together wi
 
 ## seatrelay-app-pilot (deployed 2026-10-17, CREATE_COMPLETE)
 
-Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`.
+Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=<team alarm address>`.
 
 | Item | Value |
 |---|---|
@@ -100,7 +102,7 @@ Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https
 | TableName | `seatrelay-pilot` (deletion protection ON, PITR ON, on-demand, stream NEW_AND_OLD_IMAGES) |
 | Throttling | 50 rps / burst 100 (dev: 300 / 500) |
 | Fault flags | `ALLOW_FAULT_FLAGS=false` (the API strips `_fault`) |
-| E-mail | `EMAIL_ENABLED=true`, sender `gengyuzccc@gmail.com` (verified). While SES is in the sandbox only verified recipients receive mail; other recipients are recorded as FAILED and see in-app notifications |
+| E-mail | `EMAIL_ENABLED=true`, sender `<team sender address>` (verified). While SES is in the sandbox only verified recipients receive mail; other recipients are recorded as FAILED and see in-app notifications |
 | Sweep schedule | `seatrelay-pilot-sweep` (EventBridge Scheduler, rate 5 min) |
 
 Checks after deployment: `/health` 200 `{"ok":true,"stage":"pilot"}`, `/me` without token 401, pilot SPA `env.js`
@@ -108,18 +110,18 @@ points at the pilot API.
 
 First attempt failed CloudFormation early validation: SAM names a `ScheduleV2` event after its logical id when
 `Name` is omitted, so the dev and pilot sweep schedules collided (`SweepFunctionEvery5Minutes`). Fixed by
-`Name: !Sub seatrelay-${Stage}-sweep`; dev still carries the old name until its next deployment (after the
-Table 3 run, so that the measurement is not disturbed).
+`Name: !Sub seatrelay-${Stage}-sweep`; dev kept the old name until its 18:14 UTC update on 2026-10-17 (after
+the first Table 3 series; see below).
 
-## Lambda concurrency quota (account-level, ap-southeast-1)
+## Lambda concurrency quota (before the increase; superseded, see "2026-10-17 evening")
 
-`aws lambda get-account-settings` on 2026-10-17: `ConcurrentExecutions: 10`,
+`aws lambda get-account-settings` on 2026-10-17 (before the increase) returned `ConcurrentExecutions: 10`,
 `UnreservedConcurrentExecutions: 10`, `FunctionCount: 10` (the five functions of `dev` and the five of
-`pilot` share these 10 slots). An increase to 1,000 (quota `L-B99A9384`, "Concurrent executions") was
-requested through Service Quotas; status `CASE_OPENED`, support case `179224956500721`. Until it is
-granted, never generate concurrent load against AWS; the concurrency, backfill and k6 dev re-runs wait
-for it (`docs/SUBMISSION-CHECKLIST.md`). Whether the quota caused the HTTP 503 responses of the
-concurrency and backfill runs is not yet established (Final §4.2).
+`pilot` shared these 10 slots). An increase to 1,000 (quota `L-B99A9384`, "Concurrent executions") was
+requested through Service Quotas (support case `179224956500721`) and was approved; the account limit is
+now 1000 (see below). While the limit was 10, no concurrent load was generated against AWS. The HTTP 503
+responses of the first concurrency, backfill and k6 runs were Lambda throttles
+(`results/2026-10-17-throttling-evidence/`, Final §4.2); the series was re-run at 1000.
 
 ## 2026-10-17 evening: quota, re-run, redeploy, test-account passwords
 
@@ -134,7 +136,7 @@ concurrency and backfill runs is not yet established (Final §4.2).
   wording, backfill holder names, refresh while confirmed), same parameters as above; dev SPA republished
   (`index-C61U0ZZ4.js` / `index-DW27saFr.css`). **21:19 UTC** `seatrelay-app-pilot` and the pilot SPA
   redeployed from the same commit (`Stage=pilot AllowFaultFlags=false EmailEnabled=true
-  WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`). The ten deployed Lambda
+  WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=<team alarm address>`). The ten deployed Lambda
   bundles were downloaded afterwards and are byte-identical to `node services/aws/scripts/build.mjs` at
   `d34e0ac`. Both `/health` endpoints answer `ok`; both `env.js` files point at their own API. Regression on
   dev after the deploy: smoke, correctness and access-control passed (`results/2026-10-17-*-3/`).
@@ -150,5 +152,5 @@ concurrency and backfill runs is not yet established (Final §4.2).
   at the latest 2026-10-18 02:15 UTC (12 h ID tokens; API Gateway's JWT authorizer cannot revoke them), for
   synthetic accounts in synthetic organisations only. The passwords above were rotated so that no new token
   can be minted from public information.
-- **SES:** sender identity `gengyuzccc@gmail.com` is verified; production access still shows **DENIED** for
+- **SES:** the sender identity (the team sender address) is verified; production access still shows **DENIED** for
   case `179219791000451` (the team replied to the case; waiting for AWS). The sandbox fallback applies.

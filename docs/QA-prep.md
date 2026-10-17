@@ -16,7 +16,7 @@ How to answer:
 | Topic | Value | Source |
 |---|---|---|
 | Dev smoke test, 2026-10-17 (re-run series) | PASS, 13/13 checks; server-side settle p50 57 ms (n = 6); expiry backfill 108 ms (n = 1) | `results/2026-10-17-smoke-2/summary.md` |
-| Prelim. Table 3 rows, Final Table 5 (dev re-run at Lambda quota 1,000, clean checkout of `e05c037`) | 8 of 8 pass. Correctness 672/672 checks, 0 over-capacity, 0 double holds; preference order 60/60 cases, 0 unacceptable offers; concurrency 39/39 checks (50 accounts, 5 seats), 0 of 210 commands failed, 15/15 same-account races consistent, 0 version-conflict retries, settle p95 server / client 1,525 / 3,384 ms; repeat execution 18/18 probes; expiry race 3/3 early ACCEPTs applied, 3/3 late ones rejected, 3/3 stale ticks without effect; failure recovery 9/9 injected faults settled exactly once, notifier backlog cleared ≤ 53.9 s after restore, 0 dead letters; access control 165/165 negative probes; backfill 124/124 checks (next row). Same deployed code as the first series. First series (quota 10): concurrency 22/39 and backfill aborted, both on HTTP 503 (question 21) | `results/2026-10-17-{correctness,preference-order,concurrency,repeat-execution,failure-recovery,access-control,backfill}-2/summary.md`, `results/2026-10-17-expiry-race-5/summary.md`, `results/2026-10-17-table3-dev-q1000-provenance.md`, `results/RUNS.md` |
+| Prelim. Table 3 rows, Final Table 5 (dev re-run at Lambda quota 1,000, clean checkout of `e05c037`) | 8 of 8 pass. Correctness 672/672 checks, 0 over-capacity, 0 double holds; preference order 60/60 cases, 0 unacceptable offers; concurrency 39/39 checks (50 accounts, 5 seats), 0 of 210 commands failed, 15/15 same-account races consistent, 0 version-conflict retries, settle p95 server / client 1,525 / 3,384 ms; repeat execution 18/18 probes; expiry race 3/3 early ACCEPTs applied, 3/3 late ones rejected, 3/3 stale ticks without effect; failure recovery 9/9 injected faults settled exactly once, notifier backlog cleared ≤ 53.9 s after restore, 0 dead letters; access control 165/165 probes as expected (unauthorised requests refused, the 9 authorised controls answered 200); backfill 124/124 checks (next row). Same deployed code as the first series. First series (quota 10): concurrency 22/39 and backfill failed, both on HTTP 503 (question 21) | `results/2026-10-17-{correctness,preference-order,concurrency,repeat-execution,failure-recovery,access-control,backfill}-2/summary.md`, `results/2026-10-17-expiry-race-5/summary.md`, `results/2026-10-17-table3-dev-q1000-provenance.md`, `results/RUNS.md` |
 | Backfill latency on dev (re-run) | expiry-driven p50 / p95 / max 0.05 / 0.10 / 0.33 s over 300 expiries (target p95 ≤ 120 s), 300/300 relayed, 0 outliers; cancellation-driven 0 ms (n = 60); `SweepLateExpiries` 0: the sweep ran 15 times during the series and never had to tick a workshop | `results/2026-10-17-backfill-2/summary.md`, `results/2026-10-17-table3-dev-q1000-provenance.md` |
 | Cause of the first series' 503s | API 503s = API 5xx metric = api-Lambda throttles: 76 (concurrency), 63 (backfill setup), 5,580 (first k6 matrix); account-wide concurrency maximum 10 = the quota; quota raised to 1,000 | `results/2026-10-17-throttling-evidence/summary.md`, `api-503.csv`, `lambda-metrics.csv` |
 | Performance on dev (k6 at quota 1,000, commit `d121145`, 18 runs, median of 3 rounds) | every target met at all 6 levels (reads and 202 p95 < 1 s, settle p95 < 5 s, errors < 1 %); 0.00 % HTTP errors in every run. Across workshops at 10 / 25 / 50 VUs: reads p95 294 / 292 / 289 ms, 202 p95 315 / 310 / 302 ms, settle p95 client 800 / 796 / 786 ms, server 62 / 88 / 193 ms. Hot spot: reads p95 294 / 294 / 297 ms, 202 p95 310 / 307 / 307 ms, settle p95 client 797 / 1,360 / 3,169 ms, server 115 / 940 / 2,601 ms, up to 35 messages in the FIFO queue at 50 VUs. The throttled first attempt is superseded | `results/loadtest/2026-10-17/summary.md` (target `dev`; the first attempt under "Superseded runs") |
@@ -163,8 +163,8 @@ So the latency covers the timer delay, the forwarder, the FIFO queue and the wor
 pooled and reported as n, p50, p95, p99 and max (nearest rank). Outliers are listed, and
 cancellation-driven backfills (same transaction) are reported separately. The re-run on dev relayed
 all 300 expiries with p50 / p95 / max 0.05 / 0.10 / 0.33 s against a p95 target of 120 s, with no
-outliers; the 60 cancellation-driven backfills took 0 ms. The first run aborted at its first request
-with an HTTP 503 from Lambda throttling (question 21).
+outliers; the 60 cancellation-driven backfills took 0 ms. The first run failed when a workshop creation
+got an HTTP 503 from Lambda throttling; its other workshops also lost REGISTERs to it (question 21).
 **Where:** `results/2026-10-17-backfill-2/summary.md` (first run: `results/2026-10-17-backfill/`), `tools/experiments/src/backfill.ts`, `docs/EXPERIMENTS.md` §3.8, `addBackfill` / `fillBackfill` in `packages/core/src/state.ts`.
 
 ### 10. How do you define fairness?
@@ -235,7 +235,8 @@ is not tied to DynamoDB.
 ### 14. E-mail is in the SES sandbox. What happens to notifications?
 
 Our SES production request was denied on 2026-10-17 because the sender identity was not yet verified.
-Re-applying is a team action (`docs/deployment-state.md`); until then SES delivers only to verified
+The team has since verified the sender identity and replied to the support case; we are waiting for
+AWS (`docs/deployment-state.md`). Until production access is granted SES delivers only to verified
 addresses, at most 200 a day and 1 per second. Notifications are written in the same transaction as
 the state change, so every participant sees them in the in-app notification centre whatever happens
 to e-mail. The notifier treats `MessageRejected` as permanent and marks the item FAILED without
@@ -277,7 +278,8 @@ in case a message bypasses the API. Further rules:
 - a command result is visible only to its issuer and the workshop's organisers;
 - accepting someone else's offer is rejected by the engine (`OFFER_NOT_YOURS`).
 
-The access-control experiment runs negative probes for each case: on dev 165 of 165, in 7 groups,
+The access-control experiment runs negative probes for each case, plus authorised controls that must
+answer 200 (health, the issuer and the organiser reading a command): on dev 165 of 165, in 7 groups,
 were answered as expected.
 **Where:** `results/2026-10-17-access-control-2/summary.md`, `packages/service/src/api/context.ts`, `decideAuthorised()` in `processCommand.ts`, `services/aws/templates/app.yaml` (`CognitoJwt`), `tools/experiments/src/access-control.ts`.
 
@@ -310,8 +312,8 @@ than 10 pages, overfull boxes, undefined references or leftover placeholders.
 ### 20. How did you use AI, and how did you make sure the result is correct?
 
 Answer from the AI usage declaration in the Final report, and say no more than it says. An AI coding
-assistant generated the code, templates, tests, scripts, desk research, documentation and first drafts,
-and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
+assistant generated the code, templates, tests, scripts, desk research, documentation, and the report
+and slide text (including revisions), and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
 The scope, rules R1–R7, constraints C1–C7 and acceptance targets are the team's, from the Preliminary
 report. The interviews, the user study and the pilot are run by the team: [PENDING: their status on
 the day; none had run on 2026-10-17]. How each member reviewed the generated work and what they

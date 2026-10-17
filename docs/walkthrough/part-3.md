@@ -41,9 +41,9 @@ Now let's see it live. Over to ZHANG TIANYI.
 | Timer | `DelaySeconds = clamp(expiresAt − now, 0, 900)` | `services/aws/src/adapters/sqs.ts` (`delaySecondsFor`) |
 | Transaction size | ≤ 100 items (DynamoDB limit); the engine budgets 90 | `packages/core/src/state.ts`, `services/aws/src/adapters/dynamo/store.ts` |
 | Sweep | every 5 min, sparse DUE index | `app.yaml` (`ScheduleV2`), `packages/service/src/worker/sweep.ts` |
-| Smoke test on dev, 2026-10-17 | PASS, 13/13 checks | `results/2026-10-17-smoke/summary.md` |
-| Settle latency in that smoke run (n = 6, one run, not a statistic) | server-side p50 45 ms, max 904 ms; client-observed p50 848 ms, max 1,815 ms | `results/2026-10-17-smoke/summary.md` (`\SmokeSettleServerPFiftyMs`, `\SmokeSettleClientPFiftyMs`) |
-| Read and settle latency under load (k6, dev) | reads and 202 responses p95 at most 315 ms at every level; settle p95 under 5 s only at 10 virtual users (Part 5 quotes these) | `results/loadtest/2026-10-17/summary.md` (`\PerfDevCrossVUTenAcceptPNinetyFiveMs`, `\PerfDevMaxVUsMet`) |
+| Smoke test on dev, 2026-10-17 | PASS, 13/13 checks | `results/2026-10-17-smoke-2/summary.md` |
+| Settle latency in that smoke run (n = 6, one run, not a statistic) | server-side p50 57 ms, max 767 ms; client-observed p50 858 ms, max 1,765 ms | `results/2026-10-17-smoke-2/summary.md` (`\SmokeSettleServerPFiftyMs`, `\SmokeSettleServerMaxMs`, `\SmokeSettleClientPFiftyMs`, `\SmokeSettleClientMaxMs`) |
+| Read and settle latency under load (k6, dev) | reads and 202 responses p95 at most 315 ms at every level; every target met in 6 of 6 levels, up to 50 virtual users in both scenarios (Part 5 quotes these) | `results/loadtest/2026-10-17/summary.md` (`\PerfDevCrossVUTenAcceptPNinetyFiveMs`, `\PerfDevLevelsMet`, `\PerfDevMaxVUsMet`) |
 
 ## Likely questions
 

@@ -12,9 +12,12 @@ Rules (academic integrity, plan §0): a number is either read from a file under 
 computed from one (pooled percentiles, counts, shares), never typed in. Data that does not exist
 yet becomes ``\\pending{<what is missing>}``, which prints as a red "[PENDING: ...]" in the PDF.
 
-Selection: for every Table 3 experiment the latest **complete** run directory
-``results/<YYYY-MM-DD>-<name>[-<n>]/`` (it has a meta.json) whose target is ``--target``
-(default dev, the report target). Its run id, start time and commit are recorded in a comment.
+Selection: for every Table 3 experiment the run directory pinned in ``report/series.json``
+(``series``); without a pin, or if the pinned directory is missing or incomplete, the latest
+**complete** run directory ``results/<YYYY-MM-DD>-<name>[-<n>]/`` (it has a meta.json) whose
+target is ``--target`` (default dev, the report target). The runs under ``regression`` in
+series.json are reported separately. The quoted run's id, start time and commit are recorded in a
+comment.
 Load test: the latest ``results/loadtest/<date>/raw.csv``; replay: the latest
 ``results/<date>-replay/`` else ``results/replay/``; cost: ``results/cost/``; user study:
 ``results/user-study/``; interviews: ``results/interviews/``; pilot: ``results/pilot/`` or the
@@ -485,7 +488,9 @@ def section_regression(book: Book, runs) -> None:
     book.num("RegressionChecksPassed", passed if chosen else None, 0, f"{src}: checks.passed (sum)", "regression checks passed")
     book.num("RegressionChecksTotal", total if chosen else None, 0, f"{src}: checks.total (sum)", "regression checks in total")
     book.text("RegressionCommit", ", ".join(commits) if chosen else None, f"{src}: commit.hash", "commit under test in the regression runs")
-    book.text("RegressionExperiments", ", ".join(run.name for run in chosen) if chosen else None, f"{src}: experiment names", "experiments re-run as regression checks")
+    names = [run.name for run in chosen]
+    listed = (", ".join(names[:-1]) + " and " + names[-1]) if len(names) > 1 else ", ".join(names)
+    book.text("RegressionExperiments", listed if chosen else None, f"{src}: experiment names", "experiments re-run as regression checks")
     book.text("RegressionVerdict", ("PASS" if all(run.meta.get("ok") for run in chosen) else "FAIL") if chosen else None, f"{src}: ok", "all regression runs passed")
     book.text("RegressionDirSuffix", "-".join(sorted({str(run.suffix) for run in chosen})) if chosen else None, f"{src}: directory suffix", "suffix of the regression directories")
 
@@ -671,12 +676,12 @@ def section_access(book: Book, runs, target: str) -> None:
     book.section("access", f"Access control ({target})", f"access-control ({target}) not yet run", [run.describe() if run else "none"])
     run_header(book, "Access", run, "access-control")
     meta = run.meta if run else {}
-    book.num("AccessProbes", meta.get("probes"), 0, src_of(run, "meta.json", "probes"), "negative probes")
+    book.num("AccessProbes", meta.get("probes"), 0, src_of(run, "meta.json", "probes"), "probes (unauthorised requests and the authorised 200 controls)")
     book.num("AccessProbesPassed", meta.get("passed"), 0, src_of(run, "meta.json", "passed"), "probes answered as expected")
     raw = db.read_csv(run.path / "raw.csv", book.notes) if run else None
     groups = raw["group"].nunique() if raw is not None and "group" in raw.columns else None
     book.num("AccessProbeGroups", groups, 0, src_of(run, "raw.csv", "group (distinct)"), "probe groups")
-    for status in ("401", "403", "404"):
+    for status in ("200", "401", "403", "404"):
         value = None
         if raw is not None and "expected" in raw.columns:
             value = int(raw["expected"].astype(str).str.startswith(status).sum())
@@ -895,7 +900,7 @@ def section_cost(book: Book, results: Path) -> None:
         "server capacity (registrations/month)": ("CostOnpremCapacityRegs", 0),
         "power at load (W)": ("CostOnpremLoadWatts", 1),
         "electricity tariff (S cents/kWh, incl. GST)": ("CostOnpremTariffCents", 2),
-        "business fibre line (S$/month)": ("CostOnpremLineSgd", 0),
+        "business fibre line (S$/month)": ("CostOnpremLineSgd", 2),
         "off-site backup (US$/GB-month)": ("CostOnpremBackupUsdPerGb", 5),
         "operations labour (hours/month)": ("CostOnpremLabourHours", 0),
         "labour rate (S$/hour)": ("CostOnpremLabourRateSgd", 0),
@@ -1639,10 +1644,13 @@ A macro without data expands to `\\pending{<what is missing>}`; the submission b
 
 ## Where the numbers come from
 
-* **Table 3 experiments**: for each experiment the latest *complete* directory
-  `results/<YYYY-MM-DD>-<name>[-<n>]/` (it has `meta.json`; a directory without one is still running
-  or was aborted) whose `meta.json` target is `dev` (`--target` changes it). Its run id, start time
-  and commit are listed in the section header of `numbers.tex`.
+* **Table 3 experiments**: for each experiment the run directory pinned in `report/series.json`
+  (`series`, for its `target`, default `dev`); without a pin, or if the pinned directory is missing or
+  incomplete (no `meta.json`; a directory without one is still running or was aborted), the latest
+  *complete* `results/<YYYY-MM-DD>-<name>[-<n>]/` whose `meta.json` target is `dev` (`--target`
+  changes it). The runs listed under `regression` in `report/series.json` are reported separately as
+  post-redeploy regression checks (`Regression*` macros), not quoted as the series. The quoted run's
+  id, start time and commit are listed in the section header of `numbers.tex`.
 * **Pooled latencies** (backfill, preference-order server settle) are recomputed from `raw.csv` /
   `latency.csv` with the nearest-rank percentile of `tools/experiments/src/lib/results.ts`, so they
   equal `summary.md`. Latency summaries already in `meta.json` (`settleMs`, `serverSettleMs`) are

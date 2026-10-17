@@ -70,6 +70,10 @@
 \setcounter{biburlnumpenalty}{9000}
 \setcounter{biburlucpenalty}{8000}
 \setcounter{biburllcpenalty}{7000}
+% URLs without letter-spacing: no stretch inside a URL (biblatex default 0mu plus 3mu at every
+% break point) and a slightly ragged right margin instead (finite, so URLs still break in-line).
+\biburlbigskip=0mu\relax
+\AtBeginBibliography{\rightskip=0pt plus 2em\relax}
 
 % ------------------------------------------------------------------------------ report helpers
 % \IfPending{\Macro}{text while the data does not exist}{text with the data}: the generated macro

@@ -13,10 +13,10 @@ $h \cdot w \cdot k \geq P$, where $h$ is the coordination time saved per multi-s
 the value of an organiser hour and $k$ the number of such events per organiser-year. The organiser
 interviews give $h$ (median \InterviewHoursMedian{} hours per event) and the willingness to pay
 (median price felt to be a bargain \InterviewWtpBargainMedian{}, getting expensive
-\InterviewWtpExpensiveMedian{} \sd/month). The simulation in \S\ref{sec:mechanism} gives one
-component of $h$: with per-session forms, \ReplayDupConfirmedPerSessionMean{} confirmed seats per
-workshop end as duplicates that the organiser must chase, against \ReplayDupConfirmedUnifiedMean{}
-with one queue.
+\InterviewWtpExpensiveMedian{} \sd/month). The simulation (\S\ref{sec:mechanism}) gives one
+component of $h$: per-session forms leave \ReplayDupConfirmedPerSessionMean{} duplicate confirmed
+seats per workshop for the organiser to chase, against \ReplayDupConfirmedUnifiedMean{} with one
+queue.
 
 \paragraph{Cost accounting in three layers.}
 Cloud cost is computed as usage $\times$ unit price for the \CostDimensionsUsed{} billable dimensions
@@ -47,7 +47,7 @@ per registration, \CostAssumeReadsPerCommand{} API reads per command including p
 listed in \code{results/cost/model-summary.md}).
 
 \paragraph{On-premise reference.}
-The same engine and single-page application (SPA) also run on a self-hosted stack
+The same engine and single-page application (SPA) run on a self-hosted stack
 (\code{services/local}: Docker Compose with PostgreSQL, Keycloak, Mailpit and nginx). That compose
 file is the functional reference; the priced service would run it on one mini-PC with Keycloak in
 production mode behind TLS, a transactional e-mail provider instead of the Mailpit sink, and backups.
@@ -61,10 +61,10 @@ with a UPS~\cite{onprem-ups} and a backup disk~\cite{onprem-disk}, amortised ove
 \CostOnpremTariffCents{} cents/kWh~\cite{onprem-sp-tariff}; a static IP~\cite{onprem-static-ip};
 e-mail at the SES price; no labour. \emph{Fully amortised}: plus a business fibre line at
 \sd\CostOnpremLineSgd{} a month~\cite{onprem-m1-fibre}, an off-site backup copy~\cite{onprem-b2} and
-operations labour of \CostOnpremLabourHours{}\,h a month at \sd\CostOnpremLabourRateSgd/h, which is
-our assumption; \sd\CostFxSgdPerUsd{} = \usd1~\cite{onprem-fx}. Load, retention and function
-are held equal in the model; availability is not: one machine has no failover, whereas the cloud
-services span several availability zones (AZs).
+an assumed \CostOnpremLabourHours{}\,h a month of operations labour at
+\sd\CostOnpremLabourRateSgd/h; \sd\CostFxSgdPerUsd{} = \usd1~\cite{onprem-fx}. Load, retention and
+function are equal in the model; availability is not: one machine has no failover, whereas the
+cloud services span availability zones (AZs).
 
 \begin{table}[t]
 \centering

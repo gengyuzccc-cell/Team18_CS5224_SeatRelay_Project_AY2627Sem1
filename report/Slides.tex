@@ -175,7 +175,9 @@
 % =============================================================================== Part 2
 \speaker{CHEN YANG}
 \begin{frame}{Mechanism: one registration, one queue, one seat}
-  \centering\tikzfig{0.70\textwidth}{fig-flow}\par
+  % the report's Fig. 1 without its invariants callout (clipped off the bottom; R1, C1 and C2 below
+  % state the same invariants), so the figure can be shown at full width
+  \centering\adjustbox{trim=0pt 0.80cm 0pt 0pt, clip, width=\textwidth}{\input{figures/fig-flow}}\par
   \vspace{0.10in}\raggedright
   \begin{tabular}{@{}p{5.95in}@{\hspace{0.23in}}p{5.95in}@{}}
     \rid{R1}At most one hold or seat per workshop & \rid{R5}Decline or expiry drops only that session\\
@@ -221,7 +223,7 @@
   \end{columns}
   \source{Correctness run on dev (\CorrectnessSettleClientN{} commands): settle p95 \CorrectnessSettleServerPNinetyFiveMs\,ms
     server-side, \CorrectnessSettleClientPNinetyFiveMs\,ms client-observed (as in Final report \S4.2). Final report
-    Fig.~3a, \S3.2, \S3.4; \code{results/2026-10-17-correctness/}.}
+    Fig.~3a, \S3.2, \S3.4; \code{results/\CorrectnessDir/}.}
 \end{frame}
 
 \begin{frame}{Timers: one per offer; the sweep is only a safety net}
@@ -271,7 +273,7 @@
   \tileL{\CorrectnessVerdict}{Core correctness}{\CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks}\hfill
   \tile{\FailureVerdict}{Failure recovery}{\FailureBeforeCommitSettleMedianS\,s median}\par\vspace{0.20in}
   \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable; \CorePropertySequences{} random runs}\hfill
-  \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} refused}\par\vspace{0.20in}
+  \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} as expected}\par\vspace{0.20in}
   \tileL{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyAccounts{} accounts, \ConcurrencySeats{} seats}\hfill
   \tile{\PerfDevVerdict}{Performance}{met up to \PerfDevMaxVUsMet{} users}\par\vspace{0.20in}
   \tileL{\RepeatVerdict}{Repeat execution}{\RepeatProbesPassed/\RepeatProbes{} probes}\hfill
@@ -290,7 +292,7 @@
     \begin{column}{6.0in}
       \textbf{Load test on dev}\par\vspace{0.04in}
       \includegraphics[width=6.0in]{figures/generated/slide-loadtest}\par\vspace{0.04in}
-      All targets met up to \PerfDevMaxVUsMet{} users, 0 errors; settle p95 at 50:
+      All targets met up to \PerfDevMaxVUsMet{} users, 0 errors; client settle p95 at 50:
       \PerfDevCrossVUFiftySettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs\,ms (hot spot)
     \end{column}
     \begin{column}{6.0in}
@@ -359,9 +361,9 @@
 
 \begin{frame}{Limitations, future work, AI use and roles}
   \vspace{0.06in}
-  \textbf{Limits:} one writer per workshop (hot spot p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
+  \textbf{Limits:} one writer per workshop (hot spot server settle p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
   \textbf{Next:} batch commands per workshop \textperiodcentered{} SES production \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
-  \textbf{AI use:} an AI assistant generated the code, tests, scripts, desk research and drafts, and ran
+  \textbf{AI use:} an AI assistant generated the code, tests, scripts, desk research, and the report and slide text, and ran
   deployments and experiments with our credentials; scope, rules and targets are ours\par\vspace{0.24in}
   \textbf{Work lines} \mute{(Preliminary report \S4; mapping to names provisional)}\par\vspace{0.08in}
   \role{LI ZONGZE}{product, front end}\hfill\role{CHEN YANG}{allocation logic, API}\par\vspace{0.10in}
@@ -389,12 +391,12 @@
 \speaker{ZHANG TIANYI}
 \begin{frame}{Backup: demo recording (staged)}
   \vspace{0.06in}
-  \code{docs/demo/backup-demo.mp4}: 2:43, silent, captions say who acts\par\vspace{0.10in}
+  \code{docs/demo/backup-demo.mp4}: 2:44, silent, captions say who acts\par\vspace{0.10in}
   Staged on dev: synthetic accounts, scripted clicks; not user evidence\par\vspace{0.30in}
-  \chap{D1}{0:37}{Alice registers, Session 2 first \textrightarrow{} offer \textrightarrow{} accept}
-  \chap{D2}{1:03}{Bob queues; Alice cancels \textrightarrow{} Bob's offer (1:27)}
-  \chap{D3}{1:33}{Carol queues; Bob's 60\,s hold expires \textrightarrow{} Carol's offer (2:09)}
-  \chap{D4}{2:16}{Backfill log, attendance, CSV export, verify invariants (2:23)}
+  \chap{D1}{0:39}{Alice registers, Session 2 first \textrightarrow{} offer \textrightarrow{} accept}
+  \chap{D2}{1:06}{Bob queues; Alice cancels \textrightarrow{} Bob's offer (1:29)}
+  \chap{D3}{1:34}{Carol queues; Bob's 60\,s hold expires \textrightarrow{} Carol's offer (2:11)}
+  \chap{D4}{2:19}{Backfill log, attendance, CSV export, verify invariants (2:26)}
   \source{Chapter list: \code{docs/demo/backup-demo-chapters.txt}. The recording has no fault
     injection (D5 is a terminal step; see B6). Recorded by \code{tools/e2e} on 2026-10-17 (UTC).}
 \end{frame}
@@ -419,7 +421,7 @@
 
 \shotslide{Demo beat D2, staged: cancellation \textrightarrow{} backfill}
   {190 215 540 445}{17-offer-after-cancellation.png}{Bob: Alice's cancelled seat is now held for him}
-  {190 85 190 495}{19-dashboard-queue-offer.png}{Organiser: Carol queued behind Bob's offer}
+  {195 95 505 500}{19-dashboard-queue-offer.png}{Organiser: Carol waits (queue position 1) behind Bob's offer; both chose Session 2, Bob's hold shows 00:30 left}
   {Bob's page shows the offer on its 10\,s refresh, without a reload; the relay is logged with 0\,ms.}
 
 \shotslide{Demo beat D3, staged: hold expires \textrightarrow{} backfill}
@@ -428,7 +430,7 @@
   {Nobody acted between the two screens.}
 
 \shotslide{Demo beat D4, staged: backfill log and verify}
-  {190 145 190 560}{24-dashboard-backfill-log.png}{Both relays with their latency}
+  {190 145 190 560}{24-dashboard-backfill-log.png}{Both relays with their latency (demo values): hold expired \textrightarrow{} Carol in 186\,ms; cancellation \textrightarrow{} Bob in 0\,ms}
   {190 540 480 85}{26-dashboard-verify-ok.png}{CSV export; all invariants hold}
   {Dashboard values in a demo are demo values, not measurements.}
 
@@ -443,7 +445,7 @@
     \item Dead letters: \FailureDeadLetters; one command record each, one effect
   \end{itemize}
   \source{Fault flags (\code{\_fault: AFTER\_COMMIT}) are honoured only on dev. Redelivery waits for the
-    120\,s SQS visibility timeout. \code{results/2026-10-17-repeat-execution/}, \code{-failure-recovery/}.}
+    120\,s SQS visibility timeout. \code{results/\RepeatDir/}, \code{results/\FailureDir/}.}
 \end{frame}
 
 \speaker{LIN JIE}

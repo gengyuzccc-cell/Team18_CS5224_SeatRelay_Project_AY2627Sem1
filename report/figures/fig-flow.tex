@@ -27,7 +27,7 @@
   % backfill: released seat returns to the queue (dashed blue)
   \draw[sr/flow, draw=srBlue, dash pattern=on 2.4pt off 1.4pt] ($(con.south)$) -- ++(0,-1.20) coordinate (bfr) -|
     ($(que.south)+(-0.80,0)$);
-  \node[sr/lbl, text=srBlue, anchor=south east] at ($(bfr)+(-0.12,0.02)$) {released seat returns to the queue (backfill)};
+  \node[sr/lbl, text=srBlue, anchor=south east] at ($(bfr)+(-0.12,0.02)$) {backfill: released seat to the queue};
 
   % ---------------------------------------------------------------- invariant callout
   \node[sr/base, fill=srYellow!10, dash pattern=on 2pt off 1.2pt, text width=15.3cm, minimum height=0.5cm,

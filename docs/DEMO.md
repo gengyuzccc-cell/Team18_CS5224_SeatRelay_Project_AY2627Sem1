@@ -252,7 +252,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 - **Expect (B):** Within 10 s (the status page refreshes while you are queued; or press F5) the card
   switches to *Offered*: *A seat in **Session 1** (‹date›) is held for you. Confirm within 59:5x.*
   B gets no toast: toasts only report commands sent from that window. (Browser walkthroughs on dev,
-  2026-10-17: 6–7 s after the cancellation.)
+  2026-10-17: 5.4–6.1 s after the cancellation.)
 - **Do (Window B):** **Accept seat** → *Your seat in Session 1 is confirmed.*
 - **Do (Window O):** **Refresh**. The **Backfill log** shows *Session 1 · confirmed seat cancelled ·
   latency 0 ms*. The header reads *1/1 reallocated · p50 0 ms · p95 0 ms · max 0 ms*. The *New
@@ -323,7 +323,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   seat** → confirmed.
 - **Do (Window O, tab 2):** **Refresh**. The **Backfill log** shows *Session A · offer expired* with
   a latency of a few hundred milliseconds to a few seconds (released at `expiresAt`, re-allocated
-  when the tick was processed; three browser walkthroughs on dev, 2026-10-17: 103–189 ms).
+  when the tick was processed; two browser walkthroughs on dev, 2026-10-17: 179–186 ms).
 - **Say:** "Nobody pressed anything: the seat moved on by itself, within a second or two."
 
 ### D5b (4:00–4:30): exactly-once, proven (terminal + Window O)
