@@ -106,7 +106,7 @@
 % ==============================================================================================
 % Preference, order: deployment replay (dev) and core property test
 %   source: runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10-17T18:20:35.647Z, commit e05c037d485d (dirty)
-%   source: core-tests: none
+%   source: core-tests: results/2026-10-17-core-tests
 % ==============================================================================================
 % results/2026-10-17-preference-order-2/meta.json: ok -- preference-order: verdict (PASS/FAIL)
 \newcommand{\PrefOrderVerdict}{PASS}
@@ -142,20 +142,22 @@
 \newcommand{\PrefOrderSettleClientPNinetyFiveMs}{812}
 % results/2026-10-17-preference-order-2/latency.csv: serverSettleMs (nearest-rank p95) -- server settle latency p95 (ms)
 \newcommand{\PrefOrderSettleServerPNinetyFiveMs}{61}
-% results/<date>-core-tests/run.log: 'Tests N passed' -- core unit + property tests passed
-\newcommand{\CoreTestsPassed}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/run.log: 'Tests ... (total)' -- core tests in total
-\newcommand{\CoreTestsTotal}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/run.log: 'Test Files ... (total)' -- core test files
-\newcommand{\CoreTestFiles}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/run.log: test title '<n> random command sequences' -- random command sequences of the property test
-\newcommand{\CorePropertySequences}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/coverage-summary.json: total.branches.pct -- core branch coverage (%)
-\newcommand{\CoreBranchCoveragePct}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/coverage-summary.json: total.lines.pct -- core line coverage (%)
-\newcommand{\CoreLineCoveragePct}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
-% results/<date>-core-tests/commit.txt -- commit of the core test run
-\newcommand{\CoreTestsCommit}{\pending{core property-test results (results/\textless{}date\textgreater{}-core-tests) not yet recorded}}
+% results/2026-10-17-core-tests/run.log: 'Tests N passed' -- core unit + property tests passed
+\newcommand{\CoreTestsPassed}{127}
+% results/2026-10-17-core-tests/run.log: 'Tests ... (total)' -- core tests in total
+\newcommand{\CoreTestsTotal}{127}
+% results/2026-10-17-core-tests/run.log: 'Test Files ... (total)' -- core test files
+\newcommand{\CoreTestFiles}{13}
+% results/2026-10-17-core-tests/run.log: test title '<n> random command sequences' -- random command sequences of the property test
+\newcommand{\CorePropertySequences}{2{,}000}
+% results/2026-10-17-core-tests/run.log: 'property test: <n> runs, <m> steps' -- commands applied across all sequences of the property test
+\newcommand{\CorePropertySteps}{84{,}983}
+% results/2026-10-17-core-tests/coverage-summary.json: total.branches.pct -- core branch coverage (%)
+\newcommand{\CoreBranchCoveragePct}{99.8}
+% results/2026-10-17-core-tests/coverage-summary.json: total.lines.pct -- core line coverage (%)
+\newcommand{\CoreLineCoveragePct}{100.0}
+% results/2026-10-17-core-tests/commit.txt -- commit of the core test run
+\newcommand{\CoreTestsCommit}{d121145}
 
 % ==============================================================================================
 % Concurrency (dev)
@@ -285,6 +287,8 @@
 \newcommand{\ExpiryRaceRunsPassed}{3}
 % results/2026-10-17-expiry-race-5/meta.json: params.marginMs -- ACCEPT offset from expiresAt (ms)
 \newcommand{\ExpiryRaceMarginMs}{200}
+% results/2026-10-17-expiry-race-5/meta.json: clockOffset.rttMs -- round trip from the experiment client to the dev API (ms, clock probe)
+\newcommand{\ExpiryRaceRttMs}{233}
 % results/2026-10-17-expiry-race-5/raw.csv: variant = early (rows) -- early ACCEPT attempts
 \newcommand{\ExpiryRaceEarlyAttempts}{3}
 % results/2026-10-17-expiry-race-5/raw.csv: variant = early, verdict = PASS -- early ACCEPTs applied
@@ -561,7 +565,7 @@
 % results/loadtest/2026-10-17/raw.csv: directory name -- date of the load-test matrix
 \newcommand{\PerfDate}{2026-10-17}
 % results/loadtest/2026-10-17/raw.csv: commit -- commit(s) under test
-\newcommand{\PerfCommit}{410622a, c1d0660}
+\newcommand{\PerfCommit}{410622a, d121145}
 % results/loadtest/2026-10-17/raw.csv: levels with 3 active rounds -- dev: VU levels of the matrix with all rounds recorded
 \newcommand{\PerfDevLevelsComplete}{6}
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- dev: k6 matrix complete
@@ -571,25 +575,25 @@
 % results/loadtest/2026-10-17/raw.csv: every scenario x VU level has 3 active rounds -- local: k6 matrix complete
 \newcommand{\PerfLocalMatrixComplete}{complete}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenReadPNinetyFiveMs}{290}
+\newcommand{\PerfDevCrossVUTenReadPNinetyFiveMs}{294}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
 \newcommand{\PerfDevCrossVUTenAcceptPNinetyFiveMs}{315}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenSettlePNinetyFiveMs}{803}
+\newcommand{\PerfDevCrossVUTenSettlePNinetyFiveMs}{800}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenServerSettlePNinetyFiveMs}{65}
+\newcommand{\PerfDevCrossVUTenServerSettlePNinetyFiveMs}{62}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenSettlePFiftyMs}{770}
+\newcommand{\PerfDevCrossVUTenSettlePFiftyMs}{769}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenServerSettlePFiftyMs}{34}
+\newcommand{\PerfDevCrossVUTenServerSettlePFiftyMs}{33}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: read p50 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenReadPFiftyMs}{277}
+\newcommand{\PerfDevCrossVUTenReadPFiftyMs}{276}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: 202 response p50 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenAcceptPFiftyMs}{290}
+\newcommand{\PerfDevCrossVUTenAcceptPFiftyMs}{289}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: messages on commands.fifo, worst round
 \newcommand{\PerfDevCrossVUTenQueueDepthMax}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 10 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevCrossVUTenCloudWatchSettlePNinetyFiveMs}{61}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: HTTP error rate, worst round (%)
 \newcommand{\PerfDevCrossVUTenErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 10 VUs: oldest message age on commands.fifo, worst round (s)
@@ -599,81 +603,81 @@
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev cross-workshop 10 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevCrossVUTenUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveReadPNinetyFiveMs}{288}
+\newcommand{\PerfDevCrossVUTwentyFiveReadPNinetyFiveMs}{292}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveAcceptPNinetyFiveMs}{306}
+\newcommand{\PerfDevCrossVUTwentyFiveAcceptPNinetyFiveMs}{310}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs}{6{,}912}
+\newcommand{\PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs}{796}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs}{6{,}302}
+\newcommand{\PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs}{88}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveSettlePFiftyMs}{786}
+\newcommand{\PerfDevCrossVUTwentyFiveSettlePFiftyMs}{764}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveServerSettlePFiftyMs}{98}
+\newcommand{\PerfDevCrossVUTwentyFiveServerSettlePFiftyMs}{34}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: read p50 (GET /workshops), median of rounds (ms)
 \newcommand{\PerfDevCrossVUTwentyFiveReadPFiftyMs}{275}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: 202 response p50 (POST commands), median of rounds (ms)
 \newcommand{\PerfDevCrossVUTwentyFiveAcceptPFiftyMs}{287}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: messages on commands.fifo, worst round
-\newcommand{\PerfDevCrossVUTwentyFiveQueueDepthMax}{13}
+\newcommand{\PerfDevCrossVUTwentyFiveQueueDepthMax}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 25 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevCrossVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{89}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfDevCrossVUTwentyFiveErrorPct}{1.57}
+\newcommand{\PerfDevCrossVUTwentyFiveErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfDevCrossVUTwentyFiveQueueAgeMaxS}{3}
+\newcommand{\PerfDevCrossVUTwentyFiveQueueAgeMaxS}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, rows (count over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 25 VUs: rounds aggregated
 \newcommand{\PerfDevCrossVUTwentyFiveRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev cross-workshop 25 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevCrossVUTwentyFiveUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyReadPNinetyFiveMs}{284}
+\newcommand{\PerfDevCrossVUFiftyReadPNinetyFiveMs}{289}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyAcceptPNinetyFiveMs}{300}
+\newcommand{\PerfDevCrossVUFiftyAcceptPNinetyFiveMs}{302}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftySettlePNinetyFiveMs}{29{,}127}
+\newcommand{\PerfDevCrossVUFiftySettlePNinetyFiveMs}{786}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs}{28{,}460}
+\newcommand{\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs}{193}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftySettlePFiftyMs}{14{,}930}
+\newcommand{\PerfDevCrossVUFiftySettlePFiftyMs}{762}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyServerSettlePFiftyMs}{14{,}117}
+\newcommand{\PerfDevCrossVUFiftyServerSettlePFiftyMs}{54}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: read p50 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyReadPFiftyMs}{273}
+\newcommand{\PerfDevCrossVUFiftyReadPFiftyMs}{275}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: 202 response p50 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyAcceptPFiftyMs}{284}
+\newcommand{\PerfDevCrossVUFiftyAcceptPFiftyMs}{286}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: messages on commands.fifo, worst round
-\newcommand{\PerfDevCrossVUFiftyQueueDepthMax}{38}
+\newcommand{\PerfDevCrossVUFiftyQueueDepthMax}{1}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 cross-workshop at 50 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevCrossVUFiftyCloudWatchSettlePNinetyFiveMs}{184}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfDevCrossVUFiftyErrorPct}{9.81}
+\newcommand{\PerfDevCrossVUFiftyErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfDevCrossVUFiftyQueueAgeMaxS}{17}
+\newcommand{\PerfDevCrossVUFiftyQueueAgeMaxS}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, rows (count over active rounds; quoted once 3 rounds exist) -- dev cross-workshop 50 VUs: rounds aggregated
 \newcommand{\PerfDevCrossVUFiftyRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=cross-workshop, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev cross-workshop 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevCrossVUFiftyUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenReadPNinetyFiveMs}{284}
+\newcommand{\PerfDevHotspotVUTenReadPNinetyFiveMs}{294}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenAcceptPNinetyFiveMs}{300}
+\newcommand{\PerfDevHotspotVUTenAcceptPNinetyFiveMs}{310}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenSettlePNinetyFiveMs}{780}
+\newcommand{\PerfDevHotspotVUTenSettlePNinetyFiveMs}{797}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenServerSettlePNinetyFiveMs}{120}
+\newcommand{\PerfDevHotspotVUTenServerSettlePNinetyFiveMs}{115}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenSettlePFiftyMs}{757}
+\newcommand{\PerfDevHotspotVUTenSettlePFiftyMs}{763}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenServerSettlePFiftyMs}{41}
+\newcommand{\PerfDevHotspotVUTenServerSettlePFiftyMs}{39}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: read p50 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenReadPFiftyMs}{273}
+\newcommand{\PerfDevHotspotVUTenReadPFiftyMs}{275}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: 202 response p50 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenAcceptPFiftyMs}{283}
+\newcommand{\PerfDevHotspotVUTenAcceptPFiftyMs}{286}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: messages on commands.fifo, worst round
-\newcommand{\PerfDevHotspotVUTenQueueDepthMax}{0}
+\newcommand{\PerfDevHotspotVUTenQueueDepthMax}{1}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTenCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 10 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevHotspotVUTenCloudWatchSettlePNinetyFiveMs}{117}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: HTTP error rate, worst round (%)
 \newcommand{\PerfDevHotspotVUTenErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 10 VUs: oldest message age on commands.fifo, worst round (s)
@@ -683,61 +687,61 @@
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=10, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev hotspot 10 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevHotspotVUTenUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveReadPNinetyFiveMs}{292}
+\newcommand{\PerfDevHotspotVUTwentyFiveReadPNinetyFiveMs}{294}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveAcceptPNinetyFiveMs}{306}
+\newcommand{\PerfDevHotspotVUTwentyFiveAcceptPNinetyFiveMs}{307}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveSettlePNinetyFiveMs}{7{,}398}
+\newcommand{\PerfDevHotspotVUTwentyFiveSettlePNinetyFiveMs}{1{,}360}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveServerSettlePNinetyFiveMs}{6{,}791}
+\newcommand{\PerfDevHotspotVUTwentyFiveServerSettlePNinetyFiveMs}{940}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveSettlePFiftyMs}{1{,}237}
+\newcommand{\PerfDevHotspotVUTwentyFiveSettlePFiftyMs}{1{,}236}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveServerSettlePFiftyMs}{634}
+\newcommand{\PerfDevHotspotVUTwentyFiveServerSettlePFiftyMs}{586}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: read p50 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveReadPFiftyMs}{274}
+\newcommand{\PerfDevHotspotVUTwentyFiveReadPFiftyMs}{277}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: 202 response p50 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveAcceptPFiftyMs}{284}
+\newcommand{\PerfDevHotspotVUTwentyFiveAcceptPFiftyMs}{287}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: messages on commands.fifo, worst round
-\newcommand{\PerfDevHotspotVUTwentyFiveQueueDepthMax}{24}
+\newcommand{\PerfDevHotspotVUTwentyFiveQueueDepthMax}{12}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 25 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevHotspotVUTwentyFiveCloudWatchSettlePNinetyFiveMs}{922}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfDevHotspotVUTwentyFiveErrorPct}{0.47}
+\newcommand{\PerfDevHotspotVUTwentyFiveErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfDevHotspotVUTwentyFiveQueueAgeMaxS}{3}
+\newcommand{\PerfDevHotspotVUTwentyFiveQueueAgeMaxS}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, rows (count over active rounds; quoted once 3 rounds exist) -- dev hotspot 25 VUs: rounds aggregated
 \newcommand{\PerfDevHotspotVUTwentyFiveRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=25, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev hotspot 25 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfDevHotspotVUTwentyFiveUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, readP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: read p95 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyReadPNinetyFiveMs}{307}
+\newcommand{\PerfDevHotspotVUFiftyReadPNinetyFiveMs}{297}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, commandP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: 202 response p95 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyAcceptPNinetyFiveMs}{305}
+\newcommand{\PerfDevHotspotVUFiftyAcceptPNinetyFiveMs}{307}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, settleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: client-observed settle p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftySettlePNinetyFiveMs}{29{,}943}
+\newcommand{\PerfDevHotspotVUFiftySettlePNinetyFiveMs}{3{,}169}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, serverSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: server settle p95 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs}{29{,}335}
+\newcommand{\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs}{2{,}601}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, settleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: client-observed settle p50, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftySettlePFiftyMs}{25{,}989}
+\newcommand{\PerfDevHotspotVUFiftySettlePFiftyMs}{2{,}659}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, serverSettleP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: server settle p50 (settledAt - acceptedAt), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyServerSettlePFiftyMs}{25{,}328}
+\newcommand{\PerfDevHotspotVUFiftyServerSettlePFiftyMs}{1{,}998}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, readP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: read p50 (GET /workshops), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyReadPFiftyMs}{276}
+\newcommand{\PerfDevHotspotVUFiftyReadPFiftyMs}{278}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, commandP50 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: 202 response p50 (POST commands), median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyAcceptPFiftyMs}{284}
+\newcommand{\PerfDevHotspotVUFiftyAcceptPFiftyMs}{286}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, sqsDepthMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: messages on commands.fifo, worst round
-\newcommand{\PerfDevHotspotVUFiftyQueueDepthMax}{73}
+\newcommand{\PerfDevHotspotVUFiftyQueueDepthMax}{35}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, cwSettleP95 (median over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: CloudWatch CommandSettledLatency p95, median of rounds (ms)
-\newcommand{\PerfDevHotspotVUFiftyCloudWatchSettlePNinetyFiveMs}{\pending{k6 hotspot at 50 VUs on dev: cwSettleP95 not recorded}}
+\newcommand{\PerfDevHotspotVUFiftyCloudWatchSettlePNinetyFiveMs}{2{,}613}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, httpReqFailedRate (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: HTTP error rate, worst round (%)
-\newcommand{\PerfDevHotspotVUFiftyErrorPct}{8.01}
+\newcommand{\PerfDevHotspotVUFiftyErrorPct}{0.00}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, sqsOldestAgeMax (max over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: oldest message age on commands.fifo, worst round (s)
-\newcommand{\PerfDevHotspotVUFiftyQueueAgeMaxS}{25}
+\newcommand{\PerfDevHotspotVUFiftyQueueAgeMaxS}{1}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, rows (count over active rounds; quoted once 3 rounds exist) -- dev hotspot 50 VUs: rounds aggregated
 \newcommand{\PerfDevHotspotVUFiftyRounds}{3}
 % results/loadtest/2026-10-17/raw.csv: target=dev, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- dev hotspot 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
-\newcommand{\PerfDevHotspotVUFiftyUnsettledRounds}{1}
+\newcommand{\PerfDevHotspotVUFiftyUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, readP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: read p95 (GET /workshops), median of rounds (ms)
 \newcommand{\PerfLocalCrossVUTenReadPNinetyFiveMs}{11}
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=cross-workshop, vus=10, commandP95 (median over active rounds; quoted once 3 rounds exist) -- local cross-workshop 10 VUs: 202 response p95 (POST commands), median of rounds (ms)
@@ -907,13 +911,13 @@
 % results/loadtest/2026-10-17/raw.csv: target=local, scenario=hotspot, vus=50, rounds with settleP95 = 0 and settleTimeouts > 0 -- local hotspot 50 VUs: rounds in which no command settled within the client budget (counted as +inf in the median)
 \newcommand{\PerfLocalHotspotVUFiftyUnsettledRounds}{0}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
-\newcommand{\PerfDevVerdict}{FAIL}
+\newcommand{\PerfDevVerdict}{PASS}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: levels that meet every Performance target
-\newcommand{\PerfDevLevelsMet}{2}
+\newcommand{\PerfDevLevelsMet}{6}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: levels in the matrix
 \newcommand{\PerfDevLevels}{6}
 % results/loadtest/2026-10-17/raw.csv: target=dev, every scenario x VU level (medians of the rounds, errors = worst round) -- dev: largest VU level up to which both scenarios meet every target
-\newcommand{\PerfDevMaxVUsMet}{10}
+\newcommand{\PerfDevMaxVUsMet}{50}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: PASS if every level meets reads/202 p95 < 1 s, settle p95 < 5 s (client and server) and errors < 1 %
 \newcommand{\PerfLocalVerdict}{PASS}
 % results/loadtest/2026-10-17/raw.csv: target=local, every scenario x VU level (medians of the rounds, errors = worst round) -- local: levels that meet every Performance target

@@ -270,7 +270,7 @@
   \vspace{0.06in}
   \tileL{\CorrectnessVerdict}{Core correctness}{\CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks}\hfill
   \tile{\FailureVerdict}{Failure recovery}{\FailureBeforeCommitSettleMedianS\,s median}\par\vspace{0.20in}
-  \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable {\small\mute{(dev)}}}\hfill
+  \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable; \CorePropertySequences{} random runs}\hfill
   \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} refused}\par\vspace{0.20in}
   \tileL{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyAccounts{} accounts, \ConcurrencySeats{} seats}\hfill
   \tile{\PerfDevVerdict}{Performance}{met up to \PerfDevMaxVUsMet{} users}\par\vspace{0.20in}
@@ -278,7 +278,7 @@
   \tile{\BackfillVerdict}{Backfill latency}{\IfPending{\BackfillExpiredPNinetyFiveS}{\pending{re-run}}{p95 \BackfillExpiredPNinetyFiveS\,s}}\par\vspace{0.20in}
   \tileL{\ExpiryRaceVerdict}{Expiry race}{\ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks{} stale ticks inert}\hfill
   \tile{MODEL}{Cost}{\usd\CostUnitOneKCloudListUsd{} \textrightarrow{} \CostUnitHundredKCloudListUsd{} per 1k}\par\vspace{0.34in}
-  \SeriesPassed{} of \SeriesExperiments{} scripted experiments pass; the k6 load test meets its targets only at \PerfDevMaxVUsMet{} users
+  \SeriesPassed{} of \SeriesExperiments{} scripted experiments pass; the k6 load test meets every target up to \PerfDevMaxVUsMet{} users
   \source{Dev stage, 3 runs per experiment, re-run after the Lambda quota rose from 10 to 1{,}000: in the first
     series the quota throttled the API (HTTP 503 = Lambda throttles, \ThrottleConcurrencyApiThrottles{} and
     \ThrottleBackfillApiThrottles), failing concurrency and backfill; kept in \code{results/}. Failure recovery
@@ -290,8 +290,8 @@
     \begin{column}{6.0in}
       \textbf{Load test on dev}\par\vspace{0.04in}
       \includegraphics[width=6.0in]{figures/generated/slide-loadtest}\par\vspace{0.04in}
-      Targets met only at \PerfDevMaxVUsMet{} users; settle p95 at 50:
-      \PerfDevCrossVUFiftySettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs\,ms
+      All targets met up to \PerfDevMaxVUsMet{} users, 0 errors; settle p95 at 50:
+      \PerfDevCrossVUFiftySettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs\,ms (hot spot)
     \end{column}
     \begin{column}{6.0in}
       \textbf{Simulation, \ReplaySeeds{} workshops}\par\vspace{0.04in}
@@ -359,7 +359,7 @@
 
 \begin{frame}{Limitations, future work, AI use and roles}
   \vspace{0.06in}
-  \textbf{Limits:} one writer per workshop \textperiodcentered{} HTTP 503s (cause open) \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
+  \textbf{Limits:} one writer per workshop (hot spot p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
   \textbf{Next:} batch commands per workshop \textperiodcentered{} SES production \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
   \textbf{AI use:} an AI assistant generated the code, tests, scripts, desk research and drafts, and ran
   deployments and experiments with our credentials; scope, rules and targets are ours\par\vspace{0.24in}

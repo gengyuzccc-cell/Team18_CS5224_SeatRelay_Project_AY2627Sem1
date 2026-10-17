@@ -40,8 +40,8 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \CorrectnessScenarios{} scenarios $\times$ \CorrectnessRuns{} runs: \CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks; over-capacity \CorrectnessOverCapacity, double holds \CorrectnessDoubleHolds; \CorrectnessVerifications{} \code{verify} calls, \CorrectnessVerifyFailures{} failed
  & \CorrectnessVerdict\\
 \textbf{Preference, order}: Fixed cases plus randomly generated arrival sequences & Never allocates an unacceptable session
- & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences, \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
- & \PrefOrderVerdict{} (dev part)\\
+ & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences (\CorePropertySteps{} steps), invariants after every step; \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
+ & \IfPending{\CorePropertySequences}{\PrefOrderVerdict{} (dev part)}{\PrefOrderVerdict}\\
 \textbf{Concurrency}: 50 requests contending for few seats; one account acting on several sessions & Final state satisfies every invariant
  & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} commands failed; same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} with exactly one effect; version-conflict retries \ConcurrencyMetaRetries{} (one consumer per workshop); server settle p95 \ConcurrencySettleServerPNinetyFiveMs\,ms; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
  & \ConcurrencyVerdict\\
@@ -58,7 +58,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups refused as expected (401/403/404, OFFER\_NOT\_YOURS), nothing changed}
  & \IfPending{\AccessVerdict}{--}{\AccessVerdict}\\
 \textbf{Performance}: 10\,/\,25\,/\,50 concurrent users; cross-workshop and single-workshop hot spot separately & Read/accept p95 $<$\,1\,s; settled p95 $<$\,5\,s
- & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels (\PerfDevMaxVUsMet{} VUs). 25 VUs, cross-workshop: settle \PerfDevCrossVUTwentyFiveServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUTwentyFiveSettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUTwentyFiveErrorPct\,\%. 50 VUs: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevCrossVUFiftyErrorPct\,\% (hot spot: settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%); Fig.~\ref{fig:perf}}
+ & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels, up to \PerfDevMaxVUsMet{} VUs. At 50 VUs across 10 workshops: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUFiftyErrorPct\,\%; on one hot workshop: read \PerfDevHotspotVUFiftyReadPNinetyFiveMs, 202 \PerfDevHotspotVUFiftyAcceptPNinetyFiveMs, settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%; Fig.~\ref{fig:perf}}
  & \IfPending{\PerfDevVerdict}{--}{\PerfDevVerdict}\\
 \textbf{Backfill latency}: Time from hold expiry to reallocation under normal operation & p95 $\leq$\,120\,s; outliers reported
  & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, smoke and failure-recovery runs on dev: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms. Staged rehearsal on pilot (\S\ref{sec:pilot}): \RehearsalBackfillExpiredN{} more, \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms}{Expiry-driven p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed, \BackfillOutliers{} outliers (Fig.~\ref{fig:backfill}); cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries{} (the sweep never had to act)}
@@ -112,17 +112,18 @@ serialised by design, the server p95 was \ConcurrencySettleServerPNinetyFiveMs\,
 \ConcurrencySettleClientPNinetyFiveMs\,ms, within the 5\,s target. After a worker crash, the 120\,s visibility timeout bounds
 the recovery of a stalled workshop (Table~\ref{tab:results}).
 \ifloadtest In the k6 load test~\cite{k6} with 10--50 virtual users (VUs) (Fig.~\ref{fig:perf}),
-reads and 202 responses stayed fast, but settlement did not keep up above \PerfDevMaxVUsMet{} VUs, in
-the cross-workshop scenario as in the hot spot: the commands queue backed up (up to
-\PerfDevCrossVUFiftyQueueDepthMax{} messages, the oldest \PerfDevCrossVUFiftyQueueAgeMaxS\,s, at 50
-VUs over 10 workshops), so per-workshop serialisation alone does not explain it. The client-observed
-settle p50 rose from \PerfDevCrossVUTenSettlePFiftyMs{} to \PerfDevCrossVUTwentyFiveSettlePFiftyMs{}
-and \PerfDevCrossVUFiftySettlePFiftyMs\,ms at 10, 25 and 50 VUs across workshops
-(hot spot \PerfDevHotspotVUTenSettlePFiftyMs, \PerfDevHotspotVUTwentyFiveSettlePFiftyMs,
-\PerfDevHotspotVUFiftySettlePFiftyMs\,ms). Outlier: in \PerfDevHotspotVUFiftyUnsettledRounds{} of the
-\PerfDevHotspotVUFiftyRounds{} hot-spot rounds at 50 VUs no command settled within the client's
-polling budget; such a round enters the medians as $+\infty$, not as 0.
-\pending{cause of the settle backlog and HTTP errors at 25--50 VUs}.
+every level met every target, with no HTTP errors. Reads and 202 responses took about one network
+round trip from our test client (p95 at most \PerfDevCrossVUTenAcceptPNinetyFiveMs\,ms; its round
+trip to the region was \ExpiryRaceRttMs\,ms). Across 10 workshops the server settled commands with
+p95 \PerfDevCrossVUTenServerSettlePNinetyFiveMs--\PerfDevCrossVUFiftyServerSettlePNinetyFiveMs\,ms,
+so the client's \PerfDevCrossVUFiftySettlePNinetyFiveMs\,ms is mostly round trips and the 200\,ms
+poll schedule. On one hot workshop, whose commands share one FIFO message group by design, the
+server p95 rose from \PerfDevHotspotVUTenServerSettlePNinetyFiveMs{} to
+\PerfDevHotspotVUTwentyFiveServerSettlePNinetyFiveMs{} and
+\PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 10, 25 and 50 VUs, with up to
+\PerfDevHotspotVUFiftyQueueDepthMax{} messages waiting: the cost of one writer per workshop, still
+within the 5\,s target at 50 users on one workshop. The matrix's first, throttled attempt is kept as
+superseded rounds in \code{results/loadtest/}.
 \else Fig.~\ref{fig:perf} shows the settle-latency distributions of the functional runs; the k6 load
 test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) is not complete yet.\fi{}
 

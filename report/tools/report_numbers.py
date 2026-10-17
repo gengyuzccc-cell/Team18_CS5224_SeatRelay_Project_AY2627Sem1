@@ -348,11 +348,13 @@ def section_preference(book: Book, runs, target: str, results: Path) -> None:
     tests = re.search(r"Tests\s+(?:(\d+)\s+failed\s*\|\s*)?(\d+)\s+passed\s*\((\d+)\)", log)
     files = re.search(r"Test Files\s+(?:(\d+)\s+failed\s*\|\s*)?(\d+)\s+passed\s*\((\d+)\)", log)
     seqs = re.search(r"(\d[\d,]*)\s+random\s+(?:command\s+)?sequences", log)
+    steps = re.search(r"property test:\s*\d+ runs,\s*(\d+) steps", log)
     src = f"{rel(core.path)}/run.log" if core else "results/<date>-core-tests/run.log"
     book.num("CoreTestsPassed", tests.group(2) if tests else None, 0, f"{src}: 'Tests N passed'", "core unit + property tests passed", reason)
     book.num("CoreTestsTotal", tests.group(3) if tests else None, 0, f"{src}: 'Tests ... (total)'", "core tests in total", reason)
     book.num("CoreTestFiles", files.group(3) if files else None, 0, f"{src}: 'Test Files ... (total)'", "core test files", reason)
     book.num("CorePropertySequences", seqs.group(1) if seqs else None, 0, f"{src}: test title '<n> random command sequences'", "random command sequences of the property test", reason)
+    book.num("CorePropertySteps", steps.group(1) if steps else None, 0, f"{src}: 'property test: <n> runs, <m> steps'", "commands applied across all sequences of the property test", reason)
     cov = db.read_json(core.path / "coverage-summary.json") if core else None
     total = (cov or {}).get("total", {})
     csrc = f"{rel(core.path)}/coverage-summary.json" if core else "results/<date>-core-tests/coverage-summary.json"
@@ -557,6 +559,8 @@ def section_expiry_race(book: Book, runs, target: str) -> None:
     meta = run.meta if run else {}
     params = meta.get("params") or {}
     book.num("ExpiryRaceMarginMs", params.get("marginMs"), 0, src_of(run, "meta.json", "params.marginMs"), "ACCEPT offset from expiresAt (ms)")
+    clock = meta.get("clockOffset") or {}
+    book.num("ExpiryRaceRttMs", clock.get("rttMs"), 0, src_of(run, "meta.json", "clockOffset.rttMs"), "round trip from the experiment client to the dev API (ms, clock probe)")
     raw = db.read_csv(run.path / "raw.csv", book.notes) if run else None
     early = late = None
     if raw is not None and "variant" in raw.columns:
