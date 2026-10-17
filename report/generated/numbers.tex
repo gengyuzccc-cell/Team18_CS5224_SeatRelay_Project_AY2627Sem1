@@ -1398,17 +1398,35 @@
 % results/cost/model-summary.md: section 7, mau_per_registration -- workload assumption mau_per_registration
 \newcommand{\CostAssumeMauPerRegistration}{0.333}
 % results/cost/usage-priced.md: 'List price' -- measured usage priced at list price (USD)
-\newcommand{\CostMeasuredListUsd}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredListUsd}{3.25}
 % results/cost/usage-priced.md: 'after free tier' -- measured usage after free tier (USD)
-\newcommand{\CostMeasuredAfterFreeUsd}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredAfterFreeUsd}{1.19}
 % results/cost/usage-priced.md: header (snapshot file name) -- date of the cost snapshot
-\newcommand{\CostMeasuredSnapshotDate}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredSnapshotDate}{2026-10-17}
 % results/cost/usage-priced.md: 'Unit cost' -- measured cost per 1,000 registrations, list (USD)
-\newcommand{\CostMeasuredUnitListUsd}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredUnitListUsd}{\pending{no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost}}
 % results/cost/usage-priced.md: 'Unit cost' -- measured cost per 1,000 registrations, after free tier (USD)
-\newcommand{\CostMeasuredUnitAfterFreeUsd}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredUnitAfterFreeUsd}{\pending{no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost}}
 % results/cost/usage-priced.md: 'Unit cost ... for N registrations' -- registrations in the measured period
-\newcommand{\CostMeasuredRegistrations}{\pending{measured usage not yet priced (cost-snapshot.sh, then model.py -{}-from-snapshot)}}
+\newcommand{\CostMeasuredRegistrations}{\pending{no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost}}
+% results/cost/usage-2026-10-17-cloudwatch.md: 'Window' -- UTC date of the measured window
+\newcommand{\CostMeasuredWindowDate}{2026-10-17}
+% results/cost/usage-2026-10-17-cloudwatch.md: 'Window' start -- start of the measured window (UTC, HH:MM)
+\newcommand{\CostMeasuredWindowStart}{00:00}
+% results/cost/usage-2026-10-17-cloudwatch.md: 'Window' end -- end of the measured window (UTC, HH:MM)
+\newcommand{\CostMeasuredWindowEnd}{20:20}
+% results/cost/usage-2026-10-17-cloudwatch.md: 'Cognito MAU line' -- month-level Cognito MAU charge inside the measured list price (USD)
+\newcommand{\CostMeasuredCognitoListUsd}{1.40}
+% results/cost/usage-2026-10-17-cloudwatch.md: 'window's list price' -- measured list price without the month-level Cognito MAU line (USD)
+\newcommand{\CostMeasuredNoMauListUsd}{1.86}
+% results/cost/usage-2026-10-17-cloudwatch.json: http_api_request -- measured window: HTTP API requests
+\newcommand{\CostMeasuredApiRequests}{218{,}167}
+% results/cost/usage-2026-10-17-cloudwatch.json: lambda_request_arm -- measured window: Lambda invocations
+\newcommand{\CostMeasuredLambdaInvocations}{324{,}222}
+% results/cost/usage-2026-10-17-cloudwatch.json: ddb_wru_ondemand -- measured window: DynamoDB write request units
+\newcommand{\CostMeasuredWriteUnits}{1{,}165{,}074}
+% results/cost/usage-2026-10-17-cloudwatch.json: ddb_rru_ondemand -- measured window: DynamoDB read request units
+\newcommand{\CostMeasuredReadUnits}{513{,}724}
 % results/cost/snapshots/2026-10-17.json: capturedAt -- date of the Cost Explorer snapshot
 \newcommand{\CostBillSnapshotDate}{2026-10-17}
 % results/cost/snapshots/2026-10-17.json: first TimePeriod.Start -- first day covered by the snapshot

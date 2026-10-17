@@ -207,7 +207,8 @@ def swap_keys(usage: dict[str, float], ses_alacarte: bool, cognito_lite: bool) -
 def price_usage(usage: dict[str, float], prices: dict, legacy_free_tier: bool) -> pd.DataFrame:
     """Per-dimension table with list cost and cost after free-tier allowances."""
     rows = []
-    # The SQS free pool (1M requests) covers standard and FIFO together: standard first, then FIFO.
+    # The SQS free pool (1M requests) covers standard and FIFO together; it is applied in the order
+    # the keys appear in `usage` (the result only depends on it once their sum exceeds the pool).
     sqs_pool = prices["sqs_request_standard"].get("free_always", 0)
     if legacy_free_tier:
         sqs_pool += prices["sqs_request_standard"].get("free_12mo", 0)

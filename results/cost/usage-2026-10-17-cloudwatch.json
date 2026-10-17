@@ -1,0 +1,17 @@
+{
+  "lambda_request_arm": 324222.0,
+  "lambda_gbs_arm": 3128.46798322,
+  "http_api_request": 218167.0,
+  "data_transfer_out_gb": 0.382278182,
+  "sqs_request_fifo": 257581.0,
+  "sqs_request_standard": 118443.0,
+  "ddb_rru_ondemand": 513724.5,
+  "ddb_wru_ondemand": 1165074.0,
+  "ddb_streams_rru": 0.0,
+  "cw_logs_ingest_gb": 0.47681167,
+  "eventbridge_scheduler_invocation": 245.0,
+  "ses_email_essentials": 126.0,
+  "cloudfront_https_request_asia": 157.0,
+  "cloudfront_dto_gb_asia": 0.002884407,
+  "cognito_mau_essentials": 93.0
+}

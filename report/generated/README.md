@@ -68,7 +68,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1312 macros, 1224 with data, 88 pending.
+1321 macros, 1236 with data, 85 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -587,7 +587,7 @@ Source: `results/loadtest/2026-10-17` — 167/185 with data.
 
 ### Cost model (cloud three layers vs on-prem)
 
-Source: `results/cost/model-summary.md` — 240/246 with data.
+Source: `results/cost/model-summary.md` — 252/255 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -822,12 +822,21 @@ Source: `results/cost/model-summary.md` — 240/246 with data.
 | `\CostAssumeSThreeStorageGb` | 0.05 | results/cost/model-summary.md: section 7, s3_storage_gb |
 | `\CostAssumeSThreePutRequests` | 200 | results/cost/model-summary.md: section 7, s3_put_requests |
 | `\CostAssumeMauPerRegistration` | 0.333 | results/cost/model-summary.md: section 7, mau_per_registration |
-| `\CostMeasuredListUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'List price' |
-| `\CostMeasuredAfterFreeUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'after free tier' |
-| `\CostMeasuredSnapshotDate` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: header (snapshot file name) |
-| `\CostMeasuredUnitListUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost' |
-| `\CostMeasuredUnitAfterFreeUsd` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost' |
-| `\CostMeasuredRegistrations` | PENDING: measured usage not yet priced (cost-snapshot.sh, then model.py --from-snapshot) | results/cost/usage-priced.md: 'Unit cost ... for N registrations' |
+| `\CostMeasuredListUsd` | 3.25 | results/cost/usage-priced.md: 'List price' |
+| `\CostMeasuredAfterFreeUsd` | 1.19 | results/cost/usage-priced.md: 'after free tier' |
+| `\CostMeasuredSnapshotDate` | 2026-10-17 | results/cost/usage-priced.md: header (snapshot file name) |
+| `\CostMeasuredUnitListUsd` | PENDING: no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost | results/cost/usage-priced.md: 'Unit cost' |
+| `\CostMeasuredUnitAfterFreeUsd` | PENDING: no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost | results/cost/usage-priced.md: 'Unit cost' |
+| `\CostMeasuredRegistrations` | PENDING: no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost | results/cost/usage-priced.md: 'Unit cost ... for N registrations' |
+| `\CostMeasuredWindowDate` | 2026-10-17 | results/cost/usage-2026-10-17-cloudwatch.md: 'Window' |
+| `\CostMeasuredWindowStart` | 00:00 | results/cost/usage-2026-10-17-cloudwatch.md: 'Window' start |
+| `\CostMeasuredWindowEnd` | 20:20 | results/cost/usage-2026-10-17-cloudwatch.md: 'Window' end |
+| `\CostMeasuredCognitoListUsd` | 1.40 | results/cost/usage-2026-10-17-cloudwatch.md: 'Cognito MAU line' |
+| `\CostMeasuredNoMauListUsd` | 1.86 | results/cost/usage-2026-10-17-cloudwatch.md: 'window's list price' |
+| `\CostMeasuredApiRequests` | 218,167 | results/cost/usage-2026-10-17-cloudwatch.json: http_api_request |
+| `\CostMeasuredLambdaInvocations` | 324,222 | results/cost/usage-2026-10-17-cloudwatch.json: lambda_request_arm |
+| `\CostMeasuredWriteUnits` | 1,165,074 | results/cost/usage-2026-10-17-cloudwatch.json: ddb_wru_ondemand |
+| `\CostMeasuredReadUnits` | 513,724 | results/cost/usage-2026-10-17-cloudwatch.json: ddb_rru_ondemand |
 | `\CostBillSnapshotDate` | 2026-10-17 | results/cost/snapshots/2026-10-17.json: capturedAt |
 | `\CostBillFrom` | 2026-09-17 | results/cost/snapshots/2026-10-17.json: first TimePeriod.Start |
 | `\CostBillTo` | 2026-10-16 | results/cost/snapshots/2026-10-17.json: last TimePeriod.Start |

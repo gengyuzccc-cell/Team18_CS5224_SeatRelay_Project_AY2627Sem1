@@ -35,8 +35,13 @@ spend. The bill so far is small but incomplete: Cost Explorer, filtered to the p
 allocation tag, shows \usd\CostBillListUsd{} (net \usd\CostBillNetUsd) for the \CostBillTaggedDays{}
 day with tagged usage, \CostBillFirstDay, when the tag became active; earlier usage and the
 experiments of 17~October are not in it (snapshot \CostBillSnapshotDate, \code{results/cost/snapshots/}).
-Until measured usage is priced (\CostMeasuredListUsd), usage per registration is modelled from the
-design: \CostAssumeCommandsPerRegistration{} commands and \CostAssumeOffersPerRegistration{} offers
+We therefore priced that day's usage from CloudWatch (\CostMeasuredWindowStart--\CostMeasuredWindowEnd{}
+UTC, both stages: \CostMeasuredApiRequests{} API requests, \CostMeasuredLambdaInvocations{} Lambda
+invocations, \CostMeasuredWriteUnits{} DynamoDB write units): \usd\CostMeasuredListUsd{} at list
+price, of which \usd\CostMeasuredCognitoListUsd{} is the month's Cognito charge for our test
+accounts, and \usd\CostMeasuredAfterFreeUsd{} after the free allowances
+(\code{results/cost/usage-priced.md}). CloudWatch does not count registrations, so usage per
+registration is still modelled from the design: \CostAssumeCommandsPerRegistration{} commands and \CostAssumeOffersPerRegistration{} offers
 per registration, \CostAssumeReadsPerCommand{} API reads per command including polling, and
 \CostAssumeMauPerRegistration{} Cognito monthly active users per registration (all assumptions are
 listed in \code{results/cost/model-summary.md}).

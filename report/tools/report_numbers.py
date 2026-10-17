@@ -953,9 +953,33 @@ def section_cost(book: Book, results: Path) -> None:
     snap_date = re.search(r"(\d{4}-\d{2}-\d{2})", snap.group(1)) if snap else None
     book.text("CostMeasuredSnapshotDate", snap_date.group(1) if snap_date else None, f"{usrc}: header (snapshot file name)", "date of the cost snapshot", reason)
     u = re.search(r"Unit cost: US\$([\d,\.]+) per 1,000 registrations \(list\), US\$([\d,\.]+) \(after free tier\) for ([\d,]+) registrations", utext)
+    if m and not u:
+        reason = "no registration count for the measured window (CloudWatch has no REGISTER metric), so no measured unit cost"
     book.raw("CostMeasuredUnitListUsd", summary_number(u.group(1)) if u else None, f"{usrc}: 'Unit cost'", "measured cost per 1,000 registrations, list (USD)", reason)
     book.raw("CostMeasuredUnitAfterFreeUsd", summary_number(u.group(2)) if u else None, f"{usrc}: 'Unit cost'", "measured cost per 1,000 registrations, after free tier (USD)", reason)
     book.raw("CostMeasuredRegistrations", summary_number(u.group(3)) if u else None, f"{usrc}: 'Unit cost ... for N registrations'", "registrations in the measured period", reason)
+    # The CloudWatch measurement behind usage-priced.md (tools/experiments/cost/cloudwatch_usage.py):
+    # its window, the list price without the month-level Cognito MAU line, and the main quantities.
+    cw_md = sorted(cost.glob("usage-*-cloudwatch.md"))
+    cw_md = cw_md[-1] if cw_md else None
+    ctext = cw_md.read_text(encoding="utf-8") if cw_md else ""
+    csrc = rel(cw_md) if cw_md else "results/cost/usage-<date>-cloudwatch.md"
+    creason = "measured usage not yet collected (tools/experiments/cost/cloudwatch_usage.py --price)"
+    w = re.search(r"Window: \*\*(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}Z to (\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}):\d{2}Z\*\*", ctext)
+    book.text("CostMeasuredWindowDate", w.group(1) if w else None, f"{csrc}: 'Window'", "UTC date of the measured window", creason)
+    book.text("CostMeasuredWindowStart", w.group(2) if w else None, f"{csrc}: 'Window' start", "start of the measured window (UTC, HH:MM)", creason)
+    book.text("CostMeasuredWindowEnd", w.group(4) if w else None, f"{csrc}: 'Window' end", "end of the measured window (UTC, HH:MM)", creason)
+    nm = re.search(r"Cognito MAU line \(US\$([\d,\.]+) list\) the window's list price is US\$([\d,\.]+)", ctext)
+    book.raw("CostMeasuredCognitoListUsd", summary_number(f"{float(nm.group(1).replace(',', '')):.2f}") if nm else None, f"{csrc}: 'Cognito MAU line'", "month-level Cognito MAU charge inside the measured list price (USD)", creason)
+    book.raw("CostMeasuredNoMauListUsd", summary_number(nm.group(2)) if nm else None, f"{csrc}: 'window's list price'", "measured list price without the month-level Cognito MAU line (USD)", creason)
+    cw_json = cw_md.with_suffix(".json") if cw_md else None
+    q = db.read_json(cw_json) if cw_json and cw_json.exists() else None
+    jsrc = rel(cw_json) if cw_json else "results/cost/usage-<date>-cloudwatch.json"
+    for macro, key, what in (("CostMeasuredApiRequests", "http_api_request", "HTTP API requests"),
+                             ("CostMeasuredLambdaInvocations", "lambda_request_arm", "Lambda invocations"),
+                             ("CostMeasuredWriteUnits", "ddb_wru_ondemand", "DynamoDB write request units"),
+                             ("CostMeasuredReadUnits", "ddb_rru_ondemand", "DynamoDB read request units")):
+        book.num(macro, (q or {}).get(key), 0, f"{jsrc}: {key}", f"measured window: {what}", creason)
     # The bill itself (Prelim. Table 3, Cost row: "Cloud bill"): the latest Cost Explorer snapshot of
     # tools/scripts/bin/cost-snapshot.sh, daily costs by service over 30 days. Filtered to the cost
     # allocation tag Project=SeatRelay, it sees only usage after the tag became active, so the number
