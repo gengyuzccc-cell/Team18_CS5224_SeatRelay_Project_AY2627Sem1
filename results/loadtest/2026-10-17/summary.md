@@ -58,7 +58,7 @@ Per level (median of the rounds; errors = worst round):
 ## Target `local`
 
 - API: `http://localhost:3000`
-- Runs: 13 (scenarios `cross-workshop`, `hotspot` × VUs 10/25/50 × rounds 1/2/3); warm-up `30s`, measured `60s` per run; commit `410622a-dirty`.
+- Runs: 18 (scenarios `cross-workshop`, `hotspot` × VUs 10/25/50 × rounds 1/2/3); warm-up `30s`, measured `60s` per run; commit `410622a-dirty`.
 - Note: docker-stats.csv: `docker stats` of the seatrelay-local-* containers every 2 s while the matrix runs (join on startedAt/endedAt of each run).
 
 ### local · cross-workshop
@@ -91,10 +91,16 @@ Per level (median of the rounds; errors = worst round):
 | 10 | 2 | 1 | 5 / 11 | 5 / 9 | 5 | 209 / 414 | 238 | 0.00 % | 0 | 0 | pass | – | – | – / – |
 | 10 | 3 | 1 | 5 / 11 | 5 / 9 | 5 | 209 / 413 | 236 | 0.00 % | 0 | 0 | pass | – | – | – / – |
 | 25 | 1 | 1 | 6 / 16 | 5 / 13 | 6 | 217 / 424 | 368 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 25 | 2 | 1 | 6 / 16 | 5 / 12 | 6 | 408 / 428 | 379 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 25 | 3 | 1 | 6 / 14 | 5 / 11 | 6 | 213 / 421 | 368 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 50 | 1 | 1 | 7 / 18 | 5 / 14 | 6 | 817 / 1047 | 991 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 50 | 2 | 1 | 5 / 12 | 4 / 10 | 6 | 2460 / 2879 | 2784 | 0.00 % | 0 | 0 | pass | – | – | – / – |
+| 50 | 3 | 1 | 5 / 11 | 4 / 10 | 5 | 3852 / 5947 | 5868 | 0.00 % | 0 | 0 | FAIL (settle_ms p(95)<5000) | – | – | – / – |
 
 Per level (median of the rounds; errors = worst round):
 
 | VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |
 |---|---|---|---|---|---|---|---|
 | 10 | 3 | 11 | 9 | 413 | 236 | 0.00 % | met |
-| 25 | 1 | 16 | 13 | 424 | 368 | 0.00 % | met |
+| 25 | 3 | 16 | 12 | 424 | 368 | 0.00 % | met |
+| 50 | 3 | 12 | 10 | 2879 | 2784 | 0.00 % | met |

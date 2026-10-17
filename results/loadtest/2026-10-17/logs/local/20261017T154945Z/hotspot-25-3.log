@@ -1,0 +1,12 @@
+
+seatrelay hotspot  target=local vus=25 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3019 (measured 2436)
+  http_reqs ............. 17965   failed 0.00 %
+  read_ms   p50 / p95 ... 5.8 ms / 14.1 ms
+  command_ms (202) ...... 4.7 ms / 11.5 ms
+  poll_ms ............... 2.0 ms / 5.6 ms
+  settle_ms (client) .... 213.0 ms / 421.0 ms
+  server_settle_ms ...... 187.0 ms / 368.4 ms
+  polls per command avg . 1.47
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed

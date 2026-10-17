@@ -187,3 +187,81 @@ seatrelay hotspot  target=local vus=25 round=1  warmup=30s measured=60s  api=htt
   thresholds ............ all passed
 [16:12:46] run finished {"name":"hotspot-25-1","exitCode":0,"readP95":16.3092247,"commandP95":12.89331,"settleP95":424,"errors":0,"thresholdsOk":true}
 [16:13:01] run 14/18 {"scenario":"hotspot","vus":25,"round":2,"name":"hotspot-25-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-25-2.log"}
+
+seatrelay hotspot  target=local vus=25 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 2870 (measured 2300)
+  http_reqs ............. 17470   failed 0.00 %
+  read_ms   p50 / p95 ... 6.2 ms / 15.7 ms
+  command_ms (202) ...... 5.0 ms / 11.9 ms
+  poll_ms ............... 2.1 ms / 5.8 ms
+  settle_ms (client) .... 408.0 ms / 428.0 ms
+  server_settle_ms ...... 201.0 ms / 379.0 ms
+  polls per command avg . 1.55
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:14:32] run finished {"name":"hotspot-25-2","exitCode":0,"readP95":15.718803599999996,"commandP95":11.9169915,"settleP95":428,"errors":0,"thresholdsOk":true}
+[16:14:47] run 15/18 {"scenario":"hotspot","vus":25,"round":3,"name":"hotspot-25-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-25-3.log"}
+
+seatrelay hotspot  target=local vus=25 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3019 (measured 2436)
+  http_reqs ............. 17965   failed 0.00 %
+  read_ms   p50 / p95 ... 5.8 ms / 14.1 ms
+  command_ms (202) ...... 4.7 ms / 11.5 ms
+  poll_ms ............... 2.0 ms / 5.6 ms
+  settle_ms (client) .... 213.0 ms / 421.0 ms
+  server_settle_ms ...... 187.0 ms / 368.4 ms
+  polls per command avg . 1.47
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:16:18] run finished {"name":"hotspot-25-3","exitCode":0,"readP95":14.134113249999999,"commandP95":11.462090499999988,"settleP95":421,"errors":0,"thresholdsOk":true}
+[16:16:33] run 16/18 {"scenario":"hotspot","vus":50,"round":1,"name":"hotspot-50-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-50-1.log"}
+
+seatrelay hotspot  target=local vus=50 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 2383 (measured 1589)
+  http_reqs ............. 27341   failed 0.00 %
+  read_ms   p50 / p95 ... 7.0 ms / 17.9 ms
+  command_ms (202) ...... 5.5 ms / 14.2 ms
+  poll_ms ............... 1.9 ms / 5.6 ms
+  settle_ms (client) .... 817.0 ms / 1047.0 ms
+  server_settle_ms ...... 682.0 ms / 991.0 ms
+  polls per command avg . 5.17
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:18:32] run finished {"name":"hotspot-50-1","exitCode":0,"readP95":17.893126599999995,"commandP95":14.17317819999997,"settleP95":1047,"errors":0,"thresholdsOk":true}
+[16:18:47] run 17/18 {"scenario":"hotspot","vus":50,"round":2,"name":"hotspot-50-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-50-2.log"}
+
+seatrelay hotspot  target=local vus=50 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 488 (measured 439)
+  http_reqs ............. 20476   failed 0.00 %
+  read_ms   p50 / p95 ... 5.4 ms / 11.7 ms
+  command_ms (202) ...... 4.3 ms / 10.0 ms
+  poll_ms ............... 1.8 ms / 6.0 ms
+  settle_ms (client) .... 2459.5 ms / 2879.0 ms
+  server_settle_ms ...... 2427.5 ms / 2784.2 ms
+  polls per command avg . 12.47
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:20:22] run finished {"name":"hotspot-50-2","exitCode":0,"readP95":11.688406999999996,"commandP95":9.99423625,"settleP95":2879.0499999999997,"errors":0,"thresholdsOk":true}
+[16:20:37] run 18/18 {"scenario":"hotspot","vus":50,"round":3,"name":"hotspot-50-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-50-3.log"}
+
+seatrelay hotspot  target=local vus=50 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 569 (measured 374)
+  http_reqs ............. 20876   failed 0.00 %
+  read_ms   p50 / p95 ... 5.3 ms / 10.5 ms
+  command_ms (202) ...... 4.5 ms / 9.8 ms
+  poll_ms ............... 1.8 ms / 5.2 ms
+  settle_ms (client) .... 3852.0 ms / 5946.6 ms
+  server_settle_ms ...... 3678.5 ms / 5867.8 ms
+  polls per command avg . 18.82
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T16:22:14Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[16:22:14] run finished {"name":"hotspot-50-3","exitCode":99,"readP95":10.531275799999998,"commandP95":9.807628849999997,"settleP95":5946.65,"errors":0,"thresholdsOk":false}
+[16:22:14] docker stats stopped {"samples":528,"errors":0,"file":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/docker-stats.csv"}
+{
+  "outDir": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17",
+  "runId": "20261017T154945Z",
+  "runs": 18,
+  "csv": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/raw.csv",
+  "summary": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/summary.md"
+}

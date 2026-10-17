@@ -1,0 +1,13 @@
+
+seatrelay hotspot  target=local vus=50 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 569 (measured 374)
+  http_reqs ............. 20876   failed 0.00 %
+  read_ms   p50 / p95 ... 5.3 ms / 10.5 ms
+  command_ms (202) ...... 4.5 ms / 9.8 ms
+  poll_ms ............... 1.8 ms / 5.2 ms
+  settle_ms (client) .... 3852.0 ms / 5946.6 ms
+  server_settle_ms ...... 3678.5 ms / 5867.8 ms
+  polls per command avg . 18.82
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T16:22:14Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
