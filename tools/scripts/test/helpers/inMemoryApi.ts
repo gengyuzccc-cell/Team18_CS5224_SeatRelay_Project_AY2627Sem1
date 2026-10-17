@@ -83,9 +83,11 @@ function headerRecord(headers: RequestInit['headers']): Record<string, string> {
     });
     return out;
   }
-  const entries = Array.isArray(headers) ? headers : Object.entries(headers);
+  const entries: [string, string | readonly string[]][] = Array.isArray(headers)
+    ? (headers as [string, string][])
+    : Object.entries(headers);
   for (const [key, value] of entries) {
-    out[key.toLowerCase()] = value;
+    out[key.toLowerCase()] = typeof value === 'string' ? value : value.join(', ');
   }
   return out;
 }

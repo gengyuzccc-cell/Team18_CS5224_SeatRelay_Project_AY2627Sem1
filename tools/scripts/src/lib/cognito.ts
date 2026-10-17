@@ -8,9 +8,11 @@ import type { FetchLike } from './api';
 import {
   assertAwsCredentials,
   awsRegion,
+  explainAwsError,
   getStackOutputs,
   requireOutput,
   STACKS,
+  type CredentialsBearer,
   type StackOutputsClient,
 } from './aws';
 import { CliError } from './cli';
@@ -110,6 +112,17 @@ export async function cognitoEnsureUser(
   options: CognitoOptions,
   spec: UserSpec,
 ): Promise<EnsureUserResult> {
+  try {
+    return await ensureUserUnchecked(options, spec);
+  } catch (error) {
+    throw explainAwsError(error, `Cognito AdminCreateUser/AdminSetUserPassword for ${spec.email}`);
+  }
+}
+
+async function ensureUserUnchecked(
+  options: CognitoOptions,
+  spec: UserSpec,
+): Promise<EnsureUserResult> {
   const client = clientOf(options);
   let created = false;
   let userId: string | undefined;
@@ -145,6 +158,27 @@ export async function cognitoEnsureUser(
     }),
   );
   return userId === undefined ? { created } : { userId, created };
+}
+
+/**
+ * Account creation (`AdminCreateUser` / `AdminSetUserPassword`) is a signed admin call, unlike
+ * token minting. Check once, before the first account, that credentials resolve, so a missing
+ * configuration fails fast instead of once per user deep inside the SDK.
+ */
+export async function assertCognitoAdminCredentials(
+  region: string,
+  client: CredentialsBearer = new CognitoIdentityProviderClient({ region }),
+): Promise<void> {
+  try {
+    await assertAwsCredentials(client);
+  } catch (error) {
+    if (error instanceof CliError) {
+      throw new CliError(error.message, {
+        hint: 'Creating Cognito accounts needs admin credentials. To only mint tokens for existing accounts (no credentials needed) pass --no-create with --pool-id and --client-id.',
+      });
+    }
+    throw error;
+  }
 }
 
 export function cognitoUserProvider(options: CognitoOptions): UserProvider {
@@ -198,7 +232,7 @@ async function defaultCredentialsCheck(): Promise<void> {
   } catch (error) {
     if (error instanceof CliError) {
       throw new CliError(error.message, {
-        hint: 'Pass --pool-id and --client-id (and TARGET_API) to skip CloudFormation, or configure credentials.',
+        hint: 'Pass --pool-id and --client-id (and --api / TARGET_API) to skip the CloudFormation lookup, or configure credentials.',
       });
     }
     throw error;

@@ -95,7 +95,7 @@ describe('ApiClient', () => {
   });
 
   it('uses the §1.3 backoff while the command stays ACCEPTED, then the 5 s background poll', async () => {
-    const { anonymous, api, created, wsId } = await workshopFixture();
+    const { created } = await workshopFixture();
     // Hold the worker back: the queue is only drained manually here.
     const slowApi = createInMemoryApi({ drainOnPost: false });
     const organiser = new ApiClient({
@@ -112,8 +112,6 @@ describe('ApiClient', () => {
         capacity: 1,
       })),
     });
-    void api;
-    void wsId;
     const alice = organiser.withToken(slowApi.tokenFor(ALICE));
     const sleeps: number[] = [];
     let clock = 0;
@@ -125,15 +123,19 @@ describe('ApiClient', () => {
         sleep: async (ms) => {
           sleeps.push(ms);
           clock += ms;
-          if (sleeps.length === 7) {
+          // 300 + 500 + 1000 + 15 × 2000 = 31.8 s after 18 polls: the 19th waits 5 s.
+          if (sleeps.length === 19) {
             await slowApi.ports.drain();
           }
         },
       },
     );
-    // 300 (pollAfterMs), 500, 1000, 2000, 2000, 2000 … then 5000 once 30 s elapsed.
+    // 300 (pollAfterMs), 500, 1000, 2000 (capped) … then 5000 once the 30 s budget is spent.
     expect(sleeps.slice(0, 4)).toEqual([300, 500, 1000, 2000]);
-    expect(settled.polls).toBe(7);
+    expect(sleeps.slice(3, 18).every((ms) => ms === 2000)).toBe(true);
+    expect(sleeps[18]).toBe(5000);
+    expect(settled.polls).toBe(19);
+    expect(settled.settleMs).toBe(36_800);
     expect(settled.record.status).toBe('APPLIED');
 
     // Timeout: nobody drains the queue.

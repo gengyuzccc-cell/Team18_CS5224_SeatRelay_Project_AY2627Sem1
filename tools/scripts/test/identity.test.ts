@@ -7,7 +7,12 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { FetchLike } from '../src/lib/api';
-import { cognitoEnsureUser, cognitoInitiateAuth, cognitoUserProvider } from '../src/lib/cognito';
+import {
+  assertCognitoAdminCredentials,
+  cognitoEnsureUser,
+  cognitoInitiateAuth,
+  cognitoUserProvider,
+} from '../src/lib/cognito';
 import { decodeJwtPayload, jwtExpiresAt, unsignedJwt } from '../src/lib/jwt';
 import {
   DEFAULT_KEYCLOAK,
@@ -103,6 +108,52 @@ describe('Cognito', () => {
       Password: 'Pw!12345',
       Permanent: true,
     });
+  });
+
+  it('turns rejected or missing admin credentials into a clear CliError', async () => {
+    const rejected = Object.assign(
+      new Error('The security token included in the request is invalid.'),
+      {
+        name: 'UnrecognizedClientException',
+      },
+    );
+    const denied = Object.assign(
+      new Error('User is not authorized to perform: cognito-idp:AdminCreateUser'),
+      {
+        name: 'AccessDeniedException',
+      },
+    );
+    cognito
+      .on(AdminCreateUserCommand, { Username: 'a@example.com' })
+      .rejects(rejected)
+      .on(AdminCreateUserCommand, { Username: 'b@example.com' })
+      .rejects(denied)
+      .on(AdminCreateUserCommand, { Username: 'c@example.com' })
+      .rejects(new Error('socket hang up'));
+    const client = new CognitoIdentityProviderClient({ region: 'ap-southeast-1' });
+    const ensure = (email: string) =>
+      cognitoEnsureUser({ ...options, client }, { email, password: 'Pw!12345' });
+    await expect(ensure('a@example.com')).rejects.toMatchObject({
+      name: 'CliError',
+      message: expect.stringMatching(/AdminCreateUser.*No AWS credentials.*UnrecognizedClient/),
+    });
+    await expect(ensure('b@example.com')).rejects.toMatchObject({
+      name: 'CliError',
+      message: expect.stringContaining('not allowed'),
+    });
+    // Anything that is not about credentials propagates unchanged.
+    await expect(ensure('c@example.com')).rejects.toThrow(/^socket hang up$/);
+    expect(cognito.commandCalls(AdminSetUserPasswordCommand)).toHaveLength(0);
+
+    await expect(
+      assertCognitoAdminCredentials('ap-southeast-1', {
+        config: {
+          credentials: async () => {
+            throw new Error('Could not load credentials from any providers');
+          },
+        },
+      }),
+    ).rejects.toMatchObject({ name: 'CliError', hint: expect.stringContaining('--no-create') });
   });
 
   it('InitiateAuth is an unsigned JSON POST with the X-Amz-Target header', async () => {

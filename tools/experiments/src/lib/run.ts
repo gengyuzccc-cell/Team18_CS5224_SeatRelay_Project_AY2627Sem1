@@ -73,7 +73,9 @@ Common options
   --out DIR              results base directory (default <repo>/results); the run is written to
                          <out>/<YYYY-MM-DD>-<name>[-<n>]/{raw.csv, summary.md, meta.json}
   --runs N               repetitions of the scenario (default 1)
-  --hold SECONDS         holdSeconds of the workshops the script creates (default 60, min 30)
+  --hold SECONDS         holdSeconds of the workshops the script creates (min 30; default 60 for the
+                         expiry-driven scripts, 900 for the others so that no offer expires
+                         mid-scenario on a slow target)
   --prefix / --domain    participant accounts <prefix>-1@<domain> … (default loaduser / example.com)
   --organiser EMAIL      organiser account (default organiser@example.com on local, else
                          <prefix>-organiser@<domain>)
@@ -133,6 +135,8 @@ export interface ExperimentSpec<O extends CliOptions> {
   /** Pass criterion as stated in plan §4. */
   criterion: string;
   usage: string;
+  /** `--hold` default (60 when omitted: the expiry-driven experiments). */
+  defaultHoldSeconds?: number;
   options?: O;
   run(ctx: ExperimentContext): Promise<ExperimentResult>;
 }
@@ -276,7 +280,7 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
     naming.organiserEmail = stringOption(values, 'organiser', defaultOrganiser(target, naming)) as string;
     naming.outsiderEmail = stringOption(values, 'outsider', `${naming.prefix}-outsider@${naming.domain}`) as string;
 
-    const holdSeconds = intOption(values, 'hold', 60);
+    const holdSeconds = intOption(values, 'hold', spec.defaultHoldSeconds ?? 60);
     if (holdSeconds < 30) {
       throw new CliError('--hold must be at least 30 (MIN_HOLD_SECONDS)');
     }

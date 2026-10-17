@@ -32,10 +32,13 @@ import {
   durationToMs,
   k6Args,
   k6Env,
+  mergeRows,
+  readMatrixState,
   renderCommand,
   renderSummaryMarkdown,
   summaryFileFor,
   toCsv,
+  writeMatrixState,
   type MatrixCell,
   type MatrixSpec,
 } from './lib/matrix';
@@ -57,7 +60,7 @@ Options
   --warmup DUR           warm-up ramp per run (default 30s)
   --duration DUR         measured duration per run (default 60s)
   --pause DUR            pause between runs so queues drain (default 15s)
-  --out DIR              output directory (default results/loadtest/<date>-<target>)
+  --out DIR              output directory (default results/loadtest/<date>)
   --date YYYY-MM-DD      date used in the default output directory (default today, UTC)
   --k6 PATH              k6 binary (default k6 on PATH, or K6_BIN)
   --token-cache FILE     default tools/loadtest/.token-cache.<target>.json
@@ -67,9 +70,14 @@ Options
   --stage STAGE          stage of the SQS queue / metrics for CloudWatch (default = target)
   --dry-run              print the k6 command lines and exit
 
-Outputs: <out>/raw.csv (one row per run), <out>/summary.md (p50/p95 per request kind and
-settle latency, error rate, per-level medians vs the plan §4 targets), <out>/summaries/*.json
-(k6 handleSummary files), <out>/logs/*.log (k6 output) and, for local, <out>/docker-stats.csv.
+Outputs (one directory per date, shared by every target and invocation of that day):
+  <out>/raw.csv            one row per run (re-running a target/scenario/VUs/round replaces it)
+  <out>/summary.md         p50/p95 per request kind and settle latency, error rate, per-level
+                           medians vs the plan §4 targets, per target; CloudWatch columns for dev
+  <out>/runs.json          the accumulated rows (raw.csv and summary.md are rebuilt from it)
+  <out>/k6/<target>/*.json k6 handleSummary files (<scenario>-<vus>-<round>.json)
+  <out>/logs/<target>/     k6 output per run
+  <out>/docker-stats.csv   docker stats of the local containers every 2 s (--target local)
 `;
 
 function parseList(value: string | undefined, fallback: string[]): string[] {
@@ -177,10 +185,11 @@ runMain(async () => {
   const warmupMs = durationToMs(spec.warmup);
   const date = stringOption(values, 'date') ?? new Date().toISOString().slice(0, 10);
   const outDir = path.resolve(
-    stringOption(values, 'out') ?? path.join(RESULTS_DIR, 'loadtest', `${date}-${targetName}`),
+    stringOption(values, 'out') ?? path.join(RESULTS_DIR, 'loadtest', date),
   );
-  const summaryDir = path.join(outDir, 'summaries');
-  const logsDir = path.join(outDir, 'logs');
+  const summaryDir = path.join(outDir, 'k6', targetName);
+  const logsDir = path.join(outDir, 'logs', targetName);
+  const stateFile = path.join(outDir, 'runs.json');
   const k6Bin = stringOption(values, 'k6') ?? process.env.K6_BIN ?? 'k6';
   const tokenCache = tokenCachePath(targetName, stringOption(values, 'token-cache'));
   const scenarioFile = scenarioFilePath(targetName, stringOption(values, 'scenario-file'));
@@ -257,7 +266,7 @@ runMain(async () => {
     });
     sampler.start();
     notes.push(
-      'docker-stats.csv: `docker stats` of the seatrelay-local-* containers every 2 s during the whole matrix.',
+      'docker-stats.csv: `docker stats` of the seatrelay-local-* containers every 2 s while the matrix runs (join on startedAt/endedAt of each run).',
     );
   }
 
@@ -265,19 +274,17 @@ runMain(async () => {
   const rows: RunRow[] = [];
   const csvFile = path.join(outDir, 'raw.csv');
   const mdFile = path.join(outDir, 'summary.md');
+  // Earlier invocations of the same day (other targets, earlier rounds) are kept.
+  const previous = readMatrixState(stateFile, date);
   const writeOutputs = (): void => {
-    fs.writeFileSync(csvFile, toCsv(rows));
-    fs.writeFileSync(
-      mdFile,
-      renderSummaryMarkdown(rows, {
-        date,
-        target: target.name,
-        apiBase: target.apiBase,
-        spec,
-        notes,
-        ...(commit === undefined ? {} : { commit }),
-      }),
-    );
+    const state = {
+      ...previous,
+      targets: { ...previous.targets, [target.name]: { apiBase: target.apiBase, notes } },
+      rows: mergeRows(previous.rows, rows),
+    };
+    writeMatrixState(stateFile, state);
+    fs.writeFileSync(csvFile, toCsv(state.rows));
+    fs.writeFileSync(mdFile, renderSummaryMarkdown(state));
   };
 
   try {
@@ -295,6 +302,9 @@ runMain(async () => {
         startedAt: outcome.startedAt.toISOString(),
         measuredStart: measuredStart.toISOString(),
         endedAt: outcome.endedAt.toISOString(),
+        warmup: spec.warmup,
+        duration: spec.duration,
+        ...(commit === undefined ? {} : { commit }),
         exitCode: outcome.exitCode,
       };
       const summaryFile = summaryFileFor(cell, summaryDir);

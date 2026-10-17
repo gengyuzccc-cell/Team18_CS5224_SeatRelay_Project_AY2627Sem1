@@ -86,18 +86,27 @@ describe('matrix', () => {
     expect(renderCommand('k6', ['run', 'a b.js'], { VUS: '25' })).toBe("VUS=25 k6 run 'a b.js'");
   });
 
-  it('writes raw.csv with every column and escapes lists', () => {
+  it('writes raw.csv with every column, joins lists with | and quotes only when needed', () => {
     const csv = toCsv([
       row({
         failedThresholds: ['settle_ms p(95)<5000', 'http_req_failed rate<0.01'],
         thresholdsOk: false,
       }),
+      row({
+        round: 2,
+        // tagged thresholds contain a comma, so the cell must be quoted
+        failedThresholds: ['http_req_duration{kind:read,phase:measured} p(95)<1000'],
+        thresholdsOk: false,
+        note: 'k6 exited "107"',
+      }),
     ]);
-    const [header, line] = csv.trim().split('\n');
+    const [header, first, second] = csv.trim().split('\n');
     expect(header?.split(',')).toEqual(CSV_COLUMNS);
-    expect(line).toContain('hotspot,local,10,1,');
-    expect(line).toContain('"settle_ms p(95)<5000|http_req_failed rate<0.01"');
-    expect(line?.split(',').length).toBeGreaterThanOrEqual(CSV_COLUMNS.length);
+    expect(first).toContain('hotspot,local,10,1,');
+    expect(first).toContain(',false,settle_ms p(95)<5000|http_req_failed rate<0.01,');
+    expect(first?.split(',')).toHaveLength(CSV_COLUMNS.length);
+    expect(second).toContain(',"http_req_duration{kind:read,phase:measured} p(95)<1000",');
+    expect(second).toMatch(/,"k6 exited ""107"""$/);
   });
 
   it('aggregates per level with medians and checks the plan §4 targets', () => {

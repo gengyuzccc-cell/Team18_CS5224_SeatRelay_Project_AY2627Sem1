@@ -32,6 +32,11 @@ export interface RunRow {
   startedAt: string;
   measuredStart: string;
   endedAt: string;
+  /** k6 durations of the run (`WARMUP`, `DURATION`). */
+  warmup: string;
+  duration: string;
+  /** Short git commit of the code under test (plan §3 step 21: record the commit per run). */
+  commit?: string;
   iterations: number;
   iterationsMeasured: number;
   httpReqs: number;
@@ -70,6 +75,9 @@ export interface RunMeta {
   startedAt: string;
   measuredStart: string;
   endedAt: string;
+  warmup: string;
+  duration: string;
+  commit?: string;
   exitCode?: number;
 }
 

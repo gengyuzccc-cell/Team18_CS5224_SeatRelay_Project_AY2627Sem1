@@ -49,6 +49,44 @@ export async function assertAwsCredentials(client: CredentialsBearer): Promise<v
   }
 }
 
+/** Error names the SDK uses when credentials are missing, rejected, expired or not allowed. */
+const CREDENTIAL_ERROR_NAMES = new Set([
+  'CredentialsProviderError',
+  'UnrecognizedClientException',
+  'InvalidClientTokenId',
+  'InvalidSignatureException',
+  'SignatureDoesNotMatch',
+  'ExpiredToken',
+  'ExpiredTokenException',
+  'AccessDeniedException',
+  'AccessDenied',
+  'NotAuthorizedException',
+]);
+
+/**
+ * Turns an SDK error caused by credentials (missing, rejected, expired or lacking permission)
+ * into a `CliError` that names the action; anything else is returned unchanged.
+ */
+export function explainAwsError(error: unknown, action: string): unknown {
+  if (error instanceof CliError) {
+    return error;
+  }
+  const name = error instanceof Error ? error.name : '';
+  const message = error instanceof Error ? error.message : String(error);
+  if (
+    CREDENTIAL_ERROR_NAMES.has(name) ||
+    /could not load credentials|security token|credential|expired token/i.test(message)
+  ) {
+    const denied = /AccessDenied|NotAuthorized|not authorized/i.test(`${name} ${message}`);
+    return new CliError(
+      denied
+        ? `${action}: the AWS identity is not allowed to do this (${name || 'error'}: ${message})`
+        : `${action}: ${CREDENTIALS_HINT} (${name || 'error'}: ${message})`,
+    );
+  }
+  return error;
+}
+
 export interface StackOutputsClient {
   send(command: DescribeStacksCommand): Promise<{
     Stacks?: { StackName?: string; Outputs?: { OutputKey?: string; OutputValue?: string }[] }[];
@@ -77,10 +115,7 @@ export async function getStackOutputs(
         hint: 'Deploy it first (tools/scripts/bin/deploy-all.sh) or pass the values explicitly.',
       });
     }
-    if (/credential|token|security token|expired/i.test(message)) {
-      throw new CliError(`${CREDENTIALS_HINT} (${message})`);
-    }
-    throw error;
+    throw explainAwsError(error, `DescribeStacks ${stackName}`);
   }
   const stack = stacks?.[0];
   if (stack === undefined) {

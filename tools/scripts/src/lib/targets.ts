@@ -9,7 +9,7 @@ import {
   type StackOutputsClient,
 } from './aws';
 import { CliError } from './cli';
-import { cognitoUserProvider, resolveCognitoIds } from './cognito';
+import { assertCognitoAdminCredentials, cognitoUserProvider, resolveCognitoIds } from './cognito';
 import { DEFAULT_KEYCLOAK, keycloakUserProvider, type KeycloakOptions } from './keycloak';
 import type { UserProvider } from './users';
 
@@ -98,6 +98,11 @@ export interface ProviderOptions {
   cognito?: { userPoolId?: string; clientId?: string; authStack?: string };
   fetch?: FetchLike;
   cfnClient?: StackOutputsClient;
+  /**
+   * Cognito only: check before returning that admin credentials resolve (default true; the
+   * seed scripts create accounts). Tests pass false or inject their own check.
+   */
+  adminCredentialsCheck?: boolean | ((region: string) => Promise<void>);
 }
 
 /** Keycloak options for the local stack: defaults, then `KEYCLOAK_*` env, then overrides. */
@@ -130,6 +135,10 @@ export async function userProviderFor(
     ...options.cognito,
     ...(options.cfnClient === undefined ? {} : { cfnClient: options.cfnClient }),
   });
+  const check = options.adminCredentialsCheck ?? true;
+  if (check !== false) {
+    await (check === true ? assertCognitoAdminCredentials : check)(ids.region);
+  }
   return cognitoUserProvider({
     region: ids.region,
     userPoolId: ids.userPoolId,

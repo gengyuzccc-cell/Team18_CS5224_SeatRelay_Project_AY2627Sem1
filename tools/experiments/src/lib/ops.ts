@@ -6,6 +6,11 @@ import {
   LambdaClient,
   PutFunctionConcurrencyCommand,
 } from '@aws-sdk/client-lambda';
+import {
+  CloudWatchLogsClient,
+  GetQueryResultsCommand,
+  StartQueryCommand,
+} from '@aws-sdk/client-cloudwatch-logs';
 import { GetQueueAttributesCommand, SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import type { TickCommand } from '@seatrelay/contracts';
 import {
@@ -26,6 +31,10 @@ import { getMetricData, seatRelayQueries, type MetricsResult } from './cloudwatc
  * - dev/pilot (AWS): the stack's queues (DLQ depths, a late TICK via `SendMessage` on the
  *   FIFO), the notifier's reserved concurrency (`PutFunctionConcurrency`) and CloudWatch.
  *
+ * - traceability of one command (plan §4 "failure recovery: traceable"): the `commands` row
+ *   (status, deliveries, last error) on local, a CloudWatch Logs Insights query on the worker
+ *   log group on AWS.
+ *
  * Every call reports `available`/`done` instead of throwing when the side channel is missing
  * (no docker, no AWS credentials, …), so a script can document what it skipped.
  */
@@ -43,6 +52,22 @@ export interface DeadLetterReport extends OpsReport {
   total: number;
 }
 
+export interface InjectedTick extends OpsReport {
+  /** Deduplication id the TICK was sent with (local: the `commands.dedup_id`). */
+  dedupId?: string;
+}
+
+/** How one queue message was processed (by `commandId`, or a manual tick's dedup id). */
+export interface CommandTrace extends OpsReport {
+  /** Deliveries of the message (local `commands.attempts`; AWS: highest deliveryAttempt logged). */
+  deliveries?: number;
+  /** Local queue status: PENDING | DONE | FAILED. */
+  status?: string;
+  lastError?: string;
+  /** Rows / log lines that document the processing (for raw.csv and summary.md). */
+  events: string[];
+}
+
 export interface MetricsBaseline {
   at: Date;
   /** local only: cumulative sums at `at`. */
@@ -58,7 +83,9 @@ export interface TargetOps {
   readonly kind: 'local' | 'aws';
   deadLetters(): Promise<DeadLetterReport>;
   /** Injects a TICK straight into the command queue (the "late timer message" of plan §4). */
-  injectLateTick(tick: TickCommand): Promise<OpsReport>;
+  injectLateTick(tick: TickCommand): Promise<InjectedTick>;
+  /** Delivery record of one message (see `CommandTrace`); `sinceMs` bounds the log search. */
+  commandTrace(dedupId: string, sinceMs?: number): Promise<CommandTrace>;
   metricsBaseline(): Promise<MetricsBaseline>;
   metricsSince(baseline: MetricsBaseline, names: readonly string[]): Promise<MetricsDelta>;
   /** Stops notification delivery (dev: notifier reserved concurrency 0). */
@@ -86,14 +113,17 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
   const container = options.container ?? process.env.PG_CONTAINER ?? DEFAULT_PG_CONTAINER;
   const fetchImpl = options.fetch ?? fetch;
 
-  async function psql(sql: string): Promise<{ ok: true; out: string } | { ok: false; reason: string }> {
+  async function psql(
+    sql: string,
+    separator = '|',
+  ): Promise<{ ok: true; out: string } | { ok: false; reason: string }> {
     if (container.length === 0) {
       return { ok: false, reason: 'PG_CONTAINER is empty' };
     }
     try {
       const { stdout } = await execFileAsync(
         'docker',
-        ['exec', container, 'psql', '-U', 'seatrelay', '-d', 'seatrelay', '-tA', '-c', sql],
+        ['exec', container, 'psql', '-U', 'seatrelay', '-d', 'seatrelay', '-tA', '-F', separator, '-c', sql],
         { timeout: 20_000 },
       );
       return { ok: true, out: stdout.trim() };
@@ -138,8 +168,37 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
         `INSERT INTO commands (workshop_id, payload, dedup_id) VALUES ('${tick.workshopId}', '${payload}'::jsonb, '${dedup}')`,
       );
       return result.ok
-        ? { available: true, detail: `TICK inserted into the commands table (dedup ${dedup})` }
+        ? { available: true, detail: `TICK inserted into the commands table (dedup ${dedup})`, dedupId: dedup }
         : { available: false, detail: `could not insert the TICK (${result.reason})` };
+    },
+    async commandTrace(dedupId) {
+      const id = dedupId.replace(/'/g, "''");
+      const result = await psql(
+        `SELECT status, attempts, coalesce(replace(last_error, chr(10), ' '), ''), ` +
+          `to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'), ` +
+          `coalesce(to_char(done_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'), '') ` +
+          `FROM commands WHERE dedup_id = '${id}'`,
+        '\t',
+      );
+      if (!result.ok) {
+        return { available: false, detail: `commands table not readable (${result.reason})`, events: [] };
+      }
+      const line = result.out.split('\n').find((candidate) => candidate.length > 0);
+      if (line === undefined) {
+        return { available: true, detail: `no commands row with dedup_id ${dedupId}`, events: [] };
+      }
+      const [status = '', attempts = '0', lastError = '', createdAt = '', doneAt = ''] = line.split('\t');
+      const trace: CommandTrace = {
+        available: true,
+        detail: `commands row: status ${status}, ${attempts} deliveries`,
+        deliveries: Number(attempts),
+        status,
+        events: [`queued ${createdAt}`, ...(doneAt.length > 0 ? [`done ${doneAt}`] : []), ...(lastError.length > 0 ? [`last error: ${lastError}`] : [])],
+      };
+      if (lastError.length > 0) {
+        trace.lastError = lastError;
+      }
+      return trace;
     },
     async metricsBaseline() {
       const snapshot = await metricsSnapshot();
@@ -182,7 +241,28 @@ export interface AwsOpsOptions {
   outputs?: Record<string, string>;
   sqs?: Pick<SQSClient, 'send' | 'config'>;
   lambda?: Pick<LambdaClient, 'send' | 'config'>;
+  logs?: Pick<CloudWatchLogsClient, 'send' | 'config'>;
   metricsPeriodSeconds?: number;
+  /** Logs Insights polling (tests inject a no-op sleep). */
+  sleep?: (ms: number) => Promise<void>;
+  /** Give up waiting for a Logs Insights query after this long (default 60 s). */
+  logsQueryTimeoutMs?: number;
+}
+
+/** Worker log group of a stage (services/aws/templates/app.yaml). */
+export function workerLogGroup(stage: string): string {
+  return `/aws/lambda/seatrelay-${stage}-worker`;
+}
+
+/** Logs Insights query listing the worker log lines of one command. */
+export function commandTraceQuery(commandId: string): string {
+  const id = commandId.replace(/[^A-Za-z0-9#:._-]/g, '');
+  return [
+    'fields @timestamp, message, deliveryAttempt, outcome, status, reason',
+    `| filter commandId = '${id}'`,
+    '| sort @timestamp asc',
+    '| limit 50',
+  ].join(' ');
 }
 
 export function createAwsOps(options: AwsOpsOptions): TargetOps {
@@ -191,6 +271,8 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
   let outputsPromise: Promise<Record<string, string>> | undefined;
   const sqs = () => options.sqs ?? new SQSClient({ region });
   const lambda = () => options.lambda ?? new LambdaClient({ region });
+  const logs = () => options.logs ?? new CloudWatchLogsClient({ region });
+  const pause = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
 
   async function outputs(): Promise<Record<string, string>> {
     outputsPromise ??= (async () => {
@@ -255,9 +337,71 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
             MessageDeduplicationId: dedup,
           }),
         );
-        return { available: true, detail: `TICK sent to the FIFO (group ${tick.workshopId}, dedup ${dedup})` };
+        return {
+          available: true,
+          detail: `TICK sent to the FIFO (group ${tick.workshopId}, dedup ${dedup})`,
+          dedupId: dedup,
+        };
       } catch (error) {
         return unavailable(error);
+      }
+    },
+    async commandTrace(commandId, sinceMs) {
+      try {
+        const client = logs();
+        if (options.logs === undefined) {
+          await assertAwsCredentials(client);
+        }
+        const logGroupName = workerLogGroup(options.stage);
+        const end = Date.now() + 60_000;
+        const start = (sinceMs ?? Date.now() - 3_600_000) - 60_000;
+        const started = await client.send(
+          new StartQueryCommand({
+            logGroupName,
+            startTime: Math.floor(start / 1000),
+            endTime: Math.floor(end / 1000),
+            queryString: commandTraceQuery(commandId),
+          }),
+        );
+        const queryId = started.queryId;
+        if (queryId === undefined) {
+          return { available: false, detail: 'Logs Insights returned no queryId', events: [] };
+        }
+        const deadline = Date.now() + (options.logsQueryTimeoutMs ?? 60_000);
+        for (;;) {
+          const results = await client.send(new GetQueryResultsCommand({ queryId }));
+          const status = results.status ?? 'Unknown';
+          if (status === 'Complete') {
+            const rows = (results.results ?? []).map((fields) =>
+              Object.fromEntries(fields.map((field) => [field.field ?? '', field.value ?? ''])),
+            );
+            const attempts = rows
+              .map((row) => Number(row.deliveryAttempt))
+              .filter((value) => Number.isFinite(value) && value > 0);
+            const events = rows.map(
+              (row) =>
+                `${row['@timestamp'] ?? ''} ${row.message ?? ''}${row.deliveryAttempt ? ` (delivery ${row.deliveryAttempt})` : ''}${row.outcome ? ` outcome=${row.outcome}` : ''}`,
+            );
+            const trace: CommandTrace = {
+              available: true,
+              detail: `${rows.length} worker log lines in ${logGroupName}`,
+              events,
+            };
+            if (attempts.length > 0) {
+              trace.deliveries = Math.max(...attempts);
+            }
+            return trace;
+          }
+          if (status === 'Failed' || status === 'Cancelled' || status === 'Timeout') {
+            return { available: false, detail: `Logs Insights query ${status}`, events: [] };
+          }
+          if (Date.now() > deadline) {
+            return { available: false, detail: 'Logs Insights query did not complete in time', events: [] };
+          }
+          await pause(1000);
+        }
+      } catch (error) {
+        return { ...unavailable(error), events: [] };
       }
     },
     async metricsBaseline() {

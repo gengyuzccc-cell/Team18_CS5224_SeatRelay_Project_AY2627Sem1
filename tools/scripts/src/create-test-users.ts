@@ -1,6 +1,10 @@
 #!/usr/bin/env tsx
-import { cognitoUserProvider, resolveCognitoIds } from './lib/cognito';
-import { intOption, log, parseCli, requireString, runMain, stringOption } from './lib/cli';
+import {
+  assertCognitoAdminCredentials,
+  cognitoUserProvider,
+  resolveCognitoIds,
+} from './lib/cognito';
+import { fail, intOption, log, parseCli, requireString, runMain, stringOption } from './lib/cli';
 import {
   mergeTokenCache,
   readTokenCache,
@@ -55,7 +59,7 @@ runMain(async () => {
   );
   const count = intOption(values, 'count', 0);
   if (count < 1) {
-    throw new Error('--count must be ≥ 1');
+    fail('--count must be ≥ 1', USAGE.trim());
   }
   const password = requireString(values, 'password');
   const stage = stringOption(values, 'stage') ?? stringOption(values, 'target') ?? 'dev';
@@ -101,6 +105,9 @@ runMain(async () => {
       : { region: stringOption(values, 'region') }),
   });
   log('cognito resolved', { ...ids });
+  if (create) {
+    await assertCognitoAdminCredentials(ids.region);
+  }
   const provider = cognitoUserProvider(ids);
 
   let created = 0;

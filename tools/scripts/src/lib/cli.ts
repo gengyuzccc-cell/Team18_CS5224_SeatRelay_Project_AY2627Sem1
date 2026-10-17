@@ -43,8 +43,16 @@ export interface ParsedCli {
 }
 
 /**
+ * `pnpm <script> -- --flag` forwards the `--` separator to the script (pnpm ≥ 7), where
+ * `parseArgs` would treat every following flag as a positional. Drop one leading `--`.
+ */
+export function stripArgSeparator(argv: readonly string[]): string[] {
+  return argv[0] === '--' ? argv.slice(1) : [...argv];
+}
+
+/**
  * `node:util` `parseArgs` with `--help` and a usage banner. Unknown options print the usage
- * and exit 2 instead of a stack trace.
+ * and exit 2 instead of a stack trace. A leading `--` (from `pnpm <script> -- …`) is ignored.
  */
 export function parseCli(
   options: CliOptions,
@@ -54,7 +62,7 @@ export function parseCli(
   const withHelp: CliOptions = { ...options, help: { type: 'boolean', short: 'h' } };
   try {
     const parsed = parseArgs({
-      args: argv,
+      args: stripArgSeparator(argv),
       options: withHelp,
       strict: true,
       allowPositionals: true,

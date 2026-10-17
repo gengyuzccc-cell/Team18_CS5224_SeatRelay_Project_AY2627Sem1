@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import type { RunRow } from './k6summary';
 
@@ -135,6 +136,9 @@ export const CSV_COLUMNS: (keyof RunRow)[] = [
   'startedAt',
   'measuredStart',
   'endedAt',
+  'warmup',
+  'duration',
+  'commit',
   'iterations',
   'iterationsMeasured',
   'httpReqs',
@@ -179,16 +183,82 @@ export function toCsv(rows: readonly RunRow[]): string {
   return `${lines.join('\n')}\n`;
 }
 
-/* ---------- summary.md ---------- */
+/* ---------- results/loadtest/<date>/runs.json (accumulated across invocations) ---------- */
 
-export interface SummaryMeta {
-  date: string;
-  target: string;
+/**
+ * One results directory per date (`results/loadtest/<date>/`) collects every run of that day,
+ * whichever target and however many invocations: `run-matrix` merges its rows into
+ * `runs.json` (a re-run of the same target/scenario/VUs/round replaces the older row) and
+ * regenerates `raw.csv` and `summary.md` from the whole set.
+ */
+export interface MatrixTargetInfo {
   apiBase: string;
-  spec: MatrixSpec;
+  /** Notes of the latest invocation against this target (e.g. CloudWatch skipped). */
   notes: string[];
-  commit?: string;
 }
+
+export interface MatrixState {
+  version: 1;
+  date: string;
+  targets: Record<string, MatrixTargetInfo>;
+  rows: RunRow[];
+}
+
+export function rowKey(row: Pick<RunRow, 'target' | 'scenario' | 'vus' | 'round'>): string {
+  return `${row.target}|${row.scenario}|${row.vus}|${row.round}`;
+}
+
+function scenarioRank(scenario: string): number {
+  const index = DEFAULT_SCENARIOS.indexOf(scenario);
+  return index === -1 ? DEFAULT_SCENARIOS.length : index;
+}
+
+/** Stable order: target, scenario (cross-workshop first), VUs, round. */
+export function compareRows(a: RunRow, b: RunRow): number {
+  return (
+    a.target.localeCompare(b.target) ||
+    scenarioRank(a.scenario) - scenarioRank(b.scenario) ||
+    a.scenario.localeCompare(b.scenario) ||
+    a.vus - b.vus ||
+    a.round - b.round
+  );
+}
+
+/** `current` rows replace `previous` rows with the same target/scenario/VUs/round. */
+export function mergeRows(previous: readonly RunRow[], current: readonly RunRow[]): RunRow[] {
+  const byKey = new Map<string, RunRow>();
+  for (const row of [...previous, ...current]) {
+    byKey.set(rowKey(row), row);
+  }
+  return [...byKey.values()].sort(compareRows);
+}
+
+export function emptyMatrixState(date: string): MatrixState {
+  return { version: 1, date, targets: {}, rows: [] };
+}
+
+export function readMatrixState(file: string, date: string): MatrixState {
+  if (!fs.existsSync(file)) {
+    return emptyMatrixState(date);
+  }
+  const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Partial<MatrixState>;
+  if (parsed === null || typeof parsed !== 'object' || !Array.isArray(parsed.rows)) {
+    throw new Error(`${file} is not a run-matrix state file`);
+  }
+  return {
+    version: 1,
+    date: typeof parsed.date === 'string' ? parsed.date : date,
+    targets: parsed.targets ?? {},
+    rows: parsed.rows,
+  };
+}
+
+export function writeMatrixState(file: string, state: MatrixState): void {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `${JSON.stringify(state, null, 2)}\n`);
+}
+
+/* ---------- summary.md ---------- */
 
 function ms(value: number | undefined): string {
   return value === undefined ? '–' : value.toFixed(0);
@@ -259,57 +329,75 @@ export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
   });
 }
 
-export function renderSummaryMarkdown(rows: readonly RunRow[], meta: SummaryMeta): string {
+function unique<T>(values: readonly T[]): T[] {
+  return [...new Set(values)];
+}
+
+function listOrDash(values: readonly (string | undefined)[]): string {
+  const present = unique(values.filter((v): v is string => v !== undefined && v.length > 0));
+  return present.length === 0 ? '–' : present.map((v) => `\`${v}\``).join(', ');
+}
+
+/** Renders every run of the date directory, one section per target, then per scenario. */
+export function renderSummaryMarkdown(state: MatrixState): string {
+  const rows = [...state.rows].sort(compareRows);
+  const targets = unique(rows.map((row) => row.target));
   const lines: string[] = [];
-  lines.push(`# Load test ${meta.date} — target \`${meta.target}\``);
+  lines.push(`# Load test ${state.date}`);
   lines.push('');
   lines.push(
-    `- API: \`${meta.apiBase}\`${meta.commit === undefined ? '' : `, commit \`${meta.commit}\``}`,
+    '- Each VU iteration: `GET /workshops/{id}` → `POST …/commands` REGISTER (202) → poll `GET /commands/{id}` every 200 ms until APPLIED/REJECTED → CANCEL_REGISTRATION the same way. `cross-workshop` spreads the VUs over 10 workshops, `hotspot` puts all of them on one.',
   );
   lines.push(
-    `- Matrix: scenarios ${meta.spec.scenarios.map((s) => `\`${s}\``).join(', ')} × VUs ${meta.spec.vus.join('/')} × ${meta.spec.rounds} rounds; each run = ${meta.spec.warmup} warm-up ramp + ${meta.spec.duration} measured (custom metrics cover the measured phase only).`,
+    `- Targets (plan §4 Performance): reads p95 < ${TARGETS.readP95Ms} ms, 202 p95 < ${TARGETS.commandP95Ms} ms, client-observed settle p95 < ${TARGETS.settleP95Ms} ms, HTTP error rate < ${pct(TARGETS.errorRate)}. Server-side settle = \`settledAt − acceptedAt\` of the CommandResult (plan §1.3 distinguishes the two); the client figure includes up to 200 ms of polling quantisation.`,
   );
   lines.push(
-    '- Each VU iteration: `GET /workshops/{id}` → `POST …/commands` REGISTER (202) → poll `GET /commands/{id}` every 200 ms until APPLIED/REJECTED → CANCEL_REGISTRATION the same way.',
-  );
-  lines.push(
-    `- Targets (plan §4 Performance): reads p95 < ${TARGETS.readP95Ms} ms, 202 p95 < ${TARGETS.commandP95Ms} ms, client-observed settle p95 < ${TARGETS.settleP95Ms} ms, HTTP error rate < ${pct(TARGETS.errorRate)}. Server-side settle = \`settledAt − acceptedAt\` of the CommandResult (plan §1.3 distinguishes the two).`,
+    '- Custom metrics (reads, 202s, polls, settle) cover the measured phase only; `HTTP errors` is k6 `http_req_failed` over the whole run including warm-up. Raw rows: `raw.csv`; k6 summaries: `k6/<target>/`; k6 output: `logs/<target>/`.',
   );
   lines.push('');
-  for (const scenario of meta.spec.scenarios) {
-    const scenarioRows = rows.filter((row) => row.scenario === scenario);
-    lines.push(`## ${scenario}`);
+  for (const target of targets) {
+    const targetRows = rows.filter((row) => row.target === target);
+    const info = state.targets[target];
+    const scenarios = unique(targetRows.map((row) => row.scenario));
+    lines.push(`## Target \`${target}\``);
     lines.push('');
+    if (info !== undefined) {
+      lines.push(`- API: \`${info.apiBase}\``);
+    }
     lines.push(
-      '| VUs | round | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW CommandSettledLatency p95 (ms) |',
+      `- Runs: ${targetRows.length} (scenarios ${scenarios.map((s) => `\`${s}\``).join(', ')} × VUs ${unique(targetRows.map((row) => row.vus)).join('/')} × rounds ${unique(targetRows.map((row) => row.round)).join('/')}); warm-up ${listOrDash(targetRows.map((row) => row.warmup))}, measured ${listOrDash(targetRows.map((row) => row.duration))} per run; commit ${listOrDash(targetRows.map((row) => row.commit))}.`,
     );
-    lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
-    for (const row of scenarioRows) {
+    for (const note of info?.notes ?? []) {
+      lines.push(`- Note: ${note}`);
+    }
+    lines.push('');
+    for (const scenario of scenarios) {
+      const scenarioRows = targetRows.filter((row) => row.scenario === scenario);
+      lines.push(`### ${target} · ${scenario}`);
+      lines.push('');
       lines.push(
-        `| ${row.vus} | ${row.round} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${ms(row.settleP50)} / ${ms(row.settleP95)} | ${ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} |${row.note === undefined ? '' : ` ${row.note}`}`,
+        '| VUs | round | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW CommandSettledLatency p95 (ms) |',
       );
-    }
-    lines.push('');
-    lines.push('Per level (median of the rounds; errors = worst round):');
-    lines.push('');
-    lines.push(
-      '| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |',
-    );
-    lines.push('|---|---|---|---|---|---|---|---|');
-    for (const level of aggregateByLevel(scenarioRows)) {
+      lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+      for (const row of scenarioRows) {
+        lines.push(
+          `| ${row.vus} | ${row.round} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${ms(row.settleP50)} / ${ms(row.settleP95)} | ${ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} |${row.note === undefined ? '' : ` ${row.note}`}`,
+        );
+      }
+      lines.push('');
+      lines.push('Per level (median of the rounds; errors = worst round):');
+      lines.push('');
       lines.push(
-        `| ${level.vus} | ${level.rounds} | ${ms(level.readP95)} | ${ms(level.commandP95)} | ${ms(level.settleP95)} | ${ms(level.serverSettleP95)} | ${pct(level.errorRate)} | ${level.pass ? 'met' : 'NOT met'} |`,
+        '| VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | HTTP errors | targets |',
       );
+      lines.push('|---|---|---|---|---|---|---|---|');
+      for (const level of aggregateByLevel(scenarioRows)) {
+        lines.push(
+          `| ${level.vus} | ${level.rounds} | ${ms(level.readP95)} | ${ms(level.commandP95)} | ${ms(level.settleP95)} | ${ms(level.serverSettleP95)} | ${pct(level.errorRate)} | ${level.pass ? 'met' : 'NOT met'} |`,
+        );
+      }
+      lines.push('');
     }
-    lines.push('');
-  }
-  if (meta.notes.length > 0) {
-    lines.push('## Notes');
-    lines.push('');
-    for (const note of meta.notes) {
-      lines.push(`- ${note}`);
-    }
-    lines.push('');
   }
   return lines.join('\n');
 }
