@@ -23,7 +23,6 @@ import {
   probePostgres,
   snapshotOf,
   testLogger,
-  workerPorts,
 } from './helpers';
 
 const unavailable = await probePostgres();

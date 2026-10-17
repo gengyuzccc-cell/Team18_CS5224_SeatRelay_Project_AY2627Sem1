@@ -41,11 +41,15 @@ function errorResult(status: number, body: ErrorBody): APIGatewayProxyStructured
 }
 
 /** Parses the (possibly base64) JSON body; `{ ok: false }` on malformed JSON. */
-export function parseEventBody(event: APIGatewayProxyEventV2): { ok: true; body: unknown } | { ok: false } {
+export function parseEventBody(
+  event: APIGatewayProxyEventV2,
+): { ok: true; body: unknown } | { ok: false } {
   if (event.body === undefined || event.body === null || event.body === '') {
     return { ok: true, body: undefined };
   }
-  const raw = event.isBase64Encoded ? Buffer.from(event.body, 'base64').toString('utf8') : event.body;
+  const raw = event.isBase64Encoded
+    ? Buffer.from(event.body, 'base64').toString('utf8')
+    : event.body;
   if (raw.trim() === '') {
     return { ok: true, body: undefined };
   }
@@ -96,7 +100,11 @@ export function createApiHandler(deps: ApiHandlerDeps): ApiHandler {
       });
       return { statusCode: wire.status, headers: wire.headers, body: wire.body };
     } catch (error) {
-      deps.logger.error('unhandled error in api handler', { method, path: rawPath, ...errorFields(error) });
+      deps.logger.error('unhandled error in api handler', {
+        method,
+        path: rawPath,
+        ...errorFields(error),
+      });
       return errorResult(500, { code: 'INTERNAL', message: 'Internal error' });
     } finally {
       lifecycle.end();

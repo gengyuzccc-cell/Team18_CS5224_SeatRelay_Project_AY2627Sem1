@@ -26,7 +26,8 @@ const PERMANENT_ERRORS = new Set([
   'ValidationException',
 ]);
 
-const TRANSIENT_PATTERN = /Throttl|TooManyRequests|ServiceUnavailable|InternalFailure|Timeout|LimitExceeded|Networking|ECONN|EAI_AGAIN/i;
+const TRANSIENT_PATTERN =
+  /Throttl|TooManyRequests|ServiceUnavailable|InternalFailure|Timeout|LimitExceeded|Networking|ECONN|EAI_AGAIN/i;
 
 export type SesErrorKind = 'permanent' | 'transient';
 
@@ -36,7 +37,10 @@ export type SesErrorKind = 'permanent' | 'transient';
  * e-mail is never silently dropped (the stream retries, then the DLQ alarm fires).
  */
 export function classifySesError(error: unknown): SesErrorKind {
-  const name = typeof error === 'object' && error !== null ? String((error as { name?: unknown }).name ?? '') : '';
+  const name =
+    typeof error === 'object' && error !== null
+      ? String((error as { name?: unknown }).name ?? '')
+      : '';
   if (PERMANENT_ERRORS.has(name)) {
     return 'permanent';
   }
@@ -72,7 +76,9 @@ export class SesEmailSender implements EmailSender {
           },
         }),
       );
-      return output.MessageId === undefined ? { ok: true } : { ok: true, messageId: output.MessageId };
+      return output.MessageId === undefined
+        ? { ok: true }
+        : { ok: true, messageId: output.MessageId };
     } catch (error) {
       if (classifySesError(error) === 'permanent') {
         const name = (error as { name?: string }).name ?? 'Error';

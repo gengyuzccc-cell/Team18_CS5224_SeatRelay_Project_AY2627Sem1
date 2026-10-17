@@ -23,7 +23,10 @@ export interface ExpiryForwarderDeps {
   lifecycle?: InvocationLifecycle;
 }
 
-export type ExpiryForwarderHandler = (event: SQSEvent, context?: Context) => Promise<SQSBatchResponse>;
+export type ExpiryForwarderHandler = (
+  event: SQSEvent,
+  context?: Context,
+) => Promise<SQSBatchResponse>;
 
 export function parseTickBody(body: string): TickCommand | undefined {
   try {
@@ -105,5 +108,4 @@ const defaultHandler = lazy(() =>
   }),
 );
 
-export const handler: ExpiryForwarderHandler = (event, context) =>
-  defaultHandler()(event, context);
+export const handler: ExpiryForwarderHandler = (event, context) => defaultHandler()(event, context);

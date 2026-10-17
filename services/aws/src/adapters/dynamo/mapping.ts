@@ -188,7 +188,11 @@ export function toBackfillRecord(item: Item): BackfillRecord {
 /* ---------- attendance ---------- */
 
 export function attendanceItem(record: Attendance): Item {
-  return { ...attendanceKey(record.workshopId, record.userId), entityType: 'ATTENDANCE', ...record };
+  return {
+    ...attendanceKey(record.workshopId, record.userId),
+    entityType: 'ATTENDANCE',
+    ...record,
+  };
 }
 
 export function toAttendance(item: Item): Attendance {

@@ -7,8 +7,15 @@
 export * from './adapters/dynamo/keys';
 export * from './adapters/dynamo/mapping';
 export * from './adapters/dynamo/errors';
-export { DynamoWorkshopStore, MAX_TRANSACTION_ITEMS, TransactionTooLargeError } from './adapters/dynamo/store';
-export { DynamoNotificationStatusStore, type NotificationStatusStore } from './adapters/dynamo/notifications';
+export {
+  DynamoWorkshopStore,
+  MAX_TRANSACTION_ITEMS,
+  TransactionTooLargeError,
+} from './adapters/dynamo/store';
+export {
+  DynamoNotificationStatusStore,
+  type NotificationStatusStore,
+} from './adapters/dynamo/notifications';
 export * from './adapters/sqs';
 export * from './adapters/ses';
 export * from './lib/env';
@@ -17,8 +24,19 @@ export * from './lib/email';
 export * from './lib/tokenBucket';
 export { LambdaLogger, errorFields } from './lib/logger';
 export { LambdaMetrics, METRICS_NAMESPACE } from './lib/metrics';
-export { createLambdaRuntime, lazy, noopLifecycle, type InvocationLifecycle, type LambdaRuntime } from './lib/runtime';
-export { createApiHandler, parseEventBody, type ApiHandler, type ApiHandlerDeps } from './handlers/api';
+export {
+  createLambdaRuntime,
+  lazy,
+  noopLifecycle,
+  type InvocationLifecycle,
+  type LambdaRuntime,
+} from './lib/runtime';
+export {
+  createApiHandler,
+  parseEventBody,
+  type ApiHandler,
+  type ApiHandlerDeps,
+} from './handlers/api';
 export {
   createWorkerHandler,
   deliveryAttemptOf,
@@ -34,7 +52,12 @@ export {
   type ExpiryForwarderDeps,
   type ExpiryForwarderHandler,
 } from './handlers/expiryForwarder';
-export { createSweepHandler, type SweepHandler, type SweepHandlerDeps, type SweepSummary } from './handlers/sweep';
+export {
+  createSweepHandler,
+  type SweepHandler,
+  type SweepHandlerDeps,
+  type SweepSummary,
+} from './handlers/sweep';
 export {
   createNotifierHandler,
   notificationOfRecord,

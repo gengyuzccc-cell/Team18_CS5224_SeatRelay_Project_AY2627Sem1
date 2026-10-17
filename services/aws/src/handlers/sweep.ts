@@ -27,7 +27,11 @@ export function createSweepHandler(deps: SweepHandlerDeps): SweepHandler {
     lifecycle.begin(context);
     try {
       const result: SweepResult = await runSweep(deps.ports);
-      return { now: result.now, ticked: result.workshopIds.length, workshopIds: result.workshopIds };
+      return {
+        now: result.now,
+        ticked: result.workshopIds.length,
+        workshopIds: result.workshopIds,
+      };
     } finally {
       lifecycle.end();
     }

@@ -9,7 +9,10 @@ import type { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import type { Notification } from '@seatrelay/contracts';
 import type { Logger, MetricsSink } from '@seatrelay/service';
-import { DynamoNotificationStatusStore, type NotificationStatusStore } from '../adapters/dynamo/notifications';
+import {
+  DynamoNotificationStatusStore,
+  type NotificationStatusStore,
+} from '../adapters/dynamo/notifications';
 import { entityTypeOf, toNotification } from '../adapters/dynamo/mapping';
 import { SesEmailSender, type EmailSender } from '../adapters/ses';
 import { documentClient, sesClient } from '../lib/clients';
@@ -122,7 +125,10 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
             await deps.store.markStatus(notification, 'FAILED', attempts, result.error);
             summary.failed += 1;
             deps.metrics.emit('NotificationFailures', 1, 'Count');
-            deps.logger.warn('notification rejected permanently', { ...fields, error: result.error });
+            deps.logger.warn('notification rejected permanently', {
+              ...fields,
+              error: result.error,
+            });
           }
         } catch (error) {
           summary.failed += 1;
@@ -152,7 +158,9 @@ const defaultHandler = lazy(() => {
   const emailEnabled = envFlag('EMAIL_ENABLED');
   return createNotifierHandler({
     store: new DynamoNotificationStatusStore(documentClient(), requireEnv('TABLE_NAME')),
-    ...(emailEnabled ? { sender: new SesEmailSender(sesClient(), requireEnv('SENDER_EMAIL')) } : {}),
+    ...(emailEnabled
+      ? { sender: new SesEmailSender(sesClient(), requireEnv('SENDER_EMAIL')) }
+      : {}),
     emailEnabled,
     rate: new TokenBucket(Math.max(0.1, envNumber('EMAIL_RATE_PER_SEC', 1))),
     logger: runtime().logger,

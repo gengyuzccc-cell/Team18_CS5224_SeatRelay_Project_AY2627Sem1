@@ -15,7 +15,11 @@ export class LambdaMetrics implements MetricsSink {
   constructor(powertools?: Metrics) {
     this.powertools =
       powertools ??
-      new Metrics({ namespace: METRICS_NAMESPACE, serviceName: SERVICE_NAME(), singleMetric: false });
+      new Metrics({
+        namespace: METRICS_NAMESPACE,
+        serviceName: SERVICE_NAME(),
+        singleMetric: false,
+      });
   }
 
   emit(name: MetricName, value: number, unit: PortUnit = 'Count'): void {

@@ -30,7 +30,9 @@ export function escapeHtml(value: string): string {
 }
 
 /** Plain text plus a minimal HTML alternative for one stored notification. */
-export function renderEmail(notification: Pick<Notification, 'kind' | 'title' | 'body'>): EmailContent {
+export function renderEmail(
+  notification: Pick<Notification, 'kind' | 'title' | 'body'>,
+): EmailContent {
   const subject = `[SeatRelay] ${SUBJECT_PREFIX[notification.kind]}: ${notification.title}`;
   const text = `${notification.title}\n\n${notification.body}\n\n--\n${FOOTER}\n`;
   const paragraphs = notification.body

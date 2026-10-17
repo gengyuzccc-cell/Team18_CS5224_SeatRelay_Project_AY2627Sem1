@@ -114,7 +114,9 @@ export class SqsTimerScheduler implements TimerScheduler {
       const failed = output.Failed ?? [];
       if (failed.length > 0) {
         const codes = failed.map((entry) => `${entry.Id}:${entry.Code ?? '?'}`).join(', ');
-        throw new Error(`timer scheduling failed for ${failed.length} of ${chunk.length} entries (${codes})`);
+        throw new Error(
+          `timer scheduling failed for ${failed.length} of ${chunk.length} entries (${codes})`,
+        );
       }
     }
   }

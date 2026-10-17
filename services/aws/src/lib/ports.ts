@@ -18,7 +18,9 @@ import { createLambdaRuntime, lazy, type LambdaRuntime } from './runtime';
  */
 export const runtime = lazy((): LambdaRuntime => createLambdaRuntime());
 
-export const store = lazy(() => new DynamoWorkshopStore(documentClient(), requireEnv('TABLE_NAME')));
+export const store = lazy(
+  () => new DynamoWorkshopStore(documentClient(), requireEnv('TABLE_NAME')),
+);
 
 export const commandQueue = lazy(
   () => new SqsCommandQueue(sqsClient(), requireEnv('COMMANDS_QUEUE_URL'), systemClock),
@@ -28,29 +30,25 @@ export const timerScheduler = lazy(
   () => new SqsTimerScheduler(sqsClient(), requireEnv('EXPIRY_DELAY_QUEUE_URL'), systemClock),
 );
 
-export const workerPorts = lazy(
-  (): WorkerPorts => ({
-    store: store(),
-    queue: commandQueue(),
-    timers: timerScheduler(),
-    clock: systemClock,
-    ids: uuidIdGen,
-    logger: runtime().logger,
-    metrics: runtime().metrics,
-  }),
-);
+export const workerPorts = lazy((): WorkerPorts => ({
+  store: store(),
+  queue: commandQueue(),
+  timers: timerScheduler(),
+  clock: systemClock,
+  ids: uuidIdGen,
+  logger: runtime().logger,
+  metrics: runtime().metrics,
+}));
 
-export const apiConfig = lazy(
-  (): ApiAppConfig => ({
-    store: store(),
-    queue: commandQueue(),
-    clock: systemClock,
-    ids: uuidIdGen,
-    logger: runtime().logger,
-    allowFaultFlags: envFlag('ALLOW_FAULT_FLAGS'),
-    stage: STAGE(),
-    serviceName: 'seatrelay',
-  }),
-);
+export const apiConfig = lazy((): ApiAppConfig => ({
+  store: store(),
+  queue: commandQueue(),
+  clock: systemClock,
+  ids: uuidIdGen,
+  logger: runtime().logger,
+  allowFaultFlags: envFlag('ALLOW_FAULT_FLAGS'),
+  stage: STAGE(),
+  serviceName: 'seatrelay',
+}));
 
 export const apiApp = lazy((): ApiApp => createApiApp(apiConfig()));

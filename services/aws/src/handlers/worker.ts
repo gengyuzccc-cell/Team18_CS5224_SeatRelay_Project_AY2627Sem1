@@ -1,4 +1,10 @@
-import type { Context, SQSBatchItemFailure, SQSBatchResponse, SQSEvent, SQSRecord } from 'aws-lambda';
+import type {
+  Context,
+  SQSBatchItemFailure,
+  SQSBatchResponse,
+  SQSEvent,
+  SQSRecord,
+} from 'aws-lambda';
 import { CommandSchema, type Command } from '@seatrelay/contracts';
 import {
   FaultInjectedError,
@@ -98,7 +104,10 @@ export function createWorkerHandler(deps: WorkerHandlerDeps): WorkerHandler {
           if (error instanceof FaultInjectedError) {
             ports.logger.warn('injected fault; message will be redelivered', fields);
           } else {
-            ports.logger.error('infrastructure error; reporting this and following records', fields);
+            ports.logger.error(
+              'infrastructure error; reporting this and following records',
+              fields,
+            );
           }
           for (const rest of records.slice(index)) {
             failures.push({ itemIdentifier: rest.messageId });

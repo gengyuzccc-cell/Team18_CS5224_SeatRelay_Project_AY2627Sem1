@@ -41,7 +41,11 @@ import {
 
 describe('item mapping', () => {
   test('every item carries entityType and its keys', () => {
-    expect(organizationItem(organization)).toMatchObject({ PK: 'ORG#org-1', SK: 'META', entityType: 'ORGANIZATION' });
+    expect(organizationItem(organization)).toMatchObject({
+      PK: 'ORG#org-1',
+      SK: 'META',
+      entityType: 'ORGANIZATION',
+    });
     expect(orgMemberItem('org-1', 'alice', T0)).toMatchObject({
       PK: 'ORG#org-1',
       SK: 'M#alice',
@@ -65,7 +69,11 @@ describe('item mapping', () => {
       workshopId: WS,
       nextDueAt: T0,
     });
-    expect(sessionItem(session1)).toMatchObject({ PK: `WS#${WS}`, SK: 'L#S#s1', entityType: 'SESSION' });
+    expect(sessionItem(session1)).toMatchObject({
+      PK: `WS#${WS}`,
+      SK: 'L#S#s1',
+      entityType: 'SESSION',
+    });
     expect(liveRegistrationItem(registration())).toMatchObject({
       PK: `WS#${WS}`,
       SK: 'L#R#00000001',
@@ -80,9 +88,18 @@ describe('item mapping', () => {
       status: 'CANCELLED',
     });
     expect(liveOfferItem(offer())).toMatchObject({ SK: 'L#O#offer-1', entityType: 'OFFER' });
-    expect(historyOfferItem(offer({ status: 'EXPIRED' }))).toMatchObject({ SK: 'H#O#offer-1', status: 'EXPIRED' });
-    expect(pendingBackfillItem(backfill())).toMatchObject({ SK: `L#BF#${T0}#bf-1`, entityType: 'BACKFILL' });
-    expect(historyBackfillItem(backfill())).toMatchObject({ SK: `H#BF#${T0}#bf-1`, entityType: 'BACKFILL' });
+    expect(historyOfferItem(offer({ status: 'EXPIRED' }))).toMatchObject({
+      SK: 'H#O#offer-1',
+      status: 'EXPIRED',
+    });
+    expect(pendingBackfillItem(backfill())).toMatchObject({
+      SK: `L#BF#${T0}#bf-1`,
+      entityType: 'BACKFILL',
+    });
+    expect(historyBackfillItem(backfill())).toMatchObject({
+      SK: `H#BF#${T0}#bf-1`,
+      entityType: 'BACKFILL',
+    });
     expect(commandResultItem(commandResult())).toMatchObject({
       PK: `CMD#${commandResult().commandId}`,
       SK: 'META',
@@ -101,7 +118,13 @@ describe('item mapping', () => {
 
   test('unique marker is keyed per registration scope', () => {
     const unified = uniqueMarkerItem('UNIFIED', registration());
-    expect(unified).toMatchObject({ SK: 'L#U#bob', scope: 'bob', seq: 1, status: 'QUEUED', entityType: 'UNIQUE_MARKER' });
+    expect(unified).toMatchObject({
+      SK: 'L#U#bob',
+      scope: 'bob',
+      seq: 1,
+      status: 'QUEUED',
+      entityType: 'UNIQUE_MARKER',
+    });
     const perSession = uniqueMarkerItem('PER_SESSION', registration({ acceptable: ['s2'] }));
     expect(perSession).toMatchObject({ SK: 'L#U#bob#s2', scope: 'bob#s2' });
   });
@@ -122,16 +145,37 @@ describe('item mapping', () => {
     expect(toOffer(liveOfferItem(offer()))).toEqual(offer());
     const settled = offer({ status: 'ACCEPTED', settledAt: T0 });
     expect(toOffer(historyOfferItem(settled))).toEqual(settled);
-    const relayed = backfill({ reallocatedAt: T0, newOfferId: 'o2', newUserId: 'carol', latencyMs: 0 });
+    const relayed = backfill({
+      reallocatedAt: T0,
+      newOfferId: 'o2',
+      newUserId: 'carol',
+      latencyMs: 0,
+    });
     expect(toBackfillRecord(historyBackfillItem(relayed))).toEqual(relayed);
     expect(toBackfillRecord(pendingBackfillItem(backfill()))).toEqual(backfill());
-    const attendance = { workshopId: WS, userId: 'bob', attended: true, markedAt: T0, markedBy: 'alice' };
+    const attendance = {
+      workshopId: WS,
+      userId: 'bob',
+      attended: true,
+      markedAt: T0,
+      markedBy: 'alice',
+    };
     expect(toAttendance(attendanceItem(attendance))).toEqual(attendance);
-    const applied = commandResult({ status: 'APPLIED', settledAt: T0, result: { offersCreated: 1 } });
+    const applied = commandResult({
+      status: 'APPLIED',
+      settledAt: T0,
+      result: { offersCreated: 1 },
+    });
     expect(toCommandResult(commandResultItem(applied))).toEqual(applied);
-    const rejected = commandResult({ status: 'REJECTED', reason: 'ALREADY_REGISTERED', settledAt: T0 });
+    const rejected = commandResult({
+      status: 'REJECTED',
+      reason: 'ALREADY_REGISTERED',
+      settledAt: T0,
+    });
     expect(toCommandResult(commandResultItem(rejected))).toEqual(rejected);
-    expect(toNotification(notificationItem(notification({ readAt: T0 })))).toEqual(notification({ readAt: T0 }));
+    expect(toNotification(notificationItem(notification({ readAt: T0 })))).toEqual(
+      notification({ readAt: T0 }),
+    );
   });
 
   test('reading back drops adapter-only attributes and rejects corrupt items', () => {

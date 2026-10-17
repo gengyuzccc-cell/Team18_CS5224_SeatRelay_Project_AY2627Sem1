@@ -257,10 +257,16 @@ importers:
       '@seatrelay/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@seatrelay/scripts':
+        specifier: workspace:*
+        version: link:../scripts
       zod:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@seatrelay/service':
+        specifier: workspace:*
+        version: link:../../packages/service
       tsx:
         specifier: 4.23.15
         version: 4.23.15
@@ -272,13 +278,29 @@ importers:
         version: 3.2.7(@types/node@20.19.43)(tsx@4.23.15)
 
   tools/loadtest:
+    dependencies:
+      '@aws-sdk/client-cloudwatch':
+        specifier: 3.1152.0
+        version: 3.1152.0
+      '@seatrelay/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@seatrelay/scripts':
+        specifier: workspace:*
+        version: link:../scripts
     devDependencies:
+      aws-sdk-client-mock:
+        specifier: 4.1.0
+        version: 4.1.0
       tsx:
         specifier: 4.23.15
         version: 4.23.15
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      vitest:
+        specifier: 3.2.7
+        version: 3.2.7(@types/node@20.19.43)(tsx@4.23.15)
 
   tools/replay:
     dependencies:
@@ -332,12 +354,21 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
     devDependencies:
+      '@seatrelay/service':
+        specifier: workspace:*
+        version: link:../../packages/service
+      aws-sdk-client-mock:
+        specifier: 4.1.0
+        version: 4.1.0
       tsx:
         specifier: 4.23.15
         version: 4.23.15
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      vitest:
+        specifier: 3.2.7
+        version: 3.2.7(@types/node@20.19.43)(tsx@4.23.15)
 
 packages:
 

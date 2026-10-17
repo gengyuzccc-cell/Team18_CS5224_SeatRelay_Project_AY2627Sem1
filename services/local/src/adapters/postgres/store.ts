@@ -183,24 +183,24 @@ export class PostgresWorkshopStore implements WorkshopStore {
         if (row === undefined) {
           return undefined;
         }
-        const [sessions, registrations, offers, pending] = await Promise.all([
-          client.query<SessionRow>(
-            `SELECT * FROM sessions WHERE workshop_id = $1 ORDER BY starts_at, id`,
-            [wsId],
-          ),
-          client.query<RegistrationRow>(
-            `SELECT * FROM registrations WHERE workshop_id = $1 ORDER BY seq`,
-            [wsId],
-          ),
-          client.query<OfferRow>(
-            `SELECT * FROM offers WHERE workshop_id = $1 ORDER BY created_at, id`,
-            [wsId],
-          ),
-          client.query<BackfillRow>(
-            `SELECT * FROM backfill_records WHERE workshop_id = $1 AND pending ORDER BY released_at, id`,
-            [wsId],
-          ),
-        ]);
+        // One query at a time: a single connection cannot run them concurrently (pg queues
+        // and deprecates overlapping calls).
+        const sessions = await client.query<SessionRow>(
+          `SELECT * FROM sessions WHERE workshop_id = $1 ORDER BY starts_at, id`,
+          [wsId],
+        );
+        const registrations = await client.query<RegistrationRow>(
+          `SELECT * FROM registrations WHERE workshop_id = $1 ORDER BY seq`,
+          [wsId],
+        );
+        const offers = await client.query<OfferRow>(
+          `SELECT * FROM offers WHERE workshop_id = $1 ORDER BY created_at, id`,
+          [wsId],
+        );
+        const pending = await client.query<BackfillRow>(
+          `SELECT * FROM backfill_records WHERE workshop_id = $1 AND pending ORDER BY released_at, id`,
+          [wsId],
+        );
         return {
           workshop: toWorkshop(row),
           sessions: sessions.rows.map(toSession),
@@ -354,16 +354,14 @@ export class PostgresWorkshopStore implements WorkshopStore {
   }
 
   async listHistory(wsId: string): Promise<WorkshopHistory> {
-    const [registrations, offers] = await Promise.all([
-      this.executor.query<RegistrationRow>(
-        `SELECT * FROM registrations_history WHERE workshop_id = $1 ORDER BY seq`,
-        [wsId],
-      ),
-      this.executor.query<OfferRow>(
-        `SELECT * FROM offers_history WHERE workshop_id = $1 ORDER BY created_at, id`,
-        [wsId],
-      ),
-    ]);
+    const registrations = await this.executor.query<RegistrationRow>(
+      `SELECT * FROM registrations_history WHERE workshop_id = $1 ORDER BY seq`,
+      [wsId],
+    );
+    const offers = await this.executor.query<OfferRow>(
+      `SELECT * FROM offers_history WHERE workshop_id = $1 ORDER BY created_at, id`,
+      [wsId],
+    );
     return {
       registrations: registrations.rows.map(toRegistration),
       offers: offers.rows.map(toOffer),
