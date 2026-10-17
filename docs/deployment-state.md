@@ -22,7 +22,11 @@ test user `smoke1@example.com` (created with `MessageAction=SUPPRESS`) minted an
 tooling client with `email` and `name` claims.
 
 SES: account is in the **sandbox** (200 mails/24 h, 1 mail/s, verified recipients only). Production
-access request: see `docs/ses-production-request.md`.
+access request: **submitted 2026-10-17 00:5x UTC via `sesv2 put-account-details`** (status PENDING; mail type
+TRANSACTIONAL, website URL = CloudFront URL, use case = `docs/ses-production-request.md` §3). Account-level
+suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounce/Complaint, with headers)
+published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for gengyuzccc@gmail.com is pending
+confirmation (click the SNS confirmation e-mail).
 
 ## seatrelay-web-dev (deployed 2026-10-16, CREATE_COMPLETE)
 
