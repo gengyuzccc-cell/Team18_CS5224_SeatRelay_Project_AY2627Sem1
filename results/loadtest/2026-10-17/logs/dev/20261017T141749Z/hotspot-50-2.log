@@ -1,0 +1,13 @@
+
+seatrelay hotspot  target=dev vus=50 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 255 (measured 70)
+  http_reqs ............. 10480   failed 8.01 %
+  read_ms   p50 / p95 ... 274.8 ms / 306.7 ms
+  command_ms (202) ...... 283.4 ms / 298.1 ms
+  poll_ms ............... 271.1 ms / 284.7 ms
+  settle_ms (client) .... 25989.0 ms / 29943.0 ms
+  server_settle_ms ...... 25328.0 ms / 29335.0 ms
+  polls per command avg . 47.80
+  commands_failed ....... 19   rejected 8   settle_timeouts 60
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:58:31Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"

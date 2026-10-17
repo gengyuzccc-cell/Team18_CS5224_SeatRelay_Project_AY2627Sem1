@@ -1136,3 +1136,1286 @@ All 204 checks passed.
 [13:26:50] PASS 3 accept storm / verify after phase — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
 [13:26:50] PASS 3 accept storm / confirmed ≤ capacity in every session — expected confirmed = 5, ≤ capacity per session (2/2/1), got S1 2/2, S2 2/2, S3 1/1
 [13:26:50] waiting 90 s for CloudWatch to ingest the run's metrics
+# concurrency — Concurrency (plan §4, Table 3)
+
+- Verdict: **FAIL** (22/39 checks passed)
+- Pass criterion (plan §4): final state satisfies every invariant (verify ok, 0 over-capacity, 0 double holds) after each concurrent phase; META conflict retries recorded (expected 0)
+- Run id: `a6983ff8-cf1d-44c5-9b89-94751e701ca4`, started 2026-10-17T13:26:18.893Z, finished 2026-10-17T13:28:21.194Z (122 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 900; fault flags: on
+- Commit: ec54916a2dcb44302be594f6ff5da93bcdf7ef5e (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/concurrency.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+## Result
+
+- Setup: 50 concurrent accounts race for 3 sessions with 5 seats in total (capacities 2/2/1; 10.0 accounts per seat)
+- Commands: 209 (76 transport errors / settle timeouts)
+- Same-account races: 5/15 consistent; first effective command: CANCEL 7, ACCEPT 3, DECLINE 5
+- META conflict retries in the window: **0** (expected 0: FIFO, one consumer per workshop)
+
+## Per run
+
+| run | offered after race | queued after race | relayed after same-account race | confirmed at end | backfill records |
+|---|---|---|---|---|---|
+| 1 | 5 | 24 | 4 | 5 | 4 |
+| 2 | 5 | 27 | 5 | 5 | 5 |
+| 3 | 5 | 32 | 5 | 5 | 6 |
+
+## Settle latencies
+
+| sample | n | p50 ms | p95 ms | p99 ms | max ms | mean ms |
+|---|---|---|---|---|---|---|
+| 1 register race: client-observed | 86 | 2023 | 7798 | 7839 | 7839 | 3414.0 |
+| 1 register race: server-side | 86 | 975 | 6432 | 6593 | 6593 | 2364.1 |
+| 2 same-account race: client-observed | 33 | 796 | 1432 | 1539 | 1539 | 885.1 |
+| 2 same-account race: server-side | 33 | 241 | 499 | 566 | 566 | 258.7 |
+| 3 accept storm: client-observed | 14 | 788 | 823 | 823 | 823 | 787.8 |
+| 3 accept storm: server-side | 14 | 119 | 221 | 221 | 221 | 116.7 |
+| all commands: client-observed | 133 | 1002 | 7788 | 7838 | 7839 | 2510.1 |
+| all commands: server-side | 133 | 447 | 6349 | 6549 | 6593 | 1605.1 |
+
+## Same-account races
+
+| account | POST order | first effective | ACCEPT | DECLINE | CANCEL | verdict |
+|---|---|---|---|---|---|---|
+| 1 | CANCEL>DECLINE>ACCEPT | CANCEL | REJECTED(OFFER_NOT_ACTIVE) | ERROR HTTP 503 HTTP_ERROR | APPLIED | FAIL |
+| 13 | DECLINE>CANCEL>ACCEPT | CANCEL | ERROR HTTP 503 HTTP_ERROR | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | FAIL |
+| 6 | ACCEPT>DECLINE>CANCEL | ACCEPT | APPLIED | REJECTED(OFFER_NOT_ACTIVE) | ERROR HTTP 503 HTTP_ERROR | FAIL |
+| 15 | CANCEL>DECLINE>ACCEPT | CANCEL | ERROR HTTP 503 HTTP_ERROR | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | FAIL |
+| 17 | DECLINE>CANCEL>ACCEPT | CANCEL | REJECTED(OFFER_NOT_ACTIVE) | ERROR HTTP 503 HTTP_ERROR | APPLIED | FAIL |
+| 3 | DECLINE>CANCEL>ACCEPT | DECLINE | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | ERROR HTTP 503 HTTP_ERROR | FAIL |
+| 2 | ACCEPT>CANCEL>DECLINE | CANCEL | REJECTED(OFFER_NOT_ACTIVE) | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | PASS |
+| 4 | DECLINE>ACCEPT>CANCEL | ACCEPT | APPLIED | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | PASS |
+| 10 | ACCEPT>DECLINE>CANCEL | CANCEL | REJECTED(OFFER_NOT_ACTIVE) | ERROR HTTP 503 HTTP_ERROR | APPLIED | FAIL |
+| 15 | DECLINE>ACCEPT>CANCEL | CANCEL | REJECTED(OFFER_NOT_ACTIVE) | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | PASS |
+| 15 | ACCEPT>CANCEL>DECLINE | ACCEPT | APPLIED | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | PASS |
+| 2 | CANCEL>ACCEPT>DECLINE | DECLINE | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | ERROR HTTP 503 HTTP_ERROR | FAIL |
+| 14 | CANCEL>ACCEPT>DECLINE | DECLINE | REJECTED(OFFER_NOT_ACTIVE) | APPLIED | APPLIED | PASS |
+| 8 | ACCEPT>CANCEL>DECLINE | DECLINE | ERROR HTTP 503 HTTP_ERROR | APPLIED | ERROR HTTP 503 HTTP_ERROR | FAIL |
+| 5 | ACCEPT>DECLINE>CANCEL | DECLINE | ERROR HTTP 503 HTTP_ERROR | APPLIED | ERROR HTTP 503 HTTP_ERROR | FAIL |
+
+## Metrics
+
+Source: CloudWatch SeatRelay sums 2026-10-17T13:25:19.605Z → 2026-10-17T13:29:20.207Z (metrics may lag by ~1 min)
+
+| metric | sum | samples | note |
+|---|---|---|---|
+| MetaConflictRetries | 0 | 0 | expected 0 |
+| CommandSettledLatency | 0 | 0 | server-side settle ms (sum / samples) |
+| OffersCreated | 0 | 0 |  |
+
+## Checks
+
+17 of 39 checks failed:
+
+| run | scenario | step | expected | actual | detail |
+|---|---|---|---|---|---|
+| 1 | 1 register race | every REGISTER settled APPLIED | 50 | 27 | ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR |
+| 1 | 1 register race | seq unique and gap-free (R2) | 1..27 | 29 seqs, 1..29 |  |
+| 1 | 2 same-account race | account 1: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first CANCEL; ACCEPT REJECTED(OFFER_NOT_ACTIVE), DECLINE ERROR HTTP 503 HTTP_ERROR, CANCEL APPLIED; live none |  |
+| 1 | 2 same-account race | account 13: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first CANCEL; ACCEPT ERROR HTTP 503 HTTP_ERROR, DECLINE REJECTED(OFFER_NOT_ACTIVE), CANCEL APPLIED; live none |  |
+| 1 | 2 same-account race | account 6: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first ACCEPT; ACCEPT APPLIED, DECLINE REJECTED(OFFER_NOT_ACTIVE), CANCEL ERROR HTTP 503 HTTP_ERROR; live CONFIRMED |  |
+| 1 | 2 same-account race | account 15: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first CANCEL; ACCEPT ERROR HTTP 503 HTTP_ERROR, DECLINE REJECTED(OFFER_NOT_ACTIVE), CANCEL APPLIED; live none |  |
+| 1 | 2 same-account race | account 17: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first CANCEL; ACCEPT REJECTED(OFFER_NOT_ACTIVE), DECLINE ERROR HTTP 503 HTTP_ERROR, CANCEL APPLIED; live none |  |
+| 1 | 3 accept storm | confirmed ≤ capacity in every session | confirmed = 4, ≤ capacity per session (2/2/1) | S1 2/2, S2 2/2, S3 1/1 |  |
+| 2 | 1 register race | every REGISTER settled APPLIED | 50 | 26 | ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR |
+| 2 | 1 register race | seq unique and gap-free (R2) | 1..26 | 32 seqs, 1..32 |  |
+| 2 | 2 same-account race | account 3: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first DECLINE; ACCEPT REJECTED(OFFER_NOT_ACTIVE), DECLINE APPLIED, CANCEL ERROR HTTP 503 HTTP_ERROR; live OFFERED |  |
+| 2 | 2 same-account race | account 10: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first CANCEL; ACCEPT REJECTED(OFFER_NOT_ACTIVE), DECLINE ERROR HTTP 503 HTTP_ERROR, CANCEL APPLIED; live none |  |
+| 3 | 1 register race | every REGISTER settled APPLIED | 50 | 33 | ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR; ERROR HTTP 503 HTTP_ERROR |
+| 3 | 1 register race | seq unique and gap-free (R2) | 1..33 | 37 seqs, 1..37 |  |
+| 3 | 2 same-account race | account 2: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first DECLINE; ACCEPT REJECTED(OFFER_NOT_ACTIVE), DECLINE APPLIED, CANCEL ERROR HTTP 503 HTTP_ERROR; live OFFERED |  |
+| 3 | 2 same-account race | account 8: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first DECLINE; ACCEPT ERROR HTTP 503 HTTP_ERROR, DECLINE APPLIED, CANCEL ERROR HTTP 503 HTTP_ERROR; live OFFERED |  |
+| 3 | 2 same-account race | account 5: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left | never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration | first DECLINE; ACCEPT ERROR HTTP 503 HTTP_ERROR, DECLINE APPLIED, CANCEL ERROR HTTP 503 HTTP_ERROR; live OFFERED |  |
+
+[13:28:21] FAIL: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-concurrency
+/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @seatrelay/experiments@0.1.0 concurrency: `tsx src/concurrency.ts --target dev --runs 3 --accounts 50`
+Exit status 1
+[13:28:21] === concurrency finished exit=1 ===
+[13:28:21] === repeat-execution (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 repeat-execution /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/repeat-execution.ts --target dev --runs 3
+
+[13:28:23] repeat-execution: Repeat execution (plan §4, Table 3; C3) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":900,"faults":true,"dir":"results/2026-10-17-repeat-execution","commit":"c1d066056b2c"}
+[13:28:24] --- run 1/3
+[13:28:26] PASS REGISTER ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:28:27] PASS REGISTER ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:28:26.083Z, got identical
+[13:28:27] PASS REGISTER ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:28:26.083Z, got APPLIED settledAt 2026-10-17T13:28:26.083Z
+[13:28:29] PASS REGISTER ×N / effect applied exactly once — expected seq +1, A OFFERED@S1, S1 held 1, 1 OFFER notification, got seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1
+[13:28:29] PASS commandId reuse / another user reusing a commandId — expected 409 CONFLICT, got 409 CONFLICT
+[13:28:29] PASS commandId reuse / same user, same commandId, different body → the original record (idempotency key wins) — expected REGISTER APPLIED, got REGISTER APPLIED
+[13:28:29] PASS commandId reuse / no effect — expected A OFFERED@S1, got A OFFERED@S1
+[13:28:30] PASS ACCEPT ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:28:30] PASS ACCEPT ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:28:30.085Z, got identical
+[13:28:31] PASS ACCEPT ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:28:30.085Z, got APPLIED settledAt 2026-10-17T13:28:30.085Z
+[13:28:31] PASS ACCEPT ×N / effect applied exactly once — expected S1 confirmed 1, held 0, 1 CONFIRMED notification, got S1 confirmed 1 held 0, CONFIRMED notifications 1
+[13:28:32] PASS CANCEL ×N / B queues behind A — expected QUEUED#1, got QUEUED#1
+[13:28:33] PASS CANCEL ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:28:33] PASS CANCEL ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:28:33.053Z, got identical
+[13:28:34] PASS CANCEL ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:28:33.053Z, got APPLIED settledAt 2026-10-17T13:28:33.053Z
+[13:28:34] PASS CANCEL ×N / effect applied exactly once — expected S1 confirmed 0 held 1, 1 CANCELLED_CONFIRMED record, B OFFERED@S1 once, A none, got S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none
+[13:28:35] PASS DECLINE ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:28:36] PASS DECLINE ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:28:35.162Z, got identical
+[13:28:36] PASS DECLINE ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:28:35.162Z, got APPLIED settledAt 2026-10-17T13:28:35.162Z
+[13:28:36] PASS DECLINE ×N / effect applied exactly once — expected S1 held 0, 1 DECLINED record, B none, got S1 held 0, DECLINED records 1, B none
+[13:30:40] PASS AFTER_COMMIT / REGISTER and ACCEPT settle APPLIED on the first (crashing) delivery — expected APPLIED, APPLIED, got APPLIED, APPLIED
+[13:30:40] waiting up to 28 s for the redelivery of 926549c5-b964-4369-b3ac-ca1f5e1926f8 (visibility timeout)
+[13:31:12] PASS AFTER_COMMIT / REGISTER was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:31:12] waiting up to 118 s for the redelivery of 98787881-5de5-4de9-98de-0af265725f44 (visibility timeout)
+[13:33:14] PASS AFTER_COMMIT / ACCEPT was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:33:17] PASS AFTER_COMMIT / effect applied exactly once — expected seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, 1 OFFER + 1 CONFIRMED notification, records unchanged, got seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true
+[13:33:17] PASS final / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:33:17] --- run 2/3
+[13:33:18] PASS REGISTER ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:33:19] PASS REGISTER ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:33:18.552Z, got identical
+[13:33:20] PASS REGISTER ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:33:18.552Z, got APPLIED settledAt 2026-10-17T13:33:18.552Z
+[13:33:21] PASS REGISTER ×N / effect applied exactly once — expected seq +1, A OFFERED@S1, S1 held 1, 1 OFFER notification, got seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1
+[13:33:21] PASS commandId reuse / another user reusing a commandId — expected 409 CONFLICT, got 409 CONFLICT
+[13:33:21] PASS commandId reuse / same user, same commandId, different body → the original record (idempotency key wins) — expected REGISTER APPLIED, got REGISTER APPLIED
+[13:33:21] PASS commandId reuse / no effect — expected A OFFERED@S1, got A OFFERED@S1
+[13:33:22] PASS ACCEPT ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:33:23] PASS ACCEPT ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:33:22.155Z, got identical
+[13:33:23] PASS ACCEPT ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:33:22.155Z, got APPLIED settledAt 2026-10-17T13:33:22.155Z
+[13:33:24] PASS ACCEPT ×N / effect applied exactly once — expected S1 confirmed 1, held 0, 1 CONFIRMED notification, got S1 confirmed 1 held 0, CONFIRMED notifications 1
+[13:33:25] PASS CANCEL ×N / B queues behind A — expected QUEUED#1, got QUEUED#1
+[13:33:25] PASS CANCEL ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:33:26] PASS CANCEL ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:33:25.503Z, got identical
+[13:33:26] PASS CANCEL ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:33:25.503Z, got APPLIED settledAt 2026-10-17T13:33:25.503Z
+[13:33:27] PASS CANCEL ×N / effect applied exactly once — expected S1 confirmed 0 held 1, 1 CANCELLED_CONFIRMED record, B OFFERED@S1 once, A none, got S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none
+[13:33:27] PASS DECLINE ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:33:28] PASS DECLINE ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:33:27.716Z, got identical
+[13:33:28] PASS DECLINE ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:33:27.716Z, got APPLIED settledAt 2026-10-17T13:33:27.716Z
+[13:33:29] PASS DECLINE ×N / effect applied exactly once — expected S1 held 0, 1 DECLINED record, B none, got S1 held 0, DECLINED records 1, B none
+[13:35:33] PASS AFTER_COMMIT / REGISTER and ACCEPT settle APPLIED on the first (crashing) delivery — expected APPLIED, APPLIED, got APPLIED, APPLIED
+[13:35:33] waiting up to 27 s for the redelivery of d3ba4701-c899-4ff6-8b0f-63fe655fe2fe (visibility timeout)
+[13:36:03] PASS AFTER_COMMIT / REGISTER was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:36:03] waiting up to 120 s for the redelivery of a48adef3-7fc3-4137-8c5c-1d5f1e7a4d16 (visibility timeout)
+[13:38:07] PASS AFTER_COMMIT / ACCEPT was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:38:10] PASS AFTER_COMMIT / effect applied exactly once — expected seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, 1 OFFER + 1 CONFIRMED notification, records unchanged, got seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true
+[13:38:11] PASS final / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:38:11] --- run 3/3
+[13:38:12] PASS REGISTER ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:38:13] PASS REGISTER ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:38:11.993Z, got identical
+[13:38:13] PASS REGISTER ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:38:11.993Z, got APPLIED settledAt 2026-10-17T13:38:11.993Z
+[13:38:14] PASS REGISTER ×N / effect applied exactly once — expected seq +1, A OFFERED@S1, S1 held 1, 1 OFFER notification, got seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1
+[13:38:14] PASS commandId reuse / another user reusing a commandId — expected 409 CONFLICT, got 409 CONFLICT
+[13:38:14] PASS commandId reuse / same user, same commandId, different body → the original record (idempotency key wins) — expected REGISTER APPLIED, got REGISTER APPLIED
+[13:38:15] PASS commandId reuse / no effect — expected A OFFERED@S1, got A OFFERED@S1
+[13:38:15] PASS ACCEPT ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:38:16] PASS ACCEPT ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:38:15.364Z, got identical
+[13:38:16] PASS ACCEPT ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:38:15.364Z, got APPLIED settledAt 2026-10-17T13:38:15.364Z
+[13:38:17] PASS ACCEPT ×N / effect applied exactly once — expected S1 confirmed 1, held 0, 1 CONFIRMED notification, got S1 confirmed 1 held 0, CONFIRMED notifications 1
+[13:38:17] PASS CANCEL ×N / B queues behind A — expected QUEUED#1, got QUEUED#1
+[13:38:18] PASS CANCEL ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:38:19] PASS CANCEL ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:38:18.335Z, got identical
+[13:38:19] PASS CANCEL ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:38:18.335Z, got APPLIED settledAt 2026-10-17T13:38:18.335Z
+[13:38:20] PASS CANCEL ×N / effect applied exactly once — expected S1 confirmed 0 held 1, 1 CANCELLED_CONFIRMED record, B OFFERED@S1 once, A none, got S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none
+[13:38:20] PASS DECLINE ×N / 5 concurrent POSTs of one commandId answered 202 with that commandId — expected 5, got 5
+[13:38:21] PASS DECLINE ×N / 5 GETs return the identical settled record — expected APPLIED settledAt 2026-10-17T13:38:20.459Z, got identical
+[13:38:21] PASS DECLINE ×N / re-POST after settlement returns the settled record (no re-execution) — expected APPLIED settledAt 2026-10-17T13:38:20.459Z, got APPLIED settledAt 2026-10-17T13:38:20.459Z
+[13:38:21] PASS DECLINE ×N / effect applied exactly once — expected S1 held 0, 1 DECLINED record, B none, got S1 held 0, DECLINED records 1, B none
+[13:40:25] PASS AFTER_COMMIT / REGISTER and ACCEPT settle APPLIED on the first (crashing) delivery — expected APPLIED, APPLIED, got APPLIED, APPLIED
+[13:40:25] waiting up to 27 s for the redelivery of 243035dc-1902-4b70-921e-a8e7c99ffed9 (visibility timeout)
+[13:40:57] PASS AFTER_COMMIT / REGISTER was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:40:57] waiting up to 118 s for the redelivery of a74d73d7-17c7-4203-bb9f-1ebcfd2675ce (visibility timeout)
+[13:43:00] PASS AFTER_COMMIT / ACCEPT was redelivered (the fault fired) and acknowledged — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:43:02] PASS AFTER_COMMIT / effect applied exactly once — expected seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, 1 OFFER + 1 CONFIRMED notification, records unchanged, got seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true
+[13:43:03] PASS final / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+# repeat-execution — Repeat execution (plan §4, Table 3; C3)
+
+- Verdict: **PASS** (75/75 checks passed)
+- Pass criterion (plan §4): no double booking or double release: one command record, settled once (APPLIED once), identical on every read; AFTER_COMMIT redelivery applies nothing twice
+- Run id: `3a636ec3-6a43-46f2-88ce-dd04a3288809`, started 2026-10-17T13:28:23.895Z, finished 2026-10-17T13:43:03.555Z (880 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 900; fault flags: on
+- Commit: c1d066056b2c9d36cc33869629f99f390451c101 (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/repeat-execution.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+## Result
+
+- Probes: 18/18 with one settled record, identical reads and the effect exactly once
+- Fault flags: on (AFTER_COMMIT cases ran)
+
+## Probes
+
+| run | case | POSTs → 202 | 202 statuses | final | identical reads | re-POST identical | deliveries | effect | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | REGISTER ×N | 5 → 5 | ACCEPTED/APPLIED/APPLIED/APPLIED/APPLIED | APPLIED | true | true | — | seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1 | PASS |
+| 1 | ACCEPT ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 1 held 0, CONFIRMED notifications 1 | PASS |
+| 1 | CANCEL ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none | PASS |
+| 1 | DECLINE ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 held 0, DECLINED records 1, B none | PASS |
+| 1 | REGISTER (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+| 1 | ACCEPT (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+| 2 | REGISTER ×N | 5 → 5 | ACCEPTED/APPLIED/APPLIED/APPLIED/ACCEPTED | APPLIED | true | true | — | seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1 | PASS |
+| 2 | ACCEPT ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/APPLIED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 1 held 0, CONFIRMED notifications 1 | PASS |
+| 2 | CANCEL ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/APPLIED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none | PASS |
+| 2 | DECLINE ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 held 0, DECLINED records 1, B none | PASS |
+| 2 | REGISTER (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+| 2 | ACCEPT (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+| 3 | REGISTER ×N | 5 → 5 | ACCEPTED/ACCEPTED/APPLIED/APPLIED/APPLIED | APPLIED | true | true | — | seq +1, A OFFERED@S1, S1 held 1, OFFER notifications 1 | PASS |
+| 3 | ACCEPT ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 1 held 0, CONFIRMED notifications 1 | PASS |
+| 3 | CANCEL ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 confirmed 0 held 1, CANCELLED_CONFIRMED records 1, B OFFERED@S1 (1 OFFER notifications), A none | PASS |
+| 3 | DECLINE ×N | 5 → 5 | ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED/ACCEPTED | APPLIED | true | true | — | S1 held 0, DECLINED records 1, B none | PASS |
+| 3 | REGISTER (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+| 3 | ACCEPT (AFTER_COMMIT) | 1 → 1 |  | APPLIED | true | true | REGISTER: 2, ACCEPT: 2 | seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, notifications OFFER 1 CONFIRMED 1, records unchanged after redelivery: true/true | PASS |
+
+## AFTER_COMMIT delivery traces
+
+- run 1: REGISTER: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:28:37.206 injected fault; message will be redelivered (delivery 1) message=4b6f38bd-c592-4e7a-9b11-d321fbc4afa9 | 2026-10-17 13:30:37.113 command already settled; acknowledging redelivery | 2026-10-17 13:30:37.117 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:30:37.117 internal command had nothing to do | 2026-10-17 13:30:37.117 message processed (delivery 2) outcome=ALREADY_SETTLED message=4b6f38bd-c592-4e7a-9b11-d321fbc4afa9 || ACCEPT: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:30:37.197 injected fault; message will be redelivered (delivery 1) message=31c80dcf-a86c-436b-a6ee-e29c8adca244 | 2026-10-17 13:32:37.199 command already settled; acknowledging redelivery | 2026-10-17 13:32:37.204 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:32:37.204 internal command had nothing to do | 2026-10-17 13:32:37.204 message processed (delivery 2) outcome=ALREADY_SETTLED message=31c80dcf-a86c-436b-a6ee-e29c8adca244
+- run 2: REGISTER: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:33:29.580 injected fault; message will be redelivered (delivery 1) message=b76e2305-e795-45b7-8939-faa8244f6723 | 2026-10-17 13:35:29.585 command already settled; acknowledging redelivery | 2026-10-17 13:35:29.591 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:35:29.591 internal command had nothing to do | 2026-10-17 13:35:29.591 message processed (delivery 2) outcome=ALREADY_SETTLED message=b76e2305-e795-45b7-8939-faa8244f6723 || ACCEPT: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:35:29.654 injected fault; message will be redelivered (delivery 1) message=46582932-8af4-41b4-a62b-7a62d9b34c67 | 2026-10-17 13:37:29.655 command already settled; acknowledging redelivery | 2026-10-17 13:37:29.660 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:37:29.660 internal command had nothing to do | 2026-10-17 13:37:29.660 message processed (delivery 2) outcome=ALREADY_SETTLED message=46582932-8af4-41b4-a62b-7a62d9b34c67
+- run 3: REGISTER: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:38:22.444 injected fault; message will be redelivered (delivery 1) message=1ae3b22f-2850-48a1-8b32-50754085b864 | 2026-10-17 13:40:22.455 command already settled; acknowledging redelivery | 2026-10-17 13:40:22.461 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:40:22.461 internal command had nothing to do | 2026-10-17 13:40:22.461 message processed (delivery 2) outcome=ALREADY_SETTLED message=1ae3b22f-2850-48a1-8b32-50754085b864 || ACCEPT: 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged) — 2026-10-17 13:40:22.507 injected fault; message will be redelivered (delivery 1) message=43eb9ceb-e52d-4594-afd8-1cb95060c53c | 2026-10-17 13:42:22.540 command already settled; acknowledging redelivery | 2026-10-17 13:42:22.544 convergence pass after a settled redelivery outcome=NOOP | 2026-10-17 13:42:22.544 internal command had nothing to do | 2026-10-17 13:42:22.544 message processed (delivery 2) outcome=ALREADY_SETTLED message=43eb9ceb-e52d-4594-afd8-1cb95060c53c
+
+## Checks
+
+All 75 checks passed.
+
+[13:43:03] PASS: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-repeat-execution
+[13:43:03] === repeat-execution finished exit=0 ===
+[13:43:03] === expiry-race (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 expiry-race /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/expiry-race.ts --target dev --runs 3 --hold 60
+
+[13:43:06] expiry-race: Expiry race (plan §4, Table 3; tick-first, §1.2) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":60,"faults":true,"dir":"results/2026-10-17-expiry-race","commit":"c1d066056b2c"}
+[13:43:09] server clock offset 20 ms (rtt 234 ms)
+[13:43:10] run 1 early attempt 1: offer expires at 2026-10-17T13:44:10.230Z; ACCEPT due at expiresAt − 200 ms
+[13:43:11] run 1 late: offer expires at 2026-10-17T13:44:09.855Z; waiting ~59 s
+[13:43:12] run 2 early attempt 1: offer expires at 2026-10-17T13:44:11.875Z; ACCEPT due at expiresAt − 200 ms
+[13:43:13] run 2 late: offer expires at 2026-10-17T13:44:11.798Z; waiting ~59 s
+[13:43:14] run 3 early attempt 1: offer expires at 2026-10-17T13:44:13.789Z; ACCEPT due at expiresAt − 200 ms
+[13:43:15] run 3 late: offer expires at 2026-10-17T13:44:13.841Z; waiting ~59 s
+[13:44:11] PASS early / attempt 1: outcome consistent with the server clock — expected APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got REJECTED(OFFER_EXPIRED) acceptedAt 2026-10-17T13:44:10.592Z settledAt 2026-10-17T13:44:10.641Z
+[13:44:12] PASS early / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[13:44:12] FAIL early / ACCEPT at expiresAt − 200 ms succeeds — expected APPLIED, got REJECTED(OFFER_EXPIRED); arrived 362 ms, settled 411 ms relative to expiresAt (worker pickup 49 ms)
+[13:44:12] PASS late / the expired seat is relayed to the next in queue — expected C OFFERED, EXPIRED backfill record relayed, got C OFFERED@S1; EXPIRED record latency 104 ms
+[13:44:12] PASS late / ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED — expected REJECTED(OFFER_EXPIRED), got REJECTED(OFFER_EXPIRED); arrived 825 ms after expiresAt; timer tick processed before the ACCEPT arrived
+[13:44:12] PASS late / outcome consistent with the server clock — expected OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T13:44:10.742Z
+[13:44:12] PASS early / attempt 1: outcome consistent with the server clock — expected APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got APPLIED acceptedAt 2026-10-17T13:44:11.687Z settledAt 2026-10-17T13:44:11.718Z
+[13:44:13] PASS early / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[13:44:13] PASS early / ACCEPT at expiresAt − 200 ms succeeds — expected APPLIED, got APPLIED; arrived -188 ms, settled -157 ms relative to expiresAt (worker pickup 31 ms)
+[13:44:13] PASS late / the expired seat is relayed to the next in queue — expected C OFFERED, EXPIRED backfill record relayed, got C OFFERED@S1; EXPIRED record latency 81 ms
+[13:44:13] PASS late / ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED — expected REJECTED(OFFER_EXPIRED), got REJECTED(OFFER_EXPIRED); arrived 206 ms after expiresAt; timer tick processed before the ACCEPT arrived
+[13:44:13] PASS late / outcome consistent with the server clock — expected OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T13:44:12.043Z
+[13:44:14] PASS early / attempt 1: outcome consistent with the server clock — expected APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got APPLIED acceptedAt 2026-10-17T13:44:13.597Z settledAt 2026-10-17T13:44:13.633Z
+[13:44:14] PASS early / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[13:44:14] PASS early / ACCEPT at expiresAt − 200 ms succeeds — expected APPLIED, got APPLIED; arrived -192 ms, settled -156 ms relative to expiresAt (worker pickup 36 ms)
+[13:44:15] PASS late / the expired seat is relayed to the next in queue — expected C OFFERED, EXPIRED backfill record relayed, got C OFFERED@S1; EXPIRED record latency 73 ms
+[13:44:15] PASS late / ACCEPT at expiresAt + 200 ms rejected OFFER_EXPIRED — expected REJECTED(OFFER_EXPIRED), got REJECTED(OFFER_EXPIRED); arrived 205 ms after expiresAt; timer tick processed before the ACCEPT arrived
+[13:44:15] PASS late / outcome consistent with the server clock — expected OFFER_EXPIRED ⇒ settledAt ≥ expiresAt, got REJECTED(OFFER_EXPIRED) settledAt 2026-10-17T13:44:14.080Z
+[13:44:36] PASS late tick / stale TICK has no effect on the newer offer — expected newer offer unchanged, no new backfill record, workshop version unchanged (no commit), got offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 2b3be652-d0fe-4a09-8cad-46aed0554940, dedup manual#2a0ec7c5-165a-4014-95a2-86747d1c19dc#25d2e814-ffeb-4e71-8fb7-d5720cc7492a)
+[13:44:36] PASS late tick / the newer offer can still be accepted — expected APPLIED, got APPLIED
+[13:44:36] PASS late / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[13:44:37] PASS late tick / stale TICK has no effect on the newer offer — expected newer offer unchanged, no new backfill record, workshop version unchanged (no commit), got offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 5444e956-8526-4187-a74f-777dd0eaf4ed, dedup manual#b75c8aeb-6427-44fb-8d01-c6079623c65b#d413cff2-0c63-4943-8d5c-d2933569e9ac)
+[13:44:37] PASS late tick / the newer offer can still be accepted — expected APPLIED, got APPLIED
+[13:44:37] PASS late / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[13:44:37] PASS late tick / stale TICK has no effect on the newer offer — expected newer offer unchanged, no new backfill record, workshop version unchanged (no commit), got offer unchanged, backfills 1→1, version 3→3; waited 20 s; TICK sent to the FIFO (group 08ad051a-c410-41d6-9235-b60d20533e6a, dedup manual#c103a266-6c48-4453-b71c-73376d12516a#8fbc557e-709b-4b71-bc24-bf2739b34b70)
+[13:44:37] PASS late tick / the newer offer can still be accepted — expected APPLIED, got APPLIED
+[13:44:37] PASS late / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+# expiry-race — Expiry race (plan §4, Table 3; tick-first, §1.2)
+
+- Verdict: **FAIL** (26/27 checks passed)
+- Pass criterion (plan §4): ACCEPT at expiresAt − 200 ms succeeds (a trial whose queue latency exceeds the margin is inconclusive under tick-first and repeated); ACCEPT at expiresAt + 200 ms is REJECTED(OFFER_EXPIRED) regardless of timer arrival; a late TICK has no effect on a newer offer
+- Run id: `1b862065-3e76-4168-9f19-5d7c440d0ce5`, started 2026-10-17T13:43:06.037Z, finished 2026-10-17T13:44:37.992Z (92 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 60; fault flags: on
+- Commit: c1d066056b2c9d36cc33869629f99f390451c101 (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/expiry-race.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+## Result
+
+- Early ACCEPT (reaching the API at expiresAt − 200 ms) applied: **2/3 runs**; attempts 3: 2 applied, 0 inconclusive, 1 failed
+- Inconclusive early attempts (REJECTED(OFFER_EXPIRED) although accepted before expiresAt, because the worker processed them after it: queue latency > 200 ms margin, correct under tick-first; repeated with a fresh workshop): none
+- Worker pickup latency of the ACCEPTs (settledAt − acceptedAt): p50 36 ms, max 62 ms
+- Late ACCEPT (expiresAt + 200 ms) rejected OFFER_EXPIRED: **3/3**
+- Which reached the worker first in the late trials: timer tick processed before the ACCEPT arrived: 3
+- Outcomes consistent with the server clock: 6/6
+- Stale TICK injected: 3/3 without effect on the newer offer
+- Send timing: server clock offset 20 ms (rtt 234 ms); |arrival − planned| p50 8 ms, max 625 ms
+
+Expiry is decided by server time when the command is processed (tick-first): a command arriving before expiresAt
+can still lose if it waits in the queue past expiresAt; `settledAt − expiresAt` shows that lag for every trial.
+
+## Trials
+
+| run | variant | attempt | arrival − expiresAt (ms) | settled − expiresAt (ms) | pickup (ms) | outcome | which first | consistent | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | early | 1 | 362 | 411 | 49 | REJECTED(OFFER_EXPIRED) | n/a | true | FAIL |
+| 1 | late | 1 | 825 | 887 | 62 | REJECTED(OFFER_EXPIRED) | timer tick processed before the ACCEPT arrived | true | PASS |
+| 2 | early | 1 | -188 | -157 | 31 | APPLIED | n/a | true | PASS |
+| 2 | late | 1 | 206 | 245 | 39 | REJECTED(OFFER_EXPIRED) | timer tick processed before the ACCEPT arrived | true | PASS |
+| 3 | early | 1 | -192 | -156 | 36 | APPLIED | n/a | true | PASS |
+| 3 | late | 1 | 205 | 239 | 34 | REJECTED(OFFER_EXPIRED) | timer tick processed before the ACCEPT arrived | true | PASS |
+
+## Stale TICK
+
+| run | processed | version before → after | newer offer unchanged | backfills unchanged | newer offer ACCEPT | verdict |
+|---|---|---|---|---|---|---|
+| 1 | waited 20 s | 3 → 3 | true | true | APPLIED | PASS |
+| 2 | waited 20 s | 3 → 3 | true | true | APPLIED | PASS |
+| 3 | waited 20 s | 3 → 3 | true | true | APPLIED | PASS |
+
+## Checks
+
+1 of 27 checks failed:
+
+| run | scenario | step | expected | actual | detail |
+|---|---|---|---|---|---|
+| 1 | early | ACCEPT at expiresAt − 200 ms succeeds | APPLIED | REJECTED(OFFER_EXPIRED); arrived 362 ms, settled 411 ms relative to expiresAt (worker pickup 49 ms) |  |
+
+[13:44:37] FAIL: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-expiry-race
+/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @seatrelay/experiments@0.1.0 expiry-race: `tsx src/expiry-race.ts --target dev --runs 3 --hold 60`
+Exit status 1
+[13:44:38] === expiry-race finished exit=1 ===
+[13:44:38] === failure-recovery (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 failure-recovery /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/failure-recovery.ts --target dev --runs 3 --outage 60
+
+[13:44:40] failure-recovery: Failure recovery (plan §4, Table 3) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":60,"faults":true,"dir":"results/2026-10-17-failure-recovery","commit":"c1d066056b2c"}
+[13:44:44] --- run 1/3
+[13:46:47] waiting up to 28 s for the redelivery of 7b61fd0e-cdd9-4dc7-97c2-b88f7d8be5f8 (visibility timeout)
+[13:47:21] PASS BEFORE_COMMIT / REGISTER settles APPLIED after the redelivery — expected APPLIED, got APPLIED after 122201 ms (server 120112 ms)
+[13:47:21] PASS BEFORE_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:47:21] PASS BEFORE_COMMIT / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120112 ms
+[13:47:21] PASS BEFORE_COMMIT / effect applied exactly once — expected seq +1, S2 held 1, 1 OFFER notification, A OFFERED@S2, got seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2
+[13:47:22] waiting up to 150 s for the redelivery of c0e10154-ca75-44c4-a664-754b5e5026ed (visibility timeout)
+[13:49:59] PASS AFTER_COMMIT / ACCEPT settles APPLIED on the crashing delivery — expected APPLIED, got APPLIED after 795 ms
+[13:49:59] PASS AFTER_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:49:59] PASS AFTER_COMMIT / effect applied exactly once — expected S2 confirmed 1 held 0, 1 CONFIRMED notification, record unchanged, got S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true
+[13:52:02] waiting up to 27 s for the redelivery of d5d8946d-2f40-4f0b-9866-b7733d965f4f (visibility timeout)
+[13:52:37] PASS TIMER_SEND / REGISTER settles APPLIED after the redelivery — expected APPLIED with an offer, got APPLIED OFFERED@S1 after 122524 ms
+[13:52:37] PASS TIMER_SEND / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:52:37] PASS TIMER_SEND / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120081 ms
+[13:52:37] run 1: waiting for B's offer to expire at 2026-10-17T13:53:00.102Z (~23 s)
+[13:53:01] PASS TIMER_SEND / the offer still expires through the timer path — expected EXPIRED backfill latencyMs < 15000, got EXPIRED backfill relayed to C after 119 ms (timer path < 15 s; the sweep would take minutes)
+[13:53:01] PASS TIMER_SEND / effect applied exactly once — expected seq +2 (B, C), S1 held 1, 1 OFFER notification for B, got seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 119 ms (timer path < 15 s; the sweep would take minutes)
+[13:53:02] PASS after faults / a plain command on the same workshop settles normally — expected APPLIED, got APPLIED in 810 ms
+[13:53:03] PASS after faults / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[13:53:07] PASS notifier baseline / every notification leaves PENDING without an outage — expected 10 processed, got 10/10 processed (SENT 0, SKIPPED 10, FAILED 0) 2.7 s after the last settlement
+[13:53:08] notifier paused (PutFunctionConcurrency(seatrelay-dev-notifier, 0)); generating 10 notifications
+[13:54:11] PASS notifier outage / notifications back up while the notifier is stopped — expected > 0 PENDING at the restore, got 10/10 PENDING after 60 s
+[13:54:12] notifier restored (DeleteFunctionConcurrency(seatrelay-dev-notifier)); waiting for the backlog to drain
+[13:54:56] PASS notifier outage / backlog delivered within 300 s of the restore — expected 0 PENDING, recovery < 300 s, got 0 PENDING (SENT 0, SKIPPED 10, FAILED 0); recovery 44.2 s
+[13:54:56] --- run 2/3
+[13:56:59] waiting up to 28 s for the redelivery of ded9adc9-4703-469d-b453-7310c1bbdde2 (visibility timeout)
+[13:57:34] PASS BEFORE_COMMIT / REGISTER settles APPLIED after the redelivery — expected APPLIED, got APPLIED after 122343 ms (server 120094 ms)
+[13:57:34] PASS BEFORE_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[13:57:34] PASS BEFORE_COMMIT / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120094 ms
+[13:57:34] PASS BEFORE_COMMIT / effect applied exactly once — expected seq +1, S2 held 1, 1 OFFER notification, A OFFERED@S2, got seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2
+[13:57:35] waiting up to 150 s for the redelivery of d12c2523-68ea-43c7-82e2-9cc4977372ad (visibility timeout)
+[14:00:12] PASS AFTER_COMMIT / ACCEPT settles APPLIED on the crashing delivery — expected APPLIED, got APPLIED after 833 ms
+[14:00:12] PASS AFTER_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[14:00:12] PASS AFTER_COMMIT / effect applied exactly once — expected S2 confirmed 1 held 0, 1 CONFIRMED notification, record unchanged, got S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true
+[14:02:15] waiting up to 28 s for the redelivery of 307b24ed-9042-4a89-8709-f04becffcadf (visibility timeout)
+[14:02:49] PASS TIMER_SEND / REGISTER settles APPLIED after the redelivery — expected APPLIED with an offer, got APPLIED OFFERED@S1 after 122092 ms
+[14:02:49] PASS TIMER_SEND / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[14:02:49] PASS TIMER_SEND / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120125 ms
+[14:02:49] run 2: waiting for B's offer to expire at 2026-10-17T14:03:13.172Z (~23 s)
+[14:03:16] PASS TIMER_SEND / the offer still expires through the timer path — expected EXPIRED backfill latencyMs < 15000, got EXPIRED backfill relayed to C after 982 ms (timer path < 15 s; the sweep would take minutes)
+[14:03:16] PASS TIMER_SEND / effect applied exactly once — expected seq +2 (B, C), S1 held 1, 1 OFFER notification for B, got seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 982 ms (timer path < 15 s; the sweep would take minutes)
+[14:03:16] PASS after faults / a plain command on the same workshop settles normally — expected APPLIED, got APPLIED in 793 ms
+[14:03:17] PASS after faults / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[14:03:21] PASS notifier baseline / every notification leaves PENDING without an outage — expected 10 processed, got 10/10 processed (SENT 0, SKIPPED 10, FAILED 0) 2.4 s after the last settlement
+[14:03:22] notifier paused (PutFunctionConcurrency(seatrelay-dev-notifier, 0)); generating 10 notifications
+[14:04:25] PASS notifier outage / notifications back up while the notifier is stopped — expected > 0 PENDING at the restore, got 10/10 PENDING after 60 s
+[14:04:26] notifier restored (DeleteFunctionConcurrency(seatrelay-dev-notifier)); waiting for the backlog to drain
+[14:05:18] PASS notifier outage / backlog delivered within 300 s of the restore — expected 0 PENDING, recovery < 300 s, got 0 PENDING (SENT 0, SKIPPED 10, FAILED 0); recovery 52.3 s
+[14:05:18] --- run 3/3
+[14:07:22] waiting up to 27 s for the redelivery of 8dc7e65a-10da-4c0f-b8b1-289e6026ab7a (visibility timeout)
+[14:07:56] PASS BEFORE_COMMIT / REGISTER settles APPLIED after the redelivery — expected APPLIED, got APPLIED after 122916 ms (server 120128 ms)
+[14:07:56] PASS BEFORE_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[14:07:56] PASS BEFORE_COMMIT / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120128 ms
+[14:07:56] PASS BEFORE_COMMIT / effect applied exactly once — expected seq +1, S2 held 1, 1 OFFER notification, A OFFERED@S2, got seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2
+[14:07:57] waiting up to 150 s for the redelivery of c1e6acf9-3a07-4d2d-bdbc-4d61ff76da4c (visibility timeout)
+[14:10:34] PASS AFTER_COMMIT / ACCEPT settles APPLIED on the crashing delivery — expected APPLIED, got APPLIED after 817 ms
+[14:10:34] PASS AFTER_COMMIT / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[14:10:34] PASS AFTER_COMMIT / effect applied exactly once — expected S2 confirmed 1 held 0, 1 CONFIRMED notification, record unchanged, got S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true
+[14:12:37] waiting up to 27 s for the redelivery of 4d2ae8cc-d2c4-48c5-b27c-fb4d733e86dd (visibility timeout)
+[14:13:11] PASS TIMER_SEND / REGISTER settles APPLIED after the redelivery — expected APPLIED with an offer, got APPLIED OFFERED@S1 after 123405 ms
+[14:13:11] PASS TIMER_SEND / the crashed delivery was redelivered and acknowledged (traceable) — expected ≥ 2 deliveries, last one acknowledged, got 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+[14:13:11] PASS TIMER_SEND / settled only on the redelivery (server settle spans the visibility timeout) — expected settledAt − acceptedAt ≥ 96000 ms (visibility timeout 120 s), got 120095 ms
+[14:13:11] run 3: waiting for B's offer to expire at 2026-10-17T14:13:34.538Z (~23 s)
+[14:13:36] PASS TIMER_SEND / the offer still expires through the timer path — expected EXPIRED backfill latencyMs < 15000, got EXPIRED backfill relayed to C after 131 ms (timer path < 15 s; the sweep would take minutes)
+[14:13:36] PASS TIMER_SEND / effect applied exactly once — expected seq +2 (B, C), S1 held 1, 1 OFFER notification for B, got seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 131 ms (timer path < 15 s; the sweep would take minutes)
+[14:13:37] PASS after faults / a plain command on the same workshop settles normally — expected APPLIED, got APPLIED in 799 ms
+[14:13:37] PASS after faults / verify — expected verify ok, overCapacity 0, doubleHolds 0, got verify ok, overCapacity 0, doubleHolds 0
+[14:13:40] PASS notifier baseline / every notification leaves PENDING without an outage — expected 10 processed, got 10/10 processed (SENT 0, SKIPPED 10, FAILED 0) 0.8 s after the last settlement
+[14:13:41] notifier paused (PutFunctionConcurrency(seatrelay-dev-notifier, 0)); generating 10 notifications
+[14:14:44] PASS notifier outage / notifications back up while the notifier is stopped — expected > 0 PENDING at the restore, got 10/10 PENDING after 60 s
+[14:14:45] notifier restored (DeleteFunctionConcurrency(seatrelay-dev-notifier)); waiting for the backlog to drain
+[14:15:23] PASS notifier outage / backlog delivered within 300 s of the restore — expected 0 PENDING, recovery < 300 s, got 0 PENDING (SENT 0, SKIPPED 10, FAILED 0); recovery 38.1 s
+[14:15:26] PASS dead letters / no message dead-lettered by the run — expected 0 (as before the run), got 0 — DLQ depths of seatrelay-app-dev: {"commands-dlq":0,"expiry-delay-dlq":0,"notify-dlq":0}
+# failure-recovery — Failure recovery (plan §4, Table 3)
+
+- Verdict: **PASS** (52/52 checks passed)
+- Pass criterion (plan §4): BEFORE_COMMIT / AFTER_COMMIT / TIMER_SEND: the command settles exactly once after the redelivery, traceable; notifier outage: backlog delivered < 5 min after the restore (seconds reported); dead letters empty
+- Run id: `3a7ac99e-663f-4bb0-99d7-bec8de3a7b84`, started 2026-10-17T13:44:40.315Z, finished 2026-10-17T14:15:26.033Z (1846 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 60; fault flags: on
+- Commit: c1d066056b2c9d36cc33869629f99f390451c101 (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/failure-recovery.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+## Result
+
+- `BEFORE_COMMIT`: 3/3 settled exactly once; server settle incl. redelivery p50 120112 ms, max 120128 ms
+- `AFTER_COMMIT`: 3/3 settled exactly once; server settle incl. redelivery p50 68 ms, max 90 ms
+- `TIMER_SEND`: 3/3 settled exactly once; server settle incl. redelivery p50 120095 ms, max 120125 ms
+- Notifier outage recovery: **3/3** within 300 s; recovery seconds 44.2, 52.3, 38.1 (max 52.3 s)
+- Notifier baseline (no outage): 2.7 s, 2.4 s, 0.8 s from the last settlement to the last notification processed
+- Dead letters after the run: 0
+
+Server settle latency of a BEFORE_COMMIT / TIMER_SEND command includes the redelivery delay
+(local: retry backoff ≈ 1 s; AWS: the 120 s SQS visibility timeout); AFTER_COMMIT settles on the
+first delivery and only the acknowledgement is redelivered.
+
+## Fault cases
+
+| run | fault | command | outcome | server settle ms | deliveries | effect | verdict |
+|---|---|---|---|---|---|---|---|
+| 1 | BEFORE_COMMIT | REGISTER | APPLIED | 120112 | 2 | seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2 | PASS |
+| 1 | AFTER_COMMIT | ACCEPT_OFFER | APPLIED | 49 | 2 | S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true | PASS |
+| 1 | TIMER_SEND | REGISTER | APPLIED | 120081 | 2 | seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 119 ms (timer path < 15 s; the sweep would take minutes) | PASS |
+| 2 | BEFORE_COMMIT | REGISTER | APPLIED | 120094 | 2 | seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2 | PASS |
+| 2 | AFTER_COMMIT | ACCEPT_OFFER | APPLIED | 90 | 2 | S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true | PASS |
+| 2 | TIMER_SEND | REGISTER | APPLIED | 120125 | 2 | seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 982 ms (timer path < 15 s; the sweep would take minutes) | PASS |
+| 3 | BEFORE_COMMIT | REGISTER | APPLIED | 120128 | 2 | seq +1, S2 held 1, OFFER notifications 1, A OFFERED@S2 | PASS |
+| 3 | AFTER_COMMIT | ACCEPT_OFFER | APPLIED | 68 | 2 | S2 confirmed 1 held 0, CONFIRMED notifications 1, record unchanged after redelivery true | PASS |
+| 3 | TIMER_SEND | REGISTER | APPLIED | 120095 | 2 | seq +2 (B + C), S1 held 1, B OFFER notifications 1; EXPIRED backfill relayed to C after 131 ms (timer path < 15 s; the sweep would take minutes) | PASS |
+
+## Delivery traces
+
+How each redelivery was observed (local: the `commands` row; AWS: worker log lines found by Logs Insights).
+
+- run 1 `BEFORE_COMMIT` (7b61fd0e-cdd9-4dc7-97c2-b88f7d8be5f8): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 13:44:45.296 injected fault; message will be redelivered (delivery 1) message=996d5c7a-3b09-4e98-83fe-58ed3a631629
+  - 2026-10-17 13:46:45.294 command settled status=APPLIED
+  - 2026-10-17 13:46:45.294 message processed (delivery 2) outcome=APPLIED message=996d5c7a-3b09-4e98-83fe-58ed3a631629
+- run 1 `AFTER_COMMIT` (c0e10154-ca75-44c4-a664-754b5e5026ed): 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 13:47:22.057 injected fault; message will be redelivered (delivery 1) message=7d304ea2-88e7-4236-b313-63f9fd9e2c84
+  - 2026-10-17 13:49:22.040 command already settled; acknowledging redelivery
+  - 2026-10-17 13:49:22.044 convergence pass after a settled redelivery outcome=NOOP
+  - 2026-10-17 13:49:22.044 internal command had nothing to do
+  - 2026-10-17 13:49:22.044 message processed (delivery 2) outcome=ALREADY_SETTLED message=7d304ea2-88e7-4236-b313-63f9fd9e2c84
+- run 1 `TIMER_SEND` (d5d8946d-2f40-4f0b-9866-b7733d965f4f): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 13:50:00.099 injected fault; message will be redelivered (delivery 1) message=bf2dff75-64b3-4d01-a485-eee7b6b9c47e
+  - 2026-10-17 13:52:00.144 command settled status=APPLIED
+  - 2026-10-17 13:52:00.144 message processed (delivery 2) outcome=APPLIED message=bf2dff75-64b3-4d01-a485-eee7b6b9c47e
+- run 2 `BEFORE_COMMIT` (ded9adc9-4703-469d-b453-7310c1bbdde2): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 13:54:57.519 injected fault; message will be redelivered (delivery 1) message=8bc53536-7677-4f36-8b5b-9940abf6f0e5
+  - 2026-10-17 13:56:57.570 command settled status=APPLIED
+  - 2026-10-17 13:56:57.570 message processed (delivery 2) outcome=APPLIED message=8bc53536-7677-4f36-8b5b-9940abf6f0e5
+- run 2 `AFTER_COMMIT` (d12c2523-68ea-43c7-82e2-9cc4977372ad): 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 13:57:34.862 injected fault; message will be redelivered (delivery 1) message=343c31e1-ae34-47b4-bc28-bed0452225be
+  - 2026-10-17 13:59:34.747 command already settled; acknowledging redelivery
+  - 2026-10-17 13:59:34.754 convergence pass after a settled redelivery outcome=NOOP
+  - 2026-10-17 13:59:34.754 internal command had nothing to do
+  - 2026-10-17 13:59:34.754 message processed (delivery 2) outcome=ALREADY_SETTLED message=343c31e1-ae34-47b4-bc28-bed0452225be
+- run 2 `TIMER_SEND` (307b24ed-9042-4a89-8709-f04becffcadf): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 14:00:13.136 injected fault; message will be redelivered (delivery 1) message=98f5cb64-243d-4ac0-9b0a-cf9d79bc56f0
+  - 2026-10-17 14:02:13.219 command settled status=APPLIED
+  - 2026-10-17 14:02:13.219 message processed (delivery 2) outcome=APPLIED message=98f5cb64-243d-4ac0-9b0a-cf9d79bc56f0
+- run 3 `BEFORE_COMMIT` (8dc7e65a-10da-4c0f-b8b1-289e6026ab7a): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 14:05:19.470 injected fault; message will be redelivered (delivery 1) message=9ef85bb1-6714-4698-a7d4-2445d2fd1576
+  - 2026-10-17 14:07:19.524 command settled status=APPLIED
+  - 2026-10-17 14:07:19.524 message processed (delivery 2) outcome=APPLIED message=9ef85bb1-6714-4698-a7d4-2445d2fd1576
+- run 3 `AFTER_COMMIT` (c1e6acf9-3a07-4d2d-bdbc-4d61ff76da4c): 2 deliveries (3 command + 5 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 14:07:56.568 injected fault; message will be redelivered (delivery 1) message=14a01b5a-5962-4d5d-98a8-addaa4042fee
+  - 2026-10-17 14:09:56.568 command already settled; acknowledging redelivery
+  - 2026-10-17 14:09:56.572 internal command had nothing to do
+  - 2026-10-17 14:09:56.573 convergence pass after a settled redelivery outcome=NOOP
+  - 2026-10-17 14:09:56.573 message processed (delivery 2) outcome=ALREADY_SETTLED message=14a01b5a-5962-4d5d-98a8-addaa4042fee
+- run 3 `TIMER_SEND` (4d2ae8cc-d2c4-48c5-b27c-fb4d733e86dd): 2 deliveries (2 command + 3 message log lines in /aws/lambda/seatrelay-dev-worker; injected fault logged)
+  - 2026-10-17 14:10:34.529 injected fault; message will be redelivered (delivery 1) message=93de125a-317b-4988-8006-2a369c9c9b88
+  - 2026-10-17 14:12:34.582 command settled status=APPLIED
+  - 2026-10-17 14:12:34.582 message processed (delivery 2) outcome=APPLIED message=93de125a-317b-4988-8006-2a369c9c9b88
+
+## Notifier
+
+| run | phase | notifications | PENDING at restore | recovery s | SENT | SKIPPED | FAILED | still PENDING | verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | baseline | 10 | — | 2.7 | 0 | 10 | 0 | 0 | PASS |
+| 1 | outage | 10 | 10 | 44.2 | 0 | 10 | 0 | 0 | PASS |
+| 2 | baseline | 10 | — | 2.4 | 0 | 10 | 0 | 0 | PASS |
+| 2 | outage | 10 | 10 | 52.3 | 0 | 10 | 0 | 0 | PASS |
+| 3 | baseline | 10 | — | 0.8 | 0 | 10 | 0 | 0 | PASS |
+| 3 | outage | 10 | 10 | 38.1 | 0 | 10 | 0 | 0 | PASS |
+
+## Checks
+
+All 52 checks passed.
+
+[14:15:26] PASS: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-failure-recovery
+[14:15:26] === failure-recovery finished exit=0 ===
+[14:15:26] === access-control (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 access-control /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/access-control.ts --target dev --runs 3
+
+[14:15:28] access-control: Access control (plan §4, Table 3; C7) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":900,"faults":true,"dir":"results/2026-10-17-access-control","commit":"c1d066056b2c"}
+[14:15:31] token minted {"email":"loaduser-outsider@example.com","created":true,"expiresAt":"2026-10-18T02:15:31.000Z"}
+[14:15:33] --- run 1/3
+[14:15:34] PASS no token / missing token → 401 (anonymous: GET /me) — expected 401, got 401
+[14:15:35] PASS no token / missing token → 401 (anonymous: GET /me/registrations) — expected 401, got 401
+[14:15:35] PASS no token / missing token → 401 (anonymous: GET /me/notifications) — expected 401, got 401
+[14:15:35] PASS no token / missing token → 401 (anonymous: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 401, got 401
+[14:15:35] PASS no token / missing token → 401 (anonymous: GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 401, got 401
+[14:15:35] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/dashboard) — expected 401, got 401
+[14:15:36] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/export.csv) — expected 401, got 401
+[14:15:36] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/verify) — expected 401, got 401
+[14:15:36] PASS no token / missing token → 401 (anonymous: POST /orgs) — expected 401, got 401
+[14:15:36] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 401, got 401
+[14:15:37] PASS no token / tampered token → 401 (victim (bad signature): GET /me) — expected 401, got 401
+[14:15:37] PASS no token / tampered token → 401 (victim (bad signature): GET /me/registrations) — expected 401, got 401
+[14:15:37] PASS no token / tampered token → 401 (victim (bad signature): GET /me/notifications) — expected 401, got 401
+[14:15:37] PASS no token / tampered token → 401 (victim (bad signature): POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 401, got 401
+[14:15:37] PASS no token / tampered token → 401 (victim (bad signature): GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 401, got 401
+[14:15:38] PASS no token / tampered token → 401 (victim (bad signature): GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/dashboard) — expected 401, got 401
+[14:15:38] PASS no token / public health without a token (anonymous: GET /health) — expected 200, got 200
+[14:15:39] PASS someone else's offer / attacker ACCEPT_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:15:39] PASS someone else's offer / attacker DECLINE_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:15:40] PASS someone else's offer / the victim's offer is untouched — expected OFFERED 965edf04-3434-4619-b564-c7b49ac38d15, got OFFERED 965edf04-3434-4619-b564-c7b49ac38d15
+[14:15:40] PASS cross-org (outsider organiser) / dashboard (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:40] PASS cross-org (outsider organiser) / CSV export (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:40] PASS cross-org (outsider organiser) / verify (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:41] PASS cross-org (outsider organiser) / attendance (outsider organiser: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:41] PASS cross-org (outsider organiser) / list workshops (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:41] PASS cross-org (outsider organiser) / create workshop (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:41] PASS cross-org (outsider organiser) / add self as member (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:42] PASS cross-org (outsider organiser) / edit workshop (outsider organiser: PATCH /workshops/ea0bab18-d610-4e90-987d-82980ba89d59) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:42] PASS cross-org (outsider organiser) / SET_CAPACITY (outsider organiser: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:42] PASS cross-org (outsider organiser) / CANCEL_SESSION (outsider organiser: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:42] PASS cross-org (outsider organiser) / CLOSE_REGISTRATION (outsider organiser: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:43] PASS cross-org (outsider organiser) / CANCEL_WORKSHOP (outsider organiser: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:43] PASS cross-org (participant) / dashboard (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:43] PASS cross-org (participant) / CSV export (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:43] PASS cross-org (participant) / verify (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:44] PASS cross-org (participant) / attendance (participant: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:44] PASS cross-org (participant) / list workshops (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:44] PASS cross-org (participant) / create workshop (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:44] PASS cross-org (participant) / add self as member (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:45] PASS cross-org (participant) / edit workshop (participant: PATCH /workshops/ea0bab18-d610-4e90-987d-82980ba89d59) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:45] PASS cross-org (participant) / SET_CAPACITY (participant: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:45] PASS cross-org (participant) / CANCEL_SESSION (participant: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:45] PASS cross-org (participant) / CLOSE_REGISTRATION (participant: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:45] PASS cross-org (participant) / CANCEL_WORKSHOP (participant: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:46] PASS cross-org (own org path) / dashboard via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/dashboard) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:46] PASS cross-org (own org path) / CSV export via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/ea0bab18-d610-4e90-987d-82980ba89d59/export.csv) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:46] PASS command visibility / another participant reads the victim's command (attacker: GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:46] PASS command visibility / an outsider organiser reads the victim's command (outsider organiser: GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:47] PASS command visibility / the issuer reads it (victim: GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 200, got 200
+[14:15:47] PASS command visibility / the workshop's organiser reads it (organiser: GET /commands/95783522-3eb9-44c9-b58b-ca3e133083fb) — expected 200, got 200
+[14:15:47] PASS command visibility / unknown command (victim: GET /commands/378a3900-ab95-4ba9-9526-e202ed428350) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:47] PASS command visibility / re-POST of the victim's commandId by another user (attacker: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 409 CONFLICT, got 409 CONFLICT
+[14:15:48] PASS unknown / malformed / command on an unknown workshop (attacker: POST /workshops/9cd63cb7-0036-4741-8b4c-38d93a26ea6e/commands) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:48] PASS unknown / malformed / public view of an unknown workshop (attacker: GET /workshops/8e223eba-6866-4369-9ae1-613ee326cc5d) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:15:48] PASS unknown / malformed / malformed command body (attacker: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:15:48] PASS unknown / malformed / unknown command type (attacker: POST /workshops/ea0bab18-d610-4e90-987d-82980ba89d59/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:15:49] PASS after the attack / workshop untouched — expected OPEN, title unchanged, S1 capacity 1, S2 OPEN, only the victim offered, no attendance, got OPEN, title unchanged, S1 capacity 1, S2 OPEN, offered victim, attendance 0
+[14:15:49] PASS after the attack / organisation membership unchanged — expected outsider and attacker not members, got 1 members
+[14:15:50] PASS after the attack / verify — expected verify ok, got verify ok
+[14:15:50] --- run 2/3
+[14:15:51] PASS no token / missing token → 401 (anonymous: GET /me) — expected 401, got 401
+[14:15:51] PASS no token / missing token → 401 (anonymous: GET /me/registrations) — expected 401, got 401
+[14:15:51] PASS no token / missing token → 401 (anonymous: GET /me/notifications) — expected 401, got 401
+[14:15:52] PASS no token / missing token → 401 (anonymous: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 401, got 401
+[14:15:52] PASS no token / missing token → 401 (anonymous: GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 401, got 401
+[14:15:52] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/dashboard) — expected 401, got 401
+[14:15:52] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/export.csv) — expected 401, got 401
+[14:15:53] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/verify) — expected 401, got 401
+[14:15:53] PASS no token / missing token → 401 (anonymous: POST /orgs) — expected 401, got 401
+[14:15:53] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 401, got 401
+[14:15:53] PASS no token / tampered token → 401 (victim (bad signature): GET /me) — expected 401, got 401
+[14:15:53] PASS no token / tampered token → 401 (victim (bad signature): GET /me/registrations) — expected 401, got 401
+[14:15:54] PASS no token / tampered token → 401 (victim (bad signature): GET /me/notifications) — expected 401, got 401
+[14:15:54] PASS no token / tampered token → 401 (victim (bad signature): POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 401, got 401
+[14:15:54] PASS no token / tampered token → 401 (victim (bad signature): GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 401, got 401
+[14:15:54] PASS no token / tampered token → 401 (victim (bad signature): GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/dashboard) — expected 401, got 401
+[14:15:55] PASS no token / public health without a token (anonymous: GET /health) — expected 200, got 200
+[14:15:55] PASS someone else's offer / attacker ACCEPT_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:15:56] PASS someone else's offer / attacker DECLINE_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:15:56] PASS someone else's offer / the victim's offer is untouched — expected OFFERED 1447b63b-cf7e-4dcb-a165-0f4bbb2554e6, got OFFERED 1447b63b-cf7e-4dcb-a165-0f4bbb2554e6
+[14:15:57] PASS cross-org (outsider organiser) / dashboard (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:57] PASS cross-org (outsider organiser) / CSV export (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:57] PASS cross-org (outsider organiser) / verify (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:57] PASS cross-org (outsider organiser) / attendance (outsider organiser: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:58] PASS cross-org (outsider organiser) / list workshops (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:58] PASS cross-org (outsider organiser) / create workshop (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:58] PASS cross-org (outsider organiser) / add self as member (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:58] PASS cross-org (outsider organiser) / edit workshop (outsider organiser: PATCH /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:59] PASS cross-org (outsider organiser) / SET_CAPACITY (outsider organiser: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:59] PASS cross-org (outsider organiser) / CANCEL_SESSION (outsider organiser: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:59] PASS cross-org (outsider organiser) / CLOSE_REGISTRATION (outsider organiser: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:15:59] PASS cross-org (outsider organiser) / CANCEL_WORKSHOP (outsider organiser: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:00] PASS cross-org (participant) / dashboard (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:00] PASS cross-org (participant) / CSV export (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:00] PASS cross-org (participant) / verify (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:00] PASS cross-org (participant) / attendance (participant: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:01] PASS cross-org (participant) / list workshops (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:01] PASS cross-org (participant) / create workshop (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:01] PASS cross-org (participant) / add self as member (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:01] PASS cross-org (participant) / edit workshop (participant: PATCH /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:01] PASS cross-org (participant) / SET_CAPACITY (participant: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:02] PASS cross-org (participant) / CANCEL_SESSION (participant: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:02] PASS cross-org (participant) / CLOSE_REGISTRATION (participant: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:02] PASS cross-org (participant) / CANCEL_WORKSHOP (participant: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:02] PASS cross-org (own org path) / dashboard via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/dashboard) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:03] PASS cross-org (own org path) / CSV export via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/export.csv) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:03] PASS command visibility / another participant reads the victim's command (attacker: GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:03] PASS command visibility / an outsider organiser reads the victim's command (outsider organiser: GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:03] PASS command visibility / the issuer reads it (victim: GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 200, got 200
+[14:16:04] PASS command visibility / the workshop's organiser reads it (organiser: GET /commands/d9f6a03d-7461-41a7-88ae-8d65c7ef54de) — expected 200, got 200
+[14:16:04] PASS command visibility / unknown command (victim: GET /commands/1a3a420d-a03d-4cfc-b2eb-6135aaa60216) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:04] PASS command visibility / re-POST of the victim's commandId by another user (attacker: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 409 CONFLICT, got 409 CONFLICT
+[14:16:04] PASS unknown / malformed / command on an unknown workshop (attacker: POST /workshops/bc20c135-c108-4d3b-ad61-09fa7b909ce9/commands) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:05] PASS unknown / malformed / public view of an unknown workshop (attacker: GET /workshops/43b46d59-2e43-4e07-abc9-2dceae3fed41) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:05] PASS unknown / malformed / malformed command body (attacker: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:16:05] PASS unknown / malformed / unknown command type (attacker: POST /workshops/e97e5031-8c14-4eef-ad28-1a80a558a6bb/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:16:05] PASS after the attack / workshop untouched — expected OPEN, title unchanged, S1 capacity 1, S2 OPEN, only the victim offered, no attendance, got OPEN, title unchanged, S1 capacity 1, S2 OPEN, offered victim, attendance 0
+[14:16:06] PASS after the attack / organisation membership unchanged — expected outsider and attacker not members, got 1 members
+[14:16:06] PASS after the attack / verify — expected verify ok, got verify ok
+[14:16:06] --- run 3/3
+[14:16:08] PASS no token / missing token → 401 (anonymous: GET /me) — expected 401, got 401
+[14:16:08] PASS no token / missing token → 401 (anonymous: GET /me/registrations) — expected 401, got 401
+[14:16:08] PASS no token / missing token → 401 (anonymous: GET /me/notifications) — expected 401, got 401
+[14:16:08] PASS no token / missing token → 401 (anonymous: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 401, got 401
+[14:16:09] PASS no token / missing token → 401 (anonymous: GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 401, got 401
+[14:16:09] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/dashboard) — expected 401, got 401
+[14:16:09] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/export.csv) — expected 401, got 401
+[14:16:09] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/verify) — expected 401, got 401
+[14:16:10] PASS no token / missing token → 401 (anonymous: POST /orgs) — expected 401, got 401
+[14:16:10] PASS no token / missing token → 401 (anonymous: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 401, got 401
+[14:16:10] PASS no token / tampered token → 401 (victim (bad signature): GET /me) — expected 401, got 401
+[14:16:10] PASS no token / tampered token → 401 (victim (bad signature): GET /me/registrations) — expected 401, got 401
+[14:16:10] PASS no token / tampered token → 401 (victim (bad signature): GET /me/notifications) — expected 401, got 401
+[14:16:11] PASS no token / tampered token → 401 (victim (bad signature): POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 401, got 401
+[14:16:11] PASS no token / tampered token → 401 (victim (bad signature): GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 401, got 401
+[14:16:11] PASS no token / tampered token → 401 (victim (bad signature): GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/dashboard) — expected 401, got 401
+[14:16:11] PASS no token / public health without a token (anonymous: GET /health) — expected 200, got 200
+[14:16:12] PASS someone else's offer / attacker ACCEPT_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:16:13] PASS someone else's offer / attacker DECLINE_OFFER of the victim's offer — expected REJECTED(OFFER_NOT_YOURS), got REJECTED(OFFER_NOT_YOURS)
+[14:16:13] PASS someone else's offer / the victim's offer is untouched — expected OFFERED 5ee32893-4b90-4dd9-b23b-bc15ac07c7f6, got OFFERED 5ee32893-4b90-4dd9-b23b-bc15ac07c7f6
+[14:16:13] PASS cross-org (outsider organiser) / dashboard (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:14] PASS cross-org (outsider organiser) / CSV export (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:14] PASS cross-org (outsider organiser) / verify (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:14] PASS cross-org (outsider organiser) / attendance (outsider organiser: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:14] PASS cross-org (outsider organiser) / list workshops (outsider organiser: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:15] PASS cross-org (outsider organiser) / create workshop (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:15] PASS cross-org (outsider organiser) / add self as member (outsider organiser: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:15] PASS cross-org (outsider organiser) / edit workshop (outsider organiser: PATCH /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:15] PASS cross-org (outsider organiser) / SET_CAPACITY (outsider organiser: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:16] PASS cross-org (outsider organiser) / CANCEL_SESSION (outsider organiser: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:16] PASS cross-org (outsider organiser) / CLOSE_REGISTRATION (outsider organiser: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:16] PASS cross-org (outsider organiser) / CANCEL_WORKSHOP (outsider organiser: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:16] PASS cross-org (participant) / dashboard (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/dashboard) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:17] PASS cross-org (participant) / CSV export (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/export.csv) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:17] PASS cross-org (participant) / verify (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/verify) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:17] PASS cross-org (participant) / attendance (participant: PUT /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:17] PASS cross-org (participant) / list workshops (participant: GET /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:18] PASS cross-org (participant) / create workshop (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:18] PASS cross-org (participant) / add self as member (participant: POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:18] PASS cross-org (participant) / edit workshop (participant: PATCH /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:18] PASS cross-org (participant) / SET_CAPACITY (participant: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:19] PASS cross-org (participant) / CANCEL_SESSION (participant: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:19] PASS cross-org (participant) / CLOSE_REGISTRATION (participant: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:19] PASS cross-org (participant) / CANCEL_WORKSHOP (participant: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 403 FORBIDDEN, got 403 FORBIDDEN
+[14:16:19] PASS cross-org (own org path) / dashboard via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/dashboard) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:19] PASS cross-org (own org path) / CSV export via own organisation (outsider organiser: GET /orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/export.csv) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:20] PASS command visibility / another participant reads the victim's command (attacker: GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:20] PASS command visibility / an outsider organiser reads the victim's command (outsider organiser: GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:20] PASS command visibility / the issuer reads it (victim: GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 200, got 200
+[14:16:20] PASS command visibility / the workshop's organiser reads it (organiser: GET /commands/dabf4f55-9fbd-4a6d-95af-7f8013194d9a) — expected 200, got 200
+[14:16:21] PASS command visibility / unknown command (victim: GET /commands/f13cbdd6-0c36-4ea3-9bd7-0f6dcc21289c) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:21] PASS command visibility / re-POST of the victim's commandId by another user (attacker: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 409 CONFLICT, got 409 CONFLICT
+[14:16:21] PASS unknown / malformed / command on an unknown workshop (attacker: POST /workshops/22727f45-e2ff-44da-aead-4f8a2b0bad86/commands) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:21] PASS unknown / malformed / public view of an unknown workshop (attacker: GET /workshops/312a1994-c539-439a-a9f4-47a77870d883) — expected 404 NOT_FOUND, got 404 NOT_FOUND
+[14:16:22] PASS unknown / malformed / malformed command body (attacker: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:16:22] PASS unknown / malformed / unknown command type (attacker: POST /workshops/b2fc307f-b3dc-448f-98d6-d9eb21d697b0/commands) — expected 400 VALIDATION_ERROR, got 400 VALIDATION_ERROR
+[14:16:22] PASS after the attack / workshop untouched — expected OPEN, title unchanged, S1 capacity 1, S2 OPEN, only the victim offered, no attendance, got OPEN, title unchanged, S1 capacity 1, S2 OPEN, offered victim, attendance 0
+[14:16:22] PASS after the attack / organisation membership unchanged — expected outsider and attacker not members, got 1 members
+[14:16:23] PASS after the attack / verify — expected verify ok, got verify ok
+# access-control — Access control (plan §4, Table 3; C7)
+
+- Verdict: **PASS** (177/177 checks passed)
+- Pass criterion (plan §4): 401 without / with a tampered token; 403 on every cross-organisation organiser route and command; OFFER_NOT_YOURS for someone else's offer; 404 for another user's command; nothing changed
+- Run id: `361341fa-d332-43a1-97db-57dc9c1a2166`, started 2026-10-17T14:15:28.545Z, finished 2026-10-17T14:16:23.690Z (55 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 900; fault flags: on
+- Commit: c1d066056b2c9d36cc33869629f99f390451c101 (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/access-control.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+## Result
+
+- Negative probes: **165/165** answered as expected
+
+| group | probes | as expected | expected answers |
+|---|---|---|---|
+| no token | 51 | 51 | 401, 200 |
+| someone else's offer | 6 | 6 | REJECTED(OFFER_NOT_YOURS) |
+| cross-org (outsider organiser) | 36 | 36 | 403 FORBIDDEN |
+| cross-org (participant) | 36 | 36 | 403 FORBIDDEN |
+| cross-org (own org path) | 6 | 6 | 404 NOT_FOUND |
+| command visibility | 18 | 18 | 404 NOT_FOUND, 200, 409 CONFLICT |
+| unknown / malformed | 12 | 12 | 404 NOT_FOUND, 400 VALIDATION_ERROR |
+
+## Probes
+
+| run | group | probe | who | request | expected | actual | verdict |
+|---|---|---|---|---|---|---|---|
+| 1 | no token | missing token → 401 | anonymous | GET /me | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /me/registrations | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /me/notifications | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /commands/{id} | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/export.csv | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/verify | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | POST /orgs | 401 | 401 | PASS |
+| 1 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | GET /me | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | GET /me/registrations | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | GET /me/notifications | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | GET /commands/{id} | 401 | 401 | PASS |
+| 1 | no token | tampered token → 401 | victim (bad signature) | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 1 | no token | public health without a token | anonymous | GET /health | 200 | 200 | PASS |
+| 1 | someone else's offer | ACCEPT_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 1 | someone else's offer | DECLINE_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 1 | cross-org (outsider organiser) | dashboard | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | CSV export | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | verify | outsider organiser | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | attendance | outsider organiser | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | list workshops | outsider organiser | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | create workshop | outsider organiser | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | add self as member | outsider organiser | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | edit workshop | outsider organiser | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | SET_CAPACITY | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | CANCEL_SESSION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | CLOSE_REGISTRATION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (outsider organiser) | CANCEL_WORKSHOP | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | dashboard | participant | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | CSV export | participant | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | verify | participant | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | attendance | participant | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | list workshops | participant | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | create workshop | participant | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | add self as member | participant | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | edit workshop | participant | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | SET_CAPACITY | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | CANCEL_SESSION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | CLOSE_REGISTRATION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (participant) | CANCEL_WORKSHOP | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 1 | cross-org (own org path) | dashboard via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | cross-org (own org path) | CSV export via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | command visibility | another participant reads the victim's command | attacker | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | command visibility | an outsider organiser reads the victim's command | outsider organiser | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | command visibility | the issuer reads it | victim | GET /commands/{id} | 200 | 200 | PASS |
+| 1 | command visibility | the workshop's organiser reads it | organiser | GET /commands/{id} | 200 | 200 | PASS |
+| 1 | command visibility | unknown command | victim | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | command visibility | re-POST of the victim's commandId by another user | attacker | POST /workshops/{id}/commands | 409 CONFLICT | 409 CONFLICT | PASS |
+| 1 | unknown / malformed | command on an unknown workshop | attacker | POST /workshops/{id}/commands | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | unknown / malformed | public view of an unknown workshop | attacker | GET /workshops/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 1 | unknown / malformed | malformed command body | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+| 1 | unknown / malformed | unknown command type | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /me | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /me/registrations | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /me/notifications | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /commands/{id} | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/export.csv | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/verify | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | POST /orgs | 401 | 401 | PASS |
+| 2 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | GET /me | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | GET /me/registrations | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | GET /me/notifications | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | GET /commands/{id} | 401 | 401 | PASS |
+| 2 | no token | tampered token → 401 | victim (bad signature) | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 2 | no token | public health without a token | anonymous | GET /health | 200 | 200 | PASS |
+| 2 | someone else's offer | ACCEPT_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 2 | someone else's offer | DECLINE_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 2 | cross-org (outsider organiser) | dashboard | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | CSV export | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | verify | outsider organiser | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | attendance | outsider organiser | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | list workshops | outsider organiser | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | create workshop | outsider organiser | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | add self as member | outsider organiser | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | edit workshop | outsider organiser | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | SET_CAPACITY | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | CANCEL_SESSION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | CLOSE_REGISTRATION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (outsider organiser) | CANCEL_WORKSHOP | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | dashboard | participant | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | CSV export | participant | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | verify | participant | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | attendance | participant | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | list workshops | participant | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | create workshop | participant | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | add self as member | participant | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | edit workshop | participant | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | SET_CAPACITY | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | CANCEL_SESSION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | CLOSE_REGISTRATION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (participant) | CANCEL_WORKSHOP | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 2 | cross-org (own org path) | dashboard via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | cross-org (own org path) | CSV export via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | command visibility | another participant reads the victim's command | attacker | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | command visibility | an outsider organiser reads the victim's command | outsider organiser | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | command visibility | the issuer reads it | victim | GET /commands/{id} | 200 | 200 | PASS |
+| 2 | command visibility | the workshop's organiser reads it | organiser | GET /commands/{id} | 200 | 200 | PASS |
+| 2 | command visibility | unknown command | victim | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | command visibility | re-POST of the victim's commandId by another user | attacker | POST /workshops/{id}/commands | 409 CONFLICT | 409 CONFLICT | PASS |
+| 2 | unknown / malformed | command on an unknown workshop | attacker | POST /workshops/{id}/commands | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | unknown / malformed | public view of an unknown workshop | attacker | GET /workshops/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 2 | unknown / malformed | malformed command body | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+| 2 | unknown / malformed | unknown command type | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /me | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /me/registrations | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /me/notifications | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /commands/{id} | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/export.csv | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops/{id}/verify | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | POST /orgs | 401 | 401 | PASS |
+| 3 | no token | missing token → 401 | anonymous | GET /orgs/{id}/workshops | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | GET /me | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | GET /me/registrations | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | GET /me/notifications | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | POST /workshops/{id}/commands | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | GET /commands/{id} | 401 | 401 | PASS |
+| 3 | no token | tampered token → 401 | victim (bad signature) | GET /orgs/{id}/workshops/{id}/dashboard | 401 | 401 | PASS |
+| 3 | no token | public health without a token | anonymous | GET /health | 200 | 200 | PASS |
+| 3 | someone else's offer | ACCEPT_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 3 | someone else's offer | DECLINE_OFFER of the victim's offer | attacker | POST /workshops/{id}/commands | REJECTED(OFFER_NOT_YOURS) | REJECTED(OFFER_NOT_YOURS) | PASS |
+| 3 | cross-org (outsider organiser) | dashboard | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | CSV export | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | verify | outsider organiser | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | attendance | outsider organiser | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | list workshops | outsider organiser | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | create workshop | outsider organiser | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | add self as member | outsider organiser | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | edit workshop | outsider organiser | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | SET_CAPACITY | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | CANCEL_SESSION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | CLOSE_REGISTRATION | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (outsider organiser) | CANCEL_WORKSHOP | outsider organiser | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | dashboard | participant | GET /orgs/{id}/workshops/{id}/dashboard | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | CSV export | participant | GET /orgs/{id}/workshops/{id}/export.csv | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | verify | participant | GET /orgs/{id}/workshops/{id}/verify | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | attendance | participant | PUT /orgs/{id}/workshops/{id}/attendance/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | list workshops | participant | GET /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | create workshop | participant | POST /orgs/{id}/workshops | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | add self as member | participant | POST /orgs/{id}/members | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | edit workshop | participant | PATCH /workshops/{id} | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | SET_CAPACITY | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | CANCEL_SESSION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | CLOSE_REGISTRATION | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (participant) | CANCEL_WORKSHOP | participant | POST /workshops/{id}/commands | 403 FORBIDDEN | 403 FORBIDDEN | PASS |
+| 3 | cross-org (own org path) | dashboard via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/dashboard | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | cross-org (own org path) | CSV export via own organisation | outsider organiser | GET /orgs/{id}/workshops/{id}/export.csv | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | command visibility | another participant reads the victim's command | attacker | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | command visibility | an outsider organiser reads the victim's command | outsider organiser | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | command visibility | the issuer reads it | victim | GET /commands/{id} | 200 | 200 | PASS |
+| 3 | command visibility | the workshop's organiser reads it | organiser | GET /commands/{id} | 200 | 200 | PASS |
+| 3 | command visibility | unknown command | victim | GET /commands/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | command visibility | re-POST of the victim's commandId by another user | attacker | POST /workshops/{id}/commands | 409 CONFLICT | 409 CONFLICT | PASS |
+| 3 | unknown / malformed | command on an unknown workshop | attacker | POST /workshops/{id}/commands | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | unknown / malformed | public view of an unknown workshop | attacker | GET /workshops/{id} | 404 NOT_FOUND | 404 NOT_FOUND | PASS |
+| 3 | unknown / malformed | malformed command body | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+| 3 | unknown / malformed | unknown command type | attacker | POST /workshops/{id}/commands | 400 VALIDATION_ERROR | 400 VALIDATION_ERROR | PASS |
+
+## Checks
+
+All 177 checks passed.
+
+[14:16:23] PASS: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-access-control
+[14:16:23] === access-control finished exit=0 ===
+[14:16:23] === backfill (target dev, runs 3) ===
+
+> @seatrelay/experiments@0.1.0 backfill /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments
+> tsx src/backfill.ts --target dev --runs 3 --offers 100
+
+[14:16:26] backfill: Backfill latency (plan §4, Table 3) {"target":"dev","api":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","runs":3,"holdSeconds":60,"faults":true,"dir":"results/2026-10-17-backfill","commit":"c1d066056b2c"}
+[14:16:26] obtaining 22 participant tokens {"workshops":10,"sessions":2,"capacity":5,"rounds":1,"seats":10,"offers":100,"extraPerWorkshop":2,"registrantsPerWorkshop":22}
+[14:16:26] --- run 1/3
+[14:16:26] run 1: 10 workshops × 10 seats, 100 offers left to expire (hold 60 s)
+[14:16:29] FAIL harness / run — POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops → 503
+# backfill — Backfill latency (plan §4, Table 3)
+
+- Verdict: **FAIL** (0/1 checks passed)
+- Pass criterion (plan §4): expiry-driven backfill p95 ≤ 120 s (reallocatedAt − releasedAt; single-digit seconds expected), every expiry relayed, outliers listed; cancellation-driven backfills reported separately (≈ 0 ms); SweepLateExpiries = 0
+- Run id: `3393de39-7f0b-4404-994e-cc912749aec4`, started 2026-10-17T14:16:25.938Z, finished 2026-10-17T14:16:29.695Z (4 s)
+- Target: dev (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com); runs: 3; holdSeconds: 60; fault flags: on
+- Commit: c1d066056b2c9d36cc33869629f99f390451c101 (dirty) on claude/serene-lovelace-7t14s9
+- Script: `tools/experiments/src/backfill.ts`; raw samples: `raw.csv`; parameters: `meta.json`
+
+**The run aborted with an error:** POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops → 503
+
+## Checks
+
+1 of 1 checks failed:
+
+| run | scenario | step | expected | actual | detail |
+|---|---|---|---|---|---|
+| 1 | harness | run |  |  | POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops → 503 |
+
+[14:16:29] FAIL: results in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-backfill
+[14:16:37] FAIL w3 / every REGISTER applied — expected 22, got 16 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:37] FAIL w5 / every REGISTER applied — expected 22, got 16 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:37] FAIL w2 / every REGISTER applied — expected 22, got 15 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:37] FAIL w1 / every REGISTER applied — expected 22, got 12 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:37] FAIL w4 / every REGISTER applied — expected 22, got 18 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:37] FAIL w6 / every REGISTER applied — expected 22, got 16 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:42] FAIL w8 / every REGISTER applied — expected 22, got 17 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:42] FAIL w9 / every REGISTER applied — expected 22, got 15 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:16:44] FAIL w7 / every REGISTER applied — expected 22, got 11 — HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR; HTTP 503 HTTP_ERROR
+[14:17:34] PASS w1 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 57 s)
+[14:17:34] PASS w2 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 57 s)
+[14:17:35] PASS w3 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 58 s)
+[14:17:35] PASS w1 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:36] PASS w2 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:36] PASS w1 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:36] PASS w3 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:36] PASS w2 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:36] PASS w3 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:36] PASS w5 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 59 s)
+[14:17:36] PASS w7 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 52 s)
+[14:17:37] PASS w8 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 54 s)
+[14:17:37] PASS w6 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 59 s)
+[14:17:37] PASS w9 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 55 s)
+[14:17:37] PASS w4 / 10 expired offers relayed to the queue — expected 10, got 10 (EXPIRED records 10, waited 60 s)
+[14:17:37] PASS w5 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:37] PASS w7 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:38] PASS w7 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:38] PASS w8 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:38] PASS w8 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:38] PASS w5 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:38] FAIL w9 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,none
+[14:17:38] PASS w4 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:38] PASS w6 / cancellation-driven backfills relayed in the same settlement — expected 2 × CANCELLED_OFFER, latencyMs 0, got 2 cancels applied; 2 records, latencies 0,0
+[14:17:38] PASS w9 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:39] PASS w4 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+[14:17:39] PASS w6 / verify — expected verify ok, got verify ok, overCapacity 0, doubleHolds 0
+/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/experiments:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @seatrelay/experiments@0.1.0 backfill: `tsx src/backfill.ts --target dev --runs 3 --offers 100`
+Exit status 1
+[14:17:39] === backfill finished exit=1 ===
+[14:17:39] === k6 performance matrix (target dev) ===
+
+> @seatrelay/loadtest@0.1.0 prepare-scenario /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/loadtest
+> tsx src/prepare.ts -- --target dev
+
+[14:17:41] target {"name":"dev","stage":"dev","apiBase":"https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com","apiSource":"stack"}
+[14:17:44] organiser token minted {"email":"loadtest.organiser@example.com","provider":"cognito","created":true}
+[14:17:46] organisation created {"orgId":"65685ea7-5adb-4961-8b6e-ffb3c5d32fd1","name":"SeatRelay loadtest"}
+[14:17:48] workshops created {"scenario":"cross-workshop","count":10}
+[14:17:48] workshops created {"scenario":"hotspot","count":1}
+[14:17:48] scenario file written {"file":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/loadtest/.scenario.dev.json"}
+{
+  "target": "dev",
+  "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+  "orgId": "65685ea7-5adb-4961-8b6e-ffb3c5d32fd1",
+  "scenarioFile": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/loadtest/.scenario.dev.json",
+  "scenarios": {
+    "cross-workshop": 10,
+    "hotspot": 1
+  }
+}
+
+> @seatrelay/loadtest@0.1.0 run-matrix /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/tools/loadtest
+> tsx src/run-matrix.ts -- --target dev
+
+[14:17:50] matrix {"runId":"20261017T141749Z","runs":18,"estimatedMinutes":54,"accounts":62,"firstTokenExpiry":"2026-10-18T01:18:50.000Z","outDir":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17"}
+[14:17:50] aligning the measured phase to a CloudWatch minute {"waitSeconds":39}
+[14:18:30] run 1/18 {"scenario":"cross-workshop","vus":10,"round":1,"name":"cross-workshop-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-10-1.log"}
+
+seatrelay cross-workshop  target=dev vus=10 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 402 (measured 327)
+  http_reqs ............. 2021   failed 0.00 %
+  read_ms   p50 / p95 ... 276.7 ms / 289.8 ms
+  command_ms (202) ...... 289.9 ms / 307.7 ms
+  poll_ms ............... 276.9 ms / 291.0 ms
+  settle_ms (client) .... 769.5 ms / 793.4 ms
+  server_settle_ms ...... 32.0 ms / 55.0 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:20:05] run finished {"name":"cross-workshop-10-1","exitCode":0,"readP95":289.828095,"commandP95":307.6903127,"settleP95":793.35,"errors":0,"thresholdsOk":true}
+[14:20:20] aligning the measured phase to a CloudWatch minute {"waitSeconds":9}
+[14:20:30] run 2/18 {"scenario":"cross-workshop","vus":10,"round":2,"name":"cross-workshop-10-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-10-2.log"}
+
+seatrelay cross-workshop  target=dev vus=10 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 402 (measured 328)
+  http_reqs ............. 2021   failed 0.00 %
+  read_ms   p50 / p95 ... 276.8 ms / 291.6 ms
+  command_ms (202) ...... 290.6 ms / 314.9 ms
+  poll_ms ............... 276.9 ms / 293.5 ms
+  settle_ms (client) .... 770.0 ms / 803.3 ms
+  server_settle_ms ...... 35.0 ms / 72.0 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:22:06] run finished {"name":"cross-workshop-10-2","exitCode":0,"readP95":291.57259339999996,"commandP95":314.87954025,"settleP95":803.25,"errors":0,"thresholdsOk":true}
+[14:22:21] aligning the measured phase to a CloudWatch minute {"waitSeconds":9}
+[14:22:30] run 3/18 {"scenario":"cross-workshop","vus":10,"round":3,"name":"cross-workshop-10-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-10-3.log"}
+
+seatrelay cross-workshop  target=dev vus=10 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 400 (measured 325)
+  http_reqs ............. 2011   failed 0.00 %
+  read_ms   p50 / p95 ... 277.6 ms / 288.3 ms
+  command_ms (202) ...... 290.1 ms / 318.2 ms
+  poll_ms ............... 277.8 ms / 295.0 ms
+  settle_ms (client) .... 771.0 ms / 811.1 ms
+  server_settle_ms ...... 34.0 ms / 65.0 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:24:05] run finished {"name":"cross-workshop-10-3","exitCode":0,"readP95":288.2763446,"commandP95":318.15135289999995,"settleP95":811.0999999999999,"errors":0,"thresholdsOk":true}
+[14:24:20] aligning the measured phase to a CloudWatch minute {"waitSeconds":10}
+[14:24:30] run 4/18 {"scenario":"cross-workshop","vus":25,"round":1,"name":"cross-workshop-25-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-25-1.log"}
+
+seatrelay cross-workshop  target=dev vus=25 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 535 (measured 349)
+  http_reqs ............. 4762   failed 1.57 %
+  read_ms   p50 / p95 ... 276.4 ms / 292.6 ms
+  command_ms (202) ...... 290.0 ms / 319.8 ms
+  poll_ms ............... 276.2 ms / 296.1 ms
+  settle_ms (client) .... 789.0 ms / 6553.8 ms
+  server_settle_ms ...... 98.0 ms / 6053.6 ms
+  polls per command avg . 3.86
+  commands_failed ....... 9   rejected 9   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:26:14Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:26:14] run finished {"name":"cross-workshop-25-1","exitCode":99,"readP95":292.60334370000004,"commandP95":319.78984564999996,"settleP95":6553.8,"errors":0.015749685006299873,"thresholdsOk":false}
+[14:26:29] aligning the measured phase to a CloudWatch minute {"waitSeconds":0}
+[14:26:30] run 5/18 {"scenario":"cross-workshop","vus":25,"round":2,"name":"cross-workshop-25-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-25-2.log"}
+
+seatrelay cross-workshop  target=dev vus=25 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 589 (measured 393)
+  http_reqs ............. 5026   failed 1.33 %
+  read_ms   p50 / p95 ... 275.0 ms / 287.8 ms
+  command_ms (202) ...... 287.0 ms / 305.9 ms
+  poll_ms ............... 274.3 ms / 289.0 ms
+  settle_ms (client) .... 774.0 ms / 6912.3 ms
+  server_settle_ms ...... 69.0 ms / 6301.8 ms
+  polls per command avg . 3.66
+  commands_failed ....... 20   rejected 20   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:28:19Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:28:19] run finished {"name":"cross-workshop-25-2","exitCode":99,"readP95":287.77089440000003,"commandP95":305.8697495,"settleP95":6912.25,"errors":0.013330680461599681,"thresholdsOk":false}
+[14:28:34] aligning the measured phase to a CloudWatch minute {"waitSeconds":56}
+[14:29:30] run 6/18 {"scenario":"cross-workshop","vus":25,"round":3,"name":"cross-workshop-25-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-25-3.log"}
+
+seatrelay cross-workshop  target=dev vus=25 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 542 (measured 338)
+  http_reqs ............. 4977   failed 0.84 %
+  read_ms   p50 / p95 ... 274.9 ms / 285.5 ms
+  command_ms (202) ...... 287.1 ms / 304.0 ms
+  poll_ms ............... 273.8 ms / 288.2 ms
+  settle_ms (client) .... 785.5 ms / 7059.3 ms
+  server_settle_ms ...... 124.5 ms / 6506.5 ms
+  polls per command avg . 4.40
+  commands_failed ....... 10   rejected 11   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T14:31:18Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[14:31:18] run finished {"name":"cross-workshop-25-3","exitCode":99,"readP95":285.534914,"commandP95":304.0492365,"settleP95":7059.25,"errors":0.008438818565400843,"thresholdsOk":false}
+[14:31:33] aligning the measured phase to a CloudWatch minute {"waitSeconds":56}
+[14:32:30] run 7/18 {"scenario":"cross-workshop","vus":50,"round":1,"name":"cross-workshop-50-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-50-1.log"}
+
+seatrelay cross-workshop  target=dev vus=50 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 303 (measured 80)
+  http_reqs ............. 10607   failed 9.68 %
+  read_ms   p50 / p95 ... 271.9 ms / 283.7 ms
+  command_ms (202) ...... 284.0 ms / 300.2 ms
+  poll_ms ............... 272.6 ms / 289.4 ms
+  settle_ms (client) .... 15537.0 ms / 29127.0 ms
+  server_settle_ms ...... 14926.0 ms / 28460.0 ms
+  polls per command avg . 33.06
+  commands_failed ....... 28   rejected 21   settle_timeouts 38
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:34:34Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:34:34] run finished {"name":"cross-workshop-50-1","exitCode":99,"readP95":283.6736925,"commandP95":300.24630210000004,"settleP95":29127,"errors":0.0968228528330348,"thresholdsOk":false}
+[14:34:49] aligning the measured phase to a CloudWatch minute {"waitSeconds":41}
+[14:35:30] run 8/18 {"scenario":"cross-workshop","vus":50,"round":2,"name":"cross-workshop-50-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-50-2.log"}
+
+seatrelay cross-workshop  target=dev vus=50 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 320 (measured 97)
+  http_reqs ............. 9817   failed 9.81 %
+  read_ms   p50 / p95 ... 273.0 ms / 293.4 ms
+  command_ms (202) ...... 284.7 ms / 300.4 ms
+  poll_ms ............... 272.9 ms / 289.2 ms
+  settle_ms (client) .... 14930.0 ms / 28625.3 ms
+  server_settle_ms ...... 14117.0 ms / 28180.0 ms
+  polls per command avg . 32.84
+  commands_failed ....... 29   rejected 15   settle_timeouts 26
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:37:29Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:37:29] run finished {"name":"cross-workshop-50-2","exitCode":99,"readP95":293.3891106,"commandP95":300.42953585,"settleP95":28625.3,"errors":0.09809514108179689,"thresholdsOk":false}
+[14:37:44] aligning the measured phase to a CloudWatch minute {"waitSeconds":46}
+[14:38:30] run 9/18 {"scenario":"cross-workshop","vus":50,"round":3,"name":"cross-workshop-50-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/cross-workshop-50-3.log"}
+
+seatrelay cross-workshop  target=dev vus=50 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 325 (measured 110)
+  http_reqs ............. 10182   failed 9.40 %
+  read_ms   p50 / p95 ... 272.5 ms / 284.0 ms
+  command_ms (202) ...... 283.8 ms / 305.6 ms
+  poll_ms ............... 273.2 ms / 289.6 ms
+  settle_ms (client) .... 11650.0 ms / 29370.1 ms
+  server_settle_ms ...... 10967.0 ms / 28888.0 ms
+  polls per command avg . 29.01
+  commands_failed ....... 39   rejected 27   settle_timeouts 35
+  thresholds ............ FAILED: http_req_failed rate<0.01; settle_ms p(95)<5000
+time="2026-10-17T14:40:34Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:40:34] run finished {"name":"cross-workshop-50-3","exitCode":99,"readP95":284.037898,"commandP95":305.62649519999997,"settleP95":29370.1,"errors":0.09398939304655274,"thresholdsOk":false}
+[14:40:49] aligning the measured phase to a CloudWatch minute {"waitSeconds":41}
+[14:41:30] run 10/18 {"scenario":"hotspot","vus":10,"round":1,"name":"hotspot-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-10-1.log"}
+
+seatrelay hotspot  target=dev vus=10 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 412 (measured 335)
+  http_reqs ............. 2062   failed 0.00 %
+  read_ms   p50 / p95 ... 272.9 ms / 284.2 ms
+  command_ms (202) ...... 283.0 ms / 295.7 ms
+  poll_ms ............... 271.8 ms / 287.1 ms
+  settle_ms (client) .... 757.0 ms / 780.0 ms
+  server_settle_ms ...... 39.0 ms / 116.1 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:43:03] run finished {"name":"hotspot-10-1","exitCode":0,"readP95":284.248467,"commandP95":295.70218795,"settleP95":780,"errors":0,"thresholdsOk":true}
+[14:43:18] aligning the measured phase to a CloudWatch minute {"waitSeconds":12}
+[14:43:30] run 11/18 {"scenario":"hotspot","vus":10,"round":2,"name":"hotspot-10-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-10-2.log"}
+
+seatrelay hotspot  target=dev vus=10 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 415 (measured 339)
+  http_reqs ............. 2077   failed 0.00 %
+  read_ms   p50 / p95 ... 271.1 ms / 280.9 ms
+  command_ms (202) ...... 281.4 ms / 299.8 ms
+  poll_ms ............... 270.2 ms / 283.3 ms
+  settle_ms (client) .... 754.0 ms / 780.1 ms
+  server_settle_ms ...... 41.0 ms / 120.1 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:45:03] run finished {"name":"hotspot-10-2","exitCode":0,"readP95":280.86558909999997,"commandP95":299.8459514,"settleP95":780.15,"errors":0,"thresholdsOk":true}
+[14:45:18] aligning the measured phase to a CloudWatch minute {"waitSeconds":12}
+[14:45:30] run 12/18 {"scenario":"hotspot","vus":10,"round":3,"name":"hotspot-10-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-10-3.log"}
+
+seatrelay hotspot  target=dev vus=10 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 410 (measured 334)
+  http_reqs ............. 2052   failed 0.00 %
+  read_ms   p50 / p95 ... 274.1 ms / 283.8 ms
+  command_ms (202) ...... 285.3 ms / 302.8 ms
+  poll_ms ............... 273.7 ms / 289.1 ms
+  settle_ms (client) .... 762.0 ms / 792.0 ms
+  server_settle_ms ...... 47.5 ms / 126.6 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[14:47:03] run finished {"name":"hotspot-10-3","exitCode":0,"readP95":283.80715605,"commandP95":302.78711095,"settleP95":792,"errors":0,"thresholdsOk":true}
+[14:47:18] aligning the measured phase to a CloudWatch minute {"waitSeconds":12}
+[14:47:30] run 13/18 {"scenario":"hotspot","vus":25,"round":1,"name":"hotspot-25-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-25-1.log"}
+
+seatrelay hotspot  target=dev vus=25 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 452 (measured 266)
+  http_reqs ............. 4937   failed 0.22 %
+  read_ms   p50 / p95 ... 271.2 ms / 288.6 ms
+  command_ms (202) ...... 282.4 ms / 305.1 ms
+  poll_ms ............... 269.7 ms / 285.8 ms
+  settle_ms (client) .... 1246.0 ms / 7245.2 ms
+  server_settle_ms ...... 667.0 ms / 6649.9 ms
+  polls per command avg . 5.88
+  commands_failed ....... 2   rejected 3   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T14:49:14Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[14:49:14] run finished {"name":"hotspot-25-1","exitCode":99,"readP95":288.61758280000004,"commandP95":305.14557575,"settleP95":7245.249999999999,"errors":0.002228073728985214,"thresholdsOk":false}
+[14:49:29] aligning the measured phase to a CloudWatch minute {"waitSeconds":1}
+[14:49:30] run 14/18 {"scenario":"hotspot","vus":25,"round":2,"name":"hotspot-25-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-25-2.log"}
+
+seatrelay hotspot  target=dev vus=25 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 571 (measured 381)
+  http_reqs ............. 5076   failed 0.47 %
+  read_ms   p50 / p95 ... 273.5 ms / 291.9 ms
+  command_ms (202) ...... 284.4 ms / 306.1 ms
+  poll_ms ............... 272.1 ms / 288.1 ms
+  settle_ms (client) .... 1234.0 ms / 7404.5 ms
+  server_settle_ms ...... 634.0 ms / 6791.0 ms
+  polls per command avg . 3.88
+  commands_failed ....... 11   rejected 9   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T14:51:13Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[14:51:13] run finished {"name":"hotspot-25-2","exitCode":99,"readP95":291.9045234,"commandP95":306.05894090000004,"settleP95":7404.5,"errors":0.004728132387706856,"thresholdsOk":false}
+[14:51:28] aligning the measured phase to a CloudWatch minute {"waitSeconds":2}
+[14:51:30] run 15/18 {"scenario":"hotspot","vus":25,"round":3,"name":"hotspot-25-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-25-3.log"}
+
+seatrelay hotspot  target=dev vus=25 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 592 (measured 402)
+  http_reqs ............. 5129   failed 0.47 %
+  read_ms   p50 / p95 ... 275.4 ms / 293.7 ms
+  command_ms (202) ...... 285.4 ms / 305.6 ms
+  poll_ms ............... 273.6 ms / 291.5 ms
+  settle_ms (client) .... 1237.0 ms / 7397.8 ms
+  server_settle_ms ...... 587.5 ms / 6852.0 ms
+  polls per command avg . 3.66
+  commands_failed ....... 8   rejected 8   settle_timeouts 0
+  thresholds ............ FAILED: settle_ms p(95)<5000
+time="2026-10-17T14:53:14Z" level=error msg="thresholds on metrics 'settle_ms' have been crossed"
+[14:53:14] run finished {"name":"hotspot-25-3","exitCode":99,"readP95":293.7487552,"commandP95":305.61320945,"settleP95":7397.75,"errors":0.004679274712419575,"thresholdsOk":false}
+[14:53:29] aligning the measured phase to a CloudWatch minute {"waitSeconds":0}
+[14:53:30] run 16/18 {"scenario":"hotspot","vus":50,"round":1,"name":"hotspot-50-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-50-1.log"}
+
+seatrelay hotspot  target=dev vus=50 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 187 (measured 20)
+  http_reqs ............. 10559   failed 7.61 %
+  read_ms   p50 / p95 ... 276.5 ms / 313.5 ms
+  command_ms (202) ...... 283.7 ms / 305.2 ms
+  poll_ms ............... 272.1 ms / 285.1 ms
+  settle_ms (client) .... 0.0 ms / 0.0 ms
+  server_settle_ms ......    -    /    -   
+  polls per command avg . -
+  commands_failed ....... 7   rejected 0   settle_timeouts 63
+  thresholds ............ FAILED: http_req_failed rate<0.01
+time="2026-10-17T14:55:31Z" level=error msg="thresholds on metrics 'http_req_failed' have been crossed"
+[14:55:31] run finished {"name":"hotspot-50-1","exitCode":99,"readP95":313.5381374,"commandP95":305.232437,"settleP95":0,"errors":0.07614357420210247,"thresholdsOk":false}
+[14:55:46] aligning the measured phase to a CloudWatch minute {"waitSeconds":43}
+[14:56:30] run 17/18 {"scenario":"hotspot","vus":50,"round":2,"name":"hotspot-50-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-50-2.log"}
+
+seatrelay hotspot  target=dev vus=50 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 255 (measured 70)
+  http_reqs ............. 10480   failed 8.01 %
+  read_ms   p50 / p95 ... 274.8 ms / 306.7 ms
+  command_ms (202) ...... 283.4 ms / 298.1 ms
+  poll_ms ............... 271.1 ms / 284.7 ms
+  settle_ms (client) .... 25989.0 ms / 29943.0 ms
+  server_settle_ms ...... 25328.0 ms / 29335.0 ms
+  polls per command avg . 47.80
+  commands_failed ....... 19   rejected 8   settle_timeouts 60
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:58:31Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[14:58:31] run finished {"name":"hotspot-50-2","exitCode":99,"readP95":306.720064,"commandP95":298.1495192,"settleP95":29943,"errors":0.08005725190839695,"thresholdsOk":false}
+[14:58:46] aligning the measured phase to a CloudWatch minute {"waitSeconds":43}
+[14:59:30] run 18/18 {"scenario":"hotspot","vus":50,"round":3,"name":"hotspot-50-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/dev/20261017T141749Z/hotspot-50-3.log"}
+
+seatrelay hotspot  target=dev vus=50 round=3  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 206 (measured 32)
+  http_reqs ............. 10554   failed 7.08 %
+  read_ms   p50 / p95 ... 275.7 ms / 286.6 ms
+  command_ms (202) ...... 285.8 ms / 309.8 ms
+  poll_ms ............... 272.7 ms / 285.4 ms
+  settle_ms (client) .... 20061.0 ms / 28644.0 ms
+  server_settle_ms ...... 19358.0 ms / 28241.5 ms
+  polls per command avg . 44.55
+  commands_failed ....... 10   rejected 2   settle_timeouts 76
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T15:01:31Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"
+[15:01:31] run finished {"name":"hotspot-50-3","exitCode":99,"readP95":286.62760249999997,"commandP95":309.8361301,"settleP95":28644,"errors":0.07077885162023877,"thresholdsOk":false}
+[15:01:31] waiting for CloudWatch ingestion before pulling the metrics {"rows":18,"seconds":148}
+{
+  "outDir": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17",
+  "runId": "20261017T141749Z",
+  "runs": 18,
+  "csv": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/raw.csv",
+  "summary": "/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/summary.md"
+}
+[15:04:05] === k6 matrix finished exit=0 ===
+[15:04:05] done; status in /home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/2026-10-17-table3-dev.status

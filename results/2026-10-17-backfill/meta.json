@@ -1,0 +1,57 @@
+{
+  "runId": "3393de39-7f0b-4404-994e-cc912749aec4",
+  "name": "backfill",
+  "tableRow": "Backfill latency (plan §4, Table 3)",
+  "criterion": "expiry-driven backfill p95 ≤ 120 s (reallocatedAt − releasedAt; single-digit seconds expected), every expiry relayed, outliers listed; cancellation-driven backfills reported separately (≈ 0 ms); SweepLateExpiries = 0",
+  "startedAt": "2026-10-17T14:16:25.938Z",
+  "finishedAt": "2026-10-17T14:16:29.695Z",
+  "durationMs": 3757,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "c1d066056b2c9d36cc33869629f99f390451c101",
+    "short": "c1d066056b2c",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 60,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 23,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "layout": {
+      "workshops": 10,
+      "sessions": 2,
+      "capacity": 5,
+      "rounds": 1,
+      "seats": 10,
+      "offers": 100,
+      "extraPerWorkshop": 2,
+      "registrantsPerWorkshop": 22
+    },
+    "outlierMs": 10000,
+    "waitExtraSeconds": 420,
+    "seed": 1,
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1"
+  },
+  "checks": {
+    "total": 1,
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  },
+  "ok": false,
+  "error": "POST /orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops → 503"
+}

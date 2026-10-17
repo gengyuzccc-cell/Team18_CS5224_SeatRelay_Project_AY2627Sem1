@@ -1,3 +1,10 @@
 # Table 3 run on dev, started 2026-10-17T13:21:09Z, commit 227de3d
 2026-10-17T13:25:33Z	correctness	exit=0	264s
 2026-10-17T13:26:16Z	preference-order	exit=0	43s
+2026-10-17T13:28:21Z	concurrency	exit=1	125s
+2026-10-17T13:43:03Z	repeat-execution	exit=0	882s
+2026-10-17T13:44:38Z	expiry-race	exit=1	95s
+2026-10-17T14:15:26Z	failure-recovery	exit=0	1848s
+2026-10-17T14:16:23Z	access-control	exit=0	57s
+2026-10-17T14:17:39Z	backfill	exit=1	76s
+2026-10-17T15:04:05Z	k6-matrix	exit=0	2786s

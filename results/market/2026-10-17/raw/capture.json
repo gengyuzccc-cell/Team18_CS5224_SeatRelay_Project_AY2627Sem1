@@ -1,0 +1,1101 @@
+[
+ {
+  "file": "libcal/nus/2026-08-01-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:32+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-01-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:33+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-02-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:35+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-02-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:36+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-03-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 7005,
+  "retrievedAt": "2026-10-17T15:00:37+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-03-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:38+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-04-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:39+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-04-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 1951,
+  "retrievedAt": "2026-10-17T15:00:40+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-05-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14536,
+  "retrievedAt": "2026-10-17T15:00:41+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-05-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:42+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-06-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14873,
+  "retrievedAt": "2026-10-17T15:00:43+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-06-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:44+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-07-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 7570,
+  "retrievedAt": "2026-10-17T15:00:45+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-07-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:46+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-08-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:47+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-08-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:48+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-09-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:49+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-09-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:50+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-10-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:51+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-10-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:52+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-11-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 10570,
+  "retrievedAt": "2026-10-17T15:00:53+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-11-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:54+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-12-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:55+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-12-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:56+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-13-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5182,
+  "retrievedAt": "2026-10-17T15:00:57+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-13-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:00:58+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-14-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 7252,
+  "retrievedAt": "2026-10-17T15:00:59+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-14-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:00+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-15-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2521,
+  "retrievedAt": "2026-10-17T15:01:01+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-15-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:02+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-16-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2521,
+  "retrievedAt": "2026-10-17T15:01:03+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-16-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:04+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-17-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-17&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2521,
+  "retrievedAt": "2026-10-17T15:01:05+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-17-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-17&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:06+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-18-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-18&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2521,
+  "retrievedAt": "2026-10-17T15:01:07+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-18-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-18&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:08+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-19-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-19&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 8344,
+  "retrievedAt": "2026-10-17T15:01:09+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-19-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-19&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 4086,
+  "retrievedAt": "2026-10-17T15:01:10+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-20-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-20&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 12605,
+  "retrievedAt": "2026-10-17T15:01:12+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-20-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-20&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5302,
+  "retrievedAt": "2026-10-17T15:01:13+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-21-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-21&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2521,
+  "retrievedAt": "2026-10-17T15:01:14+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-21-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-21&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:15+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-22-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-22&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5365,
+  "retrievedAt": "2026-10-17T15:01:16+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-22-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-22&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:17+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-23-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-23&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 6825,
+  "retrievedAt": "2026-10-17T15:01:18+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-23-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-23&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:19+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-24-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-24&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 10924,
+  "retrievedAt": "2026-10-17T15:01:20+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-24-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-24&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2721,
+  "retrievedAt": "2026-10-17T15:01:21+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-25-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-25&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 13893,
+  "retrievedAt": "2026-10-17T15:01:23+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-25-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-25&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5167,
+  "retrievedAt": "2026-10-17T15:01:24+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-26-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-26&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 25378,
+  "retrievedAt": "2026-10-17T15:01:25+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-26-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-26&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 8094,
+  "retrievedAt": "2026-10-17T15:01:26+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-27-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-27&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 17389,
+  "retrievedAt": "2026-10-17T15:01:27+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-27-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-27&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 9398,
+  "retrievedAt": "2026-10-17T15:01:28+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-28-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-28&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16780,
+  "retrievedAt": "2026-10-17T15:01:29+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-28-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-28&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2299,
+  "retrievedAt": "2026-10-17T15:01:30+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-29-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-29&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 15081,
+  "retrievedAt": "2026-10-17T15:01:31+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-29-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-29&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:33+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-30-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-30&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 15073,
+  "retrievedAt": "2026-10-17T15:01:34+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-30-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-30&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:35+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-08-31-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-08-31&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 15073,
+  "retrievedAt": "2026-10-17T15:01:36+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-08-31-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-08-31&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5143,
+  "retrievedAt": "2026-10-17T15:01:37+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-01-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:01:38+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-01-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5891,
+  "retrievedAt": "2026-10-17T15:01:39+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-02-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 34795,
+  "retrievedAt": "2026-10-17T15:01:40+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-02-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:41+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-03-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 22692,
+  "retrievedAt": "2026-10-17T15:01:43+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-03-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2532,
+  "retrievedAt": "2026-10-17T15:01:44+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-04-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:01:45+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-04-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 21206,
+  "retrievedAt": "2026-10-17T15:01:46+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-05-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 82930,
+  "retrievedAt": "2026-10-17T15:01:48+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-05-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:49+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-06-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:01:50+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-06-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:01:51+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-07-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 21893,
+  "retrievedAt": "2026-10-17T15:01:52+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-07-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5590,
+  "retrievedAt": "2026-10-17T15:01:53+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-08-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 22841,
+  "retrievedAt": "2026-10-17T15:01:54+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-08-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 11196,
+  "retrievedAt": "2026-10-17T15:01:55+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-09-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:01:57+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-09-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5042,
+  "retrievedAt": "2026-10-17T15:01:58+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-10-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:01:59+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-10-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5360,
+  "retrievedAt": "2026-10-17T15:02:00+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-11-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:01+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-11-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 2875,
+  "retrievedAt": "2026-10-17T15:02:02+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-12-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 20674,
+  "retrievedAt": "2026-10-17T15:02:04+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-12-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:05+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-13-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:06+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-13-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:07+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-14-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 21811,
+  "retrievedAt": "2026-10-17T15:02:08+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-14-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5071,
+  "retrievedAt": "2026-10-17T15:02:09+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-15-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 22847,
+  "retrievedAt": "2026-10-17T15:02:10+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-15-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 10871,
+  "retrievedAt": "2026-10-17T15:02:12+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-16-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 26839,
+  "retrievedAt": "2026-10-17T15:02:13+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-16-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5211,
+  "retrievedAt": "2026-10-17T15:02:14+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-17-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-17&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 25481,
+  "retrievedAt": "2026-10-17T15:02:15+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-17-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-17&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 6595,
+  "retrievedAt": "2026-10-17T15:02:16+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-18-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-18&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 23266,
+  "retrievedAt": "2026-10-17T15:02:17+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-18-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-18&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:18+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-19-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-19&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:19+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-19-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-19&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:21+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-20-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-20&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:22+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-20-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-20&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:23+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-21-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-21&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:24+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-21-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-21&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:26+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-22-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-22&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:27+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-22-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-22&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 3554,
+  "retrievedAt": "2026-10-17T15:02:28+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-23-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-23&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 29304,
+  "retrievedAt": "2026-10-17T15:02:29+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-23-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-23&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 5541,
+  "retrievedAt": "2026-10-17T15:02:30+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-24-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-24&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 21243,
+  "retrievedAt": "2026-10-17T15:02:31+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-24-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-24&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 4161,
+  "retrievedAt": "2026-10-17T15:02:32+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-25-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-25&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:34+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-25-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-25&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:35+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-26-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-26&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:36+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-26-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-26&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:37+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-27-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-27&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:39+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-27-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-27&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:40+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-28-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-28&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:41+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-28-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-28&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:42+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-29-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-29&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18076,
+  "retrievedAt": "2026-10-17T15:02:43+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-29-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-29&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:44+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-09-30-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-09-30&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 25613,
+  "retrievedAt": "2026-10-17T15:02:46+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-09-30-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-09-30&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:46+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-01-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 21004,
+  "retrievedAt": "2026-10-17T15:02:48+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-01-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-01&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:49+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-02-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14129,
+  "retrievedAt": "2026-10-17T15:02:50+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-02-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-02&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:51+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-03-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14129,
+  "retrievedAt": "2026-10-17T15:02:52+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-03-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-03&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:53+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-04-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14129,
+  "retrievedAt": "2026-10-17T15:02:54+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-04-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-04&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:55+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-05-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14129,
+  "retrievedAt": "2026-10-17T15:02:57+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-05-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-05&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:02:57+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-06-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 14129,
+  "retrievedAt": "2026-10-17T15:02:59+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-06-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-06&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:00+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-07-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 20474,
+  "retrievedAt": "2026-10-17T15:03:01+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-07-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-07&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:02+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-08-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 17268,
+  "retrievedAt": "2026-10-17T15:03:03+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-08-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-08&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:04+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-09-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16067,
+  "retrievedAt": "2026-10-17T15:03:06+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-09-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-09&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:07+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-10-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16107,
+  "retrievedAt": "2026-10-17T15:03:08+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-10-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-10&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:09+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-11-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16107,
+  "retrievedAt": "2026-10-17T15:03:10+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-11-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-11&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:11+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-12-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16107,
+  "retrievedAt": "2026-10-17T15:03:12+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-12-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-12&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:13+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-13-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16107,
+  "retrievedAt": "2026-10-17T15:03:14+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-13-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-13&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:15+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-14-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18562,
+  "retrievedAt": "2026-10-17T15:03:17+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-14-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-14&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:18+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-15-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 18470,
+  "retrievedAt": "2026-10-17T15:03:19+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-15-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-15&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:20+00:00"
+ },
+ {
+  "file": "libcal/nus/2026-10-16-p1.json",
+  "url": "https://nus.libcal.com/ajax/calendar/list?c=-1&date=2026-10-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 16099,
+  "retrievedAt": "2026-10-17T15:03:21+00:00"
+ },
+ {
+  "file": "libcal/smu/2026-10-16-p1.json",
+  "url": "https://smu-sg.libcal.com/ajax/calendar/list?c=-1&date=2026-10-16&perpage=100&page=1&audience=&cats=&camps=&inc=0",
+  "status": 200,
+  "bytes": 57,
+  "retrievedAt": "2026-10-17T15:03:22+00:00"
+ },
+ {
+  "file": "ntu/special-interest-clubs.html",
+  "url": "https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies/special-interest-clubs",
+  "status": 200,
+  "bytes": 192894,
+  "retrievedAt": "2026-10-17T15:03:23+00:00"
+ },
+ {
+  "file": "ntu/ntu-students-union-council.html",
+  "url": "https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies/ntu-students-union-council",
+  "status": 200,
+  "bytes": 150020,
+  "retrievedAt": "2026-10-17T15:03:23+00:00"
+ },
+ {
+  "file": "ntu/clubs-groups-societies.html",
+  "url": "https://www.ntu.edu.sg/life-at-ntu/student-life/student-activities-and-engagement/clubs-groups-societies",
+  "status": 200,
+  "bytes": 133253,
+  "retrievedAt": "2026-10-17T15:03:24+00:00"
+ }
+]

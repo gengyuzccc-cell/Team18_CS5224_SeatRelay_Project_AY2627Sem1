@@ -1,0 +1,13 @@
+
+seatrelay cross-workshop  target=dev vus=50 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 320 (measured 97)
+  http_reqs ............. 9817   failed 9.81 %
+  read_ms   p50 / p95 ... 273.0 ms / 293.4 ms
+  command_ms (202) ...... 284.7 ms / 300.4 ms
+  poll_ms ............... 272.9 ms / 289.2 ms
+  settle_ms (client) .... 14930.0 ms / 28625.3 ms
+  server_settle_ms ...... 14117.0 ms / 28180.0 ms
+  polls per command avg . 32.84
+  commands_failed ....... 29   rejected 15   settle_timeouts 26
+  thresholds ............ FAILED: settle_ms p(95)<5000; http_req_failed rate<0.01
+time="2026-10-17T14:37:29Z" level=error msg="thresholds on metrics 'http_req_failed, settle_ms' have been crossed"

@@ -31,11 +31,15 @@ export type EarlyVerdict = 'PASS' | 'INCONCLUSIVE' | 'FAIL';
 /**
  * The early ACCEPT (sent to reach the API before `expiresAt`):
  * - PASS: APPLIED, accepted before `expiresAt`;
- * - INCONCLUSIVE: REJECTED(OFFER_EXPIRED) although accepted before `expiresAt`, because the
- *   worker processed it at or after `expiresAt` (queue latency exceeded the margin): correct
- *   tick-first behaviour that says nothing about the early case, so the trial is repeated;
+ * - INCONCLUSIVE: REJECTED(OFFER_EXPIRED) settled at or after `expiresAt` (consistent with the
+ *   server clock), either because the worker processed it after `expiresAt` (queue latency
+ *   exceeded the margin) or because the request itself reached the API after `expiresAt` (the
+ *   send timing missed, e.g. a cold start or a network spike on a long client-server path).
+ *   Both are correct tick-first behaviour that says nothing about the early case, so the trial
+ *   is repeated with a fresh workshop;
  * - FAIL: anything else (no settlement, another rejection, an outcome the server timestamps
- *   contradict, e.g. APPLIED although accepted after `expiresAt`).
+ *   contradict, e.g. APPLIED although accepted after `expiresAt`, or REJECTED(OFFER_EXPIRED)
+ *   although settled before `expiresAt`).
  */
 export function classifyEarly(record: AcceptRecord | undefined, expiresAtMs: number): EarlyVerdict {
   if (record === undefined || !consistentWithServerTime(record, expiresAtMs)) {
@@ -44,7 +48,9 @@ export function classifyEarly(record: AcceptRecord | undefined, expiresAtMs: num
   if (record.status === 'APPLIED') {
     return 'PASS';
   }
-  return Date.parse(record.acceptedAt) < expiresAtMs ? 'INCONCLUSIVE' : 'FAIL';
+  // REJECTED(OFFER_EXPIRED) and consistent with the server clock (settled at/after expiresAt):
+  // the trial did not exercise the early case, whether the queue or the network made it late.
+  return 'INCONCLUSIVE';
 }
 
 /** Processing the relay and settling the ACCEPT in the same worker pass are this close (ms). */

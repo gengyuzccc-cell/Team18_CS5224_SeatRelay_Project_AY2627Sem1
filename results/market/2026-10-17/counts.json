@@ -1,0 +1,147 @@
+{
+ "date": "2026-10-17",
+ "nus_libcal": {
+  "window": [
+   "2026-08-01",
+   "2026-10-16"
+  ],
+  "days": 77,
+  "events": 80,
+  "distinct_titles": 55,
+  "workshop_events": 37,
+  "workshop_distinct_titles": 28,
+  "workshop_repeated_titles": [
+   [
+    "LARC Library Tours",
+    8
+   ],
+   [
+    "Library Essentials: Orientation Workshop",
+    3
+   ]
+  ],
+  "non_exhibition_events": 59,
+  "non_exhibition_repeated_titles": [
+   [
+    "LARC Library Tours",
+    8
+   ],
+   [
+    "Library Essentials: Orientation Workshop",
+    3
+   ],
+   [
+    "Mission Lib-Pawssible: Library Orientation Game",
+    3
+   ],
+   [
+    "Book Adoption and Exchange Fair",
+    2
+   ]
+  ],
+  "repeated_titles": [
+   [
+    "NUS SLP Research Seminar Poster Exhibition",
+    9
+   ],
+   [
+    "LARC Library Tours",
+    8
+   ],
+   [
+    "Exhibition: Digital Sustainability",
+    3
+   ],
+   [
+    "Library Essentials: Orientation Workshop",
+    3
+   ],
+   [
+    "Mission Lib-Pawssible: Library Orientation Game",
+    3
+   ],
+   [
+    "Book Adoption and Exchange Fair",
+    2
+   ],
+   [
+    "Exhibition: A Life Composed: Chin Whai's Journey Through Music, Literature & Charity",
+    2
+   ],
+   [
+    "Exhibition: The Life and Literary Circle of Chua Boon Hean",
+    2
+   ],
+   [
+    "Exhibition: Youth, Hope & Unity: Reflections on Pope Francis's Historic Visit to Singapore",
+    2
+   ]
+  ],
+  "workshop_repeat_events": 11,
+  "non_exhibition_repeat_events": 16,
+  "repeat_events": 34
+ },
+ "smu_libcal": {
+  "window": [
+   "2026-08-01",
+   "2026-10-16"
+  ],
+  "days": 77,
+  "events": 44,
+  "distinct_titles": 42,
+  "workshop_events": 1,
+  "workshop_distinct_titles": 1,
+  "workshop_repeated_titles": [],
+  "non_exhibition_events": 44,
+  "non_exhibition_repeated_titles": [
+   [
+    "Learning Bloomberg The Fun Way",
+    2
+   ],
+   [
+    "Library Orientation for New Research Staff",
+    2
+   ]
+  ],
+  "repeated_titles": [
+   [
+    "Learning Bloomberg The Fun Way",
+    2
+   ],
+   [
+    "Library Orientation for New Research Staff",
+    2
+   ]
+  ],
+  "workshop_repeat_events": 0,
+  "non_exhibition_repeat_events": 4,
+  "repeat_events": 4
+ },
+ "ntu": {
+  "special_interest_clubs": 71,
+  "su_constituent_clubs": 19,
+  "su_constituent_clubs_quoted": 19,
+  "hall_councils": 23,
+  "student_orgs": 113
+ },
+ "cited": {
+  "nus_student_orgs": 200,
+  "smu_student_orgs": 150,
+  "smu_student_orgs_fetched": 95,
+  "sutd_student_groups": 80,
+  "sit_student_orgs": 150,
+  "cet_training_providers": 700
+ },
+ "price_sgd_per_year": 120,
+ "derived": {
+  "student_orgs_five_universities": 693,
+  "student_orgs_fetched_or_own_count": 288,
+  "tam_campus_sgd_per_p": 83160,
+  "tam_campus_sgd_per_p_3sf": 83200,
+  "tam_campus_cet_sgd_per_p": 167160,
+  "tam_campus_cet_sgd_per_p_3sf": 167000,
+  "tam_campus_fetched_sgd_per_p": 34560,
+  "tam_campus_fetched_sgd_per_p_3sf": 34600,
+  "som_nus_max_sgd": 24000
+ }
+}

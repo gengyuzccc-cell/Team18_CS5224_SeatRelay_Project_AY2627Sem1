@@ -1,0 +1,105 @@
+{
+  "runId": "a6983ff8-cf1d-44c5-9b89-94751e701ca4",
+  "name": "concurrency",
+  "tableRow": "Concurrency (plan §4, Table 3)",
+  "criterion": "final state satisfies every invariant (verify ok, 0 over-capacity, 0 double holds) after each concurrent phase; META conflict retries recorded (expected 0)",
+  "startedAt": "2026-10-17T13:26:18.893Z",
+  "finishedAt": "2026-10-17T13:28:21.194Z",
+  "durationMs": 122301,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "ec54916a2dcb44302be594f6ff5da93bcdf7ef5e",
+    "short": "ec54916a2dcb",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 900,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 51,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "accounts": 50,
+    "sessions": 3,
+    "capacities": "2,2,1",
+    "capacityTotal": 5,
+    "seed": 1,
+    "run1.workshopId": "7bed6138-40b3-4ac3-b0a5-5ae6c0e60165",
+    "run2.workshopId": "7f3fe10f-a737-413b-b47a-50eeb1dcb3f8",
+    "run3.workshopId": "85b83e0d-42a1-4dfa-8ef9-be9e1abd2c85"
+  },
+  "checks": {
+    "total": 39,
+    "passed": 22,
+    "failed": 17,
+    "skipped": 0
+  },
+  "ok": false,
+  "capacities": [
+    2,
+    2,
+    1
+  ],
+  "settleMs": {
+    "count": 133,
+    "min": 768,
+    "max": 7839,
+    "mean": 2510.1052631578946,
+    "p50": 1002,
+    "p95": 7788,
+    "p99": 7838,
+    "stdev": 2500.437595576181
+  },
+  "serverSettleMs": {
+    "count": 133,
+    "min": 31,
+    "max": 6593,
+    "mean": 1605.1278195488721,
+    "p50": 447,
+    "p95": 6349,
+    "p99": 6549,
+    "stdev": 2167.9717676127434
+  },
+  "metaConflictRetries": 0,
+  "raceFirst": {
+    "CANCEL": 7,
+    "ACCEPT": 3,
+    "DECLINE": 5
+  },
+  "perRun": [
+    {
+      "offeredAfterRace": 5,
+      "queuedAfterRace": 24,
+      "relayedAfterSameAccountRace": 4,
+      "confirmedAtEnd": 5,
+      "backfills": 4
+    },
+    {
+      "offeredAfterRace": 5,
+      "queuedAfterRace": 27,
+      "relayedAfterSameAccountRace": 5,
+      "confirmedAtEnd": 5,
+      "backfills": 5
+    },
+    {
+      "offeredAfterRace": 5,
+      "queuedAfterRace": 32,
+      "relayedAfterSameAccountRace": 5,
+      "confirmedAtEnd": 5,
+      "backfills": 6
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "runId": "3a7ac99e-663f-4bb0-99d7-bec8de3a7b84",
+  "name": "failure-recovery",
+  "tableRow": "Failure recovery (plan §4, Table 3)",
+  "criterion": "BEFORE_COMMIT / AFTER_COMMIT / TIMER_SEND: the command settles exactly once after the redelivery, traceable; notifier outage: backlog delivered < 5 min after the restore (seconds reported); dead letters empty",
+  "startedAt": "2026-10-17T13:44:40.315Z",
+  "finishedAt": "2026-10-17T14:15:26.033Z",
+  "durationMs": 1845718,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "c1d066056b2c9d36cc33869629f99f390451c101",
+    "short": "c1d066056b2c",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 60,
+  "faults": [
+    {
+      "run": 1,
+      "fault": "BEFORE_COMMIT",
+      "ok": true,
+      "serverSettleMs": 120112,
+      "deliveries": 2
+    },
+    {
+      "run": 1,
+      "fault": "AFTER_COMMIT",
+      "ok": true,
+      "serverSettleMs": 49,
+      "deliveries": 2
+    },
+    {
+      "run": 1,
+      "fault": "TIMER_SEND",
+      "ok": true,
+      "serverSettleMs": 120081,
+      "deliveries": 2
+    },
+    {
+      "run": 2,
+      "fault": "BEFORE_COMMIT",
+      "ok": true,
+      "serverSettleMs": 120094,
+      "deliveries": 2
+    },
+    {
+      "run": 2,
+      "fault": "AFTER_COMMIT",
+      "ok": true,
+      "serverSettleMs": 90,
+      "deliveries": 2
+    },
+    {
+      "run": 2,
+      "fault": "TIMER_SEND",
+      "ok": true,
+      "serverSettleMs": 120125,
+      "deliveries": 2
+    },
+    {
+      "run": 3,
+      "fault": "BEFORE_COMMIT",
+      "ok": true,
+      "serverSettleMs": 120128,
+      "deliveries": 2
+    },
+    {
+      "run": 3,
+      "fault": "AFTER_COMMIT",
+      "ok": true,
+      "serverSettleMs": 68,
+      "deliveries": 2
+    },
+    {
+      "run": 3,
+      "fault": "TIMER_SEND",
+      "ok": true,
+      "serverSettleMs": 120095,
+      "deliveries": 2
+    }
+  ],
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 12,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "outageSeconds": 60,
+    "notifications": 10,
+    "recoveryLimitSeconds": 300,
+    "run1.workshopId": "13888fee-409f-42f7-83b9-942fcc3293ae",
+    "run2.workshopId": "d9bd780d-6f9c-45c4-9c9b-ea300d3bce16",
+    "run3.workshopId": "218baf4c-8ad0-4dd6-bb65-b3db33115120"
+  },
+  "checks": {
+    "total": 52,
+    "passed": 52,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "notifierRecoverySeconds": [
+    44.185,
+    52.291,
+    38.075
+  ],
+  "notifierBaselineSeconds": [
+    2.749,
+    2.398,
+    0.767
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "runId": "1b862065-3e76-4168-9f19-5d7c440d0ce5",
+  "name": "expiry-race",
+  "tableRow": "Expiry race (plan §4, Table 3; tick-first, §1.2)",
+  "criterion": "ACCEPT at expiresAt − 200 ms succeeds (a trial whose queue latency exceeds the margin is inconclusive under tick-first and repeated); ACCEPT at expiresAt + 200 ms is REJECTED(OFFER_EXPIRED) regardless of timer arrival; a late TICK has no effect on a newer offer",
+  "startedAt": "2026-10-17T13:43:06.037Z",
+  "finishedAt": "2026-10-17T13:44:37.992Z",
+  "durationMs": 91955,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "c1d066056b2c9d36cc33869629f99f390451c101",
+    "short": "c1d066056b2c",
+    "dirty": true,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 60,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 4,
+    "minted": 0,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "marginMs": 200,
+    "earlyAttempts": 3,
+    "clockOffset": {
+      "offsetMs": 20,
+      "rttMs": 234,
+      "samples": 9
+    },
+    "run1.early1.workshopId": "27f4bd26-ed31-4263-bfba-fb8c4807c870",
+    "run1.late.workshopId": "5444e956-8526-4187-a74f-777dd0eaf4ed",
+    "run2.late.workshopId": "2b3be652-d0fe-4a09-8cad-46aed0554940",
+    "run2.early1.workshopId": "be4726d4-d17b-4872-bce1-64662d4ea1a4",
+    "run3.late.workshopId": "08ad051a-c410-41d6-9235-b60d20533e6a",
+    "run3.early1.workshopId": "8bb98931-4caa-43e2-9ecf-9fb8e2d88fdd"
+  },
+  "checks": {
+    "total": 27,
+    "passed": 26,
+    "failed": 1,
+    "skipped": 0
+  },
+  "ok": false,
+  "clockOffset": {
+    "offsetMs": 20,
+    "rttMs": 234,
+    "samples": 9
+  },
+  "orders": {
+    "timer tick processed before the ACCEPT arrived": 3
+  },
+  "lateTicks": 3,
+  "earlyAttempts": 3,
+  "earlyInconclusive": 0,
+  "pickupMs": {
+    "count": 6,
+    "min": 31,
+    "max": 62,
+    "mean": 41.833333333333336,
+    "p50": 36,
+    "p95": 62,
+    "p99": 62,
+    "stdev": 10.6366765904059
+  }
+}
