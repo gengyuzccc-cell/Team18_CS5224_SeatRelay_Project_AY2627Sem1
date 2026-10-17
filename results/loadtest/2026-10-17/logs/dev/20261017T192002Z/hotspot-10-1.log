@@ -1,0 +1,12 @@
+
+seatrelay hotspot  target=dev vus=10 round=1  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 405 (measured 330)
+  http_reqs ............. 2027   failed 0.00 %
+  read_ms   p50 / p95 ... 274.5 ms / 296.7 ms
+  command_ms (202) ...... 285.8 ms / 310.3 ms
+  poll_ms ............... 274.3 ms / 301.6 ms
+  settle_ms (client) .... 763.0 ms / 816.1 ms
+  server_settle_ms ...... 39.0 ms / 104.0 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed

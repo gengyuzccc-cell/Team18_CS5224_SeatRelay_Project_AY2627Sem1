@@ -1,0 +1,648 @@
+{
+  "root_group": {
+    "groups": [],
+    "checks": [
+      {
+        "path": "::read 200",
+        "id": "0e2edf58435ab027aec533a7b02a45ba",
+        "passes": 2061,
+        "fails": 0,
+        "name": "read 200"
+      },
+      {
+        "path": "::command 202",
+        "id": "ea48ab4acf053d5b60a16913dd4c955d",
+        "passes": 4122,
+        "fails": 0,
+        "name": "command 202"
+      }
+    ],
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "p(90)",
+      "p(95)",
+      "p(99)",
+      "max"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  },
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 95541.503938
+  },
+  "metrics": {
+    "iterations_measured": {
+      "values": {
+        "count": 1654,
+        "rate": 17.31184806420186
+      },
+      "type": "counter",
+      "contains": "default"
+    },
+    "http_req_duration{kind:command,phase:measured}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 290.18007583645687,
+        "min": 274.536013,
+        "med": 285.801293,
+        "p(90)": 298.69536860000005,
+        "p(95)": 309.55976914999997,
+        "p(99)": 367.86127161999957,
+        "max": 1311.205898
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_failed": {
+      "thresholds": {
+        "rate<0.01": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 10316
+      }
+    },
+    "http_req_receiving": {
+      "values": {
+        "p(95)": 0.1383915,
+        "p(99)": 0.3406758000000004,
+        "max": 4.76336,
+        "avg": 0.08068435953858118,
+        "min": 0.014158,
+        "med": 0.0600005,
+        "p(90)": 0.112851
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 1757.014814,
+        "med": 1804.099422,
+        "p(90)": 1846.635442,
+        "p(95)": 1936.108882,
+        "p(99)": 2579.7310880000005,
+        "max": 4297.404544,
+        "avg": 1832.9586829505076
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "p(99)": 0,
+        "max": 601.422523,
+        "avg": 2.45889809354401,
+        "min": 0
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 282.2175876174884,
+        "min": 263.373545,
+        "med": 278.7710925,
+        "p(90)": 292.407859,
+        "p(95)": 300.77922875,
+        "p(99)": 355.46542505,
+        "max": 1311.049924
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 6183,
+        "fails": 0
+      }
+    },
+    "server_settle_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 193,
+        "p(99)": 275,
+        "max": 460,
+        "avg": 72.4087061668682,
+        "min": 21,
+        "med": 53.5,
+        "p(90)": 147
+      }
+    },
+    "http_req_sending": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 5.883679,
+        "avg": 0.1074267444746023,
+        "min": 0.021176,
+        "med": 0.08933350000000001,
+        "p(90)": 0.1400575,
+        "p(95)": 0.17721975,
+        "p(99)": 0.3846869500000008
+      }
+    },
+    "poll_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 936.68042,
+        "avg": 276.8053955259981,
+        "min": 263.675711,
+        "med": 274.1315015,
+        "p(90)": 283.7963362,
+        "p(95)": 292.15763355,
+        "p(99)": 337.8039262299998
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "min": 0,
+        "max": 50,
+        "value": 15
+      }
+    },
+    "settle_ms": {
+      "thresholds": {
+        "p(95)<5000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 762,
+        "p(90)": 782,
+        "p(95)": 795,
+        "p(99)": 910,
+        "max": 2449,
+        "avg": 768.0949214026602,
+        "min": 740
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(90)": 292.56762000000003,
+        "p(95)": 300.93454875,
+        "p(99)": 355.57163925000003,
+        "max": 1311.205898,
+        "avg": 282.4056987215017,
+        "min": 263.675711,
+        "med": 278.979508
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0.000509,
+        "p(90)": 0.00067,
+        "p(95)": 0.0007372500000000001,
+        "p(99)": 0.002112800000000003,
+        "max": 1263.984654,
+        "avg": 3.69838309422258,
+        "min": 0.000178
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "rate": 21.57177682002421,
+        "count": 2061
+      }
+    },
+    "command_ms": {
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 290.18007583645687,
+        "min": 274.536013,
+        "med": 285.801293,
+        "p(90)": 298.69536860000005,
+        "p(95)": 309.55976914999997,
+        "p(99)": 367.86127161999957,
+        "max": 1311.205898
+      }
+    },
+    "read_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(99)": 339.93894316000006,
+        "max": 906.461897,
+        "avg": 277.84820849637237,
+        "min": 264.277739,
+        "med": 274.51767900000004,
+        "p(90)": 284.8722341,
+        "p(95)": 292.00969245000005
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 282.4056987215017,
+        "min": 263.675711,
+        "med": 278.979508,
+        "p(90)": 292.56762000000003,
+        "p(95)": 300.93454875,
+        "p(99)": 355.57163925000003,
+        "max": 1311.205898
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 10316,
+        "rate": 107.97401730973786
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 6875621,
+        "rate": 71964.75580352821
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 1429152,
+        "rate": 14958.441526390701
+      }
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "p(90)": 0,
+        "p(95)": 0,
+        "p(99)": 0,
+        "max": 2.27251,
+        "avg": 0.0014301003295851102,
+        "min": 0
+      }
+    },
+    "http_req_duration{kind:read,phase:measured}": {
+      "values": {
+        "p(99)": 339.93894316000006,
+        "max": 906.461897,
+        "avg": 277.84820849637237,
+        "min": 264.277739,
+        "med": 274.51767900000004,
+        "p(90)": 284.8722341,
+        "p(95)": 292.00969245000005
+      },
+      "thresholds": {
+        "p(95)<1000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 50,
+        "min": 50,
+        "max": 50
+      }
+    },
+    "polls_per_command": {
+      "values": {
+        "max": 1,
+        "avg": 1,
+        "min": 1,
+        "med": 1,
+        "p(90)": 1,
+        "p(95)": 1,
+        "p(99)": 1
+      },
+      "type": "trend",
+      "contains": "default"
+    }
+  },
+  "setup_data": {
+    "workshopIds": [
+      "b32078f4-5a57-49e7-82f0-3404cb2c5100",
+      "7be89f4e-fda5-4488-ac1f-6871c0267c29",
+      "e8c02f67-e972-4b95-9f3d-8ffe6e3cf29c",
+      "bd74f60b-1ea7-4b03-a071-fab88aa4d6fc",
+      "621f8f44-2b8a-4503-8705-4f2bdb5ab58f",
+      "833ca6d7-9615-4e6a-8628-4fdee364564e",
+      "f2489c96-d092-4015-9289-1449856bf642",
+      "19ead1b8-6cc8-4e09-993c-cfd390804458",
+      "1658e5cf-1256-469b-932d-aabebd9a9869",
+      "2aa9bd19-c613-43b8-b972-8ba0c0db2c02"
+    ],
+    "startedAt": 1792265553856,
+    "users": [
+      {
+        "email": "loaduser-1@example.com",
+        "userId": "39ea355c-f091-7030-f5cd-c9669cca4f10"
+      },
+      {
+        "email": "loaduser-2@example.com",
+        "userId": "c92aa59c-b071-702b-3f3a-9061b8994ff8"
+      },
+      {
+        "email": "loaduser-3@example.com",
+        "userId": "197aa5ec-c091-703e-9d67-dd0e7dec7486"
+      },
+      {
+        "email": "loaduser-4@example.com",
+        "userId": "29bac59c-0021-70ae-8dd7-19bcef2f2c36"
+      },
+      {
+        "email": "loaduser-5@example.com",
+        "userId": "a99aa58c-30a1-70fb-6837-21f7d278a854"
+      },
+      {
+        "email": "loaduser-6@example.com",
+        "userId": "398a254c-30c1-703a-6310-4fff1e77ede5"
+      },
+      {
+        "email": "loaduser-7@example.com",
+        "userId": "796a052c-f031-7095-b751-31cc1d8a90e0"
+      },
+      {
+        "email": "loaduser-8@example.com",
+        "userId": "d9aac59c-80b1-7085-8ccd-c04d39b3430f"
+      },
+      {
+        "email": "loaduser-9@example.com",
+        "userId": "d9ca95dc-5021-7088-ff09-bf3c277e712a"
+      },
+      {
+        "email": "loaduser-10@example.com",
+        "userId": "a96a057c-0011-70cc-8f7a-e01ce6aa9a59"
+      },
+      {
+        "email": "loaduser-11@example.com",
+        "userId": "89dae5dc-a091-7083-1176-ef2fa2d67a2f"
+      },
+      {
+        "email": "loaduser-12@example.com",
+        "userId": "d9ea159c-b0c1-7014-36e1-6ea6aadcf88e"
+      },
+      {
+        "email": "loaduser-13@example.com",
+        "userId": "49aa654c-d011-70a5-c67d-83f3c9a6ca6c"
+      },
+      {
+        "email": "loaduser-14@example.com",
+        "userId": "990aa5fc-50b1-7059-9680-9c84041492cf"
+      },
+      {
+        "email": "loaduser-15@example.com",
+        "userId": "59ca054c-6021-70ae-a7a8-fc8d5e4bdc48"
+      },
+      {
+        "email": "loaduser-16@example.com",
+        "userId": "89ba55fc-3071-7017-4da4-714988deaf37"
+      },
+      {
+        "email": "loaduser-17@example.com",
+        "userId": "39ca95ac-50d1-70c9-6e7f-9064e85ca8de"
+      },
+      {
+        "email": "loaduser-18@example.com",
+        "userId": "89aac56c-a0e1-7051-d8c8-56a21390d20e"
+      },
+      {
+        "email": "loaduser-19@example.com",
+        "userId": "892ae5fc-3041-70de-d0fb-84ce26191052"
+      },
+      {
+        "email": "loaduser-20@example.com",
+        "userId": "490a85fc-20e1-70fb-6bb3-c432f8d6827d"
+      },
+      {
+        "email": "loaduser-21@example.com",
+        "userId": "e96a351c-a021-708f-33b7-643487ee5ab4"
+      },
+      {
+        "email": "loaduser-22@example.com",
+        "userId": "59aa55fc-20b1-70f1-0c35-10821a9133e3"
+      },
+      {
+        "email": "loaduser-23@example.com",
+        "userId": "f93a658c-3051-70e3-74a0-68126c7318a8"
+      },
+      {
+        "email": "loaduser-24@example.com",
+        "userId": "c9ea45ec-4081-7075-d9e5-273930e1f828"
+      },
+      {
+        "email": "loaduser-25@example.com",
+        "userId": "c94a35bc-50a1-70c8-f7df-4a5561d37612"
+      },
+      {
+        "email": "loaduser-26@example.com",
+        "userId": "f91a25fc-70b1-7084-8593-fb6b457835d2"
+      },
+      {
+        "email": "loaduser-27@example.com",
+        "userId": "798a255c-20a1-70b9-1f21-73e7e2f0a4ea"
+      },
+      {
+        "email": "loaduser-28@example.com",
+        "userId": "195aa5dc-f0b1-702f-fb3d-34ae8cb8a244"
+      },
+      {
+        "email": "loaduser-29@example.com",
+        "userId": "69fa659c-2031-7045-2444-3499ad5ad728"
+      },
+      {
+        "email": "loaduser-30@example.com",
+        "userId": "e97af52c-10a1-70d8-8840-73526cdd2464"
+      },
+      {
+        "email": "loaduser-31@example.com",
+        "userId": "49caf5fc-d0a1-707f-63cf-397de6743334"
+      },
+      {
+        "email": "loaduser-32@example.com",
+        "userId": "09ba752c-4021-7072-b513-add28fc3b758"
+      },
+      {
+        "email": "loaduser-33@example.com",
+        "userId": "e9da359c-f031-702c-c5f8-51782354c045"
+      },
+      {
+        "email": "loaduser-34@example.com",
+        "userId": "193a252c-c0c1-70c9-9263-b269d35270ca"
+      },
+      {
+        "email": "loaduser-35@example.com",
+        "userId": "697af5ac-5091-708c-69ea-1f68bb8482ad"
+      },
+      {
+        "email": "loaduser-36@example.com",
+        "userId": "291a957c-7001-7048-399d-c2acb39b3ce9"
+      },
+      {
+        "email": "loaduser-37@example.com",
+        "userId": "f93ae50c-6031-706c-8ca0-2887610b3d90"
+      },
+      {
+        "email": "loaduser-38@example.com",
+        "userId": "690a95cc-7041-7055-7696-9d6e557c65c6"
+      },
+      {
+        "email": "loaduser-39@example.com",
+        "userId": "594a254c-a0f1-708d-5b78-c0d3bcbc26c5"
+      },
+      {
+        "email": "loaduser-40@example.com",
+        "userId": "19caf58c-3091-7068-768e-0320df73eb70"
+      },
+      {
+        "email": "loaduser-41@example.com",
+        "userId": "29aaa5bc-1001-70ea-263c-efdb40a93301"
+      },
+      {
+        "email": "loaduser-42@example.com",
+        "userId": "599a95ec-a0c1-7088-f5c7-f8f53cae190a"
+      },
+      {
+        "email": "loaduser-43@example.com",
+        "userId": "39da35bc-b021-70e8-fe80-834ed9273e37"
+      },
+      {
+        "email": "loaduser-44@example.com",
+        "userId": "d99a95ec-d0f1-70bf-539a-0da6a280e2a1"
+      },
+      {
+        "email": "loaduser-45@example.com",
+        "userId": "496a05cc-8081-7002-59d4-8a2e3856100e"
+      },
+      {
+        "email": "loaduser-46@example.com",
+        "userId": "a93a15ac-2001-70cd-be87-6c85280913ff"
+      },
+      {
+        "email": "loaduser-47@example.com",
+        "userId": "798a75fc-7081-708c-d92a-14181c7b0f28"
+      },
+      {
+        "email": "loaduser-48@example.com",
+        "userId": "590a251c-7091-70b0-86ae-5b314889525f"
+      },
+      {
+        "email": "loaduser-49@example.com",
+        "userId": "e98a957c-50b1-70e2-d4c1-0ad5c3bf0699"
+      },
+      {
+        "email": "loaduser-50@example.com",
+        "userId": "996a154c-10f1-7079-cdf2-08b20e6be83b"
+      },
+      {
+        "email": "loaduser-51@example.com",
+        "userId": "596a856c-a061-70e4-03d3-b686b51bcfc0"
+      },
+      {
+        "email": "loaduser-52@example.com",
+        "userId": "395a25dc-a0f1-70ed-357c-707ed1b716a9"
+      },
+      {
+        "email": "loaduser-53@example.com",
+        "userId": "99aa157c-a001-70df-b58d-6959ab355e92"
+      },
+      {
+        "email": "loaduser-54@example.com",
+        "userId": "79aa350c-80e1-707b-ce97-b697fe8f2cc9"
+      },
+      {
+        "email": "loaduser-55@example.com",
+        "userId": "d9ca55cc-c031-70e3-e59f-f5681c20a157"
+      },
+      {
+        "email": "loaduser-56@example.com",
+        "userId": "f95ab56c-6091-70c4-f797-2a0b0936c230"
+      },
+      {
+        "email": "loaduser-57@example.com",
+        "userId": "d91a05dc-c041-702d-3341-14905be53c0d"
+      },
+      {
+        "email": "loaduser-58@example.com",
+        "userId": "996a452c-0001-70f3-f6b7-23c30c666033"
+      },
+      {
+        "email": "loaduser-59@example.com",
+        "userId": "093a754c-c041-70ad-5275-ccb8c132397c"
+      },
+      {
+        "email": "loaduser-60@example.com",
+        "userId": "e96ae5fc-4071-70be-7d5b-13300d09c095"
+      },
+      {
+        "email": "loaduser-organiser@example.com",
+        "userId": "d91a154c-8021-7021-83f7-578eca324ea8"
+      },
+      {
+        "email": "loaduser-outsider@example.com",
+        "userId": "a9da153c-20d1-7089-f273-eeef436a2db5"
+      }
+    ],
+    "warmupMs": 30000
+  },
+  "seatrelay": {
+    "scenario": "cross-workshop",
+    "target": "dev",
+    "vus": 50,
+    "round": "1",
+    "warmup": "30s",
+    "duration": "60s",
+    "pollIntervalMs": 200,
+    "api": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "finishedAt": "2026-10-17T19:34:05.656Z"
+  }
+}

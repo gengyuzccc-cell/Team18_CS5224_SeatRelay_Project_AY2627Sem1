@@ -9,51 +9,51 @@
 ## Target `dev`
 
 - API: `https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com`
-- Runs: 18 (scenarios `cross-workshop`, `hotspot` × VUs 10/25/50 × rounds 1/2/3); warm-up `30s`, measured `60s` per run; commit `c1d0660-dirty`.
+- Runs: 18 (scenarios `cross-workshop`, `hotspot` × VUs 10/25/50 × rounds 1/2/3); warm-up `30s`, measured `60s` per run; commit `d121145`.
 
 ### dev · cross-workshop
 
 | VUs | round | attempts | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW settle p95 / samples (window) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 10 | 1 | 1 | 277 / 290 | 290 / 308 | 291 | 770 / 793 | 55 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 10 | 2 | 1 | 277 / 292 | 291 / 315 | 294 | 770 / 803 | 72 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 10 | 3 | 1 | 278 / 288 | 290 / 318 | 295 | 771 / 811 | 65 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 25 | 1 | 1 | 276 / 293 | 290 / 320 | 296 | 789 / 6554 | 6054 | 1.57 % | 9 | 0 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 0 | 0 | – / – |
-| 25 | 2 | 1 | 275 / 288 | 287 / 306 | 289 | 774 / 6912 | 6302 | 1.33 % | 20 | 0 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 0 | 0 | – / – |
-| 25 | 3 | 1 | 275 / 286 | 287 / 304 | 288 | 786 / 7059 | 6507 | 0.84 % | 11 | 0 | FAIL (settle_ms p(95)<5000) | 13 | 3 | – / – |
-| 50 | 1 | 1 | 272 / 284 | 284 / 300 | 289 | 15537 / 29127 | 28460 | 9.68 % | 21 | 38 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 34 | 15 | – / – |
-| 50 | 2 | 1 | 273 / 293 | 285 / 300 | 289 | 14930 / 28625 | 28180 | 9.81 % | 15 | 26 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 38 | 17 | – / – |
-| 50 | 3 | 1 | 273 / 284 | 284 / 306 | 290 | 11650 / 29370 | 28888 | 9.40 % | 27 | 35 | FAIL (http_req_failed rate<0.01; settle_ms p(95)<5000) | 36 | 17 | – / – |
+| 10 | 1 | 2 | 276 / 319 | 290 / 336 | 321 | 769 / 861 | 62 | 0.00 % | 0 | 0 | pass | 0 | 0 | 61 / 640 |
+| 10 | 2 | 2 | 276 / 293 | 288 / 315 | 289 | 766 / 799 | 62 | 0.00 % | 0 | 0 | pass | 0 | 0 | 60 / 643 |
+| 10 | 3 | 2 | 277 / 294 | 289 / 312 | 292 | 769 / 800 | 65 | 0.00 % | 0 | 0 | pass | 0 | 0 | 64 / 649 |
+| 25 | 1 | 2 | 275 / 291 | 287 / 314 | 291 | 764 / 799 | 83 | 0.00 % | 0 | 0 | pass | 0 | 0 | 85 / 1639 |
+| 25 | 2 | 2 | 275 / 293 | 286 / 310 | 291 | 763 / 796 | 88 | 0.00 % | 0 | 0 | pass | 0 | 0 | 89 / 1642 |
+| 25 | 3 | 2 | 275 / 292 | 287 / 310 | 289 | 764 / 793 | 91 | 0.00 % | 0 | 0 | pass | 0 | 0 | 91 / 1643 |
+| 50 | 1 | 2 | 275 / 292 | 286 / 310 | 292 | 762 / 795 | 193 | 0.00 % | 0 | 0 | pass | 0 | 0 | 192 / 3282 |
+| 50 | 2 | 2 | 275 / 286 | 286 / 302 | 286 | 762 / 786 | 193 | 0.00 % | 0 | 0 | pass | 0 | 0 | 184 / 3297 |
+| 50 | 3 | 2 | 273 / 289 | 284 / 301 | 285 | 759 / 784 | 163 | 0.00 % | 0 | 0 | pass | 1 | 0 | 160 / 3308 |
 
 Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
 | VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
 |---|---|---|---|---|---|---|---|---|
-| 10 | 3 | 290 | 315 | 803 | 65 | 0 | 0.00 % | met |
-| 25 | 3 | 288 | 306 | 6912 | 6302 | 0 | 1.57 % | NOT met |
-| 50 | 3 | 284 | 300 | 29127 | 28460 | 0 | 9.81 % | NOT met |
+| 10 | 3 | 294 | 315 | 800 | 62 | 0 | 0.00 % | met |
+| 25 | 3 | 292 | 310 | 796 | 88 | 0 | 0.00 % | met |
+| 50 | 3 | 289 | 302 | 786 | 193 | 0 | 0.00 % | met |
 
 ### dev · hotspot
 
 | VUs | round | attempts | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW settle p95 / samples (window) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 10 | 1 | 1 | 273 / 284 | 283 / 296 | 287 | 757 / 780 | 116 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 10 | 2 | 1 | 271 / 281 | 281 / 300 | 283 | 754 / 780 | 120 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 10 | 3 | 1 | 274 / 284 | 285 / 303 | 289 | 762 / 792 | 127 | 0.00 % | 0 | 0 | pass | 0 | 0 | – / – |
-| 25 | 1 | 1 | 271 / 289 | 282 / 305 | 286 | 1246 / 7245 | 6650 | 0.22 % | 3 | 0 | FAIL (settle_ms p(95)<5000) | 11 | 0 | – / – |
-| 25 | 2 | 1 | 274 / 292 | 284 / 306 | 288 | 1234 / 7405 | 6791 | 0.47 % | 9 | 0 | FAIL (settle_ms p(95)<5000) | 24 | 3 | – / – |
-| 25 | 3 | 1 | 275 / 294 | 285 / 306 | 292 | 1237 / 7398 | 6852 | 0.47 % | 8 | 0 | FAIL (settle_ms p(95)<5000) | 12 | 0 | – / – |
-| 50 | 1 | 1 | 276 / 314 | 284 / 305 | 285 | none settled | none settled | 7.61 % | 0 | 63 | FAIL (http_req_failed rate<0.01) | 73 | 25 | – / – |
-| 50 | 2 | 1 | 275 / 307 | 283 / 298 | 285 | 25989 / 29943 | 29335 | 8.01 % | 8 | 60 | FAIL (http_req_failed rate<0.01; settle_ms p(95)<5000) | 49 | 12 | – / – |
-| 50 | 3 | 1 | 276 / 287 | 286 / 310 | 285 | 20061 / 28644 | 28242 | 7.08 % | 2 | 76 | FAIL (settle_ms p(95)<5000; http_req_failed rate<0.01) | 48 | 17 | – / – |
+| 10 | 1 | 2 | 275 / 297 | 286 / 310 | 302 | 763 / 816 | 104 | 0.00 % | 0 | 0 | pass | 0 | 0 | 107 / 657 |
+| 10 | 2 | 2 | 276 / 294 | 287 / 311 | 296 | 765 / 797 | 115 | 0.00 % | 0 | 0 | pass | 1 | 0 | 117 / 660 |
+| 10 | 3 | 2 | 274 / 286 | 285 / 299 | 287 | 761 / 785 | 162 | 0.00 % | 0 | 0 | pass | 0 | 0 | 162 / 663 |
+| 25 | 1 | 2 | 277 / 291 | 287 / 308 | 291 | 1236 / 1296 | 909 | 0.00 % | 0 | 0 | pass | 12 | 0 | 888 / 1157 |
+| 25 | 2 | 2 | 277 / 294 | 287 / 307 | 292 | 1236 / 1360 | 940 | 0.00 % | 0 | 0 | pass | 10 | 0 | 922 / 1160 |
+| 25 | 3 | 2 | 277 / 294 | 287 / 306 | 292 | 1238 / 1686 | 950 | 0.00 % | 0 | 0 | pass | 6 | 0 | 950 / 1151 |
+| 50 | 1 | 2 | 278 / 298 | 287 / 307 | 289 | 2661 / 3169 | 2604 | 0.00 % | 0 | 0 | pass | 35 | 1 | 2613 / 1084 |
+| 50 | 2 | 2 | 277 / 294 | 285 / 306 | 288 | 2659 / 3166 | 2531 | 0.00 % | 0 | 0 | pass | 35 | 1 | 2567 / 1076 |
+| 50 | 3 | 2 | 278 / 297 | 286 / 311 | 290 | 2659 / 3175 | 2601 | 0.00 % | 0 | 0 | pass | 34 | 1 | 2652 / 1087 |
 
 Per level (median of the rounds; errors = worst round; a round in which no command settled within the client budget counts as +∞ in the settle medians, not as 0):
 
 | VUs | rounds | reads p95 | 202 p95 | settle p95 client | settle p95 server | rounds with nothing settled | HTTP errors | targets |
 |---|---|---|---|---|---|---|---|---|
-| 10 | 3 | 284 | 300 | 780 | 120 | 0 | 0.00 % | met |
-| 25 | 3 | 292 | 306 | 7398 | 6791 | 0 | 0.47 % | NOT met |
-| 50 | 3 | 307 | 305 | 29943 | 29335 | 1 | 8.01 % | NOT met |
+| 10 | 3 | 294 | 310 | 797 | 115 | 0 | 0.00 % | met |
+| 25 | 3 | 294 | 307 | 1360 | 940 | 0 | 0.00 % | met |
+| 50 | 3 | 297 | 307 | 3169 | 2601 | 0 | 0.00 % | met |
 
 ## Target `local`
 
@@ -104,3 +104,28 @@ Per level (median of the rounds; errors = worst round; a round in which no comma
 | 10 | 3 | 11 | 9 | 413 | 236 | 0 | 0.00 % | met |
 | 25 | 3 | 16 | 12 | 424 | 368 | 0 | 0.00 % | met |
 | 50 | 3 | 12 | 10 | 2879 | 2784 | 0 | 0.00 % | met |
+
+## Superseded runs
+
+Earlier attempts of a cell that was run again; kept for traceability, not used in the tables above.
+
+| target | scenario | VUs | round | run id | started | exit | k6 thresholds | settle p95 client (ms) | superseded by | k6 summary | note |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| dev | cross-workshop | 10 | 1 | 20261017T141749Z | 2026-10-17T14:18:30.028Z | 0 | pass | 793 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-10-1.json` |  |
+| dev | cross-workshop | 10 | 2 | 20261017T141749Z | 2026-10-17T14:20:30.007Z | 0 | pass | 803 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-10-2.json` |  |
+| dev | cross-workshop | 10 | 3 | 20261017T141749Z | 2026-10-17T14:22:30.007Z | 0 | pass | 811 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-10-3.json` |  |
+| dev | cross-workshop | 25 | 1 | 20261017T141749Z | 2026-10-17T14:24:30.010Z | 99 | FAIL | 6554 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-25-1.json` |  |
+| dev | cross-workshop | 25 | 2 | 20261017T141749Z | 2026-10-17T14:26:30.001Z | 99 | FAIL | 6912 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-25-2.json` |  |
+| dev | cross-workshop | 25 | 3 | 20261017T141749Z | 2026-10-17T14:29:30.006Z | 99 | FAIL | 7059 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-25-3.json` |  |
+| dev | cross-workshop | 50 | 1 | 20261017T141749Z | 2026-10-17T14:32:30.055Z | 99 | FAIL | 29127 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-50-1.json` |  |
+| dev | cross-workshop | 50 | 2 | 20261017T141749Z | 2026-10-17T14:35:30.041Z | 99 | FAIL | 28625 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-50-2.json` |  |
+| dev | cross-workshop | 50 | 3 | 20261017T141749Z | 2026-10-17T14:38:30.047Z | 99 | FAIL | 29370 | 20261017T192002Z | `k6/dev/20261017T141749Z/cross-workshop-50-3.json` |  |
+| dev | hotspot | 10 | 1 | 20261017T141749Z | 2026-10-17T14:41:30.042Z | 0 | pass | 780 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-10-1.json` |  |
+| dev | hotspot | 10 | 2 | 20261017T141749Z | 2026-10-17T14:43:30.003Z | 0 | pass | 780 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-10-2.json` |  |
+| dev | hotspot | 10 | 3 | 20261017T141749Z | 2026-10-17T14:45:30.011Z | 0 | pass | 792 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-10-3.json` |  |
+| dev | hotspot | 25 | 1 | 20261017T141749Z | 2026-10-17T14:47:30.012Z | 99 | FAIL | 7245 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-25-1.json` |  |
+| dev | hotspot | 25 | 2 | 20261017T141749Z | 2026-10-17T14:49:30.001Z | 99 | FAIL | 7405 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-25-2.json` |  |
+| dev | hotspot | 25 | 3 | 20261017T141749Z | 2026-10-17T14:51:30.002Z | 99 | FAIL | 7398 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-25-3.json` |  |
+| dev | hotspot | 50 | 1 | 20261017T141749Z | 2026-10-17T14:53:30.000Z | 99 | FAIL | 0 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-50-1.json` |  |
+| dev | hotspot | 50 | 2 | 20261017T141749Z | 2026-10-17T14:56:30.032Z | 99 | FAIL | 29943 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-50-2.json` |  |
+| dev | hotspot | 50 | 3 | 20261017T141749Z | 2026-10-17T14:59:30.028Z | 99 | FAIL | 28644 | 20261017T192002Z | `k6/dev/20261017T141749Z/hotspot-50-3.json` |  |

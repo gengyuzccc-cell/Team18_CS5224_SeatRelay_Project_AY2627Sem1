@@ -1,0 +1,161 @@
+
+ RUN  v3.2.7 /tmp/claude-0/-home-user-Team18-CS5224-SeatRelay-Project-AY2627Sem1/4140af6d-f0de-5168-a1a9-033cbcfb1339/scratchpad/exp-wt/packages/core
+      Coverage enabled with v8
+
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > documents the mapping and the defaults 9ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > a mass expiry wave with a waiting queue (5 sessions) stays within budget in every decision 96ms
+ ✓ test/organizer.test.ts > SET_CAPACITY (R7) > rejects unknown, cancelled, invalid and over-used capacities 18ms
+ ✓ test/organizer.test.ts > SET_CAPACITY (R7) > raising capacity allocates immediately; CAPACITY_UP is recorded only for seats actually taken 10ms
+ ✓ test/organizer.test.ts > SET_CAPACITY (R7) > pending releases are relayed before CAPACITY_UP seats 2ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > revokes offers, re-queues confirmed participants (keeping seq) and drops the session everywhere 6ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > rejects SESSION_NOT_FOUND and SESSION_CANCELLED 1ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > drains a big session in budget-sized steps: CANCELLING until nothing references it 25ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > revokes dangling offers of a cancelled session (corrupted snapshot) 1ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > even the final status flip of an empty session waits for the budget 1ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > a session cancelled while another drain is pending: the displaced participant ends with NO_ACCEPTABLE_SESSION 3ms
+ ✓ test/organizer.test.ts > CANCEL_SESSION > displaced participants are re-allocated in the same decision when another session is free 2ms
+ ✓ test/organizer.test.ts > CANCEL_WORKSHOP > ends every registration, revokes offers, cancels sessions and notifies each user once 5ms
+ ✓ test/organizer.test.ts > CANCEL_WORKSHOP > drains a big workshop in budget-sized steps: CANCELLING until everything is archived 81ms
+ ✓ test/organizer.test.ts > CANCEL_WORKSHOP > stops the workshop drain before a dangling offer or the session flip when the budget is out 1ms
+ ✓ test/organizer.test.ts > CANCEL_WORKSHOP > releases dangling offers of a cancelled workshop (corrupted snapshot) 1ms
+ ✓ test/organizer.test.ts > CLOSE_REGISTRATION / OPEN_REGISTRATION > toggles the status, rejects no-op toggles and keeps serving the queue while closed 3ms
+ ✓ test/invariants.test.ts > checkInvariants > accepts a consistent snapshot 13ms
+ ✓ test/invariants.test.ts > checkInvariants > flags SESSION_DUPLICATE_ID 4ms
+ ✓ test/invariants.test.ts > checkInvariants > flags SESSION_WORKSHOP_MISMATCH 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags SEQ_DUPLICATE 6ms
+ ✓ test/invariants.test.ts > checkInvariants > flags SEQ_ABOVE_WORKSHOP 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_WORKSHOP_MISMATCH 4ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_NOT_LIVE 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_NO_ACCEPTABLE 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_UNKNOWN_SESSION 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_CANCELLED_SESSION 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_PER_SESSION_SHAPE 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_OFFER_MISSING 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_OFFER_MISSING 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_OFFER_MISMATCH 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_STRAY_OFFER_REF 5ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_CONFIRMED_SESSION_INVALID 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_CONFIRMED_SESSION_INVALID 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_CONFIRMED_SESSION_INVALID 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags REGISTRATION_STRAY_CONFIRMED_SESSION 3ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_DUPLICATE_ID 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_WORKSHOP_MISMATCH 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_NOT_LIVE 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_SESSION_INVALID 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_SESSION_INVALID 4ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_AFTER_CUTOFF 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_REGISTRATION_MISSING 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_REGISTRATION_MISMATCH 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_REGISTRATION_MISMATCH 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags OFFER_SESSION_NOT_ACCEPTABLE 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags R1_DUPLICATE_REGISTRATION 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags C2_DUPLICATE_HOLD 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags C1_OVER_CAPACITY 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags C1_HELD_MISMATCH 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags C1_CONFIRMED_MISMATCH 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags NO_STARVATION 2ms
+ ✓ test/invariants.test.ts > checkInvariants > flags WORKSHOP_CANCELLED_LIVE_ITEMS 2ms
+ ✓ test/invariants.test.ts > checkInvariants > attaches sessionId / userId where known 3ms
+ ✓ test/invariants.test.ts > checkInvariants > does not treat a past cut-off or a due offer as starvation 2ms
+ ✓ test/invariants.test.ts > checkInvariants > tolerates references to a CANCELLING session or workshop (drain pending), not to CANCELLED ones 8ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > the backfill-latency experiment shape (100 offers expiring, 50 waiting) stays within budget 689ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > single-session registrations whose expiry ends them (ARCHIVE_REGISTRATION per expiry) stay within budget 44ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > a PER_SESSION cancel-all of five registrations fits even after a full tick-first 42ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > cut-off endings of a long queue are bounded too (sweep at cut-off with 50 QUEUED) 40ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > closing many leftover pending releases is itself budget-bounded 255ms
+ ✓ test/allocate.test.ts > allocate > creates at most 12 offers per decision and continues with REALLOCATE 33ms
+ ✓ test/allocate.test.ts > allocate > honours the caller-provided limits 2ms
+ ✓ test/allocate.test.ts > allocate > offers the first allocatable session in the participant preference order 1ms
+ ✓ test/allocate.test.ts > allocate > relays released seats FIFO by release time and leaves surplus records pending 2ms
+ ✓ test/allocate.test.ts > allocate > keeps unrelayed releases pending in the live snapshot so later offers are still attributed 8ms
+ ✓ test/allocate.test.ts > allocate > attributes a pending release to whichever decision relays the seat, not only the continuation 4ms
+ ✓ test/allocate.test.ts > allocate > closes a pending release once no continuation is pending, and never relays it to a session that closed 3ms
+ ✓ test/budget.test.ts > item budget (DynamoDB 100-item transaction) > exposes the budget as a caller-provided limit 93ms
+ ✓ test/budget.test.ts > nextDueAt while a continuation is pending > is `now` so that the sweep finishes a lost continuation chain 9ms
+ ✓ test/budget.test.ts > nextDueAt while a continuation is pending > compares the stored nextDueAt by instant, not by string 5ms
+ ✓ test/tick.test.ts > tick-first expiry > expires a due offer, relays the seat in the same decision and records the latency 10ms
+ ✓ test/tick.test.ts > tick-first expiry > an expired participant with other acceptable sessions goes back to the queue with the same seq 4ms
+ ✓ test/tick.test.ts > tick-first expiry > a late or duplicate tick is a harmless no-op (no writes, no version bump) 2ms
+ ✓ test/tick.test.ts > tick-first expiry > flags sweepLate only for sweep ticks that actually expired something 7ms
+ ✓ test/tick.test.ts > tick-first expiry > expires at most `maxExpiriesPerDecision` offers and continues with REALLOCATE 6ms
+ ✓ test/tick.test.ts > tick-first expiry > releases the seat of a dangling offer without a registration (corrupted snapshot) 2ms
+ ✓ test/tick.test.ts > cut-off handling (R4) > ends QUEUED registrations whose sessions all passed cut-off and stops offering those sessions 4ms
+ ✓ test/tick.test.ts > cut-off handling (R4) > nextDueAt tracks the nearest pending expiry or demanded cut-off, and is rewritten when a cut-off passes 5ms
+ ✓ test/tick.test.ts > cut-off handling (R4) > the no-starvation invariant holds after every decision even with a late tick 1ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > confirms the held seat and notifies the participant 8ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > R4: expiresAt = min(now + holdSeconds, cutoffAt) 1ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > rejects OFFER_NOT_FOUND, OFFER_NOT_YOURS and OFFER_EXPIRED (even without a tick) 4ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > reports OFFER_EXPIRED for an offer a previous tick already archived (plan §4 expiry race) 6ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > reports OFFER_NOT_ACTIVE for a second ACCEPT/DECLINE of an already settled offer 6ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > rejects SESSION_CANCELLED for an offer whose session is being cancelled 2ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > rejects OFFER_NOT_ACTIVE for a settled offer left in the live set 1ms
+ ✓ test/offers.test.ts > ACCEPT_OFFER > rejects INVALID_STATE when the registration or session disagrees with the offer 2ms
+ ✓ test/offers.test.ts > DECLINE_OFFER > R5: drops the session, re-queues with the same seq and re-allocates in the same decision 3ms
+ ✓ test/offers.test.ts > DECLINE_OFFER > R5: declining the last acceptable session ends the registration (NO_ACCEPTABLE_SESSION) 2ms
+ ✓ test/offers.test.ts > post-command cut-off > a decline whose remaining sessions all passed cut-off ends the registration with CUTOFF 1ms
+ ✓ test/offers.test.ts > post-command cut-off > a session cancellation that leaves only past-cut-off fallbacks ends the confirmed participant with CUTOFF 2ms
+ ✓ test/snapshot.test.ts > snapshot helpers > computes free seats, cut-off and allocatability 5ms
+ ✓ test/snapshot.test.ts > snapshot helpers > finds sessions / offers / registrations and counts queues 8ms
+ ✓ test/snapshot.test.ts > snapshot helpers > summarises a registration for the public view 4ms
+ ✓ test/snapshot.test.ts > snapshot helpers > orders backfill records by release time, then id 0ms
+ ✓ test/snapshot.test.ts > snapshot helpers > builds fresh workshops and snapshots with defaults 1ms
+ ✓ test/snapshot.test.ts > internal guards > mustGet throws on a corrupted reference 3ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > requires exactly one session per registration 9ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > lets the same user hold registrations in several sessions (duplicate holds) but not twice in one 6ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > keeps independent FIFO queues and queue positions per session 6ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > declining the single session ends the registration; the seat relays within that session 9ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > CANCEL_REGISTRATION with sessionId cancels only that session; without it, all of mine 3ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > ignores the sessionId filter in UNIFIED mode 1ms
+ ✓ test/perSession.test.ts > PER_SESSION mode > exposes the mode strategy helpers 1ms
+ ✓ test/register.test.ts > REGISTER > R2/R3: assigns seq in FIFO order and offers the first free session in preference order 19ms
+ ✓ test/register.test.ts > REGISTER > R1: a user with a live registration cannot register again (ALREADY_REGISTERED) 2ms
+ ✓ test/register.test.ts > REGISTER > rejects WORKSHOP_NOT_OPEN while registration is closed 1ms
+ ✓ test/register.test.ts > REGISTER > rejects WORKSHOP_CANCELLED for every user command on a cancelled workshop 9ms
+ ✓ test/register.test.ts > REGISTER > rejects malformed preference lists 1ms
+ ✓ test/register.test.ts > REGISTER > drops cancelled sessions from the preferences and rejects NO_ACCEPTABLE_SESSION when nothing is left 2ms
+ ✓ test/register.test.ts > REGISTER > rejects NO_ACCEPTABLE_SESSION when every session has passed its cut-off 1ms
+ ✓ test/register.test.ts > REGISTER > drops a past-cut-off session from the preferences (it can never be offered, R4) 1ms
+ ✓ test/register.test.ts > REGISTER > throws on a command/snapshot workshop mismatch (a routing bug, not a reject reason) 2ms
+ ✓ test/register.test.ts > REGISTER > normalises `now` so every emitted timestamp is canonical (ISO UTC with milliseconds) 1ms
+ ✓ test/register.test.ts > REGISTER > stores the display name and email from the JWT identity 1ms
+ ✓ test/register.test.ts > REGISTER > is deterministic and never mutates the input snapshot 4ms
+ ✓ test/cancel.test.ts > CANCEL_REGISTRATION (R6) > from QUEUED: archives as CANCELLED without a backfill record 7ms
+ ✓ test/cancel.test.ts > CANCEL_REGISTRATION (R6) > from OFFERED: revokes the offer and relays the seat (CANCELLED_OFFER, latency 0) 3ms
+ ✓ test/cancel.test.ts > CANCEL_REGISTRATION (R6) > from CONFIRMED: releases the confirmed seat (CANCELLED_CONFIRMED) 2ms
+ ✓ test/cancel.test.ts > CANCEL_REGISTRATION (R6) > rejects NOT_REGISTERED when the user has no live registration 1ms
+ ✓ test/cancel.test.ts > CANCEL_REGISTRATION (R6) > re-registering after a cancel gets a new seq at the back of the queue 6ms
+ ✓ test/time.test.ts > time helpers > round-trips ISO strings with millisecond precision 2ms
+ ✓ test/time.test.ts > time helpers > compares and picks min / max 1ms
+ ✓ test/time.test.ts > time helpers > rejects invalid timestamps 1ms
+ ✓ test/changes.test.ts > applyChanges > upserts, archives and never mutates the input 5ms
+stdout | test/property.test.ts > decide() property test > keeps every invariant after 2,000 random command sequences
+property test: 2000 runs, 84983 steps (longest 200), 85400 decisions, 328 continuations, 89 interleaved commands
+
+ ✓ test/property.test.ts > decide() property test > keeps every invariant after 2,000 random command sequences 30094ms
+
+ Test Files  13 passed (13)
+      Tests  127 passed (127)
+   Start at  19:59:44
+   Duration  31.25s (transform 636ms, setup 0ms, collect 2.05s, tests 31.95s, environment 3ms, prepare 1.56s)
+
+ % Coverage report from v8
+------------------|---------|----------|---------|---------|-------------------
+File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------|---------|----------|---------|---------|-------------------
+All files         |     100 |    99.82 |     100 |     100 |                   
+ allocate.ts      |     100 |      100 |     100 |     100 |                   
+ apply.ts         |     100 |      100 |     100 |     100 |                   
+ changes.ts       |     100 |      100 |     100 |     100 |                   
+ decide.ts        |     100 |      100 |     100 |     100 |                   
+ drain.ts         |     100 |    98.07 |     100 |     100 | 53                
+ factories.ts     |     100 |      100 |     100 |     100 |                   
+ index.ts         |     100 |      100 |     100 |     100 |                   
+ invariants.ts    |     100 |      100 |     100 |     100 |                   
+ notifications.ts |     100 |      100 |     100 |     100 |                   
+ perSession.ts    |     100 |      100 |     100 |     100 |                   
+ snapshot.ts      |     100 |      100 |     100 |     100 |                   
+ state.ts         |     100 |      100 |     100 |     100 |                   
+ tick.ts          |     100 |      100 |     100 |     100 |                   
+ time.ts          |     100 |      100 |     100 |     100 |                   
+------------------|---------|----------|---------|---------|-------------------
+exit=0

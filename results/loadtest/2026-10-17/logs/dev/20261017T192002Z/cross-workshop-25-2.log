@@ -1,0 +1,12 @@
+
+seatrelay cross-workshop  target=dev vus=25 round=2  warmup=30s measured=60s  api=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com
+  iterations ............ 1029 (measured 830)
+  http_reqs ............. 5156   failed 0.00 %
+  read_ms   p50 / p95 ... 274.7 ms / 293.1 ms
+  command_ms (202) ...... 286.3 ms / 309.7 ms
+  poll_ms ............... 274.5 ms / 290.8 ms
+  settle_ms (client) .... 763.0 ms / 796.0 ms
+  server_settle_ms ...... 34.0 ms / 88.0 ms
+  polls per command avg . 1.00
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed

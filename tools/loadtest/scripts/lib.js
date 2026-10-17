@@ -395,11 +395,25 @@ export function textSummary(data) {
   return lines.join('\n');
 }
 
+/**
+ * k6 copies setup()'s return value into the summary as `setup_data`, and that holds every
+ * account's ID token. The summary files are committed under results/, so only the
+ * non-secret fields of each account are kept.
+ */
+export function redactSetupData(setupData) {
+  if (!setupData || !Array.isArray(setupData.users)) {
+    return setupData;
+  }
+  return Object.assign({}, setupData, {
+    users: setupData.users.map((user) => ({ email: user.email, userId: user.userId })),
+  });
+}
+
 /** handleSummary: JSON to OUT_DIR/<scenario>-<vus>-<round>.json plus the text summary on stdout. */
 export function makeSummaryHandler(scenarioName) {
   return function handleSummary(data) {
     const file = `${CONFIG.outDir}/${scenarioName}-${CONFIG.vus}-${CONFIG.round}.json`;
-    const enriched = Object.assign({}, data, {
+    const enriched = Object.assign({}, data, { setup_data: redactSetupData(data.setup_data) }, {
       seatrelay: {
         scenario: scenarioName,
         target,
