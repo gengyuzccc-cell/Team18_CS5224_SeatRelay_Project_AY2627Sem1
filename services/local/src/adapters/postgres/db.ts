@@ -85,7 +85,7 @@ export async function atomic<T>(
 export const SCHEMA_SQL_PATH = fileURLToPath(new URL('../../../sql/schema.sql', import.meta.url));
 
 /**
- * Applies `sql/schema.sql` (every statement is IF NOT EXISTS) under an advisory lock so that
+ * Applies `sql/schema.sql` (every statement is IF [NOT] EXISTS) under an advisory lock so that
  * several starting instances never race on DDL. Idempotent.
  */
 export async function migrate(pool: pg.Pool, schemaSqlPath = SCHEMA_SQL_PATH): Promise<void> {

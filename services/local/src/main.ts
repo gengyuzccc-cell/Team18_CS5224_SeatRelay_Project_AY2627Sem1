@@ -95,6 +95,7 @@ async function main(): Promise<void> {
       metrics,
       pollMs: config.notifierPollMs,
       maxAttempts: config.notifierMaxAttempts,
+      retryBackoffMs: config.notifierRetryBackoffMs,
       ...(mailer === undefined ? {} : { mailer }),
     }),
     createJanitor({ pool, logger: logger.child({ component: 'janitor' }), intervalMs: config.janitorIntervalMs }),

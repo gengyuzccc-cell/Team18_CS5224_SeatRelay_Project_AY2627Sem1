@@ -1,4 +1,9 @@
-import type { AuthUser } from '@seatrelay/contracts';
+import {
+  EmailSchema,
+  IdSchema,
+  MAX_DISPLAY_NAME_LENGTH,
+  type AuthUser,
+} from '@seatrelay/contracts';
 import { createRemoteJWKSet, errors as joseErrors, jwtVerify, type JWTPayload } from 'jose';
 
 /** Thrown for a missing or invalid bearer token; the server answers 401 `{ code: 'UNAUTHORIZED' }`. */
@@ -54,22 +59,38 @@ export function createTokenVerifier(options: TokenVerifierOptions): TokenVerifie
   };
 }
 
+/**
+ * Maps verified claims to the identity every command carries. The values must satisfy the
+ * command schema the worker validates (`actorUserId`, `actorEmail`, `actorDisplayName`):
+ * a token the API accepted but whose command the worker refuses would leave that command
+ * ACCEPTED forever. So `email` must be a valid address (`preferred_username` is used only when
+ * it is one, e.g. Keycloak with registrationEmailAsUsername), otherwise the token is refused
+ * (401), and the display name is truncated like the cloud adapter does.
+ */
 export function toAuthUser(payload: JWTPayload): AuthUser {
   const sub = typeof payload.sub === 'string' ? payload.sub : undefined;
   if (sub === undefined || sub.length === 0) {
     throw new AuthError('token has no subject');
   }
-  const email = stringClaim(payload, 'email') ?? stringClaim(payload, 'preferred_username');
-  if (email === undefined) {
-    throw new AuthError('token has no email claim');
+  if (!IdSchema.safeParse(sub).success) {
+    throw new AuthError('token subject invalid');
   }
-  const name =
+  const email = [stringClaim(payload, 'email'), stringClaim(payload, 'preferred_username')].find(
+    (candidate) => candidate !== undefined && EmailSchema.safeParse(candidate).success,
+  );
+  if (email === undefined) {
+    throw new AuthError('token has no valid email claim');
+  }
+  const name = (
     stringClaim(payload, 'name') ??
     [stringClaim(payload, 'given_name'), stringClaim(payload, 'family_name')]
       .filter((part) => part !== undefined)
-      .join(' ');
+      .join(' ')
+  )
+    .slice(0, MAX_DISPLAY_NAME_LENGTH)
+    .trim();
   const user: AuthUser = { userId: sub, email };
-  if (name !== undefined && name.length > 0) {
+  if (name.length > 0) {
     user.name = name;
   }
   return user;
@@ -77,7 +98,11 @@ export function toAuthUser(payload: JWTPayload): AuthUser {
 
 function stringClaim(payload: JWTPayload, claim: string): string | undefined {
   const value = payload[claim];
-  return typeof value === 'string' && value.length > 0 ? value : undefined;
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
 }
 
 function describeJoseError(error: unknown): string {

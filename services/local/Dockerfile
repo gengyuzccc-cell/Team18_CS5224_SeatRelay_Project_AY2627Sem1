@@ -70,5 +70,8 @@ FROM ${NGINX_IMAGE} AS web
 COPY --from=webbuild /app/apps/web/dist /usr/share/nginx/html
 COPY services/local/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --chmod=755 services/local/nginx/entrypoint.sh /entrypoint.sh
+# A Windows checkout (core.autocrlf=true) gives the script CRLF endings, and the kernel cannot
+# exec a `#!/bin/sh\r` shebang. Normalise to LF (.gitattributes prevents it for new clones).
+RUN sed -i 's/\r$//' /entrypoint.sh
 EXPOSE 80
 ENTRYPOINT ["/entrypoint.sh"]

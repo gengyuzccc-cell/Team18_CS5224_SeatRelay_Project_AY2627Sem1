@@ -1,7 +1,10 @@
 -- SeatRelay on-premise reference schema (plan §2.7), PostgreSQL 16.
 --
 -- Applied idempotently on every server start (src/main.ts `migrate()`), and once by the
--- postgres container's init hook. Every statement is `IF NOT EXISTS`, so re-running is a no-op.
+-- postgres container's init hook. Every statement is `IF [NOT] EXISTS`, so re-running is a
+-- no-op. A column added after the first release also gets an `ALTER TABLE … ADD COLUMN IF NOT
+-- EXISTS` next to its table (CREATE TABLE IF NOT EXISTS never adds columns to an existing
+-- table), so an existing `pgdata` volume is upgraded in place by the next server start.
 --
 -- Layout mirrors the DynamoDB single table (plan §2.3): live items (what the worker loads as
 -- the snapshot) and history items live in different tables, so the snapshot query never grows
@@ -199,10 +202,17 @@ CREATE TABLE IF NOT EXISTS notifications (
   read_at     timestamptz,
   sent_at     timestamptz,
   ttl         bigint NOT NULL,
-  expires_at  timestamptz NOT NULL
+  expires_at  timestamptz NOT NULL,
+  -- earliest time the notifier may (re)try the e-mail: insert time, then exponential backoff
+  -- after each failed send (src/notifier.ts)
+  next_attempt_at timestamptz NOT NULL DEFAULT now()
 );
+-- upgrade of a table created before `next_attempt_at` existed (no-op on a fresh database)
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS next_attempt_at timestamptz NOT NULL DEFAULT now();
 CREATE INDEX IF NOT EXISTS notifications_user_idx ON notifications (user_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS notifications_pending_idx ON notifications (created_at) WHERE status = 'PENDING';
+-- notifier poll: PENDING rows that are due (replaces the former notifications_pending_idx)
+DROP INDEX IF EXISTS notifications_pending_idx;
+CREATE INDEX IF NOT EXISTS notifications_due_idx ON notifications (next_attempt_at) WHERE status = 'PENDING';
 CREATE INDEX IF NOT EXISTS notifications_expires_idx ON notifications (expires_at);
 
 -- ---------------------------------------------------------------- attendance (API, synchronous)

@@ -1,0 +1,5 @@
+# Shell scripts run inside Linux containers (nginx/entrypoint.sh is the web image's ENTRYPOINT)
+# and must keep LF endings even on a Windows checkout with core.autocrlf=true: a CRLF shebang
+# (`#!/bin/sh\r`) makes the container exit with "exec /entrypoint.sh: no such file or directory".
+# The Dockerfile also strips CRs from the entrypoint, for clones made before this file existed.
+*.sh text eol=lf

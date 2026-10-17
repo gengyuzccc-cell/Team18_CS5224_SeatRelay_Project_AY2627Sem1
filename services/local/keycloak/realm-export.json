@@ -58,6 +58,7 @@
   ],
   "users": [
     {
+      "id": "fadb198a-7932-4862-84bd-a3b160105474",
       "username": "organiser@example.com",
       "email": "organiser@example.com",
       "emailVerified": true,
@@ -68,6 +69,7 @@
       "realmRoles": ["user"]
     },
     {
+      "id": "4c9461ff-59d8-4f3b-826e-fd81eba4d6e6",
       "username": "alice@example.com",
       "email": "alice@example.com",
       "emailVerified": true,
@@ -78,6 +80,7 @@
       "realmRoles": ["user"]
     },
     {
+      "id": "b18c4688-5553-4f7e-a4d2-7e02af0cef78",
       "username": "bob@example.com",
       "email": "bob@example.com",
       "emailVerified": true,
@@ -88,6 +91,7 @@
       "realmRoles": ["user"]
     },
     {
+      "id": "ac307896-b7ee-48f9-a80d-b987c4c22e58",
       "username": "carol@example.com",
       "email": "carol@example.com",
       "emailVerified": true,

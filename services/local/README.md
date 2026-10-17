@@ -20,7 +20,7 @@ browser ──> nginx (web, :8081)  ──>  Fastify API (server, :3000) ──>
 | Expiry timers | `expiry-delay` queue + forwarder | `timers` table + `src/timers.ts` (due rows → TICK commands) |
 | Worker | `worker` Lambda | `src/worker.ts`: claim with `FOR UPDATE SKIP LOCKED`, `pg_advisory_xact_lock(hashtext(workshop_id))`, `processCommand` in one transaction |
 | Sweep | EventBridge 5-min rule | `createSweepLoop` (`src/timers.ts`) every `SWEEP_INTERVAL_MS` |
-| Notifier | DynamoDB Streams + SES | `src/notifier.ts`: PENDING rows → nodemailer SMTP → SENT / FAILED / SKIPPED |
+| Notifier | DynamoDB Streams + SES | `src/notifier.ts`: due PENDING rows → nodemailer SMTP → SENT / SKIPPED; a failed send is retried with exponential backoff (`next_attempt_at`), FAILED after `NOTIFIER_MAX_ATTEMPTS` |
 | TTL | DynamoDB TTL | `src/janitor.ts`: deletes expired `command_results` / `notifications`, old timers and DONE queue rows |
 | Metrics | CloudWatch EMF | `src/metrics.ts`: in-process aggregates, `GET /metrics`, flushed to the log every `METRICS_FLUSH_MS` |
 
@@ -48,9 +48,11 @@ docker compose -f services/local/docker-compose.yml down -v           # or: pnpm
 | http://localhost:8025 | Mailpit inbox (every notification e-mail lands here) |
 | localhost:5432 | PostgreSQL `seatrelay` / `seatrelay`, database `seatrelay` |
 
-The server applies `sql/schema.sql` on every start (every statement is `IF NOT EXISTS`, under an
-advisory lock, so several instances may start at once); the postgres container also applies it
-once through its init hook. The stack is healthy when `docker compose ps` shows `server`
+The server applies `sql/schema.sql` on every start (every statement is `IF [NOT] EXISTS`, under
+an advisory lock, so several instances may start at once); the postgres container also applies it
+once through its init hook. Columns added after the first release come with an `ALTER TABLE …
+ADD COLUMN IF NOT EXISTS`, so an existing `pgdata` volume is upgraded in place by the next start
+(no `down -v` needed). The stack is healthy when `docker compose ps` shows `server`
 as `healthy` (it waits for postgres and Keycloak to be healthy first; Keycloak takes ~30–60 s).
 
 ### Images (`Dockerfile`, build context = repository root)
@@ -64,6 +66,13 @@ as `healthy` (it waits for postgres and Keycloak to be healthy first; Keycloak t
 
 `Dockerfile.dockerignore` keeps `node_modules`, build outputs, `.git`, `results/` and
 `report/` out of the context (the context is < 1 MB).
+
+**Windows checkouts**: `services/local/.gitattributes` pins `*.sh` to LF, and the `web` stage
+strips CRs from `nginx/entrypoint.sh` anyway, so a clone made with `core.autocrlf=true` (the Git
+for Windows default) still starts the web container (a CRLF shebang fails with
+`exec /entrypoint.sh: no such file or directory`). In a clone made before the attributes existed,
+re-check-out the scripts to get LF (the image works either way):
+`rm services/local/nginx/entrypoint.sh services/local/scripts/smoke.sh && git checkout -- services/local/nginx/entrypoint.sh services/local/scripts/smoke.sh`.
 
 **Behind a TLS-intercepting proxy** (`corepack`/`pnpm install` fail with
 `certificate verify failed` during the build): drop the proxy's root CA as `*.crt` or `*.pem`
@@ -103,7 +112,9 @@ pnpm --filter @seatrelay/local dev            # tsx watch src/main.ts
 | `WORKER_MAX_ATTEMPTS` | `3` | deliveries before a command is parked as `FAILED` (the DLQ) |
 | `WORKER_RETRY_BACKOFF_MS` | `1000` | retry delay = backoff × attempt |
 | `TIMER_POLL_MS` | `1000` | poll interval of the expiry timer loop |
-| `NOTIFIER_POLL_MS` / `NOTIFIER_MAX_ATTEMPTS` | `1000` / `3` | notifier loop |
+| `NOTIFIER_POLL_MS` | `1000` | poll interval of the notifier loop |
+| `NOTIFIER_MAX_ATTEMPTS` | `10` | send attempts before a notification is parked as `FAILED` |
+| `NOTIFIER_RETRY_BACKOFF_MS` | `2000` | retry delay after the n-th failed send = backoff × 2^(n−1), capped at 5 min (`0` = next poll); with the defaults the attempts span ~13.5 min |
 | `SWEEP_INTERVAL_MS` | `300000` | safety-net sweep (plan §1.2) |
 | `JANITOR_INTERVAL_MS` | `600000` | TTL clean-up interval |
 | `METRICS_FLUSH_MS` | `60000` | metric summary log line interval |
@@ -119,7 +130,15 @@ Browser: the SPA signs in through the public PKCE client `seatrelay-web`. Toolin
 the smoke script): the public client `tooling` has the password grant enabled. Test users in
 `keycloak/realm-export.json`: `organiser@example.com`, `alice@example.com`, `bob@example.com`,
 `carol@example.com`, all with password `Passw0rd!`. The API verifies the **ID token**
-(`sub`/`email`/`name` claims, `aud` = client id).
+(`sub`/`email`/`name` claims, `aud` = client id); a token without a valid e-mail address (in
+`email`, or a `preferred_username` that is one) is refused with 401, because every command
+carries the actor's address.
+
+The realm users have fixed `id`s in the export, so their `sub` stays the same when the Keycloak
+container is recreated (Keycloak keeps no volume and re-imports the realm): the organisations,
+memberships and registrations stored in the `pgdata` volume keep matching their owners. Users
+created at run time (sign-up, `tools/scripts`) are lost with the Keycloak container and get new
+ids when created again; `pnpm local:down` (`down -v`) resets both sides together.
 
 ```sh
 TOKEN=$(curl -s -X POST http://localhost:8080/realms/seatrelay/protocol/openid-connect/token \
@@ -163,8 +182,13 @@ default the compose postgres on `localhost:5432`) in its own schema `seatrelay_t
 and recreated per run; when PostgreSQL is unreachable the suite is skipped with a message
 telling you to start it. It covers: the schema applies idempotently, `commit` version conflict →
 `VERSION`, settled command → `COMMAND_ALREADY_SETTLED`, archives move rows to history, the R1
-unique index (UNIFIED and PER_SESSION scopes), queue dedup, the due-timer query, the worker
-(order, tick-first expiry, fault flags, invalid payloads) and the notifier states.
+unique index (UNIFIED and PER_SESSION scopes), queue dedup and its window (FAILED / older than
+5 minutes no longer deduplicate; a DLQ'd command is processed after a re-POST through the API),
+the due-timer query, the worker (order, tick-first expiry, fault flags, invalid payloads), the
+notifier states and its retry backoff (an outage delays the e-mail, it does not burn the
+attempts), and the in-place upgrade of an existing `notifications` table.
+`test/auth.test.ts` and `test/notifier.test.ts` are pure unit tests (claims mapping, config,
+backoff, SMTP URL).
 
 ## How the worker keeps the cloud semantics
 
@@ -178,6 +202,20 @@ unique index (UNIFIED and PER_SESSION scopes), queue dedup, the due-timer query,
   `WORKER_RETRY_BACKOFF_MS × attempt` and parked as `FAILED` after `WORKER_MAX_ATTEMPTS`
   (inspect with `SELECT * FROM commands WHERE status = 'FAILED'`). Deterministic rejections
   never throw.
+- **Deduplication window** (as SQS FIFO): an enqueue whose dedup id (`commandId`,
+  `tick#offerId#expiresAt`) matches a PENDING message, or one delivered less than 5 minutes ago,
+  is dropped. A message parked as `FAILED` or delivered longer ago no longer deduplicates: its
+  `dedup_id` is set to NULL and the duplicate is enqueued as a new message. So the client's
+  idempotent re-POST of a command still `ACCEPTED` after its message went to the DLQ redrives
+  it (the API re-enqueues still-ACCEPTED commands). To redrive by hand instead:
+
+  ```sh
+  docker compose -f services/local/docker-compose.yml exec postgres psql -U seatrelay -d seatrelay -c \
+    "UPDATE commands SET status = 'PENDING', attempts = 0, available_at = now(), done_at = NULL
+      WHERE status = 'FAILED' AND id IN (<ids>)"
+  ```
+
+  A redriven command that was settled meanwhile is acked as `COMMAND_ALREADY_SETTLED`.
 - **Fault flags** (`ALLOW_FAULT_FLAGS=true`): `BEFORE_COMMIT` / `TIMER_SEND` throw before the
   commit (clean rollback, redelivery settles the command); `AFTER_COMMIT` keeps the committed
   decision and redelivers the message, which is acknowledged as `COMMAND_ALREADY_SETTLED`.

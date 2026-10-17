@@ -52,7 +52,9 @@ export const EnvSchema = z.object({
   WORKER_RETRY_BACKOFF_MS: intWithDefault(1000, 0),
   TIMER_POLL_MS: intWithDefault(1000, 10),
   NOTIFIER_POLL_MS: intWithDefault(1000, 10),
-  NOTIFIER_MAX_ATTEMPTS: intWithDefault(3),
+  // 10 attempts with a 2 s exponential backoff (capped at 5 min) span ~13.5 min of SMTP outage.
+  NOTIFIER_MAX_ATTEMPTS: intWithDefault(10),
+  NOTIFIER_RETRY_BACKOFF_MS: intWithDefault(2000, 0),
   SWEEP_INTERVAL_MS: intWithDefault(5 * 60_000, 1000),
   JANITOR_INTERVAL_MS: intWithDefault(10 * 60_000, 1000),
   METRICS_FLUSH_MS: intWithDefault(60_000, 1000),
@@ -79,6 +81,7 @@ export interface LocalConfig {
   timerPollMs: number;
   notifierPollMs: number;
   notifierMaxAttempts: number;
+  notifierRetryBackoffMs: number;
   sweepIntervalMs: number;
   janitorIntervalMs: number;
   metricsFlushMs: number;
@@ -111,6 +114,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): LocalConfig {
     timerPollMs: e.TIMER_POLL_MS,
     notifierPollMs: e.NOTIFIER_POLL_MS,
     notifierMaxAttempts: e.NOTIFIER_MAX_ATTEMPTS,
+    notifierRetryBackoffMs: e.NOTIFIER_RETRY_BACKOFF_MS,
     sweepIntervalMs: e.SWEEP_INTERVAL_MS,
     janitorIntervalMs: e.JANITOR_INTERVAL_MS,
     metricsFlushMs: e.METRICS_FLUSH_MS,
