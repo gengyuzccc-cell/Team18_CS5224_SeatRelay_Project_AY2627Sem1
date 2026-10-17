@@ -14,6 +14,13 @@ API_URL="$(stack_output "$APP_STACK" ApiUrl)"
 ISSUER="$(stack_output "$AUTH_STACK" Issuer)"
 CLIENT_ID="$(stack_output "$AUTH_STACK" WebClientId)"
 HOSTED_UI="$(stack_output "$AUTH_STACK" HostedUiDomain)"
+for v in BUCKET DIST_ID WEB_URL API_URL ISSUER CLIENT_ID HOSTED_UI; do
+  val="${!v}"
+  if [[ -z "$val" || "$val" == "None" ]]; then
+    echo "missing stack output for $v (is seatrelay-app-${STAGE} / seatrelay-web-${STAGE} deployed?); refusing to publish" >&2
+    exit 1
+  fi
+done
 log "stage=$STAGE bucket=$BUCKET dist=$DIST_ID web=$WEB_URL api=$API_URL"
 
 # Build once, then inject the stage's runtime configuration as dist/env.js so the SAME bundle works

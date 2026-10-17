@@ -382,6 +382,9 @@ Resources:
         Every5Minutes:
           Type: ScheduleV2
           Properties:
+            # Explicit, stage-scoped name: without it SAM names the schedule after the logical id
+            # (SweepFunctionEvery5Minutes) in the default group, so dev and pilot collide.
+            Name: !Sub seatrelay-${Stage}-sweep
             ScheduleExpression: rate(5 minutes)
             Description: SeatRelay sweep safety net
             FlexibleTimeWindow:
