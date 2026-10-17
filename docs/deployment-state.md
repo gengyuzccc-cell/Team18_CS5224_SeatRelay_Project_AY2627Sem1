@@ -81,8 +81,23 @@ the dev API (`STAGE=dev tools/scripts/bin/deploy-web.sh`).
 
 Registered in Cognito as callback (`/callback`) and logout (`/`) URL together with dev and localhost.
 
-## seatrelay-app-pilot
+## seatrelay-app-pilot (deployed 2026-10-17, CREATE_COMPLETE)
 
-Not yet deployed: it is deployed from the reviewed code after the Phase 1 review fixes land
-(`STAGE=pilot tools/scripts/bin/deploy-all.sh`; `AllowFaultFlags=false`, `EmailEnabled=true`,
-throttle 50/100, table deletion protection on).
+Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=gengyuzccc@gmail.com`.
+
+| Item | Value |
+|---|---|
+| ApiUrl | `https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com` |
+| TableName | `seatrelay-pilot` (deletion protection ON, PITR ON, on-demand, stream NEW_AND_OLD_IMAGES) |
+| Throttling | 50 rps / burst 100 (dev: 300 / 500) |
+| Fault flags | `ALLOW_FAULT_FLAGS=false` (the API strips `_fault`) |
+| E-mail | `EMAIL_ENABLED=true`, sender `gengyuzccc@gmail.com` (verified). While SES is in the sandbox only verified recipients receive mail; other recipients are recorded as FAILED and see in-app notifications |
+| Sweep schedule | `seatrelay-pilot-sweep` (EventBridge Scheduler, rate 5 min) |
+
+Checks after deployment: `/health` 200 `{"ok":true,"stage":"pilot"}`, `/me` without token 401, pilot SPA `env.js`
+points at the pilot API.
+
+First attempt failed CloudFormation early validation: SAM names a `ScheduleV2` event after its logical id when
+`Name` is omitted, so the dev and pilot sweep schedules collided (`SweepFunctionEvery5Minutes`). Fixed by
+`Name: !Sub seatrelay-${Stage}-sweep`; dev still carries the old name until its next deployment (after the
+Table 3 run, so that the measurement is not disturbed).
