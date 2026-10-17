@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { MAX_SESSIONS_PER_WORKSHOP } from './constants';
 import { FaultFlagSchema, TickSourceSchema } from './enums';
 import {
-  BackfillRecordSchema,
   DisplayNameSchema,
   EmailSchema,
   IdSchema,
@@ -132,15 +131,14 @@ export const TickCommandSchema = z.object({
   expiresAt: IsoTimestampSchema.optional(),
 });
 /**
- * Internal continuation emitted when a decision hit a per-decision limit. It carries the seat
- * releases of the previous decision that nobody has been relayed yet, so that the continuation
- * attributes the offers it creates to them (backfill latency stays exact).
+ * Internal continuation emitted when a decision hit a per-decision limit (offers, expiries or
+ * the storage item budget). Seat releases that still wait for a taker are NOT carried here:
+ * they live in the workshop snapshot (`WorkshopSnapshot.pendingBackfills`) so that whichever
+ * decision relays the seat next attributes it, even when other messages run first.
  */
 export const ReallocateCommandSchema = z.object({
   type: z.literal('REALLOCATE'),
   workshopId: IdSchema,
-  /** Backfill records of the previous decision in the chain that are not yet reallocated. */
-  pendingBackfills: z.array(BackfillRecordSchema).optional(),
   /** Seats added by SET_CAPACITY in the previous decision that nobody has taken yet. */
   pendingCapacityUp: z
     .array(z.object({ sessionId: IdSchema, seats: PositiveIntSchema }))

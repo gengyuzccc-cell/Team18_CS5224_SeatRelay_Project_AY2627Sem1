@@ -4,6 +4,7 @@ import {
   buildCommand,
   type CommandAcceptedView,
   type CommandResult,
+  type UserCommand,
 } from '@seatrelay/contracts';
 import { acceptedCommandResult } from '../../commands';
 import { ApiError, notFound } from '../../errors';
@@ -15,6 +16,7 @@ import {
   param,
   requireUser,
   requireWorkshop,
+  type ApiAppConfig,
   type ApiRoute,
 } from '../context';
 import { json, parseBody } from '../http';
@@ -30,6 +32,36 @@ export function commandAcceptedView(record: CommandResult): CommandAcceptedView 
     href: `/commands/${record.commandId}`,
     pollAfterMs: COMMAND_POLL_AFTER_MS,
   };
+}
+
+/** Enqueues the command; on failure rolls the fresh ACCEPTED record back and answers 503. */
+async function enqueueOrFail(
+  deps: ApiAppConfig,
+  command: UserCommand,
+  fields: Record<string, unknown>,
+  rollback: boolean,
+): Promise<void> {
+  try {
+    await deps.queue.enqueue(command);
+  } catch (error) {
+    deps.logger.error('enqueue failed', {
+      ...fields,
+      rollback,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    if (rollback) {
+      try {
+        await deps.store.deleteCommandIfAccepted(command.commandId);
+      } catch (rollbackError) {
+        // The record stays ACCEPTED; the browser's retry with the same commandId re-enqueues it.
+        deps.logger.error('rollback of the ACCEPTED record failed', {
+          ...fields,
+          error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
+        });
+      }
+    }
+    throw new ApiError('QUEUE_UNAVAILABLE');
+  }
 }
 
 export const commandRoutes: ApiRoute[] = [
@@ -59,19 +91,16 @@ export const commandRoutes: ApiRoute[] = [
         if (existing.actorUserId !== actor.userId || existing.workshopId !== wsId) {
           throw new ApiError('CONFLICT', 'commandId is already used by another command');
         }
+        if (existing.status === 'ACCEPTED') {
+          // The record may be an orphan (crash between the record and the enqueue, or a failed
+          // 503 rollback): enqueue again. The FIFO dedup id is the commandId, so a duplicate
+          // inside the window is dropped and a later one is acked as already settled (C3).
+          await enqueueOrFail(deps, command, fields, false);
+        }
         deps.logger.info('duplicate command; returning existing record', fields);
         return json(202, commandAcceptedView(existing));
       }
-      try {
-        await deps.queue.enqueue(command);
-      } catch (error) {
-        deps.logger.error('enqueue failed; rolling back ACCEPTED record', {
-          ...fields,
-          error: error instanceof Error ? error.message : String(error),
-        });
-        await deps.store.deleteCommandIfAccepted(command.commandId);
-        throw new ApiError('QUEUE_UNAVAILABLE');
-      }
+      await enqueueOrFail(deps, command, fields, true);
       deps.logger.info('command accepted', fields);
       return json(202, commandAcceptedView(record));
     },

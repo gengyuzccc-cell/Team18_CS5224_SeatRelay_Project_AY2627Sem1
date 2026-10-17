@@ -1,6 +1,6 @@
 import { PatchWorkshopBodySchema } from '@seatrelay/contracts';
 import { notFound } from '../../errors';
-import { workshopPublicView } from '../../views';
+import { toWorkshopPublic, workshopPublicView } from '../../views';
 import { param, requireUser, requireWorkshopOrganiser, type ApiRoute } from '../context';
 import { json, parseBody } from '../http';
 
@@ -31,12 +31,13 @@ export const workshopRoutes: ApiRoute[] = [
       const patch = {
         ...(body.title !== undefined ? { title: body.title } : {}),
         ...(body.description !== undefined ? { description: body.description } : {}),
+        updatedAt: deps.clock.now(),
       };
       const workshop = await deps.store.updateWorkshopInfo(wsId, patch);
       if (workshop === undefined) {
         throw notFound('Workshop not found');
       }
-      return json(200, workshop);
+      return json(200, toWorkshopPublic(workshop));
     },
   },
 ];

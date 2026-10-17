@@ -21,3 +21,8 @@ Conventions baked in:
   `buildCommand(body, workshopId, authUser)`.
 - `RejectReason.FORBIDDEN` is reserved for the service layer (organiser commands are authorised
   by the API/worker through org membership); `decide()` never emits it.
+- `CANCELLING` (workshop and session) is the transient state while an organiser cancellation
+  is drained in budget-sized commits; clients show it as "cancelling", everything else treats
+  it like CANCELLED (never offered, user commands rejected).
+- `CommandAcceptedSchema` is the same schema as `CommandAcceptedViewSchema`: the 202 body
+  carries the record's current state, which is `APPLIED`/`REJECTED` on an idempotent re-POST.

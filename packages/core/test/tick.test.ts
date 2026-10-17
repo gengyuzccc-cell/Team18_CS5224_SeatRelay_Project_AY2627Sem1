@@ -91,12 +91,12 @@ describe('tick-first expiry', () => {
     const s = registerMany(s0, [1, 2, 3, 4], ['A'], at(0)); // 3 held, u4 queued
     const first = step(s, cmd.tick(), at(10), { maxExpiriesPerDecision: 2 });
     expect(first.decision.metrics.offersExpired).toBe(2);
-    expect(first.decision.continuation).toMatchObject({ type: 'REALLOCATE', workshopId: 'ws1' });
-    // two seats released, one relayed to u4: the other release travels with the continuation
-    expect(
-      first.decision.continuation?.type === 'REALLOCATE' &&
-        first.decision.continuation.pendingBackfills?.map((b) => b.cause),
-    ).toEqual(['EXPIRED']);
+    expect(first.decision.continuation).toEqual({ type: 'REALLOCATE', workshopId: 'ws1' });
+    // two seats released, one relayed to u4: the other release stays pending in the live
+    // snapshot (not in the continuation message) until the chain is done
+    expect(first.decision.writes.filter((w) => w.kind === 'PUT_PENDING_BACKFILL')).toHaveLength(1);
+    expect(first.snapshot.pendingBackfills.map((b) => b.cause)).toEqual(['EXPIRED']);
+    expect(first.snapshot.workshop.nextDueAt).toBe(at(10)); // = now: the sweep is the safety net
     expect(first.snapshot.offers.filter((o) => o.expiresAt === at(10))).toHaveLength(1);
     // u4 is relayed one of the two released seats already
     expect(offerOf(first.snapshot, 4)).toBeDefined();
@@ -106,6 +106,11 @@ describe('tick-first expiry', () => {
     expect(second.decision.metrics.offersExpired).toBe(1);
     expect(second.decision.continuation).toBeUndefined();
     expect(second.snapshot.offers.map((o) => o.userId)).toEqual(['u4']);
+    // nobody else waits: the two leftover releases are closed (moved to history / final)
+    expect(second.decision.writes.filter((w) => w.kind === 'ARCHIVE_BACKFILL')).toHaveLength(1);
+    expect(second.decision.writes.filter((w) => w.kind === 'PUT_BACKFILL')).toHaveLength(1);
+    expect(second.snapshot.pendingBackfills).toEqual([]);
+    expect(second.snapshot.workshop.nextDueAt).toBe(at(20));
     // An ACCEPT for a due-but-not-yet-expired offer is still rejected (direct time check).
     const due = first.snapshot.offers.find((o) => o.expiresAt === at(10))!;
     const accept = step(first.snapshot, cmd.accept(due.userId.slice(1), due.id), at(10), {

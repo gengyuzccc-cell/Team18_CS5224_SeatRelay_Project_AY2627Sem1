@@ -36,6 +36,14 @@ const cases: [string, Mutation][] = [
   ],
   ['REGISTRATION_OFFER_MISSING', (s) => (s.registrations[1]!.currentOfferId = 'ghost')],
   ['REGISTRATION_OFFER_MISSING', (s) => delete s.registrations[1]!.currentOfferId],
+  [
+    'REGISTRATION_OFFER_MISMATCH',
+    (s) => {
+      // u3 claims u2's offer: the offer side still matches u2, only the registration side lies
+      s.registrations[2]!.status = 'OFFERED';
+      s.registrations[2]!.currentOfferId = s.offers[0]!.id;
+    },
+  ],
   ['REGISTRATION_STRAY_OFFER_REF', (s) => (s.registrations[2]!.currentOfferId = 'ghost')],
   ['REGISTRATION_CONFIRMED_SESSION_INVALID', (s) => (s.registrations[0]!.confirmedSessionId = 'Z')],
   ['REGISTRATION_CONFIRMED_SESSION_INVALID', (s) => delete s.registrations[0]!.confirmedSessionId],
@@ -45,6 +53,8 @@ const cases: [string, Mutation][] = [
   ['OFFER_WORKSHOP_MISMATCH', (s) => (s.offers[0]!.workshopId = 'other')],
   ['OFFER_NOT_LIVE', (s) => (s.offers[0]!.status = 'DECLINED')],
   ['OFFER_SESSION_INVALID', (s) => (s.offers[0]!.sessionId = 'Z')],
+  ['OFFER_SESSION_INVALID', (s) => (s.sessions[0]!.status = 'CANCELLED')],
+  ['OFFER_AFTER_CUTOFF', (s) => (s.offers[0]!.expiresAt = at(10 * 60 * 24))],
   ['OFFER_REGISTRATION_MISSING', (s) => (s.offers[0]!.registrationSeq = 99)],
   ['OFFER_REGISTRATION_MISMATCH', (s) => (s.offers[0]!.userId = 'u9')],
   ['OFFER_REGISTRATION_MISMATCH', (s) => (s.offers[0]!.registrationSeq = 3)],
@@ -92,5 +102,23 @@ describe('checkInvariants', () => {
   it('does not treat a past cut-off or a due offer as starvation', () => {
     const snapshot = fixture();
     expect(checkInvariants(snapshot, at(60 * 24)).ok).toBe(true);
+  });
+
+  it('tolerates references to a CANCELLING session or workshop (drain pending), not to CANCELLED ones', () => {
+    const draining = fixture();
+    draining.sessions[0]!.status = 'CANCELLING';
+    expect(checkInvariants(draining, at(3))).toEqual({ ok: true, violations: [] });
+    const workshop = fixture();
+    workshop.workshop.status = 'CANCELLING';
+    expect(checkInvariants(workshop, at(3)).ok).toBe(true);
+    const cancelled = fixture();
+    cancelled.sessions[0]!.status = 'CANCELLED';
+    expect(checkInvariants(cancelled, at(3)).violations.map((v) => v.code)).toEqual(
+      expect.arrayContaining([
+        'OFFER_SESSION_INVALID',
+        'REGISTRATION_CANCELLED_SESSION',
+        'REGISTRATION_CONFIRMED_SESSION_INVALID',
+      ]),
+    );
   });
 });

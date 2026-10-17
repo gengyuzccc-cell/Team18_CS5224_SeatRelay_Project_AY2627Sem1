@@ -5,7 +5,9 @@ export * from './changes';
 export {
   DEFAULT_DECISION_LIMITS,
   MAX_EXPIRIES_PER_DECISION,
+  MAX_ITEMS_PER_DECISION,
   MAX_OFFERS_PER_DECISION,
+  UNIT_ITEM_COST,
   type DecideContext,
   type DecisionLimits,
   type NotificationDraft,

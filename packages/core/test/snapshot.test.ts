@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  byRelease,
   cutoffFor,
   distinctConfirmedUsers,
   findOffer,
@@ -87,6 +88,20 @@ describe('snapshot helpers', () => {
     });
   });
 
+  it('orders backfill records by release time, then id', () => {
+    const record = (id: string, releasedAt: string) => ({
+      id,
+      workshopId: 'ws1',
+      sessionId: 'A',
+      releasedAt,
+      cause: 'EXPIRED' as const,
+    });
+    expect(byRelease(record('b', at(1)), record('a', at(2)))).toBeLessThan(0);
+    expect(byRelease(record('b', at(1)), record('a', at(1)))).toBeGreaterThan(0);
+    expect(byRelease(record('a', at(1)), record('b', at(1)))).toBeLessThan(0);
+    expect(byRelease(record('a', at(1)), record('a', at(1)))).toBe(0);
+  });
+
   it('builds fresh workshops and snapshots with defaults', () => {
     const workshop = newWorkshop({ id: 'w', orgId: 'o', title: 'T', createdAt: T0 });
     expect(workshop).toMatchObject({
@@ -101,6 +116,7 @@ describe('snapshot helpers', () => {
     const snapshot = newSnapshot(workshop, [makeSession({ id: 'A' })]);
     expect(snapshot.registrations).toEqual([]);
     expect(snapshot.offers).toEqual([]);
+    expect(snapshot.pendingBackfills).toEqual([]);
   });
 });
 

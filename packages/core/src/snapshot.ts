@@ -1,4 +1,5 @@
 import type {
+  BackfillRecord,
   Offer,
   Registration,
   RegistrationStatus,
@@ -8,11 +9,12 @@ import type {
   WorkshopMode,
 } from '@seatrelay/contracts';
 import { queueScopeKey } from './perSession';
-import { parseIso } from './time';
+import { compareIso, parseIso } from './time';
 
 /**
  * The live state of one workshop as loaded by the worker (plan §2.3: `Query PK=WS#… AND
- * begins_with(SK,'L#')`). Archived registrations/offers are never part of it.
+ * begins_with(SK,'L#')`). Archived registrations/offers are never part of it, with one
+ * exception: `settledOffers` is a per-command augmentation (see below), not stored state.
  */
 export interface WorkshopSnapshot {
   workshop: Workshop;
@@ -21,6 +23,20 @@ export interface WorkshopSnapshot {
   registrations: Registration[];
   /** Live offers only: OFFERED. */
   offers: Offer[];
+  /**
+   * Seat releases that still wait for a taker while a REALLOCATE continuation is pending
+   * (`reallocatedAt` undefined, session OPEN). They are live items so that whichever decision
+   * relays the seat next (a timer tick, a user command or the continuation) attributes it.
+   * Empty outside a continuation chain. Oldest release first.
+   */
+  pendingBackfills: BackfillRecord[];
+  /**
+   * Optional: archived (settled) offers the command refers to, loaded by the service for an
+   * ACCEPT_OFFER / DECLINE_OFFER whose offer is no longer live (one point read). The engine
+   * uses them only to answer OFFER_EXPIRED / OFFER_NOT_ACTIVE instead of OFFER_NOT_FOUND once a
+   * timer tick has already archived the offer; they are never written back.
+   */
+  settledOffers?: Offer[];
 }
 
 export const LIVE_REGISTRATION_STATUSES: readonly RegistrationStatus[] = [
@@ -56,8 +72,24 @@ export function isStillOpenForAllocation(session: Session, nowMs: number): boole
   return session.status === 'OPEN' && !isPastCutoff(session, nowMs);
 }
 
+/**
+ * A session that still justifies a QUEUED registration listing it: OPEN before cut-off, or
+ * CANCELLING (never offered again, but the pending drain removes it from the preference list
+ * with a SESSION_CANCELLED notice, so the registration is not ended with CUTOFF meanwhile).
+ */
+export function canStillBeWaitedFor(session: Session, nowMs: number): boolean {
+  return (
+    (session.status === 'OPEN' || session.status === 'CANCELLING') && !isPastCutoff(session, nowMs)
+  );
+}
+
 export function bySeq(a: Pick<Registration, 'seq'>, b: Pick<Registration, 'seq'>): number {
   return a.seq - b.seq;
+}
+
+/** Backfill records oldest release first (ties by id): the FIFO relay order. */
+export function byRelease(a: BackfillRecord, b: BackfillRecord): number {
+  return compareIso(a.releasedAt, b.releasedAt) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 }
 
 export function findSession(snapshot: WorkshopSnapshot, sessionId: string): Session | undefined {
@@ -127,7 +159,12 @@ export function distinctConfirmedUsers(registrations: readonly Registration[]): 
   return users.size;
 }
 
-/** Participant-facing summary of one registration (public view `me`, command results). */
+/**
+ * Participant-facing summary of one registration (public view `me`, command results,
+ * `GET /me/registrations`). `confirmedSessionId` is reported only while the seat is held
+ * (status CONFIRMED): a CANCELLED/ENDED registration holds no seat even though the archived
+ * entity keeps the session it once had.
+ */
 export function registrationSummary(
   mode: WorkshopMode,
   registrations: readonly Registration[],
@@ -152,7 +189,7 @@ export function registrationSummary(
       };
     }
   }
-  if (registration.confirmedSessionId !== undefined) {
+  if (registration.status === 'CONFIRMED' && registration.confirmedSessionId !== undefined) {
     summary.confirmedSessionId = registration.confirmedSessionId;
   }
   if (registration.endReason !== undefined) {

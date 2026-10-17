@@ -5,7 +5,13 @@ import { z } from 'zod';
  * const array (for iteration / UI pickers), a zod enum (for validation) and a TS type.
  */
 
-export const WORKSHOP_STATUSES = ['OPEN', 'CLOSED', 'CANCELLED'] as const;
+/**
+ * `CANCELLING` is the transient state between CANCEL_WORKSHOP and the moment the engine has
+ * archived every live registration and offer (the drain runs in budget-sized continuations,
+ * plan §2.3 transaction limit). User commands are rejected with WORKSHOP_CANCELLED from the
+ * first decision on; the public view shows CANCELLED once the drain completes.
+ */
+export const WORKSHOP_STATUSES = ['OPEN', 'CLOSED', 'CANCELLING', 'CANCELLED'] as const;
 export const WorkshopStatusSchema = z.enum(WORKSHOP_STATUSES);
 export type WorkshopStatus = (typeof WORKSHOP_STATUSES)[number];
 
@@ -13,7 +19,8 @@ export const WORKSHOP_MODES = ['UNIFIED', 'PER_SESSION'] as const;
 export const WorkshopModeSchema = z.enum(WORKSHOP_MODES);
 export type WorkshopMode = (typeof WORKSHOP_MODES)[number];
 
-export const SESSION_STATUSES = ['OPEN', 'CANCELLED'] as const;
+/** `CANCELLING`: CANCEL_SESSION applied, held/confirmed seats and preferences still being drained. */
+export const SESSION_STATUSES = ['OPEN', 'CANCELLING', 'CANCELLED'] as const;
 export const SessionStatusSchema = z.enum(SESSION_STATUSES);
 export type SessionStatus = (typeof SESSION_STATUSES)[number];
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { decide } from '../src/index';
+import { decide, queueLength } from '../src/index';
 import {
+  T0,
   UUID,
   WS,
   at,
@@ -97,7 +98,7 @@ describe('REGISTER', () => {
     expect(r.decision.writes).toEqual([]);
   });
 
-  it('rejects WORKSHOP_CANCELLED for every command but TICK on a cancelled workshop', () => {
+  it('rejects WORKSHOP_CANCELLED for every user command on a cancelled workshop', () => {
     const cancelled = run(makeSnapshot(), cmd.cancelWorkshop(), at(0)).snapshot;
     for (const command of [
       cmd.register(1, ['A']),
@@ -109,15 +110,17 @@ describe('REGISTER', () => {
       cmd.cancelWorkshop(),
       cmd.close(),
       cmd.open(),
-      cmd.reallocate(),
     ]) {
       const r = run(cancelled, command, at(1));
       expect(r.decision).toMatchObject({ status: 'REJECTED', reason: 'WORKSHOP_CANCELLED' });
       expect(r.decision.writes).toEqual([]);
     }
-    const tick = run(cancelled, cmd.tick(), at(1));
-    expect(tick.decision.status).toBe('APPLIED');
-    expect(tick.decision.writes).toEqual([]);
+    // internal commands are harmless no-ops once the drain is complete
+    for (const command of [cmd.tick(), cmd.reallocate()]) {
+      const r = run(cancelled, command, at(1));
+      expect(r.decision.status).toBe('APPLIED');
+      expect(r.decision.writes).toEqual([]);
+    }
   });
 
   it('rejects malformed preference lists', () => {
@@ -154,11 +157,36 @@ describe('REGISTER', () => {
     expect(r.decision).toMatchObject({ status: 'REJECTED', reason: 'NO_ACCEPTABLE_SESSION' });
   });
 
-  it('keeps a past-cut-off session in the preferences but never offers it', () => {
+  it('drops a past-cut-off session from the preferences (it can never be offered, R4)', () => {
     const s0 = makeSnapshot({ sessions: [{ id: 'A', startsInMinutes: 40 }, { id: 'B' }] });
     const r = run(s0, cmd.register(1, ['A', 'B']), at(15)); // A cut-off (+10) has passed
-    expect(regOf(r.snapshot, 1)?.acceptable).toEqual(['A', 'B']);
+    expect(regOf(r.snapshot, 1)?.acceptable).toEqual(['B']);
+    expect(r.decision.resultForCommand?.registration?.acceptable).toEqual(['B']);
     expect(offerOf(r.snapshot, 1)?.sessionId).toBe('B');
+    // a second registrant who only lists A queues nowhere: the A queue length stays 0
+    const s2 = run(r.snapshot, cmd.register(2, ['A']), at(15));
+    expect(s2.decision.reason).toBe('NO_ACCEPTABLE_SESSION');
+    expect(queueLength(r.snapshot.registrations, 'A')).toBe(0);
+  });
+
+  it('throws on a command/snapshot workshop mismatch (a routing bug, not a reject reason)', () => {
+    expect(() =>
+      decide(makeSnapshot(), { type: 'TICK', workshopId: 'other-ws' }, makeCtx(at(0))),
+    ).toThrow(/other-ws/);
+  });
+
+  it('normalises `now` so every emitted timestamp is canonical (ISO UTC with milliseconds)', () => {
+    const decision = decide(
+      makeSnapshot(),
+      cmd.register(1, ['A']),
+      makeCtx('2026-11-03T06:00:00Z'),
+    );
+    const registration = decision.writes.find((w) => w.kind === 'PUT_REGISTRATION');
+    expect(registration?.kind === 'PUT_REGISTRATION' && registration.registration.createdAt).toBe(
+      T0,
+    );
+    expect(decision.writes[0]).toMatchObject({ kind: 'PUT_WORKSHOP_STATE', updatedAt: T0 });
+    expect(decision.timers[0]?.expiresAt).toBe(at(10));
   });
 
   it('stores the display name and email from the JWT identity', () => {

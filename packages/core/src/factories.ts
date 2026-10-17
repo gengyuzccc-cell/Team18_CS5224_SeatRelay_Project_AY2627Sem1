@@ -63,5 +63,5 @@ export function newWorkshop(input: NewWorkshopInput): Workshop {
 
 /** A fresh snapshot for a just-created workshop (no registrations, no offers). */
 export function newSnapshot(workshop: Workshop, sessions: Session[]): WorkshopSnapshot {
-  return { workshop, sessions, registrations: [], offers: [] };
+  return { workshop, sessions, registrations: [], offers: [], pendingBackfills: [] };
 }

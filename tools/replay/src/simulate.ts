@@ -173,7 +173,7 @@ export function buildSnapshot(scenario: Scenario, mode: WorkshopMode): WorkshopS
       capacity: session.capacity,
     }),
   );
-  return { workshop, sessions, registrations: [], offers: [] };
+  return { workshop, sessions, registrations: [], offers: [], pendingBackfills: [] };
 }
 
 class Simulation {

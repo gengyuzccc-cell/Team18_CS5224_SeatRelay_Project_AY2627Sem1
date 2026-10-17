@@ -7,7 +7,12 @@ import {
   type MyRegistrationListView,
   type VerifyView,
 } from '@seatrelay/contracts';
-import { addSeconds } from '@seatrelay/core';
+import {
+  MAX_ITEMS_PER_DECISION,
+  addMinutes,
+  addSeconds,
+  estimateCommitItems,
+} from '@seatrelay/core';
 import { describe, expect, test } from 'vitest';
 import {
   FaultInjectedError,
@@ -16,7 +21,18 @@ import {
   processCommand,
   tickForTimer,
 } from '../src/index';
-import { T0, accepted, alice, bob, bodyOf, call, carol, dave, scenario } from './helpers';
+import {
+  T0,
+  accepted,
+  alice,
+  bob,
+  bodyOf,
+  call,
+  carol,
+  dave,
+  scenario,
+  workshopInput,
+} from './helpers';
 
 async function commandView(
   ports: Awaited<ReturnType<typeof scenario>>['ports'],
@@ -376,6 +392,107 @@ describe('processCommand: fault injection and redelivery', () => {
     expect(await commandView(ports, commandId)).toMatchObject({ status: 'APPLIED' });
   });
 
+  test('TIMER_SEND fires at the timer-scheduling point even when the decision creates no timer', async () => {
+    const { ports, wsId, s1 } = await scenario();
+    const register = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await ports.drain();
+    const offerId =
+      (await commandView(ports, register.commandId)).result?.registration?.currentOffer?.id ?? '';
+    const accept = await accepted(ports, bob, wsId, {
+      type: 'ACCEPT_OFFER',
+      offerId,
+      _fault: 'TIMER_SEND',
+    });
+    await expect(ports.drain({ faultInjection: true })).rejects.toMatchObject({
+      fault: 'TIMER_SEND',
+    });
+    expect(await commandView(ports, accept.commandId)).toMatchObject({ status: 'ACCEPTED' });
+    const message = buildCommand(
+      { type: 'ACCEPT_OFFER', commandId: accept.commandId, offerId, _fault: 'TIMER_SEND' },
+      wsId,
+      bob,
+    );
+    await expect(
+      processCommand(ports, message, { faultInjection: true, deliveryAttempt: 2 }),
+    ).resolves.toMatchObject({ outcome: 'APPLIED' });
+  });
+
+  test('a REALLOCATE continuation lost after the commit is recovered by the redelivery itself', async () => {
+    const { ports, orgId, wsId, s1 } = await scenario();
+    for (let i = 1; i <= 16; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1],
+      });
+    }
+    await ports.drain(); // 1 OFFERED, 15 QUEUED
+    ports.metrics.clear();
+    const { commandId } = await accepted(ports, alice, wsId, {
+      type: 'SET_CAPACITY',
+      sessionId: s1,
+      capacity: 20,
+      _fault: 'AFTER_COMMIT',
+    });
+    // The first delivery commits 12 offers and crashes before enqueueing the continuation;
+    // the redelivery is acknowledged as already settled AND converges the workshop.
+    const processed = await ports.drain({ faultInjection: true, onError: 'redeliver' });
+    expect(
+      processed.map((entry) => [entry.command.type, entry.deliveryAttempt, entry.result.outcome]),
+    ).toEqual([['SET_CAPACITY', 2, 'ALREADY_SETTLED']]);
+    expect(ports.deadLetters).toEqual([]);
+    expect(await commandView(ports, commandId, alice)).toMatchObject({ status: 'APPLIED' });
+    const snapshot = await ports.store.loadSnapshot(wsId);
+    expect(snapshot?.registrations.filter((r) => r.status === 'QUEUED')).toEqual([]);
+    expect(snapshot?.sessions[0]).toMatchObject({ capacity: 20, held: 16 });
+    const verify = bodyOf<VerifyView>(
+      await call(ports, 'GET', `/orgs/${orgId}/workshops/${wsId}/verify`, { user: alice }),
+    );
+    expect(verify.ok).toBe(true);
+    expect(ports.logger.entries.some((entry) => entry.message.includes('convergence pass'))).toBe(
+      true,
+    );
+    // the 3 seats the lost continuation would have relayed are still attributed to the raise
+    const dashboard = bodyOf<DashboardView>(
+      await call(ports, 'GET', `/orgs/${orgId}/workshops/${wsId}/dashboard`, { user: alice }),
+    );
+    expect(dashboard.counts).toMatchObject({ queued: 0, offered: 16 });
+    expect(dashboard.backfills.filter((b) => b.cause === 'CAPACITY_UP')).toHaveLength(12);
+    // a redelivery of a settled command on an idle workshop is a plain ack (no commit)
+    const commits = ports.store.commits;
+    const again = buildCommand(
+      { type: 'SET_CAPACITY', commandId, sessionId: s1, capacity: 20 },
+      wsId,
+      alice,
+    );
+    expect(await processCommand(ports, again, { deliveryAttempt: 3 })).toEqual({
+      outcome: 'ALREADY_SETTLED',
+      attempts: 0,
+    });
+    expect(ports.store.commits).toBe(commits);
+  });
+
+  test('a lost continuation is also covered by the sweep: nextDueAt is `now` while a chain is pending', async () => {
+    const { ports, wsId, s1 } = await scenario();
+    for (let i = 1; i <= 16; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1],
+      });
+    }
+    await ports.drain();
+    await accepted(ports, alice, wsId, { type: 'SET_CAPACITY', sessionId: s1, capacity: 20 });
+    const message = ports.queue.dequeue()!;
+    ports.queue.failNextEnqueue = true; // the continuation enqueue fails after the commit
+    await expect(processCommand(ports, message)).rejects.toThrow('injected queue failure');
+    expect((await ports.store.getWorkshop(wsId))?.nextDueAt).toBe(ports.clock.now());
+    expect(ports.queue.size).toBe(0);
+    expect((await ports.sweep()).workshopIds).toEqual([wsId]);
+    await ports.drain();
+    const snapshot = await ports.store.loadSnapshot(wsId);
+    expect(snapshot?.registrations.filter((r) => r.status === 'QUEUED')).toEqual([]);
+    expect(snapshot?.workshop.nextDueAt).toBe(addSeconds(T0, 60));
+  });
+
   test('TIMER_SEND: thrown instead of scheduling; nothing committed; redelivery applies', async () => {
     const { ports, wsId, s1 } = await scenario();
     const { commandId } = await accepted(ports, bob, wsId, {
@@ -570,6 +687,189 @@ describe('processCommand: ticks, expiry, sweep and continuations', () => {
     );
     expect(verify.ok).toBe(true);
     expect(await ports.store.listDueWorkshops(addSeconds(T0, 60))).toMatchObject([{ id: wsId }]);
+  });
+
+  test('the ACCEPT after expiresAt is REJECTED(OFFER_EXPIRED) once the timer tick already expired it', async () => {
+    const { ports, wsId, s1, s2 } = await scenario();
+    const register = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await accepted(ports, carol, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await ports.drain();
+    const offerId =
+      (await commandView(ports, register.commandId)).result?.registration?.currentOffer?.id ?? '';
+    ports.clock.advanceSeconds(60); // exactly expiresAt
+    const [tick] = await ports.fireDueTimers();
+    expect(tick?.result.outcome).toBe('APPLIED');
+    expect(tick?.result.decision?.metrics.offersExpired).toBe(1);
+    expect((await ports.store.loadSnapshot(wsId))?.offers.map((o) => o.userId)).toEqual([
+      carol.userId,
+    ]);
+    ports.clock.advance(200);
+    const late = await accepted(ports, bob, wsId, { type: 'ACCEPT_OFFER', offerId });
+    const decline = await accepted(ports, bob, wsId, { type: 'DECLINE_OFFER', offerId });
+    const stranger = await accepted(ports, dave, wsId, { type: 'ACCEPT_OFFER', offerId });
+    await ports.drain();
+    expect(await commandView(ports, late.commandId)).toMatchObject({
+      status: 'REJECTED',
+      reason: 'OFFER_EXPIRED',
+    });
+    expect(await commandView(ports, decline.commandId)).toMatchObject({
+      status: 'REJECTED',
+      reason: 'OFFER_EXPIRED',
+    });
+    expect(await commandView(ports, stranger.commandId, dave)).toMatchObject({
+      status: 'REJECTED',
+      reason: 'OFFER_NOT_YOURS',
+    });
+    // a second answer to an offer that was accepted is "not active", not "not found"
+    const carolReg = (await ports.store.loadSnapshot(wsId))?.registrations.find(
+      (r) => r.userId === carol.userId,
+    );
+    const carolOffer = carolReg?.currentOfferId ?? '';
+    await accepted(ports, carol, wsId, { type: 'ACCEPT_OFFER', offerId: carolOffer });
+    await ports.drain();
+    const again = await accepted(ports, carol, wsId, { type: 'ACCEPT_OFFER', offerId: carolOffer });
+    const declineAfter = await accepted(ports, carol, wsId, {
+      type: 'DECLINE_OFFER',
+      offerId: carolOffer,
+    });
+    await ports.drain();
+    expect(await commandView(ports, again.commandId, carol)).toMatchObject({
+      status: 'REJECTED',
+      reason: 'OFFER_NOT_ACTIVE',
+    });
+    expect(await commandView(ports, declineAfter.commandId, carol)).toMatchObject({
+      status: 'REJECTED',
+      reason: 'OFFER_NOT_ACTIVE',
+    });
+    expect((await ports.store.loadSnapshot(wsId))?.settledOffers).toBeUndefined();
+    void s2;
+  });
+
+  test('every commit of a mass-expiry wave, of user commands in it and of organiser cancels fits the transaction', async () => {
+    const sizes: number[] = [];
+    const { ports, wsId, s1 } = await scenario(
+      {},
+      workshopInput({
+        sessions: [
+          { title: 'Big', startsAt: addMinutes(T0, 24 * 60), capacity: 100 },
+          { title: 'Other', startsAt: addMinutes(T0, 26 * 60), capacity: 1 },
+        ],
+      }),
+    );
+    ports.store.beforeCommit = (args) => {
+      sizes.push(
+        estimateCommitItems({ writes: args.writes, notifications: args.notifications }) +
+          (args.commandResult === undefined ? -1 : 0),
+      );
+    };
+    for (let i = 1; i <= 200; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1],
+      });
+    }
+    await ports.drain(); // 100 OFFERED, 100 QUEUED
+    ports.clock.advanceSeconds(61);
+    const wave = await ports.fireDueTimers();
+    expect(wave.length).toBeGreaterThan(9);
+    expect(
+      wave
+        .map((entry) => entry.result.decision?.metrics.offersExpired ?? 0)
+        .reduce((a, b) => a + b),
+    ).toBe(100);
+    expect(ports.metrics.of('BackfillLatency')).toHaveLength(100);
+    // a REGISTER and an ACCEPT landing in the next wave, then the organiser cancels
+    ports.clock.advanceSeconds(61);
+    await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    await ports.drain();
+    await accepted(ports, alice, wsId, { type: 'CANCEL_SESSION', sessionId: s1 });
+    await ports.drain();
+    await accepted(ports, alice, wsId, { type: 'CANCEL_WORKSHOP' });
+    await ports.drain();
+    expect((await ports.store.getWorkshop(wsId))?.status).toBe('CANCELLED');
+    expect(sizes.length).toBeGreaterThan(30);
+    expect(Math.max(...sizes)).toBeLessThanOrEqual(MAX_ITEMS_PER_DECISION);
+    expect(Math.max(...sizes)).toBeLessThan(100);
+  });
+
+  test('a release left for the continuation is attributed even when a queued command runs first', async () => {
+    // 13 seats: 12 holders expiring at +60 s, one more (dave) still holding; 13 waiting.
+    // dave's DECLINE is already in the FIFO when the 12 timer ticks are forwarded, so the
+    // DECLINE expires the 12 offers (hitting the offer cap), relays 12 seats and leaves one
+    // release pending; the first TICK (ahead of the REALLOCATE) relays that seat.
+    const { ports, orgId, wsId, s1 } = await scenario(
+      {},
+      workshopInput({
+        sessions: [
+          { title: 'Big', startsAt: addMinutes(T0, 24 * 60), capacity: 13 },
+          { title: 'Other', startsAt: addMinutes(T0, 26 * 60), capacity: 1 },
+        ],
+      }),
+    );
+    for (let i = 1; i <= 12; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1],
+      });
+    }
+    await ports.drain();
+    ports.clock.advanceSeconds(30);
+    const daveReg = await accepted(ports, dave, wsId, { type: 'REGISTER', acceptable: [s1] });
+    for (let i = 13; i <= 25; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1],
+      });
+    }
+    await ports.drain();
+    const daveOffer =
+      (await commandView(ports, daveReg.commandId, dave)).result?.registration?.currentOffer?.id ??
+      '';
+    ports.clock.advanceSeconds(30); // the 12 first offers expire now
+    await accepted(ports, dave, wsId, { type: 'DECLINE_OFFER', offerId: daveOffer });
+    for (const tick of ports.timers.dueTicks(ports.clock.now())) {
+      await ports.queue.enqueue(tick);
+    }
+    expect(ports.queue.messages.map((m) => m.type)).toEqual([
+      'DECLINE_OFFER',
+      ...Array(12).fill('TICK'),
+    ]);
+    const processed = await ports.drain();
+    // The DECLINE fills its item budget with expiries (11 of the 12, 87 items) and relays no
+    // seat; the first TICK expires the last one and relays 12 (the offer cap); the second
+    // TICK relays the 13th; every later tick and both continuations find nothing to do.
+    expect(processed.map((entry) => [entry.command.type, entry.result.outcome])).toEqual([
+      ['DECLINE_OFFER', 'APPLIED'],
+      ['TICK', 'APPLIED'],
+      ['TICK', 'APPLIED'],
+      ...Array(10).fill(['TICK', 'NOOP']),
+      ['REALLOCATE', 'NOOP'],
+      ['REALLOCATE', 'NOOP'],
+    ]);
+    expect(processed.map((entry) => entry.result.decision?.metrics.offersCreated ?? 0)).toEqual([
+      0,
+      12,
+      1,
+      ...Array(12).fill(0),
+    ]);
+    for (const entry of processed) {
+      if (entry.result.decision !== undefined) {
+        expect(estimateCommitItems(entry.result.decision)).toBeLessThanOrEqual(
+          MAX_ITEMS_PER_DECISION,
+        );
+      }
+    }
+    const dashboard = bodyOf<DashboardView>(
+      await call(ports, 'GET', `/orgs/${orgId}/workshops/${wsId}/dashboard`, { user: alice }),
+    );
+    expect(dashboard.counts).toMatchObject({
+      queued: 0,
+      offered: 13,
+      backfills: 13,
+      backfillsReallocated: 13,
+    });
+    expect(ports.metrics.of('BackfillLatency')).toHaveLength(13);
+    expect((await ports.store.loadSnapshot(wsId))?.pendingBackfills).toEqual([]);
   });
 
   test('the ACCEPT after expiresAt loses even when no timer has fired yet', async () => {

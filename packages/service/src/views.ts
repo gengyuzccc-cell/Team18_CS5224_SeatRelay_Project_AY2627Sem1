@@ -19,6 +19,7 @@ import type {
 } from '@seatrelay/contracts';
 import {
   compareIso,
+  distinctConfirmedUsers,
   freeSeats,
   liveRegistrationsOf,
   queueLength,
@@ -108,29 +109,12 @@ function participantFields(registration: Registration) {
 }
 
 /**
- * Distinct users who ever held a CONFIRMED seat: live CONFIRMED registrations plus every
- * archived ACCEPTED offer (a confirmation always settles its offer as ACCEPTED, so history
- * keeps the fact even after a cancellation or a cancelled session).
+ * GET /orgs/{orgId}/workshops/{wsId}/dashboard. `distinctParticipantsServed` is the number of
+ * distinct users currently holding a CONFIRMED seat (core's `distinctConfirmedUsers`, the same
+ * definition as the replay's `distinct_served`): CONFIRMED registrations stay live past the
+ * cut-off, so a finished workshop keeps its count, and someone who cancelled no longer counts.
+ * `history` is needed for the confirmation time of each confirmed entry.
  */
-export function distinctParticipantsServed(
-  snapshot: WorkshopSnapshot,
-  history: WorkshopHistory,
-): number {
-  const users = new Set<string>();
-  for (const registration of snapshot.registrations) {
-    if (registration.status === 'CONFIRMED') {
-      users.add(registration.userId);
-    }
-  }
-  for (const offer of history.offers) {
-    if (offer.status === 'ACCEPTED') {
-      users.add(offer.userId);
-    }
-  }
-  return users.size;
-}
-
-/** GET /orgs/{orgId}/workshops/{wsId}/dashboard */
 export function dashboardView(
   snapshot: WorkshopSnapshot,
   history: WorkshopHistory,
@@ -197,7 +181,7 @@ export function dashboardView(
     offered,
     confirmed,
     backfills: sortedBackfills,
-    distinctParticipantsServed: distinctParticipantsServed(snapshot, history),
+    distinctParticipantsServed: distinctConfirmedUsers(registrations),
     attendance: sortedAttendance,
     counts: {
       queued: queue.length,

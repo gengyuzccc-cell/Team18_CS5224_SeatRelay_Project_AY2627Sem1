@@ -18,6 +18,7 @@ import {
   carol,
   dave,
   scenario,
+  workshopInput,
   type Scenario,
 } from './helpers';
 
@@ -48,7 +49,7 @@ async function populated(): Promise<Scenario & { bobOfferId: string }> {
 }
 
 describe('dashboard, verify and attendance', () => {
-  test('dashboard sections, counts, history-based distinct served and backfill latencies', async () => {
+  test('dashboard sections, counts, distinct participants currently served and backfill latencies', async () => {
     const { ports, orgId, wsId, s1, s2 } = await populated();
     const base = `/orgs/${orgId}/workshops/${wsId}`;
     const dashboard = bodyOf<DashboardView>(
@@ -84,7 +85,9 @@ describe('dashboard, verify and attendance', () => {
       },
     ]);
     expect(dashboard.confirmed).toEqual([]);
-    expect(dashboard.distinctParticipantsServed).toBe(1); // bob, from the archived ACCEPTED offer
+    // bob cancelled his confirmed seat and carol is only OFFERED: nobody holds a seat now
+    // (the same definition as core's distinctConfirmedUsers and the replay's distinct_served)
+    expect(dashboard.distinctParticipantsServed).toBe(0);
     expect(dashboard.backfills).toMatchObject([
       { cause: 'DECLINED', sessionId: s2 },
       { cause: 'CANCELLED_CONFIRMED', sessionId: s1, newUserId: carol.userId, latencyMs: 0 },
@@ -102,6 +105,31 @@ describe('dashboard, verify and attendance', () => {
 
     const verify = bodyOf<VerifyView>(await call(ports, 'GET', `${base}/verify`, { user: alice }));
     expect(verify).toEqual({ ok: true, checkedAt: ports.clock.now(), violations: [] });
+  });
+
+  test('PER_SESSION: one person with two confirmed seats counts once in distinctParticipantsServed', async () => {
+    const { ports, orgId, wsId, s1, s2 } = await scenario(
+      {},
+      workshopInput({ mode: 'PER_SESSION' }),
+    );
+    const first = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s1] });
+    const second = await accepted(ports, bob, wsId, { type: 'REGISTER', acceptable: [s2] });
+    await ports.drain();
+    for (const commandId of [first.commandId, second.commandId]) {
+      const view = bodyOf<CommandResultView>(
+        await call(ports, 'GET', `/commands/${commandId}`, { user: bob }),
+      );
+      await accepted(ports, bob, wsId, {
+        type: 'ACCEPT_OFFER',
+        offerId: view.result?.registration?.currentOffer?.id ?? '',
+      });
+    }
+    await ports.drain();
+    const dashboard = bodyOf<DashboardView>(
+      await call(ports, 'GET', `/orgs/${orgId}/workshops/${wsId}/dashboard`, { user: alice }),
+    );
+    expect(dashboard.counts.confirmed).toBe(2);
+    expect(dashboard.distinctParticipantsServed).toBe(1);
   });
 
   test('attendance can be marked for anyone who ever registered, 404 otherwise', async () => {
@@ -207,7 +235,9 @@ describe('CSV export', () => {
     expect(response.headers['content-disposition']).toBe(
       `attachment; filename="seatrelay-${wsId}.csv"`,
     );
-    const lines = (response.body as string).split('\r\n');
+    const body = response.body as string;
+    expect(body.charCodeAt(0)).toBe(0xfeff); // UTF-8 BOM: Excel reads non-ASCII names correctly
+    const lines = body.slice(1).split('\r\n');
     expect(lines[0]).toBe(
       'seq,userId,email,displayName,status,endReason,acceptable,confirmedSessionId,confirmedSessionTitle,currentOfferId,offerSessionId,offerExpiresAt,attended,createdAt,updatedAt',
     );
@@ -217,7 +247,8 @@ describe('CSV export', () => {
       ['2', 'carol', 'carol@example.com', '', 'OFFERED'],
       ['3', 'dave', 'dave@example.com', 'Dave', 'QUEUED'],
     ]);
-    expect(rows[0]?.slice(6, 9)).toEqual([s1, s1, 'Morning']);
+    // a cancelled registration holds no seat: no confirmed session in the export
+    expect(rows[0]?.slice(6, 9)).toEqual([s1, '', '']);
     expect(rows[0]?.[12]).toBe('yes');
     expect(rows[1]?.[6]).toBe(s1);
     expect(rows[1]?.[10]).toBe(s1);
@@ -258,8 +289,8 @@ describe('my registrations and notifications', () => {
     expect(bobView.registrations[0]?.registration).toMatchObject({
       status: 'CANCELLED',
       seq: 1,
-      confirmedSessionId: s1,
     });
+    expect(bobView.registrations[0]?.registration).not.toHaveProperty('confirmedSessionId');
     expect(bobView.registrations[0]?.registration).not.toHaveProperty('queuePosition');
 
     const carolView = bodyOf<MyRegistrationListView>(

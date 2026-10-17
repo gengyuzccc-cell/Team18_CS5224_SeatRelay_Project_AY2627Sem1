@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   AddMemberBodySchema,
+  CommandAcceptedSchema,
+  CommandAcceptedViewSchema,
   CommandBodySchema,
   CommandSchema,
   CreateWorkshopBodySchema,
@@ -12,8 +14,10 @@ import {
   REJECT_REASONS,
   RegistrationSchema,
   RejectReasonSchema,
+  SESSION_STATUSES,
   SessionSchema,
   USER_COMMAND_TYPES,
+  WORKSHOP_STATUSES,
   WorkshopPublicViewSchema,
   WorkshopSchema,
   buildCommand,
@@ -190,6 +194,43 @@ describe('commands', () => {
     expect(REJECT_REASONS).toContain('OFFER_NOT_YOURS');
     expect(RejectReasonSchema.safeParse('SOMETHING_ELSE').success).toBe(false);
     expect(USER_COMMAND_TYPES).toHaveLength(9);
+    expect(SESSION_STATUSES).toEqual(['OPEN', 'CANCELLING', 'CANCELLED']);
+    expect(WORKSHOP_STATUSES).toEqual(['OPEN', 'CLOSED', 'CANCELLING', 'CANCELLED']);
+  });
+
+  it('never takes actor or routing fields from the request body (CONVENTIONS §3)', () => {
+    const injected = {
+      type: 'REGISTER',
+      commandId: UUID,
+      acceptable: ['s1'],
+      actorUserId: 'evil',
+      actorEmail: 'evil@example.com',
+      actorDisplayName: 'Evil',
+      workshopId: 'other-ws',
+    };
+    const body = CommandBodySchema.parse(injected);
+    expect(body).not.toHaveProperty('actorUserId');
+    expect(body).not.toHaveProperty('actorEmail');
+    expect(body).not.toHaveProperty('actorDisplayName');
+    expect(body).not.toHaveProperty('workshopId');
+    const command = buildCommand(body, 'ws1', { userId: 'u1', email: 'u1@example.com' });
+    expect(command).toMatchObject({
+      workshopId: 'ws1',
+      actorUserId: 'u1',
+      actorEmail: 'u1@example.com',
+    });
+    expect(command).not.toHaveProperty('actorDisplayName');
+    for (const type of ['ACCEPT_OFFER', 'CANCEL_REGISTRATION', 'CANCEL_WORKSHOP'] as const) {
+      const parsed = CommandBodySchema.parse({
+        ...(type === 'ACCEPT_OFFER' ? { offerId: 'o1' } : {}),
+        type,
+        commandId: UUID,
+        actorUserId: 'evil',
+        workshopId: 'other-ws',
+      });
+      expect(parsed).not.toHaveProperty('actorUserId');
+      expect(parsed).not.toHaveProperty('workshopId');
+    }
   });
 });
 
@@ -235,6 +276,27 @@ describe('api bodies', () => {
         ],
       }).success,
     ).toBe(false);
+  });
+
+  it('the 202 body schema accepts the current state of a settled command on an idempotent re-POST', () => {
+    const settled = {
+      commandId: UUID,
+      type: 'REGISTER',
+      workshopId: 'ws1',
+      status: 'APPLIED',
+      acceptedAt: T,
+      settledAt: T,
+      result: { offersCreated: 1 },
+      href: `/commands/${UUID}`,
+      pollAfterMs: 300,
+    };
+    expect(CommandAcceptedSchema.safeParse(settled).success).toBe(true);
+    expect(CommandAcceptedViewSchema.safeParse(settled).success).toBe(true);
+    expect(CommandAcceptedSchema).toBe(CommandAcceptedViewSchema);
+    expect(
+      CommandAcceptedSchema.safeParse({ ...settled, status: 'ACCEPTED', settledAt: undefined })
+        .success,
+    ).toBe(true);
   });
 
   it('requires at least one field on patch / add-member bodies', () => {
@@ -306,7 +368,7 @@ describe('api bodies', () => {
 });
 
 describe('REALLOCATE continuation', () => {
-  it('carries pending backfill records and capacity-up seats', () => {
+  it('carries capacity-up seats only (pending releases live in the workshop snapshot)', () => {
     const parsed = CommandSchema.safeParse({
       type: 'REALLOCATE',
       workshopId: 'ws1',
@@ -316,6 +378,7 @@ describe('REALLOCATE continuation', () => {
       pendingCapacityUp: [{ sessionId: 's2', seats: 3 }],
     });
     expect(parsed.success).toBe(true);
+    expect(parsed.success && parsed.data).not.toHaveProperty('pendingBackfills');
     expect(
       CommandSchema.safeParse({
         type: 'REALLOCATE',

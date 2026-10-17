@@ -120,15 +120,6 @@ export const MeViewSchema = z.object({
 });
 export type MeView = z.infer<typeof MeViewSchema>;
 
-/** 202 body for POST /workshops/{wsId}/commands (plan §1.3). */
-export const CommandAcceptedSchema = z.object({
-  commandId: UuidSchema,
-  status: z.literal('ACCEPTED'),
-  href: z.string().min(1),
-  pollAfterMs: z.number().int().min(0).default(COMMAND_POLL_AFTER_MS),
-});
-export type CommandAccepted = z.infer<typeof CommandAcceptedSchema>;
-
 /** GET /commands/{id} */
 export const CommandResultViewSchema = z.object({
   commandId: UuidSchema,
@@ -290,6 +281,14 @@ export type NotificationListView = z.infer<typeof NotificationListViewSchema>;
  */
 export const CommandAcceptedViewSchema = CommandResultViewSchema.extend({
   href: z.string().min(1),
-  pollAfterMs: z.number().int().min(0),
+  pollAfterMs: z.number().int().min(0).default(COMMAND_POLL_AFTER_MS),
 });
 export type CommandAcceptedView = z.infer<typeof CommandAcceptedViewSchema>;
+
+/**
+ * The plan §1.3 name for the 202 body. It is the same schema as `CommandAcceptedViewSchema`:
+ * `status` is the record's current state (ACCEPTED on the first POST, APPLIED/REJECTED on an
+ * idempotent re-POST of a settled command), never only the literal `ACCEPTED`.
+ */
+export const CommandAcceptedSchema = CommandAcceptedViewSchema;
+export type CommandAccepted = CommandAcceptedView;

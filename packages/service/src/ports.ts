@@ -21,10 +21,15 @@ import type { Change, OfferTimer, WorkshopSnapshot } from '@seatrelay/core';
 
 /* ---------- storage ---------- */
 
-/** Title/description only: the API edits them synchronously, outside the worker lock. */
+/**
+ * Title/description only: the API edits them synchronously, outside the worker lock.
+ * `updatedAt` is set along with them (a plain attribute write that is not conditioned on the
+ * optimistic-lock version; the engine's `PUT_WORKSHOP_STATE` writes the same attribute).
+ */
 export interface WorkshopInfoPatch {
   title?: string;
   description?: string;
+  updatedAt: string;
 }
 
 export type CommitConflict = 'VERSION' | 'COMMAND_ALREADY_SETTLED';
@@ -39,7 +44,10 @@ export type CommitResult = { ok: true } | { ok: false; conflict: CommitConflict 
  *   only the engine-owned fields (`status`, `seq`, `version`, `nextDueAt`, `updatedAt`) and is
  *   conditioned on the stored `version === expectedVersion`; a failed condition is the
  *   `VERSION` conflict. Nothing is conditioned on items that are not written. `ARCHIVE_*`
- *   deletes the live item and puts the history item; `PUT_BACKFILL` upserts the record.
+ *   deletes the live item and puts the history item. `PUT_BACKFILL` puts a final (history)
+ *   record; `PUT_PENDING_BACKFILL` upserts a live pending record (returned by `loadSnapshot`
+ *   as `pendingBackfills`, e.g. DynamoDB `L#BF#{releasedAt}#{id}`); `ARCHIVE_BACKFILL` deletes
+ *   the live pending record and puts the history one.
  * - `notifications` are stored as-is (already full entities with status PENDING); the notifier
  *   picks them up from storage (DynamoDB Streams INSERT filter / Postgres poll).
  * - `commandResult`, present for user commands, is the full settled record. It is written on
@@ -49,6 +57,20 @@ export type CommitResult = { ok: true } | { ok: false; conflict: CommitConflict 
  * - Internal commands (TICK / REALLOCATE) commit without `commandResult`.
  * - An empty `writes` list with a `commandResult` (a deterministic rejection with no tick-first
  *   effect) only settles the command and needs no version condition.
+ *
+ * Item budget: the engine keeps every decision within `MAX_ITEMS_PER_DECISION` (90) items
+ * counted with core's `COMMIT_ITEM_COST` (PUT_* 1, PUT_REGISTRATION 2, ARCHIVE_OFFER 2,
+ * ARCHIVE_REGISTRATION 3, ARCHIVE_BACKFILL 2), plus one item per notification and one for the
+ * CommandResult (`estimateCommitItems(decision)`), so that a DynamoDB adapter that writes the
+ * plan §2.3 items — including an R1 uniqueness marker per registration write — never exceeds
+ * the 100-item transaction. Such a marker must be keyed per registration scope
+ * (`L#U#{userId}` in UNIFIED, `L#U#{userId}#{sessionId}` in PER_SESSION, i.e. core's
+ * `registrationScopeKey`): a PER_SESSION cancel-all archives several registrations of one user
+ * in one commit and a transaction may touch one item only once.
+ *
+ * DUE index: the sweep key (DynamoDB sparse `GSI1PK='DUE'`) is derived solely from the presence
+ * of `nextDueAt` in `PUT_WORKSHOP_STATE`, whatever the workshop status (CLOSED workshops still
+ * have expiring offers; a CANCELLING workshop keeps `nextDueAt = now` until its drain is done).
  */
 export interface CommitArgs {
   wsId: string;
@@ -84,8 +106,18 @@ export interface WorkshopStore {
   listSessions(wsId: string): Promise<Session[]>;
 
   /* worker */
-  /** Consistent read of the live items only (workshop, sessions, live registrations, live offers). */
+  /**
+   * Consistent read of the live items only (workshop, sessions, live registrations, live
+   * offers, pending backfill records). Never `settledOffers`: the worker adds that itself.
+   */
   loadSnapshot(wsId: string): Promise<WorkshopSnapshot | undefined>;
+  /**
+   * One archived (settled) offer by id (DynamoDB GetItem `H#O#{offerId}`, Postgres by primary
+   * key). The worker reads it for an ACCEPT_OFFER / DECLINE_OFFER whose offer is no longer live,
+   * so that the engine answers OFFER_EXPIRED / OFFER_NOT_ACTIVE instead of OFFER_NOT_FOUND
+   * whichever message (the timer tick or the user's answer) was processed first.
+   */
+  getArchivedOffer(wsId: string, offerId: string): Promise<Offer | undefined>;
   commit(args: CommitArgs): Promise<CommitResult>;
 
   /* command results (plan §1.3) */
@@ -106,15 +138,17 @@ export interface WorkshopStore {
     notificationId: string,
     readAt: string,
   ): Promise<Notification | undefined>;
+  /** Every backfill record of the workshop, pending (live) and final (history). */
   listBackfills(wsId: string): Promise<BackfillRecord[]>;
-  /** Archived registrations/offers (dashboard history, CSV export, distinct participants served). */
+  /** Archived registrations/offers (dashboard history, CSV export, attendance eligibility). */
   listHistory(wsId: string): Promise<WorkshopHistory>;
   putAttendance(record: Attendance): Promise<void>;
   listAttendance(wsId: string): Promise<Attendance[]>;
   /**
    * Workshops whose `nextDueAt <= now` (sweep safety net, plan §1.2). `nextDueAt` is only set
-   * while something is pending (live offers or waiting demand before a cut-off), so a sparse
-   * index keyed on it is exactly this query.
+   * while something is pending (live offers, waiting demand before a cut-off, or a continuation
+   * chain in progress), whatever the workshop status, so a sparse index keyed on it is exactly
+   * this query.
    */
   listDueWorkshops(now: string): Promise<Workshop[]>;
 }
@@ -124,6 +158,8 @@ export interface WorkshopStore {
 /**
  * FIFO per workshop: message group = `workshopId`, dedup id = `commandDedupId(command)`
  * (`commandId` for user commands, `tick#offerId#expiresAt` for timer ticks) or a fresh UUID.
+ * A duplicate dedup id inside the queue's deduplication window (SQS: 5 minutes) is dropped,
+ * which is what makes re-enqueueing a still-ACCEPTED command on an idempotent re-POST safe.
  */
 export interface CommandQueue {
   enqueue(command: Command): Promise<void>;

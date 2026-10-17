@@ -66,7 +66,7 @@ export function makeSnapshot(spec: SnapshotSpec = {}): WorkshopSnapshot {
     ...spec.workshop,
   };
   const sessions = (spec.sessions ?? [{ id: 'A' }, { id: 'B' }]).map(makeSession);
-  return { workshop, sessions, registrations: [], offers: [] };
+  return { workshop, sessions, registrations: [], offers: [], pendingBackfills: [] };
 }
 
 let globalIdCounter = 0;
@@ -151,6 +151,8 @@ export interface StepResult {
 
 /**
  * Runs one command (asserting purity) and applies its writes. Does NOT run continuations.
+ * Like the service does for ACCEPT/DECLINE (one point read of `H#O#{offerId}`), the next
+ * snapshot carries the archived offers as `settledOffers`, here simply all of them.
  */
 export function step(
   snapshot: WorkshopSnapshot,
@@ -161,7 +163,15 @@ export function step(
   const frozen = structuredClone(snapshot);
   const decision = decide(snapshot, command, makeCtx(now, limits));
   expect(snapshot).toStrictEqual(frozen);
-  return { decision, snapshot: applyChanges(snapshot, decision.writes) };
+  const next = applyChanges(snapshot, decision.writes);
+  const settled = [
+    ...(snapshot.settledOffers ?? []),
+    ...decision.writes.flatMap((write) => (write.kind === 'ARCHIVE_OFFER' ? [write.offer] : [])),
+  ];
+  if (settled.length > 0) {
+    next.settledOffers = settled;
+  }
+  return { decision, snapshot: next };
 }
 
 /** Runs a command and every continuation it spawns; asserts invariants afterwards. */
@@ -219,4 +229,22 @@ export function sessionOf(snapshot: WorkshopSnapshot, id: string): Session {
 
 export function writesOfKind(decision: Decision, kind: string): number {
   return decision.writes.filter((write) => write.kind === kind).length;
+}
+
+/**
+ * Invariants that must hold between the decisions of a continuation chain: everything but
+ * no-starvation, which is only guaranteed once the chain is done.
+ */
+export function expectHardInvariants(snapshot: WorkshopSnapshot, now: string): void {
+  const report = checkInvariants(snapshot, now);
+  expect(report.violations.filter((v) => v.code !== 'NO_STARVATION')).toEqual([]);
+}
+
+/** Number of writes per kind, for compact assertions on big decisions. */
+export function writeHistogram(decision: Decision): Record<string, number> {
+  const histogram: Record<string, number> = {};
+  for (const write of decision.writes) {
+    histogram[write.kind] = (histogram[write.kind] ?? 0) + 1;
+  }
+  return histogram;
 }

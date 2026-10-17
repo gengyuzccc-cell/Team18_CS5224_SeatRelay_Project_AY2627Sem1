@@ -22,6 +22,7 @@ export const INVARIANT_CODES = [
   'REGISTRATION_CANCELLED_SESSION',
   'REGISTRATION_PER_SESSION_SHAPE',
   'REGISTRATION_OFFER_MISSING',
+  'REGISTRATION_OFFER_MISMATCH',
   'REGISTRATION_STRAY_OFFER_REF',
   'REGISTRATION_CONFIRMED_SESSION_INVALID',
   'REGISTRATION_STRAY_CONFIRMED_SESSION',
@@ -29,6 +30,7 @@ export const INVARIANT_CODES = [
   'OFFER_WORKSHOP_MISMATCH',
   'OFFER_NOT_LIVE',
   'OFFER_SESSION_INVALID',
+  'OFFER_AFTER_CUTOFF',
   'OFFER_REGISTRATION_MISSING',
   'OFFER_REGISTRATION_MISMATCH',
   'OFFER_SESSION_NOT_ACCEPTABLE',
@@ -50,9 +52,13 @@ export type InvariantCode = (typeof INVARIANT_CODES)[number];
  *        `confirmed` == CONFIRMED registrations of the session;
  *  - C2: at most one OFFERED/CONFIRMED hold per user (per workshop in UNIFIED mode, per session
  *        in PER_SESSION mode), and R1: at most one live registration per scope;
- *  - offer <-> registration consistency (`currentOfferId`, user, acceptable session);
+ *  - offer <-> registration consistency (`currentOfferId`, user, acceptable session) and
+ *        R4: no live offer outlives its session's cut-off;
  *  - no-starvation: no QUEUED registration has an acceptable OPEN session with a free seat
- *        before its cut-off at `now`.
+ *        before its cut-off at `now`;
+ *  - a CANCELLED workshop has no live items. A session or workshop in CANCELLING state is
+ *        being drained in budget-sized steps: references to it are tolerated meanwhile, and
+ *        it is never offered.
  */
 export function checkInvariants(snapshot: WorkshopSnapshot, now: string): InvariantReport {
   const nowMs = parseIso(now);
@@ -133,8 +139,13 @@ export function checkInvariants(snapshot: WorkshopSnapshot, now: string): Invari
     }
     bump(heldCount, offer.sessionId);
     const session = sessionById.get(offer.sessionId);
-    if (session === undefined || session.status !== 'OPEN') {
+    if (session === undefined || session.status === 'CANCELLED') {
       flag('OFFER_SESSION_INVALID', `offer ${offer.id} targets a missing or cancelled session`, {
+        sessionId: offer.sessionId,
+        userId: offer.userId,
+      });
+    } else if (parseIso(offer.expiresAt) > parseIso(session.cutoffAt)) {
+      flag('OFFER_AFTER_CUTOFF', `offer ${offer.id} expires after the session cut-off (R4)`, {
         sessionId: offer.sessionId,
         userId: offer.userId,
       });
@@ -223,6 +234,15 @@ export function checkInvariants(snapshot: WorkshopSnapshot, now: string): Invari
           `OFFERED registration ${registration.seq} has no live offer`,
           where,
         );
+      } else if (
+        offer.registrationSeq !== registration.seq ||
+        offer.userId !== registration.userId
+      ) {
+        flag(
+          'REGISTRATION_OFFER_MISMATCH',
+          `OFFERED registration ${registration.seq} references offer ${offer.id} of someone else`,
+          where,
+        );
       } else {
         holdSessionId = offer.sessionId;
       }
@@ -241,7 +261,7 @@ export function checkInvariants(snapshot: WorkshopSnapshot, now: string): Invari
           : sessionById.get(registration.confirmedSessionId);
       if (
         session === undefined ||
-        session.status !== 'OPEN' ||
+        session.status === 'CANCELLED' ||
         !registration.acceptable.includes(session.id)
       ) {
         flag(
@@ -309,7 +329,8 @@ export function checkInvariants(snapshot: WorkshopSnapshot, now: string): Invari
   }
 
   for (const registration of registrations) {
-    if (registration.status !== 'QUEUED') {
+    // Nothing is allocated while the workshop is being cancelled: free seats are no starvation.
+    if (registration.status !== 'QUEUED' || workshop.status === 'CANCELLING') {
       continue;
     }
     const starvedBy = registration.acceptable.find((sessionId) => {

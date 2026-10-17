@@ -5,7 +5,7 @@ import {
   type Organization,
   type WorkshopListView,
 } from '@seatrelay/contracts';
-import { newSnapshot } from '@seatrelay/core';
+import { compareIso, cutoffFor, newSnapshot } from '@seatrelay/core';
 import { notFound, validationError } from '../../errors';
 import { workshopPublicView } from '../../views';
 import { buildWorkshop } from '../../workshops';
@@ -94,8 +94,19 @@ export const orgRoutes: ApiRoute[] = [
       const orgId = param(ctx, 'orgId');
       await requireOrgMember(deps, orgId, user.userId);
       const body = parseBody(CreateWorkshopBodySchema, ctx.req.body);
+      const now = deps.clock.now();
+      // A session whose cut-off (30 min before start) has passed could never be joined: every
+      // REGISTER would settle REJECTED(NO_ACCEPTABLE_SESSION) without a hint why.
+      const stale = body.sessions.find(
+        (session) => compareIso(cutoffFor(session.startsAt), now) <= 0,
+      );
+      if (stale !== undefined) {
+        throw validationError(
+          `Session "${stale.title}" starts at ${stale.startsAt}: its registration cut-off (30 minutes before start) has already passed`,
+        );
+      }
       const { workshop, sessions } = buildWorkshop(body, orgId, {
-        now: deps.clock.now(),
+        now,
         newId: () => deps.ids.newId(),
       });
       await deps.store.createWorkshop(workshop, sessions);

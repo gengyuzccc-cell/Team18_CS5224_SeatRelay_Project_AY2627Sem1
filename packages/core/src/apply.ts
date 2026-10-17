@@ -11,20 +11,13 @@ import type {
   Session,
   SetCapacityCommand,
 } from '@seatrelay/contracts';
-import {
-  notifyConfirmed,
-  notifyDeclined,
-  notifyRevoked,
-  notifySessionCancelled,
-  notifyWorkshopCancelled,
-} from './notifications';
+import { notifyConfirmed, notifyDeclined } from './notifications';
 import { registrationConflicts, requiresSingleSession } from './perSession';
 import { isPastCutoff } from './snapshot';
 import {
   addBackfill,
   archiveRegistration,
   dropSessionFromRegistration,
-  liveOffers,
   liveRegistrations,
   mustGet,
   settleOffer,
@@ -77,6 +70,30 @@ export function applyCommand(st: WorkState, command: Command): ApplyResult {
   }
 }
 
+/**
+ * Worst-case storage items the command's own writes may add (under `COMMIT_ITEM_COST`), so
+ * that tick-first leaves room for them. Organiser cancels only flip a status here: their
+ * drain is budget-bounded on its own. A rejected command costs nothing.
+ */
+export function commandItemReserve(st: WorkState, command: Command): number {
+  switch (command.type) {
+    case 'REGISTER':
+      return 2; // PUT_REGISTRATION
+    case 'ACCEPT_OFFER':
+      return 6; // ARCHIVE_OFFER 2 + session 1 + PUT_REGISTRATION 2 + notification 1
+    case 'DECLINE_OFFER':
+      return 8; // ARCHIVE_OFFER 2 + session 1 + PUT_BACKFILL 1 + registration 3 + notification 1
+    case 'CANCEL_REGISTRATION':
+      // per registration: ARCHIVE_OFFER 2 + session 1 + PUT_BACKFILL 1 + ARCHIVE_REGISTRATION 3
+      return registrationsToCancel(st, command).length * 7;
+    case 'SET_CAPACITY':
+    case 'CANCEL_SESSION':
+      return 1; // PUT_SESSION
+    default:
+      return 0;
+  }
+}
+
 /* ---------- participant commands ---------- */
 
 function register(st: WorkState, command: RegisterCommand): ApplyResult {
@@ -97,10 +114,13 @@ function register(st: WorkState, command: RegisterCommand): ApplyResult {
     }
     sessions.push(session);
   }
-  // Cancelled sessions are dropped silently (they never appear in a live registration);
-  // sessions past cut-off stay listed but can no longer be offered (R4).
-  const acceptable = sessions.filter((session) => session.status === 'OPEN');
-  if (acceptable.every((session) => isPastCutoff(session, st.nowMs))) {
+  // Sessions that can never be offered (cancelled, being cancelled, past cut-off: R4) are
+  // dropped silently, so a live registration only lists sessions it can still get and the
+  // per-session queue lengths count real demand.
+  const acceptable = sessions.filter(
+    (session) => session.status === 'OPEN' && !isPastCutoff(session, st.nowMs),
+  );
+  if (acceptable.length === 0) {
     return rejected('NO_ACCEPTABLE_SESSION');
   }
   const acceptableIds = acceptable.map((session) => session.id);
@@ -134,35 +154,63 @@ type OfferLookup =
   | { ok: true; offer: Offer; registration: Registration; session: Session }
   | { ok: false; reason: RejectReason };
 
-/** Shared validation of ACCEPT_OFFER / DECLINE_OFFER. */
+/**
+ * Shared validation of ACCEPT_OFFER / DECLINE_OFFER. The reason is the same whichever message
+ * arrived first (plan §4 "Expiry race"): an offer expired by an earlier tick is found among the
+ * snapshot's `settledOffers` and answered with OFFER_EXPIRED, exactly like one that tick-first
+ * expired in this decision or one that is merely past `expiresAt`.
+ */
 function lookupOwnLiveOffer(st: WorkState, offerId: string, actorUserId: string): OfferLookup {
   const offer =
     st.offers.get(offerId) ?? st.archivedOffers.find((archived) => archived.id === offerId);
+  if (offer === undefined) {
+    return lookupSettledOffer(st, offerId, actorUserId);
+  }
+  if (offer.userId !== actorUserId) {
+    return { ok: false, reason: 'OFFER_NOT_YOURS' };
+  }
+  if (offer.status === 'EXPIRED') {
+    return { ok: false, reason: 'OFFER_EXPIRED' }; // tick-first expired it in this decision
+  }
+  if (offer.status !== 'OFFERED') {
+    return { ok: false, reason: 'OFFER_NOT_ACTIVE' }; // a settled offer in the live set
+  }
+  // The direct time check covers an offer left live by the per-decision expiry limit:
+  // an ACCEPT after expiresAt never wins.
+  if (parseIso(offer.expiresAt) <= st.nowMs) {
+    return { ok: false, reason: 'OFFER_EXPIRED' };
+  }
+  const registration = st.registrations.get(offer.registrationSeq);
+  const session = mustGet(st.sessions, offer.sessionId, 'session');
+  if (session.status !== 'OPEN') {
+    return { ok: false, reason: 'SESSION_CANCELLED' }; // the drain revokes it shortly
+  }
+  if (
+    registration === undefined ||
+    registration.status !== 'OFFERED' ||
+    registration.currentOfferId !== offer.id
+  ) {
+    return { ok: false, reason: 'INVALID_STATE' };
+  }
+  return { ok: true, offer, registration, session };
+}
+
+/** An offer that is no longer live: history, if the service loaded it (ownership checked first). */
+function lookupSettledOffer(st: WorkState, offerId: string, actorUserId: string): OfferLookup {
+  const offer = st.settledOffers.find((candidate) => candidate.id === offerId);
   if (offer === undefined) {
     return { ok: false, reason: 'OFFER_NOT_FOUND' };
   }
   if (offer.userId !== actorUserId) {
     return { ok: false, reason: 'OFFER_NOT_YOURS' };
   }
-  // Tick-first already expired due offers (status EXPIRED here); the direct time check covers
-  // an offer left live by the per-decision expiry limit. An ACCEPT after expiresAt never wins.
-  if (offer.status === 'EXPIRED' || parseIso(offer.expiresAt) <= st.nowMs) {
+  if (
+    offer.status === 'EXPIRED' ||
+    (offer.status === 'OFFERED' && parseIso(offer.expiresAt) <= st.nowMs)
+  ) {
     return { ok: false, reason: 'OFFER_EXPIRED' };
   }
-  if (offer.status !== 'OFFERED') {
-    return { ok: false, reason: 'OFFER_NOT_ACTIVE' }; // a settled offer in the live set
-  }
-  const registration = st.registrations.get(offer.registrationSeq);
-  const session = mustGet(st.sessions, offer.sessionId, 'session');
-  if (
-    registration === undefined ||
-    registration.status !== 'OFFERED' ||
-    registration.currentOfferId !== offer.id ||
-    session.status !== 'OPEN'
-  ) {
-    return { ok: false, reason: 'INVALID_STATE' };
-  }
-  return { ok: true, offer, registration, session };
+  return { ok: false, reason: 'OFFER_NOT_ACTIVE' }; // ACCEPTED / DECLINED / REVOKED
 }
 
 function acceptOffer(st: WorkState, command: AcceptOfferCommand): ApplyResult {
@@ -195,13 +243,19 @@ function declineOffer(st: WorkState, command: DeclineOfferCommand): ApplyResult 
   return applied(registration);
 }
 
-function cancelRegistration(st: WorkState, command: CancelRegistrationCommand): ApplyResult {
+/** The actor's live registrations a CANCEL_REGISTRATION concerns (all, or one in PER_SESSION). */
+function registrationsToCancel(st: WorkState, command: CancelRegistrationCommand): Registration[] {
   let mine = liveRegistrations(st).filter(
     (registration) => registration.userId === command.actorUserId,
   );
   if (st.mode === 'PER_SESSION' && command.sessionId !== undefined) {
     mine = mine.filter((registration) => registration.acceptable[0] === command.sessionId);
   }
+  return mine;
+}
+
+function cancelRegistration(st: WorkState, command: CancelRegistrationCommand): ApplyResult {
+  const mine = registrationsToCancel(st, command);
   if (mine.length === 0) {
     return rejected('NOT_REGISTERED');
   }
@@ -233,8 +287,8 @@ function lookupOpenSession(st: WorkState, sessionId: string): Session | RejectRe
   if (session === undefined) {
     return 'SESSION_NOT_FOUND';
   }
-  if (session.status === 'CANCELLED') {
-    return 'SESSION_CANCELLED';
+  if (session.status !== 'OPEN') {
+    return 'SESSION_CANCELLED'; // CANCELLED, or CANCELLING with its drain still pending
   }
   return session;
 }
@@ -259,70 +313,30 @@ function setCapacity(st: WorkState, command: SetCapacityCommand): ApplyResult {
   return applied();
 }
 
+/**
+ * The session stops being offered at once (status CANCELLING); its held and confirmed seats
+ * and every preference list that names it are drained by `drainCancellations()` in this and,
+ * if the item budget runs out, the following decisions; the status becomes CANCELLED when
+ * nothing references the session any more.
+ */
 function cancelSession(st: WorkState, command: CancelSessionCommand): ApplyResult {
   const session = lookupOpenSession(st, command.sessionId);
   if (typeof session === 'string') {
     return rejected(session);
   }
-  // Held seats: offers are withdrawn; their owners return to the queue for other sessions.
-  for (const offer of liveOffers(st)) {
-    if (offer.sessionId !== session.id) {
-      continue;
-    }
-    settleOffer(st, offer, 'REVOKED');
-    addBackfill(st, session.id, 'SESSION_CANCELLED', st.now);
-    const registration = mustGet(st.registrations, offer.registrationSeq, 'registration');
-    const outcome = dropSessionFromRegistration(st, registration, session.id);
-    notifyRevoked(st, registration, offer, session, outcome);
-  }
-  // Everyone else who listed the session loses it from their preferences.
-  for (const registration of liveRegistrations(st)) {
-    if (!registration.acceptable.includes(session.id)) {
-      continue;
-    }
-    if (registration.status === 'QUEUED') {
-      const outcome = dropSessionFromRegistration(st, registration, session.id);
-      notifySessionCancelled(st, registration, session, outcome);
-    } else if (registration.confirmedSessionId === session.id) {
-      session.confirmed -= 1;
-      addBackfill(st, session.id, 'SESSION_CANCELLED', st.now);
-      const outcome = dropSessionFromRegistration(st, registration, session.id);
-      notifySessionCancelled(st, registration, session, outcome);
-    } else {
-      // OFFERED or CONFIRMED in another session: the hold is untouched, only the fallback goes.
-      registration.acceptable = registration.acceptable.filter((id) => id !== session.id);
-      touchRegistration(st, registration);
-    }
-  }
-  session.status = 'CANCELLED';
+  session.status = 'CANCELLING';
   touchSession(st, session);
   return applied();
 }
 
+/**
+ * The workshop stops accepting user commands at once (status CANCELLING, rejected with
+ * WORKSHOP_CANCELLED); every live registration and offer is archived by the drain, in seq
+ * order and within the item budget, and the workshop and its sessions become CANCELLED when
+ * nothing is left.
+ */
 function cancelWorkshop(st: WorkState): ApplyResult {
-  for (const offer of liveOffers(st)) {
-    settleOffer(st, offer, 'REVOKED');
-  }
-  const notified = new Set<string>();
-  for (const registration of liveRegistrations(st)) {
-    if (registration.status === 'CONFIRMED') {
-      const session = mustGet(st.sessions, registration.confirmedSessionId, 'session');
-      session.confirmed -= 1;
-      touchSession(st, session);
-    }
-    archiveRegistration(st, registration, 'ENDED', 'WORKSHOP_CANCELLED');
-    if (!notified.has(registration.userId)) {
-      notified.add(registration.userId);
-      notifyWorkshopCancelled(st, registration);
-    }
-  }
-  for (const session of st.sessions.values()) {
-    if (session.status === 'OPEN') {
-      session.status = 'CANCELLED';
-      touchSession(st, session);
-    }
-  }
-  st.workshop.status = 'CANCELLED';
+  st.workshop.status = 'CANCELLING';
   touchWorkshop(st);
   return applied();
 }

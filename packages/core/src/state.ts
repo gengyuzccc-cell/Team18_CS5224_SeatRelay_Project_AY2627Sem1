@@ -11,8 +11,9 @@ import type {
   Workshop,
   WorkshopMode,
 } from '@seatrelay/contracts';
-import { cloneSnapshot, isStillOpenForAllocation, type WorkshopSnapshot } from './snapshot';
-import { diffMs, parseIso } from './time';
+import { COMMAND_RESULT_ITEM_COST, COMMIT_ITEM_COST, NOTIFICATION_ITEM_COST } from './changes';
+import { canStillBeWaitedFor, cloneSnapshot, type WorkshopSnapshot } from './snapshot';
+import { diffMs, parseIso, toIso } from './time';
 
 /** Notification to be stored by the committing adapter (the notifier sends it). */
 export interface NotificationDraft {
@@ -32,22 +33,58 @@ export interface OfferTimer {
 }
 
 /**
- * Per-decision bounds that keep one commit inside the storage transaction limit
- * (DynamoDB: 100 items). Overflow is carried over by a `REALLOCATE` continuation.
+ * Per-decision bounds. `maxItemsPerDecision` is the one that keeps a commit inside the storage
+ * transaction limit (DynamoDB: 100 items, counted with `COMMIT_ITEM_COST` + notifications +
+ * the CommandResult); the offer and expiry counts are the plan §2.2 ceilings on top of it.
+ * Whatever a limit leaves undone is carried over by a `REALLOCATE` continuation.
  */
 export interface DecisionLimits {
   /** Plan §2.2: at most 12 new offers per command. */
   maxOffersPerDecision: number;
   /** Offers expired by tick-first per decision; the rest expire in the continuation. */
   maxExpiriesPerDecision: number;
+  /**
+   * Storage items one commit may need (`estimateCommitItems`). Every bounded step (expiries,
+   * cut-off endings, cancellation drains, allocations, pending-record closing) stops before
+   * crossing it and the remainder is carried over by the continuation.
+   */
+  maxItemsPerDecision: number;
 }
 
 export const MAX_OFFERS_PER_DECISION = 12;
 export const MAX_EXPIRIES_PER_DECISION = 12;
+/** DynamoDB allows 100 items per transaction; 10 are left for adapter-specific extras. */
+export const MAX_ITEMS_PER_DECISION = 90;
 
 export const DEFAULT_DECISION_LIMITS: Readonly<DecisionLimits> = Object.freeze({
   maxOffersPerDecision: MAX_OFFERS_PER_DECISION,
   maxExpiriesPerDecision: MAX_EXPIRIES_PER_DECISION,
+  maxItemsPerDecision: MAX_ITEMS_PER_DECISION,
+});
+
+/**
+ * Worst-case item cost of one unit of each bounded step, under `COMMIT_ITEM_COST` (every unit
+ * may also dirty one session; the first touch of a session is included here):
+ *
+ * - expiry: ARCHIVE_OFFER 2 + session 1 + PUT_BACKFILL 1 + ARCHIVE_REGISTRATION 3 + notification 1;
+ * - offer: PUT_OFFER 1 + session 1 + PUT_REGISTRATION 2 + notification 1 + ARCHIVE_BACKFILL 2
+ *   (relaying a pending record of the snapshot);
+ * - cut-off ending: ARCHIVE_REGISTRATION 3 + notification 1;
+ * - session drain, revoked offer: ARCHIVE_OFFER 2 + session 1 + PUT_BACKFILL 1 + registration 3
+ *   + notification 1; other registration listing the session: session 1 + PUT_BACKFILL 1 +
+ *   registration 3 + notification 1;
+ * - workshop drain, one registration: ARCHIVE_OFFER 2 + session 1 + ARCHIVE_REGISTRATION 3 +
+ *   notification 1;
+ * - dangling offer (corrupted snapshot): ARCHIVE_OFFER 2 + session 1.
+ */
+export const UNIT_ITEM_COST = Object.freeze({
+  EXPIRY: 8,
+  OFFER: 7,
+  CUTOFF_END: 4,
+  DRAIN_SESSION_OFFER: 8,
+  DRAIN_SESSION_REGISTRATION: 6,
+  DRAIN_WORKSHOP_REGISTRATION: 7,
+  DANGLING_OFFER: 3,
 });
 
 export interface DecideContext {
@@ -63,6 +100,7 @@ export interface DecideContext {
  * `decide()` creates it from a deep copy of the input snapshot and turns it into a `Decision`.
  */
 export interface WorkState {
+  /** `ctx.now` in canonical form (ISO UTC with milliseconds). */
   readonly now: string;
   readonly nowMs: number;
   readonly newId: () => string;
@@ -75,6 +113,8 @@ export interface WorkState {
   readonly registrations: Map<number, Registration>;
   /** Live offers by id. */
   readonly offers: Map<string, Offer>;
+  /** Archived offers the command refers to (`WorkshopSnapshot.settledOffers`); read-only. */
+  readonly settledOffers: readonly Offer[];
 
   workshopStateDirty: boolean;
   readonly dirtySessions: Set<string>;
@@ -82,10 +122,17 @@ export interface WorkState {
   readonly archivedRegistrations: Registration[];
   readonly newOfferIds: string[];
   readonly archivedOffers: Offer[];
-  /** Backfill records known to this decision: created here or carried over by a REALLOCATE. */
+  /**
+   * Backfill records known to this decision, oldest release first: the snapshot's pending
+   * records (still waiting for a taker) followed by the ones created here.
+   */
   readonly backfills: BackfillRecord[];
-  /** Ids of backfill records created or updated in this decision (the ones written). */
+  /** Ids of the records that came with the snapshot (live pending items). */
+  readonly snapshotBackfillIds: Set<string>;
+  /** Ids of backfill records created, relayed or closed in this decision (the ones written). */
   readonly touchedBackfillIds: Set<string>;
+  /** Pending records closed in this decision without a taker (final, never relayed). */
+  readonly closedBackfillIds: Set<string>;
   /** Seats added by SET_CAPACITY (this decision or carried over) not yet taken, per session. */
   readonly pendingCapacityUp: Map<string, number>;
   readonly notifications: NotificationDraft[];
@@ -99,9 +146,10 @@ export interface WorkState {
 
 export function createWorkState(snapshot: WorkshopSnapshot, ctx: DecideContext): WorkState {
   const copy = cloneSnapshot(snapshot);
+  const nowMs = parseIso(ctx.now);
   return {
-    now: ctx.now,
-    nowMs: parseIso(ctx.now),
+    now: toIso(nowMs),
+    nowMs,
     newId: ctx.newId,
     limits: { ...DEFAULT_DECISION_LIMITS, ...ctx.limits },
     mode: copy.workshop.mode,
@@ -112,14 +160,17 @@ export function createWorkState(snapshot: WorkshopSnapshot, ctx: DecideContext):
       copy.registrations.map((registration) => [registration.seq, registration]),
     ),
     offers: new Map(copy.offers.map((offer) => [offer.id, offer])),
+    settledOffers: copy.settledOffers ?? [],
     workshopStateDirty: false,
     dirtySessions: new Set(),
     dirtyRegistrations: new Set(),
     archivedRegistrations: [],
     newOfferIds: [],
     archivedOffers: [],
-    backfills: [],
+    backfills: copy.pendingBackfills.filter((record) => record.reallocatedAt === undefined),
+    snapshotBackfillIds: new Set(copy.pendingBackfills.map((record) => record.id)),
     touchedBackfillIds: new Set(),
+    closedBackfillIds: new Set(),
     pendingCapacityUp: new Map(),
     notifications: [],
     timers: [],
@@ -146,6 +197,39 @@ export function liveRegistrations(st: WorkState): Registration[] {
 export function liveOffers(st: WorkState): Offer[] {
   return [...st.offers.values()];
 }
+
+/* ---------- item budget ---------- */
+
+/**
+ * Items the commit of the work done so far would need (the same formula as
+ * `estimateCommitItems` applied to the writes this state will produce; the CommandResult is
+ * always counted, which over-estimates internal commands by one, on the safe side).
+ */
+export function estimateItems(st: WorkState): number {
+  let items = COMMIT_ITEM_COST.PUT_WORKSHOP_STATE + COMMAND_RESULT_ITEM_COST;
+  items += st.dirtySessions.size * COMMIT_ITEM_COST.PUT_SESSION;
+  items += st.dirtyRegistrations.size * COMMIT_ITEM_COST.PUT_REGISTRATION;
+  items += st.archivedRegistrations.length * COMMIT_ITEM_COST.ARCHIVE_REGISTRATION;
+  items += st.newOfferIds.length * COMMIT_ITEM_COST.PUT_OFFER;
+  items += st.archivedOffers.length * COMMIT_ITEM_COST.ARCHIVE_OFFER;
+  for (const id of st.touchedBackfillIds) {
+    items += st.snapshotBackfillIds.has(id)
+      ? COMMIT_ITEM_COST.ARCHIVE_BACKFILL
+      : COMMIT_ITEM_COST.PUT_BACKFILL;
+  }
+  items += st.notifications.length * NOTIFICATION_ITEM_COST;
+  return items;
+}
+
+/**
+ * Whether one more unit costing at most `unitCost` items fits in the budget, keeping
+ * `reserve` items free (tick-first keeps the command's own worst case free).
+ */
+export function fitsBudget(st: WorkState, unitCost: number, reserve = 0): boolean {
+  return estimateItems(st) + unitCost + reserve <= st.limits.maxItemsPerDecision;
+}
+
+/* ---------- mutations ---------- */
 
 export function touchSession(st: WorkState, session: Session): void {
   st.dirtySessions.add(session.id);
@@ -214,7 +298,7 @@ export function dropSessionFromRegistration(
   }
   const stillPossible = registration.acceptable.some((id) => {
     const session = st.sessions.get(id);
-    return session !== undefined && isStillOpenForAllocation(session, st.nowMs);
+    return session !== undefined && canStillBeWaitedFor(session, st.nowMs);
   });
   if (!stillPossible) {
     archiveRegistration(st, registration, 'ENDED', 'CUTOFF');
@@ -253,25 +337,21 @@ export function fillBackfill(st: WorkState, record: BackfillRecord, offer: Offer
   st.backfillLatenciesMs.push(record.latencyMs);
 }
 
-/** Backfill records created or updated in this decision, in creation order. */
+/** Backfill records created, relayed or closed in this decision, oldest release first. */
 export function touchedBackfills(st: WorkState): BackfillRecord[] {
   return st.backfills.filter((record) => st.touchedBackfillIds.has(record.id));
 }
 
-/** Seeds the pending releases carried by a REALLOCATE continuation (see contracts). */
-export function seedPendingReleases(
+/** A record written by this decision is final unless it still waits for a taker. */
+export function isBackfillSettled(st: WorkState, record: BackfillRecord): boolean {
+  return record.reallocatedAt !== undefined || st.closedBackfillIds.has(record.id);
+}
+
+/** Seeds the capacity-up seats carried by a REALLOCATE continuation (see contracts). */
+export function seedPendingCapacityUp(
   st: WorkState,
-  pendingBackfills: readonly BackfillRecord[] | undefined,
   pendingCapacityUp: readonly { sessionId: string; seats: number }[] | undefined,
 ): void {
-  for (const record of pendingBackfills ?? []) {
-    if (
-      record.reallocatedAt === undefined &&
-      !st.backfills.some((known) => known.id === record.id)
-    ) {
-      st.backfills.push(structuredClone(record));
-    }
-  }
   for (const { sessionId, seats } of pendingCapacityUp ?? []) {
     st.pendingCapacityUp.set(sessionId, (st.pendingCapacityUp.get(sessionId) ?? 0) + seats);
   }

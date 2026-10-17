@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { addMs } from '../src/index';
 import {
   at,
   cmd,
@@ -72,6 +73,67 @@ describe('ACCEPT_OFFER', () => {
     expect(run(s1, cmd.decline(1, offer.id), at(10)).decision.reason).toBe('OFFER_EXPIRED');
   });
 
+  it('reports OFFER_EXPIRED for an offer a previous tick already archived (plan §4 expiry race)', () => {
+    const s1 = registerMany(makeSnapshot(), [1, 2], ['A'], at(0));
+    const offer = offerOf(s1, 1)!;
+    // The timer tick lands exactly at expiresAt and archives the offer (the common ordering).
+    const ticked = run(s1, cmd.tick('TIMER'), at(10));
+    expect(ticked.decision.metrics.offersExpired).toBe(1);
+    expect(ticked.snapshot.offers.map((o) => o.userId)).toEqual(['u2']);
+    expect(ticked.snapshot.settledOffers?.map((o) => [o.id, o.status])).toEqual([
+      [offer.id, 'EXPIRED'],
+    ]);
+    // The same +200 ms ACCEPT is rejected with the same reason as without the tick.
+    const late = run(ticked.snapshot, cmd.accept(1, offer.id), addMs(at(10), 200));
+    expect(late.decision).toMatchObject({ status: 'REJECTED', reason: 'OFFER_EXPIRED' });
+    expect(late.decision.writes).toEqual([]);
+    expect(
+      run(ticked.snapshot, cmd.decline(1, offer.id), addMs(at(10), 200)).decision,
+    ).toMatchObject({ status: 'REJECTED', reason: 'OFFER_EXPIRED' });
+    // Ownership is still checked first; an unknown id is still OFFER_NOT_FOUND.
+    expect(run(ticked.snapshot, cmd.accept(2, offer.id), at(11)).decision.reason).toBe(
+      'OFFER_NOT_YOURS',
+    );
+    expect(run(ticked.snapshot, cmd.accept(1, 'nope'), at(11)).decision.reason).toBe(
+      'OFFER_NOT_FOUND',
+    );
+    // Without the history the engine can only say OFFER_NOT_FOUND (the live snapshot alone).
+    const blind = { ...ticked.snapshot, settledOffers: [] };
+    expect(run(blind, cmd.accept(1, offer.id), at(11)).decision.reason).toBe('OFFER_NOT_FOUND');
+  });
+
+  it('reports OFFER_NOT_ACTIVE for a second ACCEPT/DECLINE of an already settled offer', () => {
+    const s1 = registerMany(makeSnapshot(), [1], ['A'], at(0));
+    const offer = offerOf(s1, 1)!;
+    const confirmed = run(s1, cmd.accept(1, offer.id), at(1)).snapshot;
+    expect(run(confirmed, cmd.accept(1, offer.id), at(2)).decision.reason).toBe('OFFER_NOT_ACTIVE');
+    expect(run(confirmed, cmd.decline(1, offer.id), at(2)).decision.reason).toBe(
+      'OFFER_NOT_ACTIVE',
+    );
+    // even once its original expiresAt has passed, an ACCEPTED offer is "not active", not expired
+    expect(run(confirmed, cmd.accept(1, offer.id), at(30)).decision.reason).toBe(
+      'OFFER_NOT_ACTIVE',
+    );
+    const declined = run(s1, cmd.decline(1, offer.id), at(1)).snapshot;
+    expect(run(declined, cmd.accept(1, offer.id), at(2)).decision.reason).toBe('OFFER_NOT_ACTIVE');
+    // a history record that still says OFFERED (corrupt) is judged by its expiry
+    const stale = { ...declined, settledOffers: [{ ...offer, status: 'OFFERED' as const }] };
+    expect(run(stale, cmd.accept(1, offer.id), at(2)).decision.reason).toBe('OFFER_NOT_ACTIVE');
+    expect(run(stale, cmd.accept(1, offer.id), at(10)).decision.reason).toBe('OFFER_EXPIRED');
+  });
+
+  it('rejects SESSION_CANCELLED for an offer whose session is being cancelled', () => {
+    const s0 = makeSnapshot({ sessions: [{ id: 'A' }, { id: 'B' }] });
+    const s1 = registerMany(s0, [1], ['A', 'B'], at(0));
+    const offer = offerOf(s1, 1)!;
+    // The drain of CANCEL_SESSION is budget-bounded; with no budget the session stays CANCELLING.
+    const cancelling = step(s1, cmd.cancelSession('A'), at(1), { maxItemsPerDecision: 4 });
+    expect(sessionOf(cancelling.snapshot, 'A').status).toBe('CANCELLING');
+    expect(cancelling.decision.continuation).toBeDefined();
+    const accept = step(cancelling.snapshot, cmd.accept(1, offer.id), at(2));
+    expect(accept.decision).toMatchObject({ status: 'REJECTED', reason: 'SESSION_CANCELLED' });
+  });
+
   it('rejects OFFER_NOT_ACTIVE for a settled offer left in the live set', () => {
     const s1 = registerMany(makeSnapshot(), [1], ['A'], at(0));
     const crafted = structuredClone(s1);
@@ -94,7 +156,9 @@ describe('ACCEPT_OFFER', () => {
 
     const cancelled = structuredClone(s1);
     cancelled.sessions[0]!.status = 'CANCELLED';
-    expect(step(cancelled, cmd.decline(1, offerId), at(1)).decision.reason).toBe('INVALID_STATE');
+    expect(step(cancelled, cmd.decline(1, offerId), at(1)).decision.reason).toBe(
+      'SESSION_CANCELLED',
+    );
 
     const orphan = structuredClone(s1);
     orphan.registrations = [];

@@ -5,9 +5,13 @@ import { sortedSessions } from './views';
 
 /**
  * Organiser CSV export (plan §2.5): one row per registration, live and archived, by seq.
- * RFC 4180 quoting with CRLF line ends; cells that a spreadsheet would read as a formula are
- * prefixed with an apostrophe (display names and emails are participant input).
+ * RFC 4180 quoting with CRLF line ends, a UTF-8 byte-order mark so that Excel reads non-ASCII
+ * display names correctly; cells that a spreadsheet would read as a formula are prefixed with
+ * an apostrophe (display names and emails are participant input). `confirmedSessionId/Title`
+ * are filled only while the seat is held (status CONFIRMED).
  */
+
+export const CSV_BOM = '\uFEFF';
 
 export const CSV_COLUMNS = [
   'seq',
@@ -66,6 +70,8 @@ export function registrationsCsv(
         ? undefined
         : snapshot.offers.find((candidate) => candidate.id === registration.currentOfferId);
     const attended = attendedBy.get(registration.userId);
+    const confirmedSessionId =
+      registration.status === 'CONFIRMED' ? registration.confirmedSessionId : undefined;
     lines.push(
       csvLine([
         registration.seq,
@@ -75,10 +81,8 @@ export function registrationsCsv(
         registration.status,
         registration.endReason,
         registration.acceptable.join('|'),
-        registration.confirmedSessionId,
-        registration.confirmedSessionId === undefined
-          ? undefined
-          : sessionTitle.get(registration.confirmedSessionId),
+        confirmedSessionId,
+        confirmedSessionId === undefined ? undefined : sessionTitle.get(confirmedSessionId),
         offer?.id,
         offer?.sessionId,
         offer?.expiresAt,
@@ -88,5 +92,5 @@ export function registrationsCsv(
       ]),
     );
   }
-  return `${lines.join('\r\n')}\r\n`;
+  return `${CSV_BOM}${lines.join('\r\n')}\r\n`;
 }

@@ -10,7 +10,7 @@ import {
 } from '@seatrelay/contracts';
 import { decide, diffMs, parseIso, type Decision, type WorkshopSnapshot } from '@seatrelay/core';
 import { epochSeconds, materializeNotification } from '../commands';
-import type { IdGen, MetricsSink, WorkerPorts, WorkshopStore } from '../ports';
+import type { IdGen, LogFields, MetricsSink, WorkerPorts, WorkshopStore } from '../ports';
 
 /** In-process reloads of the snapshot after a VERSION conflict (plan §2.3). */
 export const DEFAULT_MAX_VERSION_RETRIES = 3;
@@ -73,12 +73,20 @@ export class VersionConflictError extends Error {
  *   commit (writes + notifications + CommandResult) → enqueue continuation → emit metrics.
  *
  * - VERSION conflict: reload and retry up to `maxVersionRetries` times (MetaConflictRetries).
- * - COMMAND_ALREADY_SETTLED: a redelivery of a settled command; acknowledged (C3).
+ * - COMMAND_ALREADY_SETTLED (or a record found settled before loading): a redelivery of a
+ *   settled command; acknowledged (C3). Because the first delivery may have crashed after its
+ *   commit but before enqueueing its REALLOCATE continuation, the redelivery runs one internal
+ *   TICK pass on the workshop (a no-op when nothing is pending), so the workshop converges
+ *   without waiting for the sweep.
  * - Deterministic rejections settle the command as REJECTED and never throw.
  * - TICK / REALLOCATE have no CommandResult; one that changes nothing is a NOOP (no commit).
+ * - ACCEPT_OFFER / DECLINE_OFFER of an offer that is no longer live: the archived offer is read
+ *   (one point read) and handed to the engine as `snapshot.settledOffers`, so the rejection
+ *   reason is OFFER_EXPIRED / OFFER_NOT_ACTIVE whichever message was processed first.
  * - `_fault` flags (when `faultInjection` is on and this is the first delivery) throw at the
- *   named point: TIMER_SEND instead of scheduling timers, BEFORE_COMMIT before the commit,
- *   AFTER_COMMIT after it (the redelivery then hits COMMAND_ALREADY_SETTLED).
+ *   named point: TIMER_SEND at the timer-scheduling point (whether or not the decision created
+ *   timers), BEFORE_COMMIT before the commit, AFTER_COMMIT after it (the redelivery then hits
+ *   COMMAND_ALREADY_SETTLED).
  */
 export async function processCommand(
   ports: WorkerPorts,
@@ -100,6 +108,7 @@ export async function processCommand(
     accepted = await store.getCommandResult(user.commandId);
     if (accepted !== undefined && accepted.status !== 'ACCEPTED') {
       logger.info('command already settled; acknowledging redelivery', fields);
+      await convergeAfterSettled(ports, command.workshopId, maxRetries, fields);
       return { outcome: 'ALREADY_SETTLED', attempts: 0 };
     }
   }
@@ -110,6 +119,7 @@ export async function processCommand(
       logger.warn('workshop not found; command dropped', fields);
       return { outcome: 'NOOP', attempts: attempt };
     }
+    await attachSettledOffer(store, snapshot, command);
     const now = clock.now();
     const decision = await decideAuthorised(store, ids, snapshot, command, now);
 
@@ -119,10 +129,10 @@ export async function processCommand(
       return { outcome: 'NOOP', decision, attempts: attempt };
     }
 
+    if (fault === 'TIMER_SEND') {
+      throw new FaultInjectedError(fault, user?.commandId ?? '');
+    }
     if (decision.timers.length > 0) {
-      if (fault === 'TIMER_SEND') {
-        throw new FaultInjectedError(fault, user?.commandId ?? '');
-      }
       await timers.schedule(command.workshopId, decision.timers);
     }
     if (fault === 'BEFORE_COMMIT') {
@@ -146,6 +156,7 @@ export async function processCommand(
     if (!committed.ok) {
       if (committed.conflict === 'COMMAND_ALREADY_SETTLED') {
         logger.info('command settled concurrently; acknowledging redelivery', fields);
+        await convergeAfterSettled(ports, command.workshopId, maxRetries, fields);
         return { outcome: 'ALREADY_SETTLED', decision, attempts: attempt };
       }
       metrics.emit('MetaConflictRetries', 1, 'Count');
@@ -174,6 +185,43 @@ export async function processCommand(
       continuation: decision.continuation !== undefined,
     });
     return { outcome: decision.status, decision, attempts: attempt };
+  }
+}
+
+/**
+ * The settled command's first delivery may have crashed between its commit and the enqueue of
+ * its REALLOCATE continuation (an AFTER_COMMIT fault, a timeout, a failing enqueue). One
+ * internal TICK pass finishes whatever that commit left pending; it is a NOOP otherwise.
+ */
+async function convergeAfterSettled(
+  ports: WorkerPorts,
+  workshopId: string,
+  maxVersionRetries: number,
+  fields: LogFields,
+): Promise<void> {
+  const result = await processCommand(ports, { type: 'TICK', workshopId }, { maxVersionRetries });
+  ports.logger.info('convergence pass after a settled redelivery', {
+    ...fields,
+    outcome: result.outcome,
+    continuation: result.decision?.continuation !== undefined,
+  });
+}
+
+/** One point read of the archived offer an ACCEPT/DECLINE refers to when it is no longer live. */
+async function attachSettledOffer(
+  store: WorkshopStore,
+  snapshot: WorkshopSnapshot,
+  command: Command,
+): Promise<void> {
+  if (command.type !== 'ACCEPT_OFFER' && command.type !== 'DECLINE_OFFER') {
+    return;
+  }
+  if (snapshot.offers.some((offer) => offer.id === command.offerId)) {
+    return;
+  }
+  const archived = await store.getArchivedOffer(command.workshopId, command.offerId);
+  if (archived !== undefined) {
+    snapshot.settledOffers = [archived];
   }
 }
 

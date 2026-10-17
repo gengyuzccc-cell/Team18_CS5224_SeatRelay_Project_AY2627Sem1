@@ -9,7 +9,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "build": "node scripts/build.mjs",
     "validate": "for t in templates/auth.yaml templates/app.yaml templates/web.yaml; do sam validate --lint -t $t || exit 1; done"
   },

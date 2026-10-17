@@ -2,12 +2,15 @@ import { randomUUID } from 'node:crypto';
 import type {
   CommandAcceptedView,
   CommandResultView,
+  ErrorBody,
   HealthView,
   MeView,
   Organization,
   UserCommand,
+  VerifyView,
   Workshop,
   WorkshopListView,
+  WorkshopPublic,
   WorkshopPublicView,
 } from '@seatrelay/contracts';
 import { addMinutes } from '@seatrelay/core';
@@ -311,6 +314,28 @@ describe('workshop creation', () => {
       (await post({ title: 'x', holdSeconds: 86_400, sessions: [1, 2].map(session) })).status,
     ).toBe(201);
   });
+
+  test('rejects a session whose registration cut-off has already passed', async () => {
+    const ports = setup();
+    const org = await createOrg(ports, alice);
+    const post = (startsAt: string) =>
+      call(ports, 'POST', `/orgs/${org.id}/workshops`, {
+        user: alice,
+        body: {
+          title: 'x',
+          sessions: [
+            { title: 'Soon', startsAt, capacity: 1 },
+            { title: 'Later', startsAt: addMinutes(T0, 24 * 60), capacity: 1 },
+          ],
+        },
+      });
+    const tooSoon = await post(addMinutes(T0, 20)); // cut-off would be 10 min ago
+    expectError(tooSoon, 400, 'VALIDATION_ERROR');
+    expect(bodyOf<ErrorBody>(tooSoon).message).toContain('Soon');
+    expectError(await post(addMinutes(T0, -60)), 400, 'VALIDATION_ERROR');
+    expectError(await post(addMinutes(T0, 30)), 400, 'VALIDATION_ERROR'); // cut-off = now
+    expect((await post(addMinutes(T0, 31))).status).toBe(201);
+  });
 });
 
 describe('organiser routes (C7)', () => {
@@ -360,16 +385,25 @@ describe('organiser routes (C7)', () => {
     );
   });
 
-  test('PATCH edits title/description only and leaves engine fields alone', async () => {
+  test('PATCH edits title/description (and updatedAt) only and leaves engine fields alone', async () => {
     const { ports, wsId } = await scenario();
+    ports.clock.advanceSeconds(100);
     const response = await call(ports, 'PATCH', `/workshops/${wsId}`, {
       user: alice,
       body: { description: 'Bring a laptop' },
     });
     expect(response.status).toBe(200);
-    expect(bodyOf<Workshop>(response)).toMatchObject({
+    expect(bodyOf<WorkshopPublic>(response)).toMatchObject({
       title: 'Intro to Git',
       description: 'Bring a laptop',
+      updatedAt: ports.clock.now(),
+    });
+    expect(response.body).not.toHaveProperty('version'); // the public shape, like GET/POST
+    expect(response.body).not.toHaveProperty('seq');
+    expect(await ports.store.getWorkshop(wsId)).toMatchObject({
+      description: 'Bring a laptop',
+      updatedAt: ports.clock.now(),
+      createdAt: T0,
       version: 0,
       seq: 0,
     });
@@ -483,6 +517,64 @@ describe('POST /workshops/{wsId}/commands', () => {
     });
     expect(retry.status).toBe(202);
     expect(ports.queue.size).toBe(1);
+  });
+
+  test('an orphaned ACCEPTED record is re-enqueued on retry, and a failing rollback still answers 503', async () => {
+    const { ports, wsId, s1 } = await scenario();
+    const commandId = randomUUID();
+    ports.queue.failNextEnqueue = true;
+    const original = ports.store.deleteCommandIfAccepted.bind(ports.store);
+    ports.store.deleteCommandIfAccepted = async () => {
+      throw new Error('store down');
+    };
+    expectError(
+      await postCommand(ports, bob, wsId, { type: 'REGISTER', commandId, acceptable: [s1] }),
+      503,
+      'QUEUE_UNAVAILABLE',
+    );
+    ports.store.deleteCommandIfAccepted = original;
+    // the record survived the failed rollback: nothing on the queue would ever settle it
+    expect(await ports.store.getCommandResult(commandId)).toMatchObject({ status: 'ACCEPTED' });
+    expect(ports.queue.size).toBe(0);
+    const retry = await postCommand(ports, bob, wsId, {
+      type: 'REGISTER',
+      commandId,
+      acceptable: [s1],
+    });
+    expect(retry.status).toBe(202);
+    expect(bodyOf<CommandAcceptedView>(retry)).toMatchObject({ commandId, status: 'ACCEPTED' });
+    expect(ports.queue.size).toBe(1);
+    // a third POST while still ACCEPTED is deduplicated by the FIFO (same commandId)
+    expect(
+      (await postCommand(ports, bob, wsId, { type: 'REGISTER', commandId, acceptable: [s1] }))
+        .status,
+    ).toBe(202);
+    expect(ports.queue.size).toBe(1);
+    expect(ports.queue.deduplicated).toBe(1);
+    await ports.drain();
+    expect(await ports.store.getCommandResult(commandId)).toMatchObject({ status: 'APPLIED' });
+    // once settled, a re-POST neither enqueues nor fails when the queue is down
+    ports.queue.failNextEnqueue = true;
+    expect(
+      (await postCommand(ports, bob, wsId, { type: 'REGISTER', commandId, acceptable: [s1] }))
+        .status,
+    ).toBe(202);
+    ports.queue.failNextEnqueue = false;
+    // a re-enqueue failure for a still-ACCEPTED record answers 503 without touching the record
+    const other = randomUUID();
+    await accepted(ports, carol, wsId, { type: 'REGISTER', commandId: other, acceptable: [s1] });
+    ports.queue.messages.length = 0; // simulate the message being lost
+    ports.queue.failNextEnqueue = true;
+    expectError(
+      await postCommand(ports, carol, wsId, {
+        type: 'REGISTER',
+        commandId: other,
+        acceptable: [s1],
+      }),
+      503,
+      'QUEUE_UNAVAILABLE',
+    );
+    expect(await ports.store.getCommandResult(other)).toMatchObject({ status: 'ACCEPTED' });
   });
 
   test('validates the body with CommandBodySchema', async () => {
@@ -611,5 +703,46 @@ describe('GET /workshops/{wsId}', () => {
     const view = bodyOf<WorkshopPublicView>(await call(ports, 'GET', `/workshops/${wsId}`));
     expect(view.workshop.status).toBe('CANCELLED');
     expect(view.sessions.every((session) => session.status === 'CANCELLED')).toBe(true);
+  });
+
+  test('a cancelled workshop with many registrations is drained in several commits', async () => {
+    const { ports, orgId, wsId, s1, s2 } = await scenario(
+      {},
+      workshopInput({
+        sessions: [
+          { title: 'Morning', startsAt: addMinutes(T0, 24 * 60), capacity: 5 },
+          { title: 'Afternoon', startsAt: addMinutes(T0, 26 * 60), capacity: 5 },
+        ],
+      }),
+    );
+    for (let i = 1; i <= 40; i += 1) {
+      await accepted(ports, { userId: `u${i}`, email: `u${i}@example.com` }, wsId, {
+        type: 'REGISTER',
+        acceptable: [s1, s2],
+      });
+    }
+    await ports.drain();
+    const commitsBefore = ports.store.commits;
+    const { commandId } = await accepted(ports, alice, wsId, { type: 'CANCEL_WORKSHOP' });
+    const [first] = await ports.drain();
+    expect(first?.result.outcome).toBe('APPLIED');
+    expect(
+      bodyOf<CommandResultView>(await call(ports, 'GET', `/commands/${commandId}`, { user: alice }))
+        .status,
+    ).toBe('APPLIED');
+    expect(ports.store.commits - commitsBefore).toBeGreaterThan(1);
+    const view = bodyOf<WorkshopPublicView>(await call(ports, 'GET', `/workshops/${wsId}`));
+    expect(view.workshop.status).toBe('CANCELLED');
+    expect(view.queueLength).toBe(0);
+    const verify = bodyOf<VerifyView>(
+      await call(ports, 'GET', `/orgs/${orgId}/workshops/${wsId}/verify`, { user: alice }),
+    );
+    expect(verify.ok).toBe(true);
+    const history = await ports.store.listHistory(wsId);
+    expect(history.registrations).toHaveLength(40);
+    expect(history.registrations.every((r) => r.endReason === 'WORKSHOP_CANCELLED')).toBe(true);
+    expect(
+      ports.store.allNotifications().filter((n) => n.kind === 'WORKSHOP_CANCELLED'),
+    ).toHaveLength(40);
   });
 });

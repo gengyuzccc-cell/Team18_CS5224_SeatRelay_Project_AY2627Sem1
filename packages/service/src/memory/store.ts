@@ -9,7 +9,7 @@ import type {
   Session,
   Workshop,
 } from '@seatrelay/contracts';
-import { compareIso, type Change, type WorkshopSnapshot } from '@seatrelay/core';
+import { byRelease, compareIso, type Change, type WorkshopSnapshot } from '@seatrelay/core';
 import type {
   CommitArgs,
   CommitResult,
@@ -27,7 +27,9 @@ interface WorkshopPartition {
   historyRegistrations: Registration[];
   liveOffers: Map<string, Offer>;
   historyOffers: Offer[];
+  /** Every backfill record (pending and final); the pending ones are also live items. */
   backfills: Map<string, BackfillRecord>;
+  pendingBackfillIds: Set<string>;
   attendance: Map<string, Attendance>;
 }
 
@@ -97,6 +99,7 @@ export class InMemoryWorkshopStore implements WorkshopStore {
       liveOffers: new Map(),
       historyOffers: [],
       backfills: new Map(),
+      pendingBackfillIds: new Set(),
       attendance: new Map(),
     });
   }
@@ -112,6 +115,7 @@ export class InMemoryWorkshopStore implements WorkshopStore {
     if (patch.description !== undefined) {
       partition.workshop.description = patch.description;
     }
+    partition.workshop.updatedAt = patch.updatedAt;
     return clone(partition.workshop);
   }
 
@@ -145,7 +149,17 @@ export class InMemoryWorkshopStore implements WorkshopStore {
       sessions: [...partition.sessions.values()],
       registrations: [...partition.live.values()].sort((a, b) => a.seq - b.seq),
       offers: [...partition.liveOffers.values()],
+      pendingBackfills: [...partition.pendingBackfillIds]
+        .map((id) => partition.backfills.get(id)!)
+        .sort(byRelease),
     });
+  }
+
+  async getArchivedOffer(wsId: string, offerId: string): Promise<Offer | undefined> {
+    const offer = this.partitions
+      .get(wsId)
+      ?.historyOffers.find((candidate) => candidate.id === offerId);
+    return offer === undefined ? undefined : clone(offer);
   }
 
   async commit(args: CommitArgs): Promise<CommitResult> {
@@ -331,8 +345,14 @@ function applyChange(partition: WorkshopPartition, change: Change): void {
       partition.liveOffers.delete(change.offer.id);
       partition.historyOffers.push(clone(change.offer));
       break;
-    case 'PUT_BACKFILL':
+    case 'PUT_PENDING_BACKFILL':
       partition.backfills.set(change.record.id, clone(change.record));
+      partition.pendingBackfillIds.add(change.record.id);
+      break;
+    case 'PUT_BACKFILL':
+    case 'ARCHIVE_BACKFILL':
+      partition.backfills.set(change.record.id, clone(change.record));
+      partition.pendingBackfillIds.delete(change.record.id);
       break;
   }
 }

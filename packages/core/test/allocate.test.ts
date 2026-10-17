@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_DECISION_LIMITS, MAX_OFFERS_PER_DECISION } from '../src/index';
-import { at, cmd, makeSnapshot, offerOf, registerMany, run, step } from './helpers';
+import { at, cmd, makeSnapshot, offerOf, regOf, registerMany, run, step } from './helpers';
 
 describe('allocate', () => {
   it('creates at most 12 offers per decision and continues with REALLOCATE', () => {
@@ -80,7 +80,7 @@ describe('allocate', () => {
     expect(r.decision.metrics.backfillLatenciesMs).toEqual([0]);
   });
 
-  it('carries unrelayed releases into the continuation so late offers are still attributed', () => {
+  it('keeps unrelayed releases pending in the live snapshot so later offers are still attributed', () => {
     const s0 = makeSnapshot({
       sessions: [
         { id: 'A', capacity: 3 },
@@ -95,36 +95,73 @@ describe('allocate', () => {
     expect(first.decision.metrics.offersExpired).toBe(4);
     expect(first.decision.metrics.offersCreated).toBe(1);
     expect(first.decision.backfills.filter((b) => b.reallocatedAt !== undefined)).toHaveLength(1);
-    expect(first.decision.continuation?.type).toBe('REALLOCATE');
-    const carried = first.decision.continuation!;
-    expect(carried.type === 'REALLOCATE' && carried.pendingBackfills?.length).toBe(3);
+    expect(first.decision.continuation).toEqual({ type: 'REALLOCATE', workshopId: 'ws1' });
+    // the three releases without a taker yet are live pending items, oldest first
+    expect(first.decision.writes.filter((w) => w.kind === 'PUT_PENDING_BACKFILL')).toHaveLength(3);
+    expect(first.snapshot.pendingBackfills.map((b) => b.sessionId)).toEqual(['A', 'A', 'B']);
 
-    const second = step(first.snapshot, carried, at(10), { maxOffersPerDecision: 1 });
-    // The record filled here is one carried over, re-emitted with its latency.
+    const second = step(first.snapshot, first.decision.continuation!, at(10), {
+      maxOffersPerDecision: 1,
+    });
+    // The record filled here is one carried by the snapshot, moved to history with its latency.
     expect(second.decision.backfills).toEqual([
       expect.objectContaining({ cause: 'EXPIRED', newUserId: 'u6', latencyMs: 0 }),
     ]);
-    expect(second.decision.writes.filter((w) => w.kind === 'PUT_BACKFILL')).toHaveLength(1);
+    expect(second.decision.writes.filter((w) => w.kind === 'ARCHIVE_BACKFILL')).toHaveLength(1);
+    expect(second.snapshot.pendingBackfills).toHaveLength(2);
     expect(second.decision.continuation?.type).toBe('REALLOCATE');
-    const third = run(first.snapshot, carried, at(10), { maxOffersPerDecision: 1 });
+    const third = run(first.snapshot, first.decision.continuation!, at(10), {
+      maxOffersPerDecision: 1,
+    });
     expect(third.decisions.length).toBeGreaterThan(1);
     expect(third.snapshot.offers.map((o) => o.userId).sort()).toEqual(['u5', 'u6', 'u7']);
+    expect(third.snapshot.pendingBackfills).toEqual([]);
     // every release that found a taker is attributed exactly once
     const relayed = [first.decision, ...third.decisions]
       .flatMap((d) => d.backfills)
       .filter((b) => b.newUserId !== undefined);
     expect(relayed.map((b) => b.newUserId).sort()).toEqual(['u5', 'u6', 'u7']);
-    // a REALLOCATE carrying an already-relayed or unknown record ignores it
-    const stale = run(
-      third.snapshot,
-      {
-        type: 'REALLOCATE',
-        workshopId: 'ws1',
-        pendingBackfills: [relayed[0]!],
-        pendingCapacityUp: [],
-      },
-      at(11),
-    );
-    expect(stale.decision.writes).toEqual([]);
+    // a stale REALLOCATE afterwards changes nothing
+    expect(run(third.snapshot, cmd.reallocate(), at(11)).decision.writes).toEqual([]);
+  });
+
+  it('attributes a pending release to whichever decision relays the seat, not only the continuation', () => {
+    // A seat released while the offer cap is hit; a user command (already queued in the FIFO)
+    // runs before the REALLOCATE and takes the seat: the record is still filled.
+    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 2 }, { id: 'B' }] });
+    let s = registerMany(s0, [1, 2], ['A'], at(0)); // both hold A until +10
+    s = registerMany(s, [3, 4], ['A'], at(1)); // queued
+    const first = step(s, cmd.tick(), at(10), { maxOffersPerDecision: 1 }); // 2 expire, u3 relayed
+    expect(first.snapshot.pendingBackfills).toHaveLength(1);
+    expect(first.decision.continuation).toBeDefined();
+    // a REGISTER that was already in the FIFO runs first: u4 (ahead by seq) takes the seat
+    const late = step(first.snapshot, cmd.register(5, ['A']), at(10), { maxOffersPerDecision: 1 });
+    expect(offerOf(late.snapshot, 4)).toBeDefined();
+    expect(regOf(late.snapshot, 5)?.status).toBe('QUEUED');
+    expect(late.decision.backfills).toEqual([
+      expect.objectContaining({ cause: 'EXPIRED', newUserId: 'u4', latencyMs: 0 }),
+    ]);
+    expect(late.decision.metrics.backfillLatenciesMs).toEqual([0]);
+    expect(late.decision.writes.filter((w) => w.kind === 'ARCHIVE_BACKFILL')).toHaveLength(1);
+    expect(late.snapshot.pendingBackfills).toEqual([]);
+    const reallocate = run(late.snapshot, first.decision.continuation!, at(10));
+    expect(reallocate.decision.writes).toEqual([]);
+  });
+
+  it('closes a pending release once no continuation is pending, and never relays it to a session that closed', () => {
+    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 2 }, { id: 'B' }] });
+    let s = registerMany(s0, [1, 2], ['A'], at(0));
+    s = registerMany(s, [3, 4], ['A'], at(1));
+    const first = step(s, cmd.tick(), at(10), { maxOffersPerDecision: 1 });
+    expect(first.snapshot.pendingBackfills).toHaveLength(1);
+    // the session is cancelled before the continuation runs: the record is closed unrelayed
+    const cancelled = run(first.snapshot, cmd.cancelSession('A'), at(10));
+    expect(cancelled.decision.writes.filter((w) => w.kind === 'ARCHIVE_BACKFILL')).toEqual([
+      expect.objectContaining({
+        record: expect.objectContaining({ cause: 'EXPIRED', sessionId: 'A' }),
+      }),
+    ]);
+    expect(cancelled.decision.backfills[0]?.reallocatedAt).toBeUndefined();
+    expect(cancelled.snapshot.pendingBackfills).toEqual([]);
   });
 });

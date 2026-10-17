@@ -7,6 +7,7 @@ import {
   applyChanges,
   checkInvariants,
   decide,
+  estimateCommitItems,
   isStillOpenForAllocation,
   newSession,
   newWorkshop,
@@ -21,9 +22,13 @@ import { T0, UUID, WS } from './helpers';
 /**
  * Model-based property test (plan §2.2): random command sequences (length ≤ 200) over 2–5
  * sessions and up to 40 users, with random clock advances (0–20 min), random holdSeconds
- * (30–900 s) and random per-decision limits. After EVERY step (command + its continuation
- * chain) the snapshot must satisfy every invariant, contain no due offer, no starving
- * registration and no cut-off-ended queue entry, and the engine must be pure and deterministic.
+ * (30–900 s) and random per-decision limits (offers, expiries and the item budget). Each
+ * step's continuation chain is run through a FIFO in which another random command may be
+ * interleaved (as the real queue does), with the clock moving on. After EVERY committed
+ * decision the hard invariants (everything but no-starvation) hold and the commit fits the
+ * item budget; after every step's chain the snapshot must satisfy every invariant, contain no
+ * due offer, no starving registration, no cut-off-ended queue entry and no pending
+ * cancellation drain, and the engine must be pure and deterministic.
  */
 
 const sessionArb = fc.record({
@@ -38,6 +43,8 @@ const setupArb = fc.record({
   nUsers: fc.integer({ min: 1, max: 40 }),
   maxOffers: fc.integer({ min: 1, max: 12 }),
   maxExpiries: fc.integer({ min: 1, max: 12 }),
+  /** 40 leaves exactly room for the largest user command (PER_SESSION cancel-all of 5). */
+  maxItems: fc.integer({ min: 40, max: 90 }),
 });
 
 type Kind =
@@ -79,7 +86,7 @@ const stepArb = fc.record({
 
 type ArbValue<A> = A extends fc.Arbitrary<infer T> ? T : never;
 type Setup = ArbValue<typeof setupArb>;
-type Step = ArbValue<typeof stepArb>;
+type Step = ArbValue<typeof stepArb> & { last?: boolean };
 
 function buildSnapshot(setup: Setup): WorkshopSnapshot {
   const workshop = newWorkshop({
@@ -99,7 +106,7 @@ function buildSnapshot(setup: Setup): WorkshopSnapshot {
       capacity: spec.capacity,
     }),
   );
-  return { workshop, sessions, registrations: [], offers: [] };
+  return { workshop, sessions, registrations: [], offers: [], pendingBackfills: [] };
 }
 
 const actor = (n: number) => ({
@@ -134,8 +141,16 @@ function toCommand(step: Step, setup: Setup, snapshot: WorkshopSnapshot): Comman
     }
     case 'ACCEPT':
     case 'DECLINE': {
+      // Mostly a live offer answered by its owner; sometimes a missing id, a stranger, or an
+      // offer that was settled earlier (the user retrying after the fact).
       const offers = [...snapshot.offers].sort((a, b) => (a.id < b.id ? -1 : 1));
-      const offer = offers[step.k % (offers.length + 1)];
+      const settled = snapshot.settledOffers ?? [];
+      const offer =
+        step.k % 13 === 0
+          ? undefined
+          : step.k % 7 === 0 && settled.length > 0
+            ? settled[step.k % settled.length]
+            : offers[step.k % Math.max(1, offers.length)];
       const offerId = offer?.id ?? `missing-${step.k}`;
       const owner = offer === undefined || step.k % 11 === 0 ? n : Number(offer.userId.slice(1));
       return step.kind === 'ACCEPT'
@@ -151,7 +166,11 @@ function toCommand(step: Step, setup: Setup, snapshot: WorkshopSnapshot): Comman
     case 'CANCEL_SESSION':
       return { type: 'CANCEL_SESSION', ...actor(999), sessionId: pick(step.s) };
     case 'CANCEL_WORKSHOP':
-      return { type: 'CANCEL_WORKSHOP', ...actor(999) };
+      // absorbing: everything after it is a WORKSHOP_CANCELLED rejection, so keep it for the
+      // last steps of a script and turn the earlier draws into a CLOSE/OPEN pair
+      return step.last
+        ? { type: 'CANCEL_WORKSHOP', ...actor(999) }
+        : { type: step.k % 2 === 0 ? 'CLOSE_REGISTRATION' : 'OPEN_REGISTRATION', ...actor(999) };
     case 'CLOSE':
       return { type: 'CLOSE_REGISTRATION', ...actor(999) };
     case 'OPEN':
@@ -170,9 +189,21 @@ function makeCtx(now: string, limits: DecisionLimits, start: number): DecideCont
   return { now, newId: () => `o${start}-${++counter}`, limits };
 }
 
+/** Invariants that must hold after every committed decision, continuation pending or not. */
+function assertHardInvariants(snapshot: WorkshopSnapshot, now: string, what: string): void {
+  const report = checkInvariants(snapshot, now);
+  const hard = report.violations.filter((violation) => violation.code !== 'NO_STARVATION');
+  if (hard.length > 0) {
+    throw new Error(`invariants violated after ${what} at ${now}: ${JSON.stringify(hard)}`);
+  }
+}
+
 /** Post-step assertions that go beyond checkInvariants (which must hold between decisions too). */
 function assertSettled(snapshot: WorkshopSnapshot, now: string): void {
   const nowMs = parseIso(now);
+  expect(snapshot.pendingBackfills, 'pending releases left after the chain').toEqual([]);
+  expect(snapshot.workshop.status).not.toBe('CANCELLING');
+  expect(snapshot.sessions.some((session) => session.status === 'CANCELLING')).toBe(false);
   for (const offer of snapshot.offers) {
     expect(parseIso(offer.expiresAt), `due offer ${offer.id} left live`).toBeGreaterThan(nowMs);
     expect(parseIso(offer.expiresAt) - parseIso(offer.createdAt)).toBeLessThanOrEqual(
@@ -207,6 +238,9 @@ function assertDecisionShape(
 ): void {
   expect(decision.metrics.offersCreated).toBeLessThanOrEqual(limits.maxOffersPerDecision);
   expect(decision.metrics.offersExpired).toBeLessThanOrEqual(limits.maxExpiriesPerDecision);
+  expect(estimateCommitItems(decision), 'commit over the item budget').toBeLessThanOrEqual(
+    limits.maxItemsPerDecision,
+  );
   expect(decision.timers).toHaveLength(decision.metrics.offersCreated);
   expect(decision.writes.filter((w) => w.kind === 'PUT_OFFER')).toHaveLength(
     decision.metrics.offersCreated,
@@ -239,6 +273,8 @@ function assertDecisionShape(
       case 'ARCHIVE_OFFER':
         return `offer:${w.offer.id}`;
       case 'PUT_BACKFILL':
+      case 'PUT_PENDING_BACKFILL':
+      case 'ARCHIVE_BACKFILL':
         return `backfill:${w.record.id}`;
     }
   });
@@ -255,31 +291,56 @@ const scriptArb = fc
 
 const yieldToEventLoop = () => new Promise<void>((resolve) => setImmediate(resolve));
 
+const INTERLEAVE_KINDS: readonly Kind[] = ['REGISTER', 'ACCEPT', 'CANCEL', 'TICK'];
+
+/** What the service does for the next ACCEPT/DECLINE: hand the engine the archived offers. */
+function withSettledOffers(
+  previous: WorkshopSnapshot,
+  next: WorkshopSnapshot,
+  decision: Decision,
+): WorkshopSnapshot {
+  const settled = [
+    ...(previous.settledOffers ?? []),
+    ...decision.writes.flatMap((write) => (write.kind === 'ARCHIVE_OFFER' ? [write.offer] : [])),
+  ].slice(-20);
+  if (settled.length > 0) {
+    next.settledOffers = settled;
+  }
+  return next;
+}
+
 describe('decide() property test', () => {
   it('keeps every invariant after 2,000 random command sequences', async () => {
     let steps = 0;
     let decisions = 0;
     let continuations = 0;
+    let interleaved = 0;
     let longest = 0;
     await fc.assert(
       fc.asyncProperty(setupArb, scriptArb, async (setup, script) => {
         const limits: DecisionLimits = {
           maxOffersPerDecision: setup.maxOffers,
           maxExpiriesPerDecision: setup.maxExpiries,
+          maxItemsPerDecision: setup.maxItems,
         };
         let snapshot = buildSnapshot(setup);
         let now = T0;
         let idSeed = 0;
         longest = Math.max(longest, script.length);
-        for (const step of script) {
+        for (const [index, drawn] of script.entries()) {
           steps += 1;
           if (steps % 50 === 0) {
             await yieldToEventLoop(); // keep the vitest worker responsive
           }
+          const step: Step = { ...drawn, last: index >= script.length - 5 };
           now = addSeconds(now, step.dtSeconds);
-          let command = toCommand(step, setup, snapshot);
+          // The workshop's FIFO group: the step's command, then whatever it spawns. A random
+          // command may be interleaved before a continuation, like a user command that was
+          // already queued when the overflowing decision committed.
+          const queue: Command[] = [toCommand(step, setup, snapshot)];
           let guard = 0;
-          for (;;) {
+          while (queue.length > 0) {
+            const command = queue.shift()!;
             const before = JSON.stringify(snapshot);
             const ctx = makeCtx(now, limits, ++idSeed);
             const decision = decide(snapshot, command, ctx);
@@ -294,12 +355,23 @@ describe('decide() property test', () => {
               }
             }
             assertDecisionShape(decision, limits, snapshot);
-            snapshot = applyChanges(snapshot, decision.writes);
-            if (decision.continuation === undefined) {
-              break;
+            snapshot = withSettledOffers(
+              snapshot,
+              applyChanges(snapshot, decision.writes),
+              decision,
+            );
+            assertHardInvariants(snapshot, now, command.type);
+            if (decision.continuation !== undefined) {
+              continuations += 1;
+              if (step.k % 4 === 0) {
+                interleaved += 1;
+                now = addSeconds(now, step.s % 121);
+                queue.push(
+                  toCommand({ ...step, kind: INTERLEAVE_KINDS[step.s % 4]! }, setup, snapshot),
+                );
+              }
+              queue.push(decision.continuation);
             }
-            continuations += 1;
-            command = decision.continuation;
             if (++guard > 500) {
               throw new Error('continuation chain did not converge');
             }
@@ -307,7 +379,7 @@ describe('decide() property test', () => {
           const report = checkInvariants(snapshot, now);
           if (!report.ok) {
             throw new Error(
-              `invariants violated after ${command.type} at ${now}: ${JSON.stringify(report.violations)}`,
+              `invariants violated after step ${index} (${step.kind}) at ${now}: ${JSON.stringify(report.violations)}`,
             );
           }
           assertSettled(snapshot, now);
@@ -318,8 +390,9 @@ describe('decide() property test', () => {
     expect(steps).toBeGreaterThan(2_000);
     expect(longest).toBeGreaterThan(150);
     expect(continuations).toBeGreaterThan(0);
+    expect(interleaved).toBeGreaterThan(0);
     console.log(
-      `property test: 2000 runs, ${steps} steps (longest ${longest}), ${decisions} decisions, ${continuations} continuations`,
+      `property test: 2000 runs, ${steps} steps (longest ${longest}), ${decisions} decisions, ${continuations} continuations, ${interleaved} interleaved commands`,
     );
   });
 });

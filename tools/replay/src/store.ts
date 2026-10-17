@@ -1,4 +1,4 @@
-import { bySeq, type Change, type WorkshopSnapshot } from '@seatrelay/core';
+import { byRelease, bySeq, type Change, type WorkshopSnapshot } from '@seatrelay/core';
 
 /**
  * The replay's storage adapter. It maps a decision's `Change[]` onto the live snapshot exactly
@@ -65,10 +65,26 @@ export function applyChangesInPlace(
       case 'ARCHIVE_OFFER':
         snapshot.offers = snapshot.offers.filter((offer) => offer.id !== change.offer.id);
         break;
+      case 'PUT_PENDING_BACKFILL': {
+        const index = snapshot.pendingBackfills.findIndex(
+          (record) => record.id === change.record.id,
+        );
+        if (index === -1) {
+          snapshot.pendingBackfills.push(change.record);
+        } else {
+          snapshot.pendingBackfills[index] = change.record;
+        }
+        break;
+      }
       case 'PUT_BACKFILL':
+      case 'ARCHIVE_BACKFILL':
+        snapshot.pendingBackfills = snapshot.pendingBackfills.filter(
+          (record) => record.id !== change.record.id,
+        );
         break;
     }
   }
   snapshot.registrations.sort(bySeq);
+  snapshot.pendingBackfills.sort(byRelease);
   return snapshot;
 }
