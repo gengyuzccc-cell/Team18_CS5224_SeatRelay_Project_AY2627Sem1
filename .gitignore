@@ -44,3 +44,6 @@ report/*.build.log
 report/missfont.log
 report/ecsx*.log
 report/*.xdv
+
+# student numbers stay out of the public repository (see report/README.md)
+report/team-ids.tex
