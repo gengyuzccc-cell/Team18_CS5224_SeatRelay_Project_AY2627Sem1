@@ -131,3 +131,59 @@ seatrelay cross-workshop  target=local vus=50 round=3  warmup=30s measured=60s  
   thresholds ............ all passed
 [16:05:41] run finished {"name":"cross-workshop-50-3","exitCode":0,"readP95":11.015672,"commandP95":9.569149850000002,"settleP95":2875,"errors":0,"thresholdsOk":true}
 [16:05:56] run 10/18 {"scenario":"hotspot","vus":10,"round":1,"name":"hotspot-10-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-10-1.log"}
+
+seatrelay hotspot  target=local vus=10 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1539 (measured 1232)
+  http_reqs ............. 8121   failed 0.00 %
+  read_ms   p50 / p95 ... 5.2 ms / 11.7 ms
+  command_ms (202) ...... 4.4 ms / 9.0 ms
+  poll_ms ............... 2.1 ms / 4.8 ms
+  settle_ms (client) .... 208.0 ms / 411.0 ms
+  server_settle_ms ...... 137.0 ms / 225.8 ms
+  polls per command avg . 1.15
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:07:27] run finished {"name":"hotspot-10-1","exitCode":0,"readP95":11.702699850000002,"commandP95":9.043082499999999,"settleP95":411,"errors":0,"thresholdsOk":true}
+[16:07:42] run 11/18 {"scenario":"hotspot","vus":10,"round":2,"name":"hotspot-10-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-10-2.log"}
+
+seatrelay hotspot  target=local vus=10 round=2  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1504 (measured 1210)
+  http_reqs ............. 8013   failed 0.00 %
+  read_ms   p50 / p95 ... 5.2 ms / 11.3 ms
+  command_ms (202) ...... 4.5 ms / 9.0 ms
+  poll_ms ............... 2.1 ms / 5.1 ms
+  settle_ms (client) .... 209.0 ms / 414.0 ms
+  server_settle_ms ...... 138.0 ms / 238.0 ms
+  polls per command avg . 1.17
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:09:13] run finished {"name":"hotspot-10-2","exitCode":0,"readP95":11.269631249999996,"commandP95":9.029607,"settleP95":414,"errors":0,"thresholdsOk":true}
+[16:09:28] run 12/18 {"scenario":"hotspot","vus":10,"round":3,"name":"hotspot-10-3","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-10-3.log"}
+
+seatrelay hotspot  target=local vus=10 round=3  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 1497 (measured 1212)
+  http_reqs ............. 7995   failed 0.00 %
+  read_ms   p50 / p95 ... 5.3 ms / 11.5 ms
+  command_ms (202) ...... 4.6 ms / 9.1 ms
+  poll_ms ............... 2.1 ms / 4.6 ms
+  settle_ms (client) .... 209.0 ms / 413.0 ms
+  server_settle_ms ...... 137.0 ms / 236.0 ms
+  polls per command avg . 1.18
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:10:59] run finished {"name":"hotspot-10-3","exitCode":0,"readP95":11.478189500000003,"commandP95":9.118871549999998,"settleP95":413,"errors":0,"thresholdsOk":true}
+[16:11:14] run 13/18 {"scenario":"hotspot","vus":25,"round":1,"name":"hotspot-25-1","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-25-1.log"}
+
+seatrelay hotspot  target=local vus=25 round=1  warmup=30s measured=60s  api=http://localhost:3000
+  iterations ............ 3105 (measured 2383)
+  http_reqs ............. 18212   failed 0.00 %
+  read_ms   p50 / p95 ... 6.1 ms / 16.3 ms
+  command_ms (202) ...... 5.0 ms / 12.9 ms
+  poll_ms ............... 2.1 ms / 6.2 ms
+  settle_ms (client) .... 217.0 ms / 424.0 ms
+  server_settle_ms ...... 190.0 ms / 368.0 ms
+  polls per command avg . 1.50
+  commands_failed ....... 0   rejected 0   settle_timeouts 0
+  thresholds ............ all passed
+[16:12:46] run finished {"name":"hotspot-25-1","exitCode":0,"readP95":16.3092247,"commandP95":12.89331,"settleP95":424,"errors":0,"thresholdsOk":true}
+[16:13:01] run 14/18 {"scenario":"hotspot","vus":25,"round":2,"name":"hotspot-25-2","logFile":"/home/user/Team18_CS5224_SeatRelay_Project_AY2627Sem1/results/loadtest/2026-10-17/logs/local/20261017T154945Z/hotspot-25-2.log"}
