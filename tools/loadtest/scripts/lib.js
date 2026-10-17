@@ -86,13 +86,30 @@ export const metrics = {
   settleTimeouts: new Counter('settle_timeouts'),
 };
 
+/**
+ * Workshop ids of a scenario: WORKSHOP_IDS (JSON array or comma-separated list) when set,
+ * otherwise the scenario file written by prepare.ts. WORKSHOP_COUNT keeps only the first N
+ * (e.g. WORKSHOP_COUNT=5 runs cross-workshop over 5 of the 10 prepared workshops).
+ */
 export function workshopIdsFor(scenarioName) {
-  if (__ENV.WORKSHOP_IDS) {
-    const parsed = JSON.parse(__ENV.WORKSHOP_IDS);
-    return Array.isArray(parsed) ? parsed : [];
+  let ids = [];
+  const raw = (__ENV.WORKSHOP_IDS || '').trim();
+  if (raw.length > 0) {
+    if (raw.startsWith('[')) {
+      const parsed = JSON.parse(raw);
+      ids = Array.isArray(parsed) ? parsed.map(String) : [];
+    } else {
+      ids = raw
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+    }
+  } else {
+    const entry = scenarioFile && scenarioFile.scenarios && scenarioFile.scenarios[scenarioName];
+    ids = entry && Array.isArray(entry.workshopIds) ? entry.workshopIds : [];
   }
-  const entry = scenarioFile && scenarioFile.scenarios && scenarioFile.scenarios[scenarioName];
-  return entry && Array.isArray(entry.workshopIds) ? entry.workshopIds : [];
+  const count = Number(__ENV.WORKSHOP_COUNT || 0);
+  return count > 0 ? ids.slice(0, count) : ids;
 }
 
 /** k6 options: one ramping scenario (warm-up ramp, then the measured plateau) + thresholds. */

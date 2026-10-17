@@ -14,6 +14,7 @@ import {
   parseTarget,
   REPO_ROOT,
   resolveTarget,
+  resolveUserPath,
   RESULTS_DIR,
   runMain,
   stringOption,
@@ -184,9 +185,9 @@ runMain(async () => {
   const pauseMs = durationToMs(stringOption(values, 'pause', '15s') as string);
   const warmupMs = durationToMs(spec.warmup);
   const date = stringOption(values, 'date') ?? new Date().toISOString().slice(0, 10);
-  const outDir = path.resolve(
-    stringOption(values, 'out') ?? path.join(RESULTS_DIR, 'loadtest', date),
-  );
+  const outArg = stringOption(values, 'out');
+  const outDir =
+    outArg === undefined ? path.join(RESULTS_DIR, 'loadtest', date) : resolveUserPath(outArg);
   const summaryDir = path.join(outDir, 'k6', targetName);
   const logsDir = path.join(outDir, 'logs', targetName);
   const stateFile = path.join(outDir, 'runs.json');

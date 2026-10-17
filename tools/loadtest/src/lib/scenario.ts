@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { LOADTEST_DIR } from '@seatrelay/scripts';
+import { LOADTEST_DIR, resolveUserPath } from '@seatrelay/scripts';
 
 /**
  * `tools/loadtest/.scenario.<target>.json` — the workshops `prepare.ts` created for the k6
@@ -28,7 +28,7 @@ export type ScenarioName = (typeof SCENARIO_NAMES)[number];
 
 export function scenarioFilePath(target: string, override?: string): string {
   if (override !== undefined && override.length > 0) {
-    return path.resolve(override);
+    return resolveUserPath(override);
   }
   return path.join(LOADTEST_DIR, `.scenario.${target}.json`);
 }

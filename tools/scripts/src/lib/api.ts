@@ -70,6 +70,34 @@ function isErrorBody(value: unknown): value is ErrorBody {
   );
 }
 
+/** The request never got an HTTP answer (connection refused, DNS, TLS, reset). */
+export class ApiNetworkError extends Error {
+  readonly method: string;
+  readonly url: string;
+
+  constructor(method: string, url: string, cause: unknown) {
+    super(`${method} ${url}: the API is not reachable (${networkCause(cause)})`, { cause });
+    this.name = 'ApiNetworkError';
+    this.method = method;
+    this.url = url;
+  }
+}
+
+/** `fetch failed` hides the useful part in `cause` (e.g. ECONNREFUSED 127.0.0.1:3000). */
+export function networkCause(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const cause = (error as { cause?: unknown }).cause;
+  if (cause instanceof Error) {
+    const code = (cause as { code?: unknown }).code;
+    return typeof code === 'string' && !cause.message.includes(code)
+      ? `${code}: ${cause.message}`
+      : cause.message;
+  }
+  return error.message;
+}
+
 export class CommandTimeoutError extends Error {
   readonly commandId: string;
 
@@ -179,7 +207,12 @@ export class ApiClient {
       headers['content-type'] = 'application/json';
       init.body = JSON.stringify(body);
     }
-    return this.fetchImpl(`${this.baseUrl}${path}`, init);
+    const url = `${this.baseUrl}${path}`;
+    try {
+      return await this.fetchImpl(url, init);
+    } catch (error) {
+      throw new ApiNetworkError(method, url, error);
+    }
   }
 
   get<T>(path: string): Promise<T> {

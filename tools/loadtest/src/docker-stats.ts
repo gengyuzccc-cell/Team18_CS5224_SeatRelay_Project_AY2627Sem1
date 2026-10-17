@@ -1,6 +1,14 @@
 #!/usr/bin/env tsx
 import path from 'node:path';
-import { intOption, log, parseCli, RESULTS_DIR, runMain, stringOption } from '@seatrelay/scripts';
+import {
+  intOption,
+  log,
+  parseCli,
+  resolveUserPath,
+  RESULTS_DIR,
+  runMain,
+  stringOption,
+} from '@seatrelay/scripts';
 import { createDockerStatsSampler, DEFAULT_CONTAINER_PREFIX } from './lib/dockerStats';
 import { durationToMs } from './lib/matrix';
 
@@ -12,10 +20,13 @@ containers into a CSV while a load test runs (plan §2.7). run-matrix does this 
   pnpm --filter @seatrelay/loadtest docker-stats -- [options]
 
 Options
-  --out FILE           CSV file (default results/loadtest/<date>-local/docker-stats.csv)
+  --out FILE           CSV file (default results/loadtest/<date>/docker-stats.csv; appended)
   --interval MS        sampling interval in ms (default 2000)
   --prefix NAME        container name prefix to keep (default seatrelay-local-)
   --duration DUR       stop after this long (default: run until Ctrl-C / SIGTERM)
+
+CSV columns: ts,container,cpuPercent,memUsageMiB,memLimitMiB,memPercent,netInputBytes,
+netOutputBytes,blockInputBytes,blockOutputBytes,pids (one line per container per sample).
 `;
 
 runMain(async () => {
@@ -29,10 +40,11 @@ runMain(async () => {
     USAGE,
   );
   const date = new Date().toISOString().slice(0, 10);
-  const outFile = path.resolve(
-    stringOption(values, 'out') ??
-      path.join(RESULTS_DIR, 'loadtest', `${date}-local`, 'docker-stats.csv'),
-  );
+  const outArg = stringOption(values, 'out');
+  const outFile =
+    outArg === undefined
+      ? path.join(RESULTS_DIR, 'loadtest', date, 'docker-stats.csv')
+      : resolveUserPath(outArg);
   const prefix = stringOption(values, 'prefix', DEFAULT_CONTAINER_PREFIX) as string;
   const sampler = createDockerStatsSampler({
     outFile,

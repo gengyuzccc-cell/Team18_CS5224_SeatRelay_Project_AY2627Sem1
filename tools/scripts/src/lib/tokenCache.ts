@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import { CliError, LOADTEST_DIR } from './cli';
+import { CliError, LOADTEST_DIR, resolveUserPath } from './cli';
 
 /**
  * `tools/loadtest/.token-cache.<target>.json` — the ID tokens k6 and the seed scripts use.
@@ -28,7 +28,7 @@ export type TokenCache = z.infer<typeof TokenCacheSchema>;
 
 export function tokenCachePath(target: string, override?: string): string {
   if (override !== undefined && override.length > 0) {
-    return path.resolve(override);
+    return resolveUserPath(override);
   }
   return path.join(LOADTEST_DIR, `.token-cache.${target}.json`);
 }

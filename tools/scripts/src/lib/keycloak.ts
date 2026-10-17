@@ -1,4 +1,5 @@
-import type { FetchLike } from './api';
+import { networkCause, type FetchLike } from './api';
+import { CliError } from './cli';
 import { decodeJwtPayload, jwtExpiresAt } from './jwt';
 import {
   splitName,
@@ -47,8 +48,23 @@ export function keycloakIssuer(options: Pick<KeycloakOptions, 'baseUrl' | 'realm
   return `${options.baseUrl.replace(/\/+$/, '')}/realms/${options.realm}`;
 }
 
+export const KEYCLOAK_UNREACHABLE_HINT =
+  'Is the local stack up? docker compose -f services/local/docker-compose.yml ps ' +
+  '(Keycloak takes about a minute to become healthy after `up`).';
+
+/** `fetch` that turns "no HTTP answer" into a CliError naming the Keycloak URL. */
 function fetchOf(options: KeycloakOptions): FetchLike {
-  return options.fetch ?? ((input, init) => fetch(input, init));
+  const inner: FetchLike = options.fetch ?? ((input, init) => fetch(input, init));
+  return async (input, init) => {
+    try {
+      return await inner(input, init);
+    } catch (error) {
+      throw new CliError(
+        `Keycloak is not reachable at ${options.baseUrl} (${networkCause(error)})`,
+        { hint: KEYCLOAK_UNREACHABLE_HINT },
+      );
+    }
+  };
 }
 
 async function tokenEndpoint(

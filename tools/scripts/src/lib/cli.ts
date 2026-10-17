@@ -7,6 +7,21 @@ export const REPO_ROOT = fileURLToPath(new URL('../../../../', import.meta.url))
 export const LOADTEST_DIR = path.join(REPO_ROOT, 'tools', 'loadtest');
 export const RESULTS_DIR = path.join(REPO_ROOT, 'results');
 
+/**
+ * Directory the user ran the command from. `pnpm --filter <pkg> <script>` runs the script in the
+ * package directory but exports the original directory as `INIT_CWD`, so relative paths given
+ * on the command line must be resolved against it, not against `process.cwd()`.
+ */
+export function invocationDir(): string {
+  const initCwd = process.env.INIT_CWD;
+  return initCwd !== undefined && initCwd.length > 0 ? initCwd : process.cwd();
+}
+
+/** Resolves a path typed by the user (flag value) against `invocationDir()`. */
+export function resolveUserPath(file: string): string {
+  return path.resolve(invocationDir(), file);
+}
+
 /** A usage / input error: printed without a stack trace, exit code 2. */
 export class CliError extends Error {
   readonly exitCode: number;
@@ -129,6 +144,19 @@ export function enumOption<const T extends readonly string[]>(
   return raw as T[number];
 }
 
+/**
+ * Errors that describe an operational condition (API answered 4xx/5xx, API or identity
+ * provider unreachable, command rejected or not settled, seeded state differs): their message
+ * says everything, a stack trace would only hide it.
+ */
+const OPERATIONAL_ERRORS = new Set([
+  'ApiHttpError',
+  'ApiNetworkError',
+  'CommandTimeoutError',
+  'CommandRejectedError',
+  'SeedStateError',
+]);
+
 /** Runs a CLI main; CliErrors print `error: message` (+ hint), anything else its stack. */
 export function runMain(main: () => Promise<void>): void {
   main().then(
@@ -142,6 +170,10 @@ export function runMain(main: () => Promise<void>): void {
           process.stderr.write(`${error.hint}\n`);
         }
         process.exit(error.exitCode);
+      }
+      if (error instanceof Error && OPERATIONAL_ERRORS.has(error.name)) {
+        process.stderr.write(`error: ${error.message}\n`);
+        process.exit(1);
       }
       process.stderr.write(
         `error: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}\n`,

@@ -102,6 +102,8 @@ export interface CommonValues {
 }
 
 export interface CheckInput {
+  /** Repetition the check belongs to (default: the current `beginRun`); for parallel trials. */
+  run?: number;
   scenario: string;
   step: string;
   ok: boolean;
@@ -115,12 +117,17 @@ export interface CheckRow extends CheckInput {
   run: number;
 }
 
+/** Fields of a check row that may be overridden besides the assertion itself. */
+type CheckExtras = Pick<CheckInput, 'detail' | 'ms' | 'run'>;
+
 export interface ExperimentResult {
   /** Markdown body of summary.md (the harness adds the header and the checks section). */
   summary: string;
   /** raw.csv rows; the check rows when omitted. */
   rows?: CsvRow[];
   columns?: string[];
+  /** Further CSV files of the run directory, e.g. `{ 'latency.csv': samples }`. */
+  extraFiles?: Record<string, CsvRow[]>;
   /** Extra fields for meta.json (headline numbers). */
   extra?: Record<string, unknown>;
   /** Overrides the "every check passed" verdict (e.g. a latency target). */
@@ -145,6 +152,8 @@ export class ExperimentContext {
   readonly runId = randomUUID();
   readonly startedAt = new Date();
   readonly checks: CheckRow[] = [];
+  /** Steps that could not run on this target (documented in summary.md, not counted). */
+  readonly skipped: CheckRow[] = [];
   readonly params: Record<string, unknown> = {};
   readonly commit: CommitInfo | undefined;
   readonly anonymous: ApiClient;
@@ -182,7 +191,7 @@ export class ExperimentContext {
 
   /** Records an assertion; returns `ok`. */
   check(input: CheckInput): boolean {
-    const row: CheckRow = { run: this.run, ...input };
+    const row: CheckRow = { ...input, run: input.run ?? this.run };
     this.checks.push(row);
     const parts = [`${checkmark(input.ok)} ${input.scenario} / ${input.step}`];
     if (input.expected !== undefined || input.actual !== undefined) {
@@ -199,28 +208,34 @@ export class ExperimentContext {
   }
 
   /** `check` with `ok = expected === actual` (stringified). */
-  expectEqual(scenario: string, step: string, expected: unknown, actual: unknown, detail?: string, ms?: number): boolean {
-    const row: CheckInput = {
+  expectEqual(
+    scenario: string,
+    step: string,
+    expected: unknown,
+    actual: unknown,
+    extras: CheckExtras = {},
+  ): boolean {
+    return this.check({
       scenario,
       step,
       ok: String(expected) === String(actual),
       expected: String(expected),
       actual: String(actual),
-    };
-    if (detail !== undefined) {
-      row.detail = detail;
-    }
-    if (ms !== undefined) {
-      row.ms = ms;
-    }
-    return this.check(row);
+      ...extras,
+    });
   }
 
   /** Records a thrown error as a failed check. */
-  fail(scenario: string, step: string, error: unknown): false {
+  fail(scenario: string, step: string, error: unknown, run?: number): false {
     const message = error instanceof Error ? error.message : String(error);
-    this.check({ scenario, step, ok: false, detail: message });
+    this.check({ scenario, step, ok: false, detail: message, ...(run === undefined ? {} : { run }) });
     return false;
+  }
+
+  /** Records a step that cannot run on this target: listed in summary.md / meta.json, not a check. */
+  skip(scenario: string, step: string, reason: string, run?: number): void {
+    this.skipped.push({ run: run ?? this.run, scenario, step, ok: true, detail: `skipped: ${reason}` });
+    this.log(`SKIP ${scenario} / ${step} — ${reason}`);
   }
 
   /** Records a parameter in meta.json. */
@@ -341,6 +356,9 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
     if (result?.rows !== undefined) {
       writeCsv(path.join(dir, 'checks.csv'), checkRows);
     }
+    for (const [file, rows] of Object.entries(result?.extraFiles ?? {})) {
+      writeCsv(path.join(dir, path.basename(file)), rows);
+    }
     const summary = renderSummary(spec, ctx, result, error, finishedAt, ok);
     writeMarkdown(path.join(dir, 'summary.md'), summary);
     writeJson(path.join(dir, 'meta.json'), {
@@ -359,7 +377,15 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       label: options.label ?? null,
       accounts: { prefix: naming.prefix, domain: naming.domain, organiser: naming.organiserEmail, ...accounts.stats },
       params: ctx.params,
-      checks: { total: ctx.checks.length, passed: ctx.checks.length - failed.length, failed: failed.length },
+      checks: {
+        total: ctx.checks.length,
+        passed: ctx.checks.length - failed.length,
+        failed: failed.length,
+        skipped: ctx.skipped.length,
+      },
+      ...(ctx.skipped.length === 0
+        ? {}
+        : { skipped: ctx.skipped.map((row) => ({ run: row.run, scenario: row.scenario, step: row.step, reason: row.detail })) }),
       ok,
       ...(error === undefined ? {} : { error: error instanceof Error ? error.message : String(error) }),
       ...(result?.extra ?? {}),
@@ -398,6 +424,16 @@ function renderSummary<O extends CliOptions>(
   }
   if (result !== undefined) {
     lines.push(result.summary.trim(), '');
+  }
+  if (ctx.skipped.length > 0) {
+    lines.push('## Skipped on this target', '');
+    lines.push(
+      markdownTable(
+        ['run', 'scenario', 'step', 'reason'],
+        ctx.skipped.map((row) => [row.run, row.scenario, row.step, row.detail]),
+      ),
+      '',
+    );
   }
   lines.push('## Checks', '');
   if (failed.length === 0) {

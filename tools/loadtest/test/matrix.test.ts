@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { parseK6Summary, type RunRow } from '../src/lib/k6summary';
 import {
   aggregateByLevel,
@@ -7,10 +10,14 @@ import {
   durationToMs,
   k6Args,
   k6Env,
+  mergeRows,
+  readMatrixState,
+  rowKey,
   renderCommand,
   renderSummaryMarkdown,
   summaryFileFor,
   toCsv,
+  writeMatrixState,
 } from '../src/lib/matrix';
 import { SAMPLE_SUMMARY } from './k6summary.test';
 
@@ -32,6 +39,9 @@ function row(overrides: Partial<RunRow>): RunRow {
       startedAt: '2026-10-17T06:58:00.000Z',
       measuredStart: '2026-10-17T06:58:30.000Z',
       endedAt: '2026-10-17T07:00:00.000Z',
+      warmup: '30s',
+      duration: '60s',
+      commit: 'abc1234',
     }),
     ...overrides,
   };
@@ -128,24 +138,33 @@ describe('matrix', () => {
     expect(levels[1]).toMatchObject({ vus: 50, rounds: 1, readP95: 1200, pass: false });
   });
 
-  it('renders summary.md with a table per scenario, per-level medians and notes', () => {
-    const md = renderSummaryMarkdown(
-      [
+  it('renders summary.md per target and scenario, with per-level medians and notes', () => {
+    const md = renderSummaryMarkdown({
+      version: 1,
+      date: '2026-10-17',
+      targets: {
+        local: { apiBase: 'http://localhost:3000', notes: ['docker-stats.csv sampled'] },
+        dev: {
+          apiBase: 'https://api.example',
+          notes: ['CloudWatch metrics skipped: no credentials'],
+        },
+      },
+      rows: [
         row({}),
         row({ scenario: 'cross-workshop', sqsDepthMax: 3, sqsOldestAgeMax: 2, cwSettleP95: 420 }),
+        row({ target: 'dev', commit: 'def5678' }),
       ],
-      {
-        date: '2026-10-17',
-        target: 'local',
-        apiBase: 'http://localhost:3000',
-        spec,
-        notes: ['CloudWatch metrics skipped: no credentials'],
-        commit: 'abc1234',
-      },
-    );
-    expect(md).toContain('# Load test 2026-10-17 — target `local`');
-    expect(md).toContain('## cross-workshop');
-    expect(md).toContain('## hotspot');
+    });
+    expect(md).toContain('# Load test 2026-10-17');
+    expect(md).toContain('## Target `local`');
+    expect(md).toContain('## Target `dev`');
+    expect(md.indexOf('## Target `dev`')).toBeLessThan(md.indexOf('## Target `local`'));
+    expect(md).toContain('### local · cross-workshop');
+    expect(md).toContain('### local · hotspot');
+    expect(md).toContain('### dev · hotspot');
+    expect(md).toContain('- API: `http://localhost:3000`');
+    expect(md).toContain('warm-up `30s`, measured `60s` per run; commit `abc1234`.');
+    expect(md).toContain('commit `def5678`.');
     expect(md).toContain(
       '| 10 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | 3 | 2 | 420 |',
     );
@@ -153,7 +172,33 @@ describe('matrix', () => {
       '| 10 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | – | – | – |',
     );
     expect(md).toContain('| 10 | 1 | 55 | 80 | 1400 | 600 | 0.20 % | met |');
-    expect(md).toContain('- CloudWatch metrics skipped: no credentials');
-    expect(md).toContain('commit `abc1234`');
+    expect(md).toContain('- Note: CloudWatch metrics skipped: no credentials');
+  });
+
+  it('accumulates runs of one date across invocations; re-runs replace their row', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'matrix-state-'));
+    const file = path.join(dir, 'runs.json');
+    const first = readMatrixState(file, '2026-10-17');
+    expect(first.rows).toEqual([]);
+    writeMatrixState(file, {
+      ...first,
+      targets: { local: { apiBase: 'http://localhost:3000', notes: [] } },
+      rows: mergeRows(first.rows, [row({ round: 2 }), row({ round: 1, settleP95: 9000 })]),
+    });
+    const second = readMatrixState(file, '2026-10-17');
+    const merged = mergeRows(second.rows, [
+      row({ round: 1, settleP95: 1200 }),
+      row({ target: 'dev' }),
+      row({ scenario: 'cross-workshop', vus: 25 }),
+    ]);
+    expect(merged.map((r) => `${r.target}/${r.scenario}/${r.vus}/${r.round}`)).toEqual([
+      'dev/hotspot/10/1',
+      'local/cross-workshop/25/1',
+      'local/hotspot/10/1',
+      'local/hotspot/10/2',
+    ]);
+    const replaced = merged.find((r) => rowKey(r) === 'local|hotspot|10|1');
+    expect(replaced?.settleP95).toBe(1200);
+    fs.rmSync(dir, { recursive: true, force: true });
   });
 });

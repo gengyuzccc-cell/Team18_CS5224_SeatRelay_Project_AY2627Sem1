@@ -87,6 +87,9 @@ describe('parseK6Summary', () => {
     startedAt: '2026-10-17T06:58:00.000Z',
     measuredStart: '2026-10-17T06:58:30.000Z',
     endedAt: '2026-10-17T07:00:00.000Z',
+    warmup: '30s',
+    duration: '60s',
+    commit: 'abc1234',
     exitCode: 0,
   };
 
@@ -96,6 +99,9 @@ describe('parseK6Summary', () => {
       scenario: 'hotspot',
       vus: 10,
       round: 1,
+      warmup: '30s',
+      duration: '60s',
+      commit: 'abc1234',
       iterations: 120,
       iterationsMeasured: 90,
       httpReqs: 1500,

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { CliError } from '../src/lib/cli';
+import { CliError, parseCli, resolveUserPath, stripArgSeparator } from '../src/lib/cli';
 import {
   findCachedUser,
   isTokenFresh,
@@ -35,7 +35,32 @@ const user = (email: string, expiresAt: string): TokenCacheUser => ({
 describe('token cache', () => {
   it('defaults to tools/loadtest/.token-cache.<target>.json', () => {
     expect(tokenCachePath('local')).toMatch(/tools[/\\]loadtest[/\\]\.token-cache\.local\.json$/);
-    expect(tokenCachePath('dev', 'custom.json')).toBe(path.resolve('custom.json'));
+  });
+
+  it('resolves user-given paths against INIT_CWD (pnpm --filter runs in the package dir)', () => {
+    const saved = process.env.INIT_CWD;
+    try {
+      process.env.INIT_CWD = '/work/repo';
+      expect(tokenCachePath('dev', 'tools/loadtest/x.json')).toBe(
+        path.resolve('/work/repo', 'tools/loadtest/x.json'),
+      );
+      expect(resolveUserPath('/abs/file.json')).toBe(path.resolve('/abs/file.json'));
+      delete process.env.INIT_CWD;
+      expect(resolveUserPath('custom.json')).toBe(path.resolve(process.cwd(), 'custom.json'));
+    } finally {
+      if (saved === undefined) {
+        delete process.env.INIT_CWD;
+      } else {
+        process.env.INIT_CWD = saved;
+      }
+    }
+  });
+
+  it('ignores the `--` that `pnpm <script> -- --flag` forwards', () => {
+    expect(stripArgSeparator(['--', '--count', '2'])).toEqual(['--count', '2']);
+    expect(stripArgSeparator(['--count', '2', '--', 'x'])).toEqual(['--count', '2', '--', 'x']);
+    const { values } = parseCli({ count: { type: 'string' } }, 'usage', ['--', '--count', '3']);
+    expect(values.count).toBe('3');
   });
 
   it('writes and reads the { users: [{ email, idToken, expiresAt }] } format', () => {

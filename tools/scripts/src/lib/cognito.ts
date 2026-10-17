@@ -4,7 +4,7 @@ import {
   CognitoIdentityProviderClient,
   UsernameExistsException,
 } from '@aws-sdk/client-cognito-identity-provider';
-import type { FetchLike } from './api';
+import { networkCause, type FetchLike } from './api';
 import {
   assertAwsCredentials,
   awsRegion,
@@ -58,18 +58,25 @@ export async function cognitoInitiateAuth(
   password: string,
 ): Promise<MintedToken> {
   const fetchImpl = options.fetch ?? ((input, init) => fetch(input, init));
-  const response = await fetchImpl(cognitoEndpoint(options.region), {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/x-amz-json-1.1',
-      'x-amz-target': 'AWSCognitoIdentityProviderService.InitiateAuth',
-    },
-    body: JSON.stringify({
-      AuthFlow: 'USER_PASSWORD_AUTH',
-      ClientId: options.clientId,
-      AuthParameters: { USERNAME: username, PASSWORD: password },
-    }),
-  });
+  let response: Response;
+  try {
+    response = await fetchImpl(cognitoEndpoint(options.region), {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-amz-json-1.1',
+        'x-amz-target': 'AWSCognitoIdentityProviderService.InitiateAuth',
+      },
+      body: JSON.stringify({
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: options.clientId,
+        AuthParameters: { USERNAME: username, PASSWORD: password },
+      }),
+    });
+  } catch (error) {
+    throw new CliError(
+      `Cognito InitiateAuth for ${username}: ${cognitoEndpoint(options.region)} is not reachable (${networkCause(error)})`,
+    );
+  }
   const text = await response.text();
   let body: InitiateAuthResponse = {};
   try {

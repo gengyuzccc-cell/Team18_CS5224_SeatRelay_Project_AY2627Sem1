@@ -1,6 +1,14 @@
 #!/usr/bin/env tsx
 import fs from 'node:fs';
-import { CliError, intOption, log, parseCli, runMain, stringOption } from './lib/cli';
+import {
+  CliError,
+  intOption,
+  log,
+  parseCli,
+  resolveUserPath,
+  runMain,
+  stringOption,
+} from './lib/cli';
 import { REALM_USERS, keycloakUserProvider } from './lib/keycloak';
 import { keycloakOptionsFromEnv } from './lib/targets';
 import {
@@ -45,7 +53,12 @@ tools/loadtest/.token-cache.local.json = { users: [{ email, idToken, expiresAt, 
 `;
 
 function parseUsersFile(file: string, password: string): UserSpec[] {
-  const raw = fs.readFileSync(file, 'utf8');
+  let raw: string;
+  try {
+    raw = fs.readFileSync(file, 'utf8');
+  } catch {
+    throw new CliError(`--users file not found: ${file}`);
+  }
   const trimmed = raw.trim();
   if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
     const parsed: unknown = JSON.parse(trimmed);
@@ -103,7 +116,7 @@ runMain(async () => {
   const usersFile = stringOption(values, 'users');
   const count = intOption(values, 'count', 0);
   if (usersFile !== undefined) {
-    specs = parseUsersFile(usersFile, password);
+    specs = parseUsersFile(resolveUserPath(usersFile), password);
   } else if (count > 0) {
     specs = generatedUserSpecs({
       count,
@@ -155,9 +168,14 @@ runMain(async () => {
       },
     });
   } catch (error) {
+    if (error instanceof CliError) {
+      throw error; // e.g. Keycloak not reachable (with its own hint)
+    }
     const message = error instanceof Error ? error.message : String(error);
     throw new CliError(message, {
-      hint: `Is the local stack up? docker compose -f services/local/docker-compose.yml ps (Keycloak at ${keycloak.baseUrl})`,
+      hint: create
+        ? `Keycloak at ${keycloak.baseUrl}: check --admin-user / --admin-password (bootstrap admin of docker-compose.yml).`
+        : `Keycloak at ${keycloak.baseUrl}: with --no-create every account must already exist with --password.`,
     });
   }
 
