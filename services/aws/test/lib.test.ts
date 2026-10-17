@@ -133,6 +133,36 @@ describe('observability wrappers', () => {
     expect(() => idle.flush()).not.toThrow();
   });
 
+  test('EMF carries the service and stage dimensions, so dev and pilot never share a metric stream', () => {
+    const saved = { stage: process.env.STAGE, service: process.env.POWERTOOLS_SERVICE_NAME };
+    try {
+      process.env.POWERTOOLS_SERVICE_NAME = 'worker';
+      const blobs = ['dev', 'pilot'].map((stage) => {
+        process.env.STAGE = stage;
+        const metrics = new LambdaMetrics();
+        metrics.emit('SweepLateExpiries', 1);
+        metrics.count('WorkerRecordFailures');
+        return metrics.powertools.serializeMetrics() as unknown as Record<string, unknown> & {
+          _aws: { CloudWatchMetrics: { Namespace: string; Dimensions: string[][] }[] };
+        };
+      });
+      for (const [index, stage] of ['dev', 'pilot'].entries()) {
+        const blob = blobs[index]!;
+        expect(blob._aws.CloudWatchMetrics[0]?.Namespace).toBe('SeatRelay');
+        expect(blob._aws.CloudWatchMetrics[0]?.Dimensions).toEqual([['service', 'stage']]);
+        expect(blob).toMatchObject({
+          service: 'worker',
+          stage,
+          SweepLateExpiries: 1,
+          WorkerRecordFailures: 1,
+        });
+      }
+    } finally {
+      restoreEnv('STAGE', saved.stage);
+      restoreEnv('POWERTOOLS_SERVICE_NAME', saved.service);
+    }
+  });
+
   test('LambdaLogger forwards structured fields; errorFields keeps the stack out of the response path', () => {
     const logger = new LambdaLogger();
     const info = vi.spyOn(logger.powertools, 'info').mockImplementation(() => undefined);
@@ -161,3 +191,11 @@ describe('observability wrappers', () => {
     expect(builds).toBe(1);
   });
 });
+
+function restoreEnv(name: string, value: string | undefined): void {
+  if (value === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = value;
+  }
+}

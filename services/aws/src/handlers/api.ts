@@ -3,7 +3,7 @@ import type {
   APIGatewayProxyStructuredResultV2,
   Context,
 } from 'aws-lambda';
-import type { AuthUser, ErrorBody } from '@seatrelay/contracts';
+import { EmailSchema, type AuthUser, type ErrorBody } from '@seatrelay/contracts';
 import {
   JSON_CONTENT_TYPE,
   toWireResponse,
@@ -31,6 +31,28 @@ export type ApiHandler = (
 
 /** `GET /public/workshops/{wsId}` (no authorizer) is served by the public workshop route. */
 const PUBLIC_WORKSHOP = /^\/public(\/workshops\/[^/]+)\/?$/;
+
+/** `POST /workshops/{wsId}/commands`: the only route that copies the identity into a command. */
+const COMMAND_INTAKE = /^\/workshops\/[^/]+\/commands\/?$/;
+
+/**
+ * A command carries the caller's e-mail (`actorEmail`, contracts `EmailSchema`) and the worker
+ * parses every message with the command schema. An identity whose `email` claim that schema
+ * rejects (Cognito accepts some RFC 5322 forms zod does not) would get a 202 for a command the
+ * worker can only drop, leaving its record ACCEPTED forever; refuse it at the door instead.
+ */
+export function unusableCommandIdentity(
+  method: string,
+  path: string,
+  user: AuthUser | undefined,
+): boolean {
+  return (
+    user !== undefined &&
+    method.toUpperCase() === 'POST' &&
+    COMMAND_INTAKE.test(path) &&
+    !EmailSchema.safeParse(user.email).success
+  );
+}
 
 function errorResult(status: number, body: ErrorBody): APIGatewayProxyStructuredResultV2 {
   return {
@@ -80,6 +102,17 @@ export function createApiHandler(deps: ApiHandlerDeps): ApiHandler {
       const parsed = parseEventBody(event);
       if (!parsed.ok) {
         return errorResult(400, { code: 'VALIDATION_ERROR', message: 'Malformed JSON body' });
+      }
+      if (unusableCommandIdentity(method, path, user)) {
+        deps.logger.warn('command refused: identity e-mail fails the command schema', {
+          method,
+          path,
+          userId: user?.userId,
+        });
+        return errorResult(400, {
+          code: 'VALIDATION_ERROR',
+          message: 'The e-mail address of this account cannot be used to submit commands',
+        });
       }
       const request: ApiRequest = {
         method,

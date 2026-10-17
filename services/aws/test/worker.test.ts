@@ -2,8 +2,20 @@ import { randomUUID } from 'node:crypto';
 import type { SQSRecord } from 'aws-lambda';
 import type { Command } from '@seatrelay/contracts';
 import { describe, expect, test } from 'vitest';
-import { createWorkerHandler, deliveryAttemptOf, parseCommandBody } from '../src/handlers/worker';
+import {
+  createWorkerHandler,
+  deliveryAttemptOf,
+  messageIdentifiers,
+  parseCommandBody,
+} from '../src/handlers/worker';
+import type { OperationalMetricName, OperationalMetricsSink } from '../src/lib/metrics';
 import { bob, carol, postCommand, scenario, sqsRecord } from './harness';
+
+/** Records `WorkerRecordFailures` counts. */
+function failureCounter(): OperationalMetricsSink & { counts: OperationalMetricName[] } {
+  const counts: OperationalMetricName[] = [];
+  return { counts, count: (name) => void counts.push(name) };
+}
 
 /** Takes every message the in-memory API enqueued and turns it into SQS records. */
 function drainToRecords(messages: Command[], receiveCount = 1): SQSRecord[] {
@@ -76,17 +88,46 @@ describe('worker handler', () => {
     });
   });
 
-  test('malformed messages are dropped (logged), not retried', async () => {
+  test('malformed messages are dropped (logged with their identifiers, counted), not retried', async () => {
     const { ports } = await scenario();
-    const handler = createWorkerHandler({ ports, faultInjection: false });
+    const operationalMetrics = failureCounter();
+    const handler = createWorkerHandler({ ports, faultInjection: false, operationalMetrics });
+    const commandId = randomUUID();
     const records = [
       sqsRecord('not json', { messageId: 'bad-1' }),
       sqsRecord({ type: 'BOGUS', workshopId: 'x' }, { messageId: 'bad-2' }),
+      // e.g. an identity e-mail the API accepted but the command schema does not
+      sqsRecord(
+        {
+          type: 'REGISTER',
+          commandId,
+          workshopId: 'ws-9',
+          actorUserId: 'u1',
+          actorEmail: 'a&b@example',
+          acceptable: ['s1'],
+        },
+        { messageId: 'bad-3' },
+      ),
     ];
     await expect(handler({ Records: records })).resolves.toEqual({ batchItemFailures: [] });
-    expect(
-      ports.logger.entries.filter((entry) => entry.message === 'malformed command message dropped'),
-    ).toHaveLength(2);
+    const dropped = ports.logger.entries.filter(
+      (entry) => entry.message === 'malformed command message dropped',
+    );
+    expect(dropped).toHaveLength(3);
+    expect(dropped[2]?.fields).toMatchObject({
+      messageId: 'bad-3',
+      type: 'REGISTER',
+      commandId,
+      workshopId: 'ws-9',
+      actorUserId: 'u1',
+    });
+    expect(operationalMetrics.counts).toEqual([
+      'WorkerRecordFailures',
+      'WorkerRecordFailures',
+      'WorkerRecordFailures',
+    ]);
+    expect(messageIdentifiers('[1]')).toEqual({});
+    expect(messageIdentifiers('null')).toEqual({});
   });
 
   test('internal ticks for an unknown workshop are a NOOP', async () => {
@@ -109,11 +150,14 @@ describe('worker handler', () => {
         throw Object.assign(new Error('DynamoDB unavailable'), { name: 'InternalServerError' });
       }
     };
-    const handler = createWorkerHandler({ ports, faultInjection: false });
+    const operationalMetrics = failureCounter();
+    const handler = createWorkerHandler({ ports, faultInjection: false, operationalMetrics });
 
     await expect(handler({ Records: records })).resolves.toEqual({
       batchItemFailures: [{ itemIdentifier: 'msg-2' }, { itemIdentifier: 'msg-3' }],
     });
+    // The invocation succeeds, so the failure is counted for the WorkerRecordFailures alarm.
+    expect(operationalMetrics.counts).toEqual(['WorkerRecordFailures']);
     expect(await ports.store.getCommandResult(ok.commandId)).toMatchObject({ status: 'APPLIED' });
     expect(await ports.store.getCommandResult(broken.commandId)).toMatchObject({
       status: 'ACCEPTED',
@@ -152,7 +196,8 @@ describe('worker handler', () => {
     });
     const [message] = ports.queue.messages;
     expect(message).toMatchObject({ _fault: 'BEFORE_COMMIT' });
-    const injecting = createWorkerHandler({ ports, faultInjection: true });
+    const operationalMetrics = failureCounter();
+    const injecting = createWorkerHandler({ ports, faultInjection: true, operationalMetrics });
 
     const firstDelivery = sqsRecord(message, { messageId: 'm1', receiveCount: 1 });
     await expect(injecting({ Records: [firstDelivery] })).resolves.toEqual({
@@ -166,6 +211,7 @@ describe('worker handler', () => {
         (entry) => entry.message === 'injected fault; message will be redelivered',
       ),
     ).toBe(true);
+    expect(operationalMetrics.counts).toEqual([]); // expected in experiments: no alarm
 
     const redelivery = sqsRecord(message, { messageId: 'm1', receiveCount: 2 });
     await expect(injecting({ Records: [redelivery] })).resolves.toEqual({ batchItemFailures: [] });

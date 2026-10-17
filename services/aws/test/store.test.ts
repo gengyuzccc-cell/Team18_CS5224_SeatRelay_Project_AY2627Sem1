@@ -40,11 +40,14 @@ import {
   sessionItem,
   uniqueMarkerItem,
   workshopItem,
+  type Item,
 } from '../src/adapters/dynamo/mapping';
 import {
+  DEFAULT_TRANSIENT_RETRIES,
   DynamoWorkshopStore,
   MAX_TRANSACTION_ITEMS,
   TransactionTooLargeError,
+  UniqueMarkerConflictError,
 } from '../src/adapters/dynamo/store';
 import {
   CMD_ID,
@@ -67,10 +70,20 @@ const T1 = addSeconds(T0, 90);
 
 type TransactItem = NonNullable<TransactWriteCommandInput['TransactItems']>[number];
 
+/** Backoff sleeps requested by the store under test (never actually waited for). */
+let sleeps: number[] = [];
+
 function newStore(): DynamoWorkshopStore {
   const doc = DynamoDBDocumentClient.from(new DynamoDBClient({ region: 'ap-southeast-1' }));
-  return new DynamoWorkshopStore(doc, TABLE);
+  return new DynamoWorkshopStore(doc, TABLE, {
+    sleep: async (ms) => {
+      sleeps.push(ms);
+    },
+    random: () => 0.5,
+  });
 }
+
+const MARKER_CONDITION = 'attribute_not_exists(PK) OR #seq = :seq0';
 
 function sentTransaction(): TransactItem[] {
   const calls = ddb.commandCalls(TransactWriteCommand);
@@ -160,6 +173,7 @@ function registerDecision() {
 
 beforeEach(() => {
   ddb.reset();
+  sleeps = [];
 });
 
 describe('commit: one TransactWriteItems per decision', () => {
@@ -186,7 +200,7 @@ describe('commit: one TransactWriteItems per decision', () => {
       'Put L#S#s1',
       'Put L#R#00000001',
       'Put L#O#id-1 [attribute_not_exists(PK)]',
-      'Put L#U#bob',
+      `Put L#U#bob [${MARKER_CONDITION}]`,
       `Put N#${T0}#n-1 [attribute_not_exists(PK)]`,
     ]);
     // Every item has the table name and the DUE marker carries the sparse index key.
@@ -210,6 +224,9 @@ describe('commit: one TransactWriteItems per decision', () => {
       seq: 1,
       status: 'OFFERED',
     });
+    // R1 (plan §2.2): the marker is written conditionally, created or held by the same seq.
+    expect(items[6]?.Put?.ExpressionAttributeNames).toEqual({ '#seq': 'seq' });
+    expect(items[6]?.Put?.ExpressionAttributeValues).toEqual({ ':seq0': 1 });
     expect(items[7]?.Put?.Item).toMatchObject({
       entityType: 'NOTIFICATION',
       kind: 'OFFER',
@@ -374,7 +391,7 @@ describe('commit: one TransactWriteItems per decision', () => {
       'Put L#R#00000001',
       'Delete L#R#00000002',
       'Put H#R#00000002 [attribute_not_exists(PK)]',
-      'Put L#U#bob#s2',
+      `Put L#U#bob#s2 [${MARKER_CONDITION}]`,
       'Delete L#U#bob#s1',
     ]);
     expect(ddb.commandCalls(GetCommand)).toHaveLength(1);
@@ -449,6 +466,243 @@ describe('commit: one TransactWriteItems per decision', () => {
   });
 });
 
+describe('commit: R1 unique marker (plan §2.2)', () => {
+  const perSession = { ...workshop, mode: 'PER_SESSION' as const };
+
+  /** A PER_SESSION workshop whose snapshot holds Bob's registration bound to s1, offered. */
+  function perSessionSnapshot(): WorkshopSnapshot {
+    const held = { ...structuredClone(session1), held: 1 };
+    return {
+      workshop: { ...structuredClone(perSession), seq: 1, version: 1 },
+      sessions: [held, structuredClone(session2)],
+      registrations: [
+        registration({ acceptable: ['s1'], status: 'OFFERED', currentOfferId: 'offer-1' }),
+      ],
+      offers: [offer()],
+      pendingBackfills: [],
+    };
+  }
+
+  function itemsOf(snapshot: WorkshopSnapshot): Item[] {
+    return [
+      workshopItem(snapshot.workshop),
+      ...snapshot.sessions.map(sessionItem),
+      ...snapshot.registrations.map(liveRegistrationItem),
+      ...snapshot.registrations.map((r) => uniqueMarkerItem(snapshot.workshop.mode, r)),
+      ...snapshot.offers.map(liveOfferItem),
+    ];
+  }
+
+  function markerOps(items: readonly TransactItem[]): string[] {
+    return describeTransaction(items).filter((line) => line.includes(' L#U#'));
+  }
+
+  test('PER_SESSION decline: the engine archives the registration with acceptable [] and the marker of its bound session is deleted', async () => {
+    ddb.on(QueryCommand).resolvesOnce({ Items: itemsOf(perSessionSnapshot()) });
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    const snapshot = await store.loadSnapshot(WS);
+    const command: UserCommand = {
+      type: 'DECLINE_OFFER',
+      commandId: CMD_ID,
+      workshopId: WS,
+      actorUserId: 'bob',
+      actorEmail: 'bob@example.com',
+      offerId: 'offer-1',
+    };
+    const decision = decide(snapshot!, command, { now: T0, newId: () => 'x' });
+    const archived = decision.writes.find((change) => change.kind === 'ARCHIVE_REGISTRATION');
+    // The precondition of the bug: the archived entity no longer names its session.
+    expect(archived?.kind === 'ARCHIVE_REGISTRATION' && archived.registration.acceptable).toEqual(
+      [],
+    );
+
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: decision.writes,
+      notifications: [],
+    });
+    expect(markerOps(sentTransaction())).toEqual(['Delete L#U#bob#s1']);
+    expect(ddb.commandCalls(GetCommand)).toHaveLength(0); // scope came from the snapshot load
+  });
+
+  test('PER_SESSION offer expiry (tick-first) deletes the marker of the bound session as well', async () => {
+    ddb.on(QueryCommand).resolvesOnce({ Items: itemsOf(perSessionSnapshot()) });
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    const snapshot = await store.loadSnapshot(WS);
+    const decision = decide(
+      snapshot!,
+      { type: 'TICK', workshopId: WS, source: 'TIMER' },
+      { now: addSeconds(T0, 61), newId: () => 'x' },
+    );
+    expect(decision.metrics.offersExpired).toBe(1);
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: decision.writes,
+      notifications: [],
+    });
+    expect(markerOps(sentTransaction())).toEqual(['Delete L#U#bob#s1']);
+  });
+
+  test('without a cached scope the live registration item is read (consistently) for it', async () => {
+    ddb.on(GetCommand, { Key: { PK: `WS#${WS}`, SK: 'L#META' } }).resolves({
+      Item: workshopItem(perSession),
+    });
+    ddb.on(GetCommand, { Key: { PK: `WS#${WS}`, SK: 'L#R#00000001' } }).resolves({
+      Item: liveRegistrationItem(registration({ acceptable: ['s2'], status: 'OFFERED' })),
+    });
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    const ended = registration({
+      acceptable: [],
+      status: 'ENDED',
+      endReason: 'NO_ACCEPTABLE_SESSION',
+    });
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: [{ kind: 'ARCHIVE_REGISTRATION', registration: ended }],
+      notifications: [],
+    });
+    expect(markerOps(sentTransaction())).toEqual(['Delete L#U#bob#s2']);
+    const reads = ddb.commandCalls(GetCommand).map((call) => call.args[0].input);
+    expect(reads).toContainEqual(
+      expect.objectContaining({
+        Key: { PK: `WS#${WS}`, SK: 'L#R#00000001' },
+        ConsistentRead: true,
+      }),
+    );
+  });
+
+  test('a registration that was never stored live has no marker to delete', async () => {
+    ddb.on(GetCommand, { Key: { PK: `WS#${WS}`, SK: 'L#META' } }).resolves({
+      Item: workshopItem(perSession),
+    });
+    ddb.on(GetCommand, { Key: { PK: `WS#${WS}`, SK: 'L#R#00000004' } }).resolves({});
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: [
+        {
+          kind: 'ARCHIVE_REGISTRATION',
+          registration: registration({ seq: 4, acceptable: [], status: 'ENDED' }),
+        },
+      ],
+      notifications: [],
+    });
+    expect(describeTransaction(sentTransaction())).toEqual([
+      'Delete L#R#00000004',
+      'Put H#R#00000004 [attribute_not_exists(PK)]',
+    ]);
+  });
+
+  test('a registration put in the same decision is remembered: its later archive needs no read', async () => {
+    ddb.on(GetCommand).resolves({ Item: workshopItem(perSession) });
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    const live = registration({ seq: 7, acceptable: ['s2'] });
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: [{ kind: 'PUT_REGISTRATION', registration: live }],
+      notifications: [],
+    });
+    ddb.reset();
+    ddb.on(TransactWriteCommand).resolves({});
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 2,
+      writes: [
+        {
+          kind: 'ARCHIVE_REGISTRATION',
+          registration: { ...live, acceptable: [], status: 'ENDED' },
+        },
+      ],
+      notifications: [],
+    });
+    expect(markerOps(sentTransaction())).toEqual(['Delete L#U#bob#s2']);
+    expect(ddb.commandCalls(GetCommand)).toHaveLength(0);
+  });
+
+  test('UNIFIED: an expired registration and a re-registration in one decision share one conditional marker put', async () => {
+    // Bob's offer expired before his new REGISTER is processed: tick-first ends the old
+    // registration (seq 1) and the command creates seq 2 of the same scope.
+    const snapshot: WorkshopSnapshot = {
+      workshop: { ...structuredClone(workshop), seq: 1, version: 1 },
+      sessions: [{ ...structuredClone(session1), held: 1 }, structuredClone(session2)],
+      registrations: [
+        registration({ acceptable: ['s1'], status: 'OFFERED', currentOfferId: 'offer-1' }),
+      ],
+      offers: [offer()],
+      pendingBackfills: [],
+    };
+    ddb.on(QueryCommand).resolvesOnce({ Items: itemsOf(snapshot) });
+    ddb.on(TransactWriteCommand).resolves({});
+    const store = newStore();
+    const loaded = await store.loadSnapshot(WS);
+    const command: UserCommand = {
+      type: 'REGISTER',
+      commandId: CMD_ID,
+      workshopId: WS,
+      actorUserId: 'bob',
+      actorEmail: 'bob@example.com',
+      acceptable: ['s1', 's2'],
+    };
+    let counter = 0;
+    const decision = decide(loaded!, command, {
+      now: addSeconds(T0, 120),
+      newId: () => `id-${++counter}`,
+    });
+    expect(decision.status).toBe('APPLIED');
+    const kinds = decision.writes.map((change) =>
+      change.kind === 'PUT_REGISTRATION' || change.kind === 'ARCHIVE_REGISTRATION'
+        ? `${change.kind} ${change.registration.seq}`
+        : change.kind,
+    );
+    expect(kinds).toContain('ARCHIVE_REGISTRATION 1');
+    expect(kinds).toContain('PUT_REGISTRATION 2');
+
+    await store.commit({
+      wsId: WS,
+      expectedVersion: 1,
+      writes: decision.writes,
+      notifications: [],
+    });
+    const items = sentTransaction();
+    expect(markerOps(items)).toEqual([
+      'Put L#U#bob [attribute_not_exists(PK) OR #seq IN (:seq0, :seq1)]',
+    ]);
+    const marker = items.find((item) => skOf(item) === 'L#U#bob')?.Put;
+    expect(marker?.ExpressionAttributeValues).toEqual({ ':seq0': 2, ':seq1': 1 });
+    expect(marker?.Item).toMatchObject({ seq: 2, status: 'OFFERED' });
+  });
+
+  test('a marker held by another registration fails the commit with UniqueMarkerConflictError (not retried)', async () => {
+    const store = await primedStore();
+    const { args } = registerDecision();
+    const built = await store.buildTransaction(args);
+    expect(built.markerIndexes).toHaveLength(1);
+    ddb.on(TransactWriteCommand).rejects(
+      new TransactionCanceledException({
+        $metadata: {},
+        message: 'Transaction cancelled',
+        CancellationReasons: built.items.map((_, index) =>
+          index === built.markerIndexes[0] ? { Code: 'ConditionalCheckFailed' } : { Code: 'None' },
+        ),
+      }),
+    );
+    const failure = await store.commit(args).catch((error: unknown) => error);
+    expect(failure).toBeInstanceOf(UniqueMarkerConflictError);
+    expect((failure as UniqueMarkerConflictError).markerSk).toBe('L#U#bob');
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(1);
+  });
+});
+
 describe('commit: TransactionCanceledException mapping', () => {
   function cancelled(reasons: CancellationReason[]): TransactionCanceledException {
     return new TransactionCanceledException({
@@ -506,7 +760,7 @@ describe('commit: TransactionCanceledException mapping', () => {
     await expect(store.commit(args)).resolves.toEqual({ ok: false, conflict: 'VERSION' });
   });
 
-  test('any other cancellation reason, or another error, is thrown', async () => {
+  test('any other cancellation reason, or another error, is thrown at once', async () => {
     const store = await primedStore();
     const { args } = registerDecision();
     const built = await store.buildTransaction(args);
@@ -516,13 +770,24 @@ describe('commit: TransactionCanceledException mapping', () => {
       .on(TransactWriteCommand)
       .rejects(cancelled(await reasonsFor(store, args, () => [offerIndex])));
     await expect(store.commit(args)).rejects.toThrow(/Transaction cancelled/);
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(1);
 
+    // A validation error next to a conflict is not transient.
     ddb.reset();
-    const conflict = built.items.map((_, index) => ({
-      Code: index === built.metaIndex ? 'TransactionConflict' : 'None',
-    }));
-    ddb.on(TransactWriteCommand).rejects(cancelled(conflict));
+    ddb.on(TransactWriteCommand).rejects(
+      cancelled(
+        built.items.map((_, index) => ({
+          Code:
+            index === built.metaIndex
+              ? 'TransactionConflict'
+              : index === offerIndex
+                ? 'ValidationError'
+                : 'None',
+        })),
+      ),
+    );
     await expect(store.commit(args)).rejects.toThrow(/Transaction cancelled/);
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(1);
 
     ddb.reset();
     ddb.on(TransactWriteCommand).rejects(
@@ -531,6 +796,48 @@ describe('commit: TransactionCanceledException mapping', () => {
       }),
     );
     await expect(store.commit(args)).rejects.toThrow(/Rate exceeded/);
+    expect(sleeps).toEqual([]);
+  });
+
+  test('a transient cancellation (TransactionConflict) is retried in-process with backoff, nothing re-decided', async () => {
+    const store = await primedStore();
+    const { args } = registerDecision();
+    const built = await store.buildTransaction(args);
+    // e.g. a duplicate POST's conditional put on the CMD item while the worker commits.
+    const conflict = cancelled(
+      built.items.map((_, index) => ({
+        Code: index === built.commandIndex ? 'TransactionConflict' : 'None',
+      })),
+    );
+    ddb.on(TransactWriteCommand).rejectsOnce(conflict).resolves({});
+    await expect(store.commit(args)).resolves.toEqual({ ok: true });
+    const calls = ddb.commandCalls(TransactWriteCommand);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]!.args[0].input).toEqual(calls[0]!.args[0].input);
+    expect(sleeps).toEqual([38]); // 25 ms × 2^0 × (1 + 0.5)
+
+    // A conflict that persists is thrown after the retries (the message is redelivered).
+    ddb.reset();
+    sleeps = [];
+    ddb.on(TransactWriteCommand).rejects(conflict);
+    await expect(store.commit(args)).rejects.toThrow(/Transaction cancelled/);
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(DEFAULT_TRANSIENT_RETRIES + 1);
+    expect(sleeps).toEqual([38, 75, 150]);
+
+    // Throttling reasons are transient too; a VERSION conflict found on retry is reported.
+    ddb.reset();
+    ddb
+      .on(TransactWriteCommand)
+      .rejectsOnce(
+        cancelled(
+          built.items.map((_, index) => ({
+            Code: index === built.metaIndex ? 'ThrottlingError' : 'None',
+          })),
+        ),
+      )
+      .rejects(cancelled(await reasonsFor(store, args, ({ metaIndex }) => [metaIndex])));
+    await expect(store.commit(args)).resolves.toEqual({ ok: false, conflict: 'VERSION' });
+    expect(ddb.commandCalls(TransactWriteCommand)).toHaveLength(2);
   });
 });
 
@@ -621,6 +928,52 @@ describe('command results (plan §1.3)', () => {
       .on(DeleteCommand)
       .rejects(Object.assign(new Error('down'), { name: 'InternalServerError' }));
     await expect(store.deleteCommandIfAccepted(CMD_ID)).rejects.toThrow('down');
+  });
+
+  test('putCommandAccepted retries a TransactionConflictException (the worker is settling that CMD item)', async () => {
+    const conflict = Object.assign(new Error('Transaction is ongoing for the item'), {
+      name: 'TransactionConflictException',
+    });
+    ddb.on(PutCommand).rejectsOnce(conflict).resolves({});
+    const store = newStore();
+    await expect(store.putCommandAccepted(commandResult())).resolves.toEqual({ created: true });
+    expect(ddb.commandCalls(PutCommand)).toHaveLength(2);
+    expect(sleeps).toEqual([38]);
+
+    // A conflict that outlasts the retries falls back to the consistent read of the record.
+    ddb.reset();
+    const settled = commandResult({ status: 'APPLIED', settledAt: T1 });
+    ddb.on(PutCommand).rejects(conflict);
+    ddb.on(GetCommand).resolves({ Item: commandResultItem(settled) });
+    await expect(store.putCommandAccepted(commandResult())).resolves.toEqual({
+      created: false,
+      existing: settled,
+    });
+    expect(ddb.commandCalls(PutCommand)).toHaveLength(DEFAULT_TRANSIENT_RETRIES + 1);
+
+    // … and rethrows when there is no record to return.
+    ddb.reset();
+    ddb.on(PutCommand).rejects(conflict);
+    ddb.on(GetCommand).resolves({});
+    await expect(store.putCommandAccepted(commandResult())).rejects.toThrow(/ongoing/);
+  });
+
+  test('deleteCommandIfAccepted and updateWorkshopInfo retry a TransactionConflictException', async () => {
+    const conflict = Object.assign(new Error('Transaction is ongoing for the item'), {
+      name: 'TransactionConflictException',
+    });
+    ddb.on(DeleteCommand).rejectsOnce(conflict).resolves({});
+    ddb
+      .on(UpdateCommand)
+      .rejectsOnce(conflict)
+      .resolves({ Attributes: workshopItem({ ...workshop, title: 'New' }) });
+    const store = newStore();
+    await store.deleteCommandIfAccepted(CMD_ID);
+    expect(ddb.commandCalls(DeleteCommand)).toHaveLength(2);
+    await expect(
+      store.updateWorkshopInfo(WS, { title: 'New', updatedAt: T1 }),
+    ).resolves.toMatchObject({ title: 'New' });
+    expect(ddb.commandCalls(UpdateCommand)).toHaveLength(2);
   });
 
   test('getCommandResult is a consistent GetItem', async () => {

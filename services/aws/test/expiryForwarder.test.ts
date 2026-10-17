@@ -66,14 +66,40 @@ describe('expiry forwarder', () => {
     expect(sqs.commandCalls(SendMessageCommand)).toHaveLength(0);
   });
 
-  test('a tick that is early by at most one second is forwarded rather than re-delayed', async () => {
+  test('a tick at or after its expiresAt is forwarded', async () => {
     const { handler, commands } = build(T0);
-    const slightlyEarly = tick(addSeconds(T0, RE_DELAY_THRESHOLD_MS / 1000));
-    await handler({ Records: [sqsRecord(slightlyEarly)] });
-    expect(commands.messages).toEqual([slightlyEarly]);
+    const exactlyDue = tick(addSeconds(T0, RE_DELAY_THRESHOLD_MS / 1000));
+    await handler({ Records: [sqsRecord(exactlyDue)] });
+    expect(commands.messages).toEqual([exactlyDue]);
+    expect(sqs.commandCalls(SendMessageCommand)).toHaveLength(0);
   });
 
-  test('a tick that is early by more than one second goes back to the delay queue (holds > 15 min)', async () => {
+  test('a tick delivered up to one second early is re-delayed by 1 s, never forwarded before expiresAt', async () => {
+    // The worker would run tick-first before expiresAt, expire nothing and leave the offer to
+    // the 5-minute sweep (SweepLateExpiries > 0).
+    const expiresAt = addSeconds(T0, 60);
+    const early = tick(expiresAt);
+    const { handler, commands, clock } = build(new Date(parseIso(expiresAt) - 900).toISOString());
+    await expect(handler({ Records: [sqsRecord(early)] })).resolves.toEqual({
+      batchItemFailures: [],
+    });
+    expect(commands.messages).toEqual([]);
+    expect(sqs.commandCalls(SendMessageCommand).map((call) => call.args[0].input)).toEqual([
+      { QueueUrl: DELAY_URL, MessageBody: JSON.stringify(early), DelaySeconds: 1 },
+    ]);
+    // One millisecond early is still early.
+    sqs.resetHistory();
+    clock.set(new Date(parseIso(expiresAt) - 1).toISOString());
+    await handler({ Records: [sqsRecord(early)] });
+    expect(sqs.commandCalls(SendMessageCommand)[0]?.args[0].input.DelaySeconds).toBe(1);
+    expect(commands.messages).toEqual([]);
+    // When it comes back after the delay it is due and goes to the FIFO.
+    clock.set(addSeconds(expiresAt, 0.05));
+    await handler({ Records: [sqsRecord(early)] });
+    expect(commands.messages).toEqual([early]);
+  });
+
+  test('a tick that is early by more than one second goes back to the delay queue with the remaining delay (holds > 15 min)', async () => {
     const { handler, commands, logger } = build(T0);
     const longHold = tick(addSeconds(T0, 20 * 60));
     const mediumHold = tick(addSeconds(T0, 90), 'offer-2');

@@ -33,7 +33,16 @@ export interface NotifierDeps {
   logger: Logger;
   metrics: MetricsSink;
   lifecycle?: InvocationLifecycle;
+  /** Backoff between SENT status write attempts (tests inject a no-op). */
+  sleep?: (ms: number) => Promise<void>;
 }
+
+/** Attempts to record SENT after SES accepted the e-mail (see `recordSent`). */
+export const SENT_STATUS_WRITE_ATTEMPTS = 3;
+const SENT_STATUS_BACKOFF_MS = 100;
+
+const defaultSleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 export type NotifierHandler = (
   event: DynamoDBStreamEvent,
@@ -68,6 +77,9 @@ export function notificationOfRecord(record: DynamoDBRecord): Notification | und
  *   in `batchItemFailures` so the stream retries from it (`NotificationFailures` counts both).
  * - The status update is a MODIFY the stream filter ignores; a notification already past
  *   PENDING (a retried batch) is not sent twice.
+ * - Once SES has accepted an e-mail the record is never reported for redelivery (that would
+ *   send it again): the SENT status write is retried in-process and, if it still fails, the
+ *   item is left PENDING with an error log instead.
  */
 export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
   const lifecycle = deps.lifecycle ?? noopLifecycle;
@@ -99,6 +111,7 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
           workshopId: notification.workshopId,
           kind: notification.kind,
         };
+        let delivered: { attempts: number; messageId?: string } | undefined;
         try {
           if (!deps.emailEnabled) {
             await deps.store.markStatus(notification, 'SKIPPED', notification.attempts);
@@ -117,11 +130,7 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
             to: notification.email,
             ...renderEmail(notification),
           });
-          if (result.ok) {
-            await deps.store.markStatus(notification, 'SENT', attempts);
-            summary.sent += 1;
-            deps.logger.info('notification sent', { ...fields, messageId: result.messageId });
-          } else {
+          if (!result.ok) {
             await deps.store.markStatus(notification, 'FAILED', attempts, result.error);
             summary.failed += 1;
             deps.metrics.emit('NotificationFailures', 1, 'Count');
@@ -129,7 +138,12 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
               ...fields,
               error: result.error,
             });
+            continue;
           }
+          delivered =
+            result.messageId === undefined
+              ? { attempts }
+              : { attempts, messageId: result.messageId };
         } catch (error) {
           summary.failed += 1;
           deps.metrics.emit('NotificationFailures', 1, 'Count');
@@ -145,6 +159,14 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
           failures.push({ itemIdentifier: sequenceNumber });
           break;
         }
+        // SES accepted the e-mail: from here on the record must not be retried.
+        summary.sent += 1;
+        const recorded = await recordSent(deps, notification, delivered.attempts, fields);
+        deps.logger.info('notification sent', {
+          ...fields,
+          messageId: delivered.messageId,
+          ...(recorded ? {} : { statusRecorded: false }),
+        });
       }
       deps.logger.info('notifier batch done', { ...summary, retried: failures.length });
       return { batchItemFailures: failures };
@@ -152,6 +174,35 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
       lifecycle.end();
     }
   };
+}
+
+/**
+ * Records SENT after a successful send, retrying a failed write in-process. Never throws: a
+ * failure here must not put the record back on the stream, which would e-mail the participant
+ * a second time. Returns whether the status was written (false also when the item is gone).
+ */
+async function recordSent(
+  deps: NotifierDeps,
+  notification: Notification,
+  attempts: number,
+  fields: Record<string, unknown>,
+): Promise<boolean> {
+  const sleep = deps.sleep ?? defaultSleep;
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await deps.store.markStatus(notification, 'SENT', attempts);
+    } catch (error) {
+      if (attempt >= SENT_STATUS_WRITE_ATTEMPTS) {
+        deps.logger.error('notification sent but its SENT status could not be recorded', {
+          ...fields,
+          attempts: attempt,
+          ...errorFields(error),
+        });
+        return false;
+      }
+      await sleep(SENT_STATUS_BACKOFF_MS * attempt);
+    }
+  }
 }
 
 const defaultHandler = lazy(() => {

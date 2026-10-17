@@ -366,9 +366,16 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: sweep
+      # Least privilege (plan section 2.4): the DUE query on GSI1 and the consistent BatchGetItem
+      # of the candidate META items (listDueWorkshops), then FIFO sends.
       Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref Table
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:Query]
+              Resource: !Sub '${Table.Arn}/index/GSI1'
+            - Effect: Allow
+              Action: [dynamodb:BatchGetItem]
+              Resource: !GetAtt Table.Arn
         - SQSSendMessagePolicy:
             QueueName: !GetAtt CommandsQueue.QueueName
       Events:
@@ -399,15 +406,26 @@ Resources:
             - !Ref SenderEmail
             - { 'Fn::ImportValue': !Sub '${AuthStackName}-SenderEmail' }
           EMAIL_RATE_PER_SEC: '1'
+      # Least privilege (plan section 2.4): GetItem/UpdateItem on the notification items (status
+      # check and SENT/FAILED/SKIPPED update) and SendEmail on this account's SES identities (the
+      # sender, and the verified recipients the sandbox also authorises against). Stream reads
+      # are granted by SAM for the DynamoDB event source.
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
-        - SQSSendMessagePolicy:
-            QueueName: !GetAtt NotifyDlq.QueueName
         - Statement:
             - Effect: Allow
-              Action: [ses:SendEmail, ses:SendRawEmail]
-              Resource: '*'
+              Action: [dynamodb:GetItem, dynamodb:UpdateItem]
+              Resource: !GetAtt Table.Arn
+            - Effect: Allow
+              Action: [ses:SendEmail]
+              Resource: !Sub 'arn:${AWS::Partition}:ses:${AWS::Region}:${AWS::AccountId}:identity/*'
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt NotifyDlq.QueueName
+      # EMAIL_RATE_PER_SEC paces each notifier instance, i.e. each stream shard (one concurrent
+      # invocation per shard). With several shards the aggregate rate can exceed the SES sandbox
+      # 1 msg/s; the excess gets SES Throttling, which is transient: the record is retried from
+      # the stream (no e-mail lost). Reserved concurrency 1 would make the rate global but
+      # needs unreserved account concurrency headroom, and the failure-recovery experiment
+      # resets the notifier's reserved concurrency (PutFunctionConcurrency 0 / Delete).
       Events:
         NotificationInserts:
           Type: DynamoDB
@@ -527,6 +545,39 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       TreatMissingData: notBreaching
       AlarmActions: [!Ref AlarmTopic]
+  # The api handler answers every unexpected error with a 500 and the worker reports failed
+  # records in batchItemFailures; both invocations succeed, so the Errors alarms above only
+  # catch timeouts, crashes and init failures. These two alarm on the failures themselves.
+  ApiServerErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-api-5xx
+      Namespace: AWS/ApiGateway
+      MetricName: 5xx
+      Dimensions: [{ Name: ApiId, Value: !Ref HttpApi }]
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
+  WorkerRecordFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub seatrelay-${Stage}-worker-record-failures
+      Namespace: SeatRelay
+      MetricName: WorkerRecordFailures
+      Dimensions:
+        - { Name: service, Value: worker }
+        - { Name: stage, Value: !Ref Stage }
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlarmTopic]
   NotifierIteratorAgeAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -555,11 +606,11 @@ Resources:
             {"type":"metric","x":12,"y":0,"width":12,"height":6,"properties":{"title":"API requests / 4xx / 5xx","region":"${AWS::Region}","stat":"Sum","period":60,
               "metrics":[["AWS/ApiGateway","Count","ApiId","${HttpApi}"],["AWS/ApiGateway","4xx","ApiId","${HttpApi}"],["AWS/ApiGateway","5xx","ApiId","${HttpApi}"]]}},
             {"type":"metric","x":0,"y":6,"width":12,"height":6,"properties":{"title":"Command settlement latency (ms, server-side)","region":"${AWS::Region}","period":60,
-              "metrics":[["SeatRelay","CommandSettledLatency","service","worker",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["...",{"stat":"Maximum","label":"max"}]]}},
+              "metrics":[["SeatRelay","CommandSettledLatency","service","worker","stage","${Stage}",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["...",{"stat":"Maximum","label":"max"}]]}},
             {"type":"metric","x":12,"y":6,"width":12,"height":6,"properties":{"title":"Backfill latency (ms) and sweep-late expiries","region":"${AWS::Region}","period":60,
-              "metrics":[["SeatRelay","BackfillLatency","service","worker",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["SeatRelay","SweepLateExpiries","service","worker",{"stat":"Sum","label":"sweep-late (should be 0)","yAxis":"right"}]]}},
-            {"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"title":"Offers created / expired, notification failures","region":"${AWS::Region}","stat":"Sum","period":60,
-              "metrics":[["SeatRelay","OffersCreated","service","worker"],["SeatRelay","OffersExpired","service","worker"],["SeatRelay","NotificationFailures","service","notifier"],["SeatRelay","MetaConflictRetries","service","worker"]]}},
+              "metrics":[["SeatRelay","BackfillLatency","service","worker","stage","${Stage}",{"stat":"p50","label":"p50"}],["...",{"stat":"p95","label":"p95"}],["SeatRelay","SweepLateExpiries","service","worker","stage","${Stage}",{"stat":"Sum","label":"sweep-late (should be 0)","yAxis":"right"}]]}},
+            {"type":"metric","x":0,"y":12,"width":12,"height":6,"properties":{"title":"Offers created / expired, notification failures, worker failures","region":"${AWS::Region}","stat":"Sum","period":60,
+              "metrics":[["SeatRelay","OffersCreated","service","worker","stage","${Stage}"],["SeatRelay","OffersExpired","service","worker","stage","${Stage}"],["SeatRelay","NotificationFailures","service","notifier","stage","${Stage}"],["SeatRelay","MetaConflictRetries","service","worker","stage","${Stage}"],["SeatRelay","WorkerRecordFailures","service","worker","stage","${Stage}"]]}},
             {"type":"metric","x":12,"y":12,"width":12,"height":6,"properties":{"title":"SQS depth and oldest message age","region":"${AWS::Region}","period":60,
               "metrics":[["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${CommandsQueue.QueueName}",{"stat":"Maximum","label":"commands depth"}],["AWS/SQS","ApproximateAgeOfOldestMessage","QueueName","${CommandsQueue.QueueName}",{"stat":"Maximum","label":"commands oldest (s)","yAxis":"right"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${ExpiryDelayQueue.QueueName}",{"stat":"Maximum","label":"expiry-delay depth"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${CommandsDlq.QueueName}",{"stat":"Maximum","label":"commands DLQ"}],["AWS/SQS","ApproximateNumberOfMessagesVisible","QueueName","${NotifyDlq.QueueName}",{"stat":"Maximum","label":"notify DLQ"}]]}},
             {"type":"metric","x":0,"y":18,"width":12,"height":6,"properties":{"title":"Lambda errors","region":"${AWS::Region}","stat":"Sum","period":60,

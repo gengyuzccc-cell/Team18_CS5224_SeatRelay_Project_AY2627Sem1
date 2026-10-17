@@ -8,9 +8,13 @@ export * from './adapters/dynamo/keys';
 export * from './adapters/dynamo/mapping';
 export * from './adapters/dynamo/errors';
 export {
+  DEFAULT_TRANSIENT_RETRIES,
   DynamoWorkshopStore,
   MAX_TRANSACTION_ITEMS,
+  TRANSIENT_BACKOFF_BASE_MS,
   TransactionTooLargeError,
+  UniqueMarkerConflictError,
+  type DynamoWorkshopStoreOptions,
 } from './adapters/dynamo/store';
 export {
   DynamoNotificationStatusStore,
@@ -23,7 +27,13 @@ export * from './lib/auth';
 export * from './lib/email';
 export * from './lib/tokenBucket';
 export { LambdaLogger, errorFields } from './lib/logger';
-export { LambdaMetrics, METRICS_NAMESPACE } from './lib/metrics';
+export {
+  LambdaMetrics,
+  METRICS_NAMESPACE,
+  OPERATIONAL_METRIC_NAMES,
+  type OperationalMetricName,
+  type OperationalMetricsSink,
+} from './lib/metrics';
 export {
   createLambdaRuntime,
   lazy,
@@ -34,12 +44,14 @@ export {
 export {
   createApiHandler,
   parseEventBody,
+  unusableCommandIdentity,
   type ApiHandler,
   type ApiHandlerDeps,
 } from './handlers/api';
 export {
   createWorkerHandler,
   deliveryAttemptOf,
+  messageIdentifiers,
   parseCommandBody,
   type WorkerHandler,
   type WorkerHandlerDeps,
@@ -59,6 +71,7 @@ export {
   type SweepSummary,
 } from './handlers/sweep';
 export {
+  SENT_STATUS_WRITE_ATTEMPTS,
   createNotifierHandler,
   notificationOfRecord,
   type NotifierDeps,

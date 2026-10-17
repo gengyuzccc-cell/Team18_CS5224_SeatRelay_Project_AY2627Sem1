@@ -28,6 +28,43 @@ export function conditionFailedAt(reasons: readonly CancellationReason[], index:
   return index >= 0 && reasons[index]?.Code === CONDITIONAL_CHECK_FAILED;
 }
 
+/**
+ * Cancellation reasons DynamoDB reports for a transaction that was not applied for a transient
+ * cause: another request was writing one of the items at the same time (`TransactionConflict`,
+ * e.g. a duplicate POST's conditional put on the CMD item or an organiser PATCH on `L#META`),
+ * or throttling. The SDK does not retry a `TransactionCanceledException` itself.
+ */
+export const TRANSIENT_CANCELLATION_CODES: ReadonlySet<string> = new Set([
+  'TransactionConflict',
+  'ThrottlingError',
+  'ProvisionedThroughputExceeded',
+  'RequestLimitExceeded',
+]);
+
+/**
+ * True when the transaction was cancelled only for transient reasons (no failed condition, no
+ * validation error): nothing was written and the identical transaction may be sent again.
+ */
+export function isTransientCancellation(reasons: readonly CancellationReason[]): boolean {
+  let transient = false;
+  for (const reason of reasons) {
+    const code = reason?.Code;
+    if (code === undefined || code === 'None') {
+      continue;
+    }
+    if (!TRANSIENT_CANCELLATION_CODES.has(code)) {
+      return false;
+    }
+    transient = true;
+  }
+  return transient;
+}
+
+/** A single-item write rejected because a transaction was writing the same item. */
+export function isTransactionConflict(error: unknown): boolean {
+  return errorName(error) === 'TransactionConflictException';
+}
+
 /** The `Item` attached to a condition failure (`ReturnValuesOnConditionCheckFailure: ALL_OLD`). */
 export function conditionFailureItem(error: unknown): Item | undefined {
   const item = (error as { Item?: unknown }).Item;

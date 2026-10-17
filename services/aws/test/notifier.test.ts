@@ -25,6 +25,8 @@ class FakeStatusStore implements NotificationStatusStore {
   readonly statuses = new Map<string, NotificationStatus>();
   readonly marks: Mark[] = [];
   missing = new Set<string>();
+  /** Errors thrown by the next markStatus calls (one per call). */
+  readonly markFailures: Error[] = [];
 
   async getStatus(target: Notification): Promise<NotificationStatus | undefined> {
     if (this.missing.has(target.id)) return undefined;
@@ -37,6 +39,8 @@ class FakeStatusStore implements NotificationStatusStore {
     attempts: number,
     lastError?: string,
   ): Promise<boolean> {
+    const failure = this.markFailures.shift();
+    if (failure !== undefined) throw failure;
     if (this.missing.has(target.id)) return false;
     this.statuses.set(target.id, status);
     this.marks.push({
@@ -66,6 +70,7 @@ function build(emailEnabled: boolean) {
   const logger = new InMemoryLogger();
   const metrics = new InMemoryMetrics();
   const take = vi.fn(async () => undefined);
+  const sleeps: number[] = [];
   const handler = createNotifierHandler({
     store,
     sender,
@@ -73,8 +78,11 @@ function build(emailEnabled: boolean) {
     rate: { take },
     logger,
     metrics,
+    sleep: async (ms) => {
+      sleeps.push(ms);
+    },
   });
-  return { handler, store, sender, logger, metrics, take };
+  return { handler, store, sender, logger, metrics, take, sleeps };
 }
 
 function insert(target: Notification, sequenceNumber: string) {
@@ -175,6 +183,43 @@ describe('notifier handler', () => {
     expect(sender.sent).toHaveLength(1); // the second record waits for the retry
     expect(store.marks).toEqual([]); // nothing recorded: the item stays PENDING for the retry
     expect(metrics.of('NotificationFailures')).toEqual([1]);
+  });
+
+  test('a failed SENT status write after a successful send is retried in-process, never redelivered (no second e-mail)', async () => {
+    const { handler, store, sender, metrics, sleeps } = build(true);
+    const throughput = () =>
+      Object.assign(new Error('Throughput exceeds the current capacity'), {
+        name: 'ProvisionedThroughputExceededException',
+      });
+    store.markFailures.push(throughput());
+    const records = [
+      insert(notification({ id: 'n-1' }), '1'),
+      insert(notification({ id: 'n-2' }), '2'),
+    ];
+    await expect(handler({ Records: records })).resolves.toEqual({ batchItemFailures: [] });
+    expect(sender.sent).toHaveLength(2);
+    expect(store.marks).toEqual([
+      { id: 'n-1', status: 'SENT', attempts: 1 },
+      { id: 'n-2', status: 'SENT', attempts: 1 },
+    ]);
+    expect(sleeps).toEqual([100]);
+    expect(metrics.of('NotificationFailures')).toEqual([]);
+
+    // A status write that keeps failing is logged; the record is still not retried.
+    const second = build(true);
+    second.store.markFailures.push(throughput(), throughput(), throughput());
+    await expect(second.handler({ Records: [insert(notification(), '7')] })).resolves.toEqual({
+      batchItemFailures: [],
+    });
+    expect(second.sender.sent).toHaveLength(1);
+    expect(second.store.marks).toEqual([]);
+    expect(second.metrics.of('NotificationFailures')).toEqual([]);
+    expect(
+      second.logger.entries.find(
+        (entry) => entry.message === 'notification sent but its SENT status could not be recorded',
+      )?.fields,
+    ).toMatchObject({ notificationId: 'n-1', attempts: 3 });
+    expect(second.sleeps).toEqual([100, 200]);
   });
 
   test('retried batches do not send a notification that is already past PENDING', async () => {

@@ -14,6 +14,7 @@ import {
 } from '@seatrelay/service';
 import { envFlag } from '../lib/env';
 import { errorFields } from '../lib/logger';
+import type { OperationalMetricsSink } from '../lib/metrics';
 import { runtime, workerPorts } from '../lib/ports';
 import { lazy, noopLifecycle, type InvocationLifecycle } from '../lib/runtime';
 
@@ -23,6 +24,11 @@ export interface WorkerHandlerDeps {
   faultInjection: boolean;
   lifecycle?: InvocationLifecycle;
   maxVersionRetries?: number;
+  /**
+   * Receives `WorkerRecordFailures` for every record the worker could not settle (an
+   * infrastructure error, a malformed message). Injected faults are expected and not counted.
+   */
+  operationalMetrics?: OperationalMetricsSink;
 }
 
 export type WorkerHandler = (event: SQSEvent, context?: Context) => Promise<SQSBatchResponse>;
@@ -43,6 +49,27 @@ export function parseCommandBody(body: string): ParsedCommand {
   return { ok: true, command: result.data };
 }
 
+/** Identifiers a malformed body still carries, for the log line that records the drop. */
+export function messageIdentifiers(body: string): Record<string, string> {
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch {
+    return {};
+  }
+  if (typeof json !== 'object' || json === null) {
+    return {};
+  }
+  const fields: Record<string, string> = {};
+  for (const key of ['type', 'commandId', 'workshopId', 'actorUserId']) {
+    const value = (json as Record<string, unknown>)[key];
+    if (typeof value === 'string') {
+      fields[key] = value.slice(0, 100);
+    }
+  }
+  return fields;
+}
+
 export function deliveryAttemptOf(record: SQSRecord): number {
   const count = Number(record.attributes?.ApproximateReceiveCount ?? '1');
   return Number.isFinite(count) && count >= 1 ? Math.floor(count) : 1;
@@ -55,6 +82,10 @@ export function deliveryAttemptOf(record: SQSRecord): number {
  * succeed, and failing it would stall its workshop's message group); an infrastructure error
  * (DynamoDB/SQS failure, exhausted version retries, an injected fault) reports that record and
  * every following record in `batchItemFailures`, as the FIFO batch rule requires.
+ *
+ * The invocation itself always succeeds, so `AWS/Lambda Errors` does not see these failures:
+ * every dropped message and every infrastructure error (not an injected fault) is counted as
+ * `WorkerRecordFailures`, which the stack alarms on.
  */
 export function createWorkerHandler(deps: WorkerHandlerDeps): WorkerHandler {
   const lifecycle = deps.lifecycle ?? noopLifecycle;
@@ -70,8 +101,10 @@ export function createWorkerHandler(deps: WorkerHandlerDeps): WorkerHandler {
         if (!parsed.ok) {
           ports.logger.error('malformed command message dropped', {
             messageId: record.messageId,
+            ...messageIdentifiers(record.body),
             error: parsed.error,
           });
+          deps.operationalMetrics?.count('WorkerRecordFailures');
           continue;
         }
         const { command } = parsed;
@@ -108,6 +141,7 @@ export function createWorkerHandler(deps: WorkerHandlerDeps): WorkerHandler {
               'infrastructure error; reporting this and following records',
               fields,
             );
+            deps.operationalMetrics?.count('WorkerRecordFailures');
           }
           for (const rest of records.slice(index)) {
             failures.push({ itemIdentifier: rest.messageId });
@@ -127,6 +161,7 @@ const defaultHandler = lazy(() =>
     ports: workerPorts(),
     faultInjection: envFlag('ALLOW_FAULT_FLAGS'),
     lifecycle: runtime(),
+    operationalMetrics: runtime().metrics,
   }),
 );
 

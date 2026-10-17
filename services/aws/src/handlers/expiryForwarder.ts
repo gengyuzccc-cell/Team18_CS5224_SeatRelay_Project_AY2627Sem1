@@ -10,8 +10,12 @@ import { errorFields } from '../lib/logger';
 import { commandQueue, runtime } from '../lib/ports';
 import { lazy, noopLifecycle, type InvocationLifecycle } from '../lib/runtime';
 
-/** A tick that arrives more than this early (hold > 15 min) goes back to the delay queue. */
-export const RE_DELAY_THRESHOLD_MS = 1000;
+/**
+ * A tick that arrives more than this early goes back to the delay queue: holds longer than the
+ * 900 s SQS timer cap, and any tick the delay queue delivered before its `expiresAt` (a tick
+ * the worker processed early would expire nothing and leave the offer to the 5-minute sweep).
+ */
+export const RE_DELAY_THRESHOLD_MS = 0;
 
 export interface ExpiryForwarderDeps {
   sqs: SQSClient;
@@ -43,10 +47,12 @@ export function remainingMs(tick: TickCommand, nowMs: number): number {
 }
 
 /**
- * Delay queue → FIFO (plan §1.2). For each TICK: if it is still more than one second early
- * (the hold was longer than the 900 s SQS timer cap) it is re-sent to the delay queue with the
- * remaining delay, clamped to 900 s again; otherwise it is enqueued on the FIFO under the
- * workshop's message group. Failures are reported per record (standard queue, partial batch).
+ * Delay queue → FIFO (plan §1.2). For each TICK: if `expiresAt` has not been reached yet (the
+ * hold was longer than the 900 s SQS timer cap, or the delay queue delivered early) it is
+ * re-sent to the delay queue with the remaining delay, at least 1 s and at most 900 s;
+ * otherwise it is enqueued on the FIFO under the workshop's message group. A tick therefore
+ * never reaches the worker before its offer expires. Failures are reported per record
+ * (standard queue, partial batch).
  */
 export function createExpiryForwarderHandler(deps: ExpiryForwarderDeps): ExpiryForwarderHandler {
   const lifecycle = deps.lifecycle ?? noopLifecycle;
@@ -64,7 +70,7 @@ export function createExpiryForwarderHandler(deps: ExpiryForwarderDeps): ExpiryF
         const remaining = remainingMs(tick, nowMs);
         try {
           if (remaining > RE_DELAY_THRESHOLD_MS) {
-            const delaySeconds = delaySecondsFor(tick.expiresAt!, nowMs);
+            const delaySeconds = Math.max(1, delaySecondsFor(tick.expiresAt!, nowMs));
             await sendDelayedTick(deps.sqs, deps.delayQueueUrl, tick, delaySeconds);
             deps.logger.info('tick re-delayed', {
               workshopId: tick.workshopId,

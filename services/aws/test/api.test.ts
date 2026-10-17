@@ -7,7 +7,8 @@ import type {
 } from '@seatrelay/contracts';
 import { InMemoryLogger, type ApiApp, type ApiRequest } from '@seatrelay/service';
 import { describe, expect, test } from 'vitest';
-import { createApiHandler, parseEventBody } from '../src/handlers/api';
+import { randomUUID } from 'node:crypto';
+import { createApiHandler, parseEventBody, unusableCommandIdentity } from '../src/handlers/api';
 import { apiEvent, bob, call, claimsOf, scenario, setup, alice, postCommand } from './harness';
 
 function parse<T>(body: string | undefined): T {
@@ -205,6 +206,59 @@ describe('api handler against the real route table', () => {
     );
     expect(invalid.statusCode).toBe(400);
     expect(parse<ErrorBody>(invalid.body).code).toBe('VALIDATION_ERROR');
+  });
+});
+
+describe('api handler: identities the command schema rejects', () => {
+  test('a command from an e-mail zod rejects gets 400 VALIDATION_ERROR, not a 202 that can never settle', async () => {
+    const { ports, wsId, s1 } = await scenario();
+    const handler = createApiHandler({ app: ports.api, logger: ports.logger });
+    const odd = { userId: 'odd', email: 'a&b@example.com' };
+    const commandId = randomUUID();
+    const result = await handler(
+      apiEvent({
+        method: 'POST',
+        path: `/workshops/${wsId}/commands`,
+        body: { type: 'REGISTER', commandId, acceptable: [s1] },
+        claims: claimsOf(odd),
+      }),
+    );
+    expect(result.statusCode).toBe(400);
+    expect(parse<ErrorBody>(result.body)).toEqual({
+      code: 'VALIDATION_ERROR',
+      message: 'The e-mail address of this account cannot be used to submit commands',
+    });
+    // Nothing was accepted or enqueued, so nothing is left to poll.
+    expect(await ports.store.getCommandResult(commandId)).toBeUndefined();
+    expect(ports.queue.messages).toHaveLength(0);
+    // The account still reads normally.
+    expect((await handler(apiEvent({ path: '/me', claims: claimsOf(odd) }))).statusCode).toBe(200);
+
+    // The same command from a schema-valid address is accepted.
+    const accepted = await handler(
+      apiEvent({
+        method: 'POST',
+        path: `/workshops/${wsId}/commands`,
+        body: { type: 'REGISTER', commandId: randomUUID(), acceptable: [s1] },
+        claims: claimsOf({ userId: 'plus', email: 'user+tag@example.com' }),
+      }),
+    );
+    expect(accepted.statusCode).toBe(202);
+  });
+
+  test('unusableCommandIdentity only applies to the command intake route', () => {
+    const odd = { userId: 'odd', email: 'josé@example.com' };
+    expect(unusableCommandIdentity('POST', '/workshops/w1/commands', odd)).toBe(true);
+    expect(unusableCommandIdentity('post', '/workshops/w1/commands/', odd)).toBe(true);
+    expect(unusableCommandIdentity('GET', '/workshops/w1/commands', odd)).toBe(false);
+    expect(unusableCommandIdentity('POST', '/orgs', odd)).toBe(false);
+    expect(unusableCommandIdentity('POST', '/workshops/w1/commands', undefined)).toBe(false);
+    expect(
+      unusableCommandIdentity('POST', '/workshops/w1/commands', {
+        userId: 'ok',
+        email: 'ok@example.com',
+      }),
+    ).toBe(false);
   });
 });
 
