@@ -104,6 +104,20 @@ export interface LocalOpsOptions {
 
 export const DEFAULT_PG_CONTAINER = 'seatrelay-local-postgres-1';
 
+/** A short reason for a failed `docker exec` (missing binary, daemon down, no container, SQL error). */
+export function execFailure(error: unknown): string {
+  const failure = error as { code?: unknown; stderr?: unknown; message?: unknown };
+  if (failure.code === 'ENOENT') {
+    return 'docker CLI not found';
+  }
+  const stderr = typeof failure.stderr === 'string' ? failure.stderr.trim().split('\n')[0] : undefined;
+  if (stderr !== undefined && stderr.length > 0) {
+    return stderr.slice(0, 200);
+  }
+  const message = typeof failure.message === 'string' ? failure.message : String(error);
+  return (message.split('\n')[0] ?? message).slice(0, 200);
+}
+
 interface LocalMetricsSnapshot {
   since: string;
   metrics: Record<string, { count: number; sum: number }>;
@@ -128,7 +142,7 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
       );
       return { ok: true, out: stdout.trim() };
     } catch (error) {
-      return { ok: false, reason: error instanceof Error ? error.message.split('\n')[0] ?? error.message : String(error) };
+      return { ok: false, reason: execFailure(error) };
     }
   }
 

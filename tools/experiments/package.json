@@ -9,7 +9,18 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run",
+    "smoke": "tsx src/smoke.ts",
+    "correctness": "tsx src/correctness.ts",
+    "preference-order": "tsx src/preference-order.ts",
+    "concurrency": "tsx src/concurrency.ts",
+    "repeat-execution": "tsx src/repeat-execution.ts",
+    "expiry-race": "tsx src/expiry-race.ts",
+    "failure-recovery": "tsx src/failure-recovery.ts",
+    "access-control": "tsx src/access-control.ts",
+    "backfill": "tsx src/backfill.ts",
+    "fixture": "tsx test/helpers/serve-memory.ts",
+    "plot": "python3 analysis/plot_results.py"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.1152.0",

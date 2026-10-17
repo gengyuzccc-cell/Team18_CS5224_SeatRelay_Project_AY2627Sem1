@@ -61,6 +61,8 @@ export const COMMON_OPTIONS = {
   region: { type: 'string' },
   keycloak: { type: 'string' },
   'settle-timeout': { type: 'string' },
+  'metrics-wait': { type: 'string' },
+  'redelivery-wait': { type: 'string' },
   label: { type: 'string' },
 } as const satisfies CliOptions;
 
@@ -85,6 +87,10 @@ Common options
   --no-create            never create missing accounts (tokens must be cached or sign-in must work)
   --faults auto|on|off   use _fault flags (auto = on for local and dev, off for pilot)
   --settle-timeout MS    give up polling a command after this long (default 60000; 300000 on dev)
+  --metrics-wait S       wait before reading CloudWatch metrics so the run's EMF datapoints are
+                         ingested (default 90 on dev/pilot; local reads GET /metrics at once)
+  --redelivery-wait S    how long to wait for a crashed delivery to be redelivered (default 10 on
+                         local, where the commands row is polled; 150 on dev: SQS visibility 120 s)
   --pool-id / --client-id / --region   Cognito ids (default: outputs of stack seatrelay-auth)
   --keycloak URL         Keycloak base URL for local (default http://localhost:8080)
   --label TEXT           free text recorded in meta.json
@@ -98,6 +104,10 @@ export interface CommonValues {
   create: boolean;
   faults: boolean;
   settleTimeoutMs: number;
+  /** Wait before reading metrics of the run (CloudWatch ingestion lag). */
+  metricsWaitMs: number;
+  /** Upper bound for a fault-injected message to be redelivered and acknowledged. */
+  redeliveryWaitMs: number;
   label: string | undefined;
 }
 
@@ -277,7 +287,17 @@ async function providerFor(
 /** Builds the context from the CLI, runs the experiment and writes the result files. */
 export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): void {
   runMain(async () => {
-    const { values } = parseCli({ ...COMMON_OPTIONS, ...(spec.options ?? {}) }, usageOf(spec));
+    // `pnpm <script> -- --target dev` forwards the `--`; parseArgs would turn every flag after it
+    // into a positional, so drop a leading one.
+    const argv = process.argv.slice(2);
+    const { values, positionals } = parseCli(
+      { ...COMMON_OPTIONS, ...(spec.options ?? {}) },
+      usageOf(spec),
+      argv[0] === '--' ? argv.slice(1) : argv,
+    );
+    if (positionals.length > 0) {
+      throw new CliError(`unexpected argument(s): ${positionals.join(' ')}`, { hint: usageOf(spec) });
+    }
     const target = await resolveTarget({
       target: parseTarget(stringOption(values, 'target')),
       ...(stringOption(values, 'api') === undefined ? {} : { api: stringOption(values, 'api') }),
@@ -316,6 +336,8 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       create: values['no-create'] !== true,
       faults: faultsFlag === 'on' || (faultsFlag === 'auto' && ops.faultFlagsExpected()),
       settleTimeoutMs: intOption(values, 'settle-timeout', target.name === 'local' ? 60_000 : 300_000),
+      metricsWaitMs: intOption(values, 'metrics-wait', target.name === 'local' ? 0 : 90) * 1000,
+      redeliveryWaitMs: intOption(values, 'redelivery-wait', target.name === 'local' ? 10 : 150) * 1000,
       label: stringOption(values, 'label'),
     };
     const accounts = new AccountPool({

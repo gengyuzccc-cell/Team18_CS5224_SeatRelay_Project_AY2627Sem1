@@ -7,7 +7,6 @@ import { ApiHttpError, CommandTimeoutError, type CommandInput, type SettledComma
 import type { Account } from './accounts';
 import type { ExperimentContext } from './run';
 import {
-  describeSettled,
   invariantSnapshot,
   latencySample,
   myRegistration,
@@ -186,7 +185,7 @@ export class ScenarioRun {
       step,
       ok,
       expected: expectedText(expected),
-      actual: `${describeSettled(settled)} ${describeRegistration(settled.record.result?.registration, this.label)}`,
+      actual: `${settled.record.status}${settled.record.reason === undefined ? '' : `(${settled.record.reason})`} ${describeRegistration(settled.record.result?.registration, this.label)}`,
       ms: settled.settleMs,
     });
     return settled;

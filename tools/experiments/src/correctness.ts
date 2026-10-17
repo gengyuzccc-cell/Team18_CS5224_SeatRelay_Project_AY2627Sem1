@@ -1,12 +1,19 @@
 #!/usr/bin/env tsx
 import { randomUUID } from 'node:crypto';
-import type { BackfillCause, DashboardView } from '@seatrelay/contracts';
+import type { BackfillCause, DashboardView, RejectReason } from '@seatrelay/contracts';
 import { CliError, stringOption } from '@seatrelay/scripts';
 import type { Account } from './lib/accounts';
 import { SUMMARY_HEADERS, markdownTable, summarize, summaryRow } from './lib/results';
 import { runExperiment, type ExperimentContext } from './lib/run';
 import { createWorkshop, ensureOrganisation, type LatencySample, type SessionSpec } from './lib/scenario';
-import { ScenarioRun, describeRegistration, emptyTotals, offerIdOf, type InvariantTotals } from './lib/steps';
+import {
+  ScenarioRun,
+  describeRegistration,
+  emptyTotals,
+  offerIdOf,
+  type ExpectedOutcome,
+  type InvariantTotals,
+} from './lib/steps';
 
 /**
  * Table 3 "Core correctness" (plan §4): scripted scenarios — register / confirm / decline /
@@ -20,7 +27,7 @@ correctness — Table 3 "Core correctness": scripted scenarios with verify after
 
   pnpm --filter @seatrelay/experiments correctness --target local|dev [--runs N] [--scenarios a,b]
 
-Scenarios: ${'' /* filled below */}
+Scenarios: 
 Each scenario creates its own workshop (2 sessions, holdSeconds = --hold, default 900) in the
 organiser's "SeatRelay experiments" organisation and uses participants <prefix>-1 … <prefix>-5.
 Pass: every step as expected, 0 over-capacity, 0 double holds, verify ok after every step.
@@ -28,7 +35,7 @@ Pass: every step as expected, 0 over-capacity, 0 double holds, verify ok after e
 
 const ORG_NAME = 'SeatRelay experiments';
 const APPLIED = { status: 'APPLIED' } as const;
-const rejected = (reason: Parameters<ScenarioRun['command']>[3]['reason']) => ({ status: 'REJECTED' as const, reason });
+const rejected = (reason: RejectReason): ExpectedOutcome => ({ status: 'REJECTED', reason });
 
 interface People {
   A: Account;
