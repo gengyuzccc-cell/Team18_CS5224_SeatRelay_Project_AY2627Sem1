@@ -44,8 +44,8 @@ and the dev stack runs with `EmailEnabled=false`.
 | DistributionId | `E26U29AH9791XC` |
 | BucketName | `seatrelay-web-dev-379549361891` |
 
-Callback/logout URLs registered in Cognito: `http://localhost:5173/callback`, `https://d2ni5e1z674t04.cloudfront.net/callback`
-(logout: `http://localhost:5173/`, `https://d2ni5e1z674t04.cloudfront.net/`).
+Callback/logout URLs registered in Cognito: localhost:5173, the dev CloudFront URL and the pilot CloudFront URL
+(`/callback` for sign-in, `/` for sign-out).
 
 ## seatrelay-app-dev (deployed 2026-10-17, CREATE_COMPLETE)
 
@@ -71,6 +71,18 @@ only. Smoke test users (Cognito, e-mail suppressed): `smoke-{organiser,alice,bob
 The SPA is published to `https://d2ni5e1z674t04.cloudfront.net` with `env.js` pointing at the Cognito pool and
 the dev API (`STAGE=dev tools/scripts/bin/deploy-web.sh`).
 
-## seatrelay-app-pilot / seatrelay-web-pilot
+## seatrelay-web-pilot (deployed 2026-10-17, CREATE_COMPLETE)
 
-Not yet deployed.
+| Output | Value |
+|---|---|
+| WebUrl | `https://diiztwl34x7s1.cloudfront.net` |
+| DistributionId | `E8IW9Y948A3CG` |
+| BucketName | `seatrelay-web-pilot-379549361891` |
+
+Registered in Cognito as callback (`/callback`) and logout (`/`) URL together with dev and localhost.
+
+## seatrelay-app-pilot
+
+Not yet deployed: it is deployed from the reviewed code after the Phase 1 review fixes land
+(`STAGE=pilot tools/scripts/bin/deploy-all.sh`; `AllowFaultFlags=false`, `EmailEnabled=true`,
+throttle 50/100, table deletion protection on).
