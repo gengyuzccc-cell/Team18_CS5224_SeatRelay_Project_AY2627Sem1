@@ -28,6 +28,14 @@ suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounc
 published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for gengyuzccc@gmail.com is pending
 confirmation (click the SNS confirmation e-mail).
 
+**2026-10-17 07:0x UTC: SES production access DENIED** (support case `179219791000451`). At review time the
+sender identity was still *unverified*, which is the usual cause. Next steps for the team: (1) click the SES
+verification e-mail sent to gengyuzccc@gmail.com; (2) confirm the SNS subscription e-mail; (3) reply to the case
+in the AWS Support Center console (Basic support cannot reply via CLI) with the use-case text of
+`docs/ses-production-request.md` §3 and the CloudFront URL. Until approved the plan §9 fallback applies:
+participants rely on in-app notifications (`/me/notifications`), e-mail goes only to verified team addresses,
+and the dev stack runs with `EmailEnabled=false`.
+
 ## seatrelay-web-dev (deployed 2026-10-16, CREATE_COMPLETE)
 
 | Output | Value |
