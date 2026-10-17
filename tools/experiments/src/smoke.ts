@@ -199,8 +199,12 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
   const dead = await ctx.ops.deadLetters();
   if (dead.available) {
     ctx.check({ scenario, step: '7 dead letters empty', ok: dead.total === 0, expected: '0', actual: String(dead.total), detail: dead.detail });
+  } else if (ctx.ops.kind === 'aws') {
+    // RUNBOOK §3 step 7 / plan §3 step 12 ("DLQ 为 0") is an acceptance criterion of the cloud
+    // deployment: without reading the DLQs the smoke cannot pass there.
+    ctx.check({ scenario, step: '7 dead letters empty', ok: false, expected: '0 (DLQ depths readable)', actual: 'DLQs not readable', detail: dead.detail });
   } else {
-    ctx.log(`dead-letter check skipped: ${dead.detail}`);
+    ctx.skip(scenario, '7 dead letters empty (commands rows with status FAILED)', dead.detail);
   }
   ctx.param(`run${run}.workshopId`, ws.wsId);
 }

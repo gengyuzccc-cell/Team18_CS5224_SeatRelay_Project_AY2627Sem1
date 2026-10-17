@@ -10,7 +10,14 @@ import {
   settledFingerprint,
   type PostOutcome,
 } from './lib/poll';
-import { awaitRedelivery, describeRedelivery, type RedeliveryOutcome } from './lib/redelivery';
+import {
+  awaitRedelivery,
+  describeRedelivery,
+  recordRedeliveryCheck,
+  redeliveryOk,
+  traceText,
+  type RedeliveryOutcome,
+} from './lib/redelivery';
 import { markdownTable, type CsvRow } from './lib/results';
 import { runExperiment, type ExperimentContext } from './lib/run';
 import { createWorkshop, ensureOrganisation, invariantSnapshot, type CreatedWorkshop } from './lib/scenario';
@@ -51,6 +58,8 @@ interface ProbeRow extends CsvRow {
   effectCheck: string;
   effectOk: boolean;
   deliveries: string;
+  /** AFTER_COMMIT: how the redelivery was observed (local `commands` row / AWS worker log lines). */
+  trace: string;
   ok: boolean;
 }
 
@@ -158,6 +167,7 @@ function probeRow(run: number, name: string, copies: number, probe: ProbeResult,
     effectCheck,
     effectOk,
     deliveries,
+    trace: '',
     ok: probe.record !== undefined && probe.identicalReads && probe.repostIdentical && effectOk,
   };
 }
@@ -189,7 +199,7 @@ async function runOnce(
   let before = await effects(organiser, orgId, ws, everyone);
   const register = await duplicateProbe(ctx, run, 'REGISTER ×N', A, ws.wsId, { type: 'REGISTER', acceptable: [s1] }, copies);
   let after = await effects(organiser, orgId, ws, everyone);
-  let offers = await countNotifications(A, ws.wsId, 'OFFER');
+  const offers = await countNotifications(A, ws.wsId, 'OFFER');
   let ok = after.seq - before.seq === 1 && after.live[A.email] === 'OFFERED@S1' && offers === 1 && after.sessions.S1?.held === 1;
   let text = `seq +${after.seq - before.seq}, A ${after.live[A.email]}, S1 held ${after.sessions.S1?.held}, OFFER notifications ${offers}`;
   effect('REGISTER ×N', ok, 'seq +1, A OFFERED@S1, S1 held 1, 1 OFFER notification', text);
@@ -279,14 +289,10 @@ async function runOnce(
     for (const [name, id, crashedAtMs] of [['REGISTER', registerId, regCrashedAt], ['ACCEPT', acceptId, accCrashedAt]] as const) {
       const outcome = await awaitRedelivery(ctx, id, { sinceMs, crashedAtMs });
       redeliveries.push([name, outcome]);
-      if (outcome.deliveries !== undefined) {
-        ctx.check({
-          run, scenario: 'AFTER_COMMIT', step: `${name} was redelivered (the fault fired) and acknowledged`,
-          ok: outcome.deliveries >= 2, expected: '≥ 2 deliveries', actual: describeRedelivery(outcome),
-        });
-      } else {
-        ctx.skip('AFTER_COMMIT', `${name} delivery count`, describeRedelivery(outcome), run);
-      }
+      // On AWS an unobservable redelivery fails (the AFTER_COMMIT fault must be shown to fire).
+      recordRedeliveryCheck(ctx, {
+        run, scenario: 'AFTER_COMMIT', step: `${name} was redelivered (the fault fired) and acknowledged`, outcome,
+      });
     }
     after = await effects(organiser, orgId, ws, everyone);
     const dOffers = await countNotifications(D, ws.wsId, 'OFFER');
@@ -307,11 +313,13 @@ async function runOnce(
     text = `seq +${after.seq - before.seq}, D ${after.live[D.email]}, S2 confirmed ${after.sessions.S2?.confirmed} held ${after.sessions.S2?.held}, notifications OFFER ${dOffers} CONFIRMED ${dConfirmed}, records unchanged after redelivery: ${regRecord !== undefined && settledFingerprint(regAgain) === settledFingerprint(regRecord)}/${accRecord !== undefined && settledFingerprint(accAgain) === settledFingerprint(accRecord)}`;
     effect('AFTER_COMMIT', ok, 'seq +1, D CONFIRMED@S2, S2 confirmed 1 held 0, 1 OFFER + 1 CONFIRMED notification, records unchanged', text);
     const deliveries = redeliveries.map(([name, outcome]) => `${name}: ${outcome.deliveries ?? '?'}`).join(', ');
+    const redelivered = redeliveries.every(([, outcome]) => redeliveryOk(ctx.ops.kind, outcome));
+    const trace = redeliveries.map(([name, outcome]) => `${name}: ${describeRedelivery(outcome)}${outcome.events.length > 0 ? ` — ${traceText(outcome)}` : ''}`).join(' || ');
     for (const [name, record, id] of [['REGISTER (AFTER_COMMIT)', regRecord, registerId], ['ACCEPT (AFTER_COMMIT)', accRecord, acceptId]] as const) {
       rows.push({
         run, case: name, commandId: id, copies: 1, accepted202: record === undefined ? 0 : 1, createdStatuses: '',
         finalStatus: record?.status ?? 'UNSETTLED', reason: record?.reason ?? '', identicalReads: true, repostIdentical: true,
-        effectCheck: text, effectOk: ok, deliveries, ok,
+        effectCheck: text, effectOk: ok, deliveries, trace, ok: ok && redelivered,
       });
     }
   }
@@ -365,6 +373,14 @@ runExperiment({
           row.identicalReads, row.repostIdentical, row.deliveries || '—', row.effectCheck, row.ok ? 'PASS' : 'FAIL',
         ]),
       ),
+      ...(rows.some((row) => row.trace.length > 0)
+        ? [
+            '',
+            '## AFTER_COMMIT delivery traces',
+            '',
+            ...[...new Set(rows.filter((row) => row.trace.length > 0).map((row) => `- run ${row.run}: ${row.trace}`))],
+          ]
+        : []),
     ];
     return {
       summary: lines.join('\n'),

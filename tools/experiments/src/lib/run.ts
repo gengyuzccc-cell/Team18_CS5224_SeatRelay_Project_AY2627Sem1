@@ -11,6 +11,7 @@ import {
   parseCli,
   parseTarget,
   resolveTarget,
+  resolveUserPath,
   runMain,
   stringOption,
   tokenCachePath,
@@ -281,6 +282,9 @@ async function providerFor(
       ...(poolId === undefined ? {} : { userPoolId: poolId }),
       ...(clientId === undefined ? {} : { clientId }),
     },
+    // Admin credentials are needed only to create accounts; with --no-create the tokens are
+    // minted with the unsigned InitiateAuth call (and --pool-id/--client-id skip the stack lookup).
+    adminCredentialsCheck: values['no-create'] !== true,
   });
 }
 
@@ -349,7 +353,8 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       provider: () => providerFor(target, values),
       log: scriptLog,
     });
-    const baseDir = path.resolve(stringOption(values, 'out', RESULTS_DIR) as string);
+    const outFlag = stringOption(values, 'out');
+    const baseDir = outFlag === undefined ? RESULTS_DIR : resolveUserPath(outFlag);
     const dir = allocateResultsDir(baseDir, spec.name);
     const ctx = new ExperimentContext(spec.name, target, values, options, accounts, ops, dir);
     ctx.log(`${spec.name}: ${spec.tableRow}`, {
@@ -432,7 +437,7 @@ function renderSummary<O extends CliOptions>(
   const lines = [
     `# ${spec.name} — ${spec.tableRow}`,
     '',
-    `- Verdict: **${ok ? 'PASS' : 'FAIL'}** (${ctx.checks.length - failed.length}/${ctx.checks.length} checks passed)`,
+    `- Verdict: **${ok ? 'PASS' : 'FAIL'}** (${ctx.checks.length - failed.length}/${ctx.checks.length} checks passed${ctx.skipped.length === 0 ? '' : `; ${ctx.skipped.length} step(s) not checked on this target, see "Skipped on this target"`})`,
     `- Pass criterion (plan §4): ${spec.criterion}`,
     `- Run id: \`${ctx.runId}\`, started ${ctx.startedAt.toISOString()}, finished ${finishedAt.toISOString()} (${Math.round((finishedAt.getTime() - ctx.startedAt.getTime()) / 1000)} s)`,
     `- Target: ${ctx.target.name} (${ctx.target.apiBase}); runs: ${ctx.options.runs}; holdSeconds: ${ctx.options.holdSeconds}; fault flags: ${ctx.options.faults ? 'on' : 'off'}`,

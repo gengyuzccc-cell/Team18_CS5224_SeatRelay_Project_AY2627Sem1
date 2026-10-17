@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
 
@@ -369,6 +370,19 @@ USAGETYPE_MAP = {  # Cost Explorer usage type (ap-southeast-1) -> pricing.json k
 }
 
 
+def snapshot_filter_note(snap: dict) -> str:
+    """Whether the snapshot's usage-by-type query was limited to the Project=SeatRelay tag.
+    Snapshots written before cost-snapshot.sh recorded it were not filtered."""
+    flags = snap.get("filter")
+    if not isinstance(flags, dict) or "byUsageType" not in flags:
+        return ("Usage by type in this snapshot is **not filtered** to Project=SeatRelay (snapshot "
+                "predates the filter): it covers every workload of the account.")
+    if flags.get("byUsageType"):
+        return "Usage by type is filtered to the cost allocation tag Project=SeatRelay."
+    return ("Usage by type is **not filtered** to Project=SeatRelay (the tag filter failed, e.g. the tag "
+            "was not active yet): it covers every workload of the account.")
+
+
 def usage_from_snapshot(path: Path) -> tuple[dict[str, float], list[str]]:
     snap = json.loads(path.read_text())
     totals: dict[str, float] = {}
@@ -637,9 +651,12 @@ def main():
     # ---- measured usage
     measured = None
     unmapped: list[str] = []
+    filter_note = None
     if args.from_snapshot:
         measured, unmapped = usage_from_snapshot(args.from_snapshot)
         src = str(args.from_snapshot)
+        filter_note = snapshot_filter_note(json.loads(args.from_snapshot.read_text()))
+        print(filter_note, file=sys.stderr)
     elif args.usage:
         measured = json.loads(args.usage.read_text())
         src = str(args.usage)
@@ -649,6 +666,7 @@ def main():
         measured = {k: float(v) for k, v in measured.items() if k in prices}
         df = price_usage(measured, prices, args.legacy_free_tier)
         M = [f"# Measured usage priced ({src})\n",
+             *([f"{filter_note}\n"] if filter_note else []),
              f"List price: **US${df['list_usd'].sum():,.2f}**; after free tier: **US${df['after_free_usd'].sum():,.2f}**; after credits: US$0.00 while credits last.\n"]
         if regs:
             M.append(f"Unit cost: US${df['list_usd'].sum() / regs * 1000:,.2f} per 1,000 registrations (list), "

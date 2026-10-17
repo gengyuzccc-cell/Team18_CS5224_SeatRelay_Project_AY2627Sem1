@@ -25,6 +25,11 @@ export interface K6Summary {
 }
 
 export interface RunRow {
+  /**
+   * The run-matrix invocation that produced the row (`invocationId`); its k6 summary and log
+   * live in `k6/<target>/<runId>/` and `logs/<target>/<runId>/`.
+   */
+  runId?: string;
   scenario: string;
   target: string;
   vus: number;
@@ -58,16 +63,31 @@ export interface RunRow {
   settleTimeouts: number;
   thresholdsOk: boolean;
   failedThresholds: string[];
-  /** CloudWatch (dev only): max over the measured window. */
+  /**
+   * CloudWatch (dev/pilot only), over the whole minutes `cwWindowStart`–`cwWindowEnd` of the
+   * measured phase: SQS maxima, and the worker's server-side `CommandSettledLatency` p95 and
+   * sample count over the window (every command of the stage, not only k6's).
+   */
   sqsDepthMax?: number;
   sqsOldestAgeMax?: number;
   cwSettleP95?: number;
   cwSettleCount?: number;
+  cwWindowStart?: string;
+  cwWindowEnd?: string;
   exitCode?: number;
+  /** Paths relative to the results directory. */
+  summaryFile?: string;
+  logFile?: string;
+  /**
+   * Set when a later invocation re-ran the same target / scenario / VUs / round: the row is
+   * kept (raw.csv, runs.json, "Superseded runs" in summary.md) but left out of the tables.
+   */
+  supersededBy?: string;
   note?: string;
 }
 
 export interface RunMeta {
+  runId?: string;
   scenario: string;
   target: string;
   vus: number;
@@ -79,6 +99,8 @@ export interface RunMeta {
   duration: string;
   commit?: string;
   exitCode?: number;
+  summaryFile?: string;
+  logFile?: string;
 }
 
 export function metricValue(summary: K6Summary, metric: string, key: string): number | undefined {

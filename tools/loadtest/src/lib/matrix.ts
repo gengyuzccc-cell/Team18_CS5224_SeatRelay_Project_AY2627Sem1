@@ -88,7 +88,10 @@ export interface K6RunConfig {
   pollTimeoutMs?: number;
 }
 
-/** Rough wall-clock length of a matrix: per run warm-up + measured + graceful stop + pause. */
+/**
+ * Rough wall-clock length of a matrix: per run warm-up + measured + overhead (setup, graceful
+ * stop; `run-matrix` adds up to a minute when it aligns runs to CloudWatch minutes) + pause.
+ */
 export function estimateMatrixMs(
   spec: MatrixSpec,
   pauseMs: number,
@@ -108,7 +111,9 @@ export interface TokenCacheCheck {
 
 /**
  * Before a matrix starts: every VU needs its own account, and the tokens must outlive the
- * whole matrix (k6 `setup()` aborts a run whose tokens expire within a minute).
+ * whole matrix (k6 `setup()` aborts a run whose tokens expire within a minute). Like k6's
+ * setup, only the first `maxVus` entries count: VU n uses entry n − 1, and entries after them
+ * (e.g. the organiser / outsider accounts tools/experiments appends) are never used by k6.
  */
 export function checkTokenCacheForMatrix(
   users: readonly { expiresAt: string }[],
@@ -162,6 +167,18 @@ export function summaryFileFor(cell: MatrixCell, summaryDir: string): string {
   return path.join(summaryDir, `${cell.name}.json`);
 }
 
+/**
+ * Id of one run-matrix invocation (UTC, second resolution, e.g. `20261017T124159Z`): names the
+ * per-invocation directories `k6/<target>/<id>/` and `logs/<target>/<id>/`, so a re-run never
+ * overwrites the k6 summary or log of an earlier attempt.
+ */
+export function invocationId(at: Date): string {
+  return at
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}Z$/, 'Z');
+}
+
 /** Shell-ish rendering of a run for `--dry-run` and logs. */
 export function renderCommand(k6Bin: string, args: string[], env: Record<string, string>): string {
   const assignments = Object.entries(env)
@@ -181,6 +198,7 @@ export const CSV_COLUMNS: (keyof RunRow)[] = [
   'target',
   'vus',
   'round',
+  'runId',
   'startedAt',
   'measuredStart',
   'endedAt',
@@ -211,7 +229,12 @@ export const CSV_COLUMNS: (keyof RunRow)[] = [
   'sqsOldestAgeMax',
   'cwSettleP95',
   'cwSettleCount',
+  'cwWindowStart',
+  'cwWindowEnd',
   'exitCode',
+  'summaryFile',
+  'logFile',
+  'supersededBy',
   'note',
 ];
 
@@ -236,8 +259,10 @@ export function toCsv(rows: readonly RunRow[]): string {
 /**
  * One results directory per date (`results/loadtest/<date>/`) collects every run of that day,
  * whichever target and however many invocations: `run-matrix` merges its rows into
- * `runs.json` (a re-run of the same target/scenario/VUs/round replaces the older row) and
- * regenerates `raw.csv` and `summary.md` from the whole set.
+ * `runs.json` and regenerates `raw.csv` and `summary.md` from the whole set. A re-run of the
+ * same target/scenario/VUs/round supersedes the older row: the older row stays in runs.json
+ * and raw.csv (marked `supersededBy`) and its k6 summary and log stay on disk, but only the
+ * latest attempt enters the tables (results are never overwritten or deleted).
  */
 export interface MatrixTargetInfo {
   apiBase: string;
@@ -261,24 +286,45 @@ function scenarioRank(scenario: string): number {
   return index === -1 ? DEFAULT_SCENARIOS.length : index;
 }
 
-/** Stable order: target, scenario (cross-workshop first), VUs, round. */
+/** Stable order: target, scenario (cross-workshop first), VUs, round, then oldest attempt first. */
 export function compareRows(a: RunRow, b: RunRow): number {
   return (
     a.target.localeCompare(b.target) ||
     scenarioRank(a.scenario) - scenarioRank(b.scenario) ||
     a.scenario.localeCompare(b.scenario) ||
     a.vus - b.vus ||
-    a.round - b.round
+    a.round - b.round ||
+    a.startedAt.localeCompare(b.startedAt)
   );
 }
 
-/** `current` rows replace `previous` rows with the same target/scenario/VUs/round. */
+/** Rows not superseded by a later attempt of the same cell (the ones the tables report). */
+export function activeRows(rows: readonly RunRow[]): RunRow[] {
+  return rows.filter((row) => row.supersededBy === undefined);
+}
+
+/**
+ * Every row of `previous` and `current` is kept. Per target/scenario/VUs/round the last row
+ * (`current` after `previous`) stays active; earlier ones get `supersededBy` = the run id of
+ * that last row. Rows are copied, never mutated.
+ */
 export function mergeRows(previous: readonly RunRow[], current: readonly RunRow[]): RunRow[] {
-  const byKey = new Map<string, RunRow>();
-  for (const row of [...previous, ...current]) {
-    byKey.set(rowKey(row), row);
-  }
-  return [...byKey.values()].sort(compareRows);
+  const all = [...previous, ...current];
+  const latest = new Map<string, number>();
+  all.forEach((row, index) => {
+    if (row.supersededBy === undefined) {
+      latest.set(rowKey(row), index);
+    }
+  });
+  return all
+    .map((row, index) => {
+      const last = latest.get(rowKey(row));
+      if (row.supersededBy !== undefined || last === undefined || last === index) {
+        return row;
+      }
+      return { ...row, supersededBy: all[last]?.runId ?? 'a later run' };
+    })
+    .sort(compareRows);
 }
 
 export function emptyMatrixState(date: string): MatrixState {
@@ -339,10 +385,13 @@ export interface LevelAggregate {
   pass: boolean;
 }
 
-/** Median of the per-round p95s per (scenario, VUs); pass = every target met by the medians. */
+/**
+ * Median of the per-round p95s per (scenario, VUs) over the active rows; pass = every target
+ * met by the medians. `settleP95` is the client-observed k6 figure (never the CloudWatch one).
+ */
 export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
   const groups = new Map<string, RunRow[]>();
-  for (const row of rows) {
+  for (const row of activeRows(rows)) {
     const key = `${row.scenario}\u0000${row.vus}`;
     groups.set(key, [...(groups.get(key) ?? []), row]);
   }
@@ -388,7 +437,13 @@ function listOrDash(values: readonly (string | undefined)[]): string {
 
 /** Renders every run of the date directory, one section per target, then per scenario. */
 export function renderSummaryMarkdown(state: MatrixState): string {
-  const rows = [...state.rows].sort(compareRows);
+  const allRows = [...state.rows].sort(compareRows);
+  const rows = activeRows(allRows);
+  const attempts = new Map<string, number>();
+  for (const row of allRows) {
+    attempts.set(rowKey(row), (attempts.get(rowKey(row)) ?? 0) + 1);
+  }
+  const superseded = allRows.filter((row) => row.supersededBy !== undefined);
   const targets = unique(rows.map((row) => row.target));
   const lines: string[] = [];
   lines.push(`# Load test ${state.date}`);
@@ -400,7 +455,13 @@ export function renderSummaryMarkdown(state: MatrixState): string {
     `- Targets (plan §4 Performance): reads p95 < ${TARGETS.readP95Ms} ms, 202 p95 < ${TARGETS.commandP95Ms} ms, client-observed settle p95 < ${TARGETS.settleP95Ms} ms, HTTP error rate < ${pct(TARGETS.errorRate)}. Server-side settle = \`settledAt − acceptedAt\` of the CommandResult (plan §1.3 distinguishes the two); the client figure includes up to 200 ms of polling quantisation.`,
   );
   lines.push(
-    '- Custom metrics (reads, 202s, polls, settle) cover the measured phase only; `HTTP errors` is k6 `http_req_failed` over the whole run including warm-up. Raw rows: `raw.csv`; k6 summaries: `k6/<target>/`; k6 output: `logs/<target>/`.',
+    '- Custom metrics (reads, 202s, polls, settle) cover the measured phase only; `HTTP errors` is k6 `http_req_failed` over the whole run including warm-up. Raw rows: `raw.csv`; k6 summaries: `k6/<target>/<runId>/`; k6 output: `logs/<target>/<runId>/`.',
+  );
+  lines.push(
+    "- CloudWatch columns (dev/pilot): pulled after the matrix (ingestion delay) over the whole minutes of each measured phase (`cwWindowStart`–`cwWindowEnd` in raw.csv; the runs are started so that the measured phase begins on a minute boundary). SQS depth / oldest-message age = maximum of the commands FIFO in the window; CW settle p95 = p95 of the worker's `CommandSettledLatency` over the window as one period (server-side, every command of the stage). It is reported next to, never instead of, the client-observed k6 settle p95.",
+  );
+  lines.push(
+    '- A cell run more than once keeps every attempt: the tables use the latest attempt (column `attempts`), the earlier ones are listed under "Superseded runs" and stay in `raw.csv` / `runs.json` with their k6 files.',
   );
   lines.push('');
   for (const target of targets) {
@@ -424,12 +485,12 @@ export function renderSummaryMarkdown(state: MatrixState): string {
       lines.push(`### ${target} · ${scenario}`);
       lines.push('');
       lines.push(
-        '| VUs | round | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW CommandSettledLatency p95 (ms) |',
+        '| VUs | round | attempts | reads p50 / p95 (ms) | 202 p50 / p95 (ms) | poll p95 (ms) | settle p50 / p95 client (ms) | settle p95 server (ms) | HTTP errors | rejected | timeouts | k6 thresholds | SQS depth max | oldest msg max (s) | CW settle p95 / samples (window) |',
       );
-      lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
+      lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|');
       for (const row of scenarioRows) {
         lines.push(
-          `| ${row.vus} | ${row.round} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${ms(row.settleP50)} / ${ms(row.settleP95)} | ${ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} |${row.note === undefined ? '' : ` ${row.note}`}`,
+          `| ${row.vus} | ${row.round} | ${attempts.get(rowKey(row)) ?? 1} | ${ms(row.readP50)} / ${ms(row.readP95)} | ${ms(row.commandP50)} / ${ms(row.commandP95)} | ${ms(row.pollP95)} | ${ms(row.settleP50)} / ${ms(row.settleP95)} | ${ms(row.serverSettleP95)} | ${pct(row.httpReqFailedRate)} | ${row.commandsRejected} | ${row.settleTimeouts} | ${row.thresholdsOk ? 'pass' : row.failedThresholds.length === 0 ? 'FAIL' : `FAIL (${row.failedThresholds.join('; ')})`} | ${row.sqsDepthMax ?? '–'} | ${row.sqsOldestAgeMax ?? '–'} | ${ms(row.cwSettleP95)} / ${row.cwSettleCount ?? '–'} |${row.note === undefined ? '' : ` ${row.note}`}`,
         );
       }
       lines.push('');
@@ -446,6 +507,24 @@ export function renderSummaryMarkdown(state: MatrixState): string {
       }
       lines.push('');
     }
+  }
+  if (superseded.length > 0) {
+    lines.push('## Superseded runs');
+    lines.push('');
+    lines.push(
+      'Earlier attempts of a cell that was run again; kept for traceability, not used in the tables above.',
+    );
+    lines.push('');
+    lines.push(
+      '| target | scenario | VUs | round | run id | started | exit | k6 thresholds | settle p95 client (ms) | superseded by | k6 summary | note |',
+    );
+    lines.push('|---|---|---|---|---|---|---|---|---|---|---|---|');
+    for (const row of superseded) {
+      lines.push(
+        `| ${row.target} | ${row.scenario} | ${row.vus} | ${row.round} | ${row.runId ?? '–'} | ${row.startedAt} | ${row.exitCode ?? '–'} | ${row.thresholdsOk ? 'pass' : 'FAIL'} | ${ms(row.settleP95)} | ${row.supersededBy ?? '–'} | ${row.summaryFile === undefined ? '–' : `\`${row.summaryFile}\``} | ${row.note ?? ''} |`,
+      );
+    }
+    lines.push('');
   }
   return lines.join('\n');
 }

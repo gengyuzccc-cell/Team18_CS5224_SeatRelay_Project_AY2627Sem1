@@ -32,8 +32,8 @@ import { getMetricData, seatRelayQueries, type MetricsResult } from './cloudwatc
  *   FIFO), the notifier's reserved concurrency (`PutFunctionConcurrency`) and CloudWatch.
  *
  * - traceability of one command (plan §4 "failure recovery: traceable"): the `commands` row
- *   (status, deliveries, last error) on local, a CloudWatch Logs Insights query on the worker
- *   log group on AWS.
+ *   (status, deliveries, last error) on local, CloudWatch Logs Insights queries on the worker
+ *   log group on AWS (see `analyseWorkerTrace`).
  *
  * Every call reports `available`/`done` instead of throwing when the side channel is missing
  * (no docker, no AWS credentials, …), so a script can document what it skipped.
@@ -66,6 +66,8 @@ export interface CommandTrace extends OpsReport {
   lastError?: string;
   /** Rows / log lines that document the processing (for raw.csv and summary.md). */
   events: string[];
+  /** AWS: an "injected fault" worker line names the command (the `_fault` flag fired). */
+  faultInjected?: boolean;
 }
 
 export interface MetricsBaseline {
@@ -268,15 +270,115 @@ export function workerLogGroup(stage: string): string {
   return `/aws/lambda/seatrelay-${stage}-worker`;
 }
 
-/** Logs Insights query listing the worker log lines of one command. */
+/** Characters a command / message / request id can contain; everything else is dropped. */
+function sanitiseId(id: string): string {
+  return id.replace(/[^A-Za-z0-9#:._-]/g, '');
+}
+
+/**
+ * Logs Insights query 1 of a command trace: every worker line that names the command. The
+ * worker logs `commandId` on the engine lines ("command settled", "command already settled;
+ * acknowledging redelivery", "convergence pass …") but not on the per-message lines that
+ * carry `deliveryAttempt`; the "injected fault; message will be redelivered" line names it only
+ * inside `error` ("injected fault X on command <id>") and carries `messageId`.
+ */
 export function commandTraceQuery(commandId: string): string {
-  const id = commandId.replace(/[^A-Za-z0-9#:._-]/g, '');
+  const id = sanitiseId(commandId);
   return [
-    'fields @timestamp, message, deliveryAttempt, outcome, status, reason',
-    `| filter commandId = '${id}'`,
+    'fields @timestamp, message, commandId, messageId, deliveryAttempt, outcome, status, reason, error, function_request_id',
+    `| filter commandId = '${id}' or error like /${id}/`,
     '| sort @timestamp asc',
     '| limit 50',
   ].join(' ');
+}
+
+/**
+ * Logs Insights query 2: the per-message lines ("message processed", "injected fault …") of the
+ * SQS message(s) found by query 1 — by `messageId` (stable across redeliveries) and by the
+ * Lambda request id of the invocations that logged the command (BatchSize 1: one message per
+ * invocation). Undefined when there is nothing to look up.
+ */
+export function messageTraceQuery(messageIds: readonly string[], requestIds: readonly string[]): string | undefined {
+  const list = (values: readonly string[]) => values.map((value) => `"${sanitiseId(value)}"`).join(', ');
+  const clauses = [
+    ...(messageIds.length === 0 ? [] : [`messageId in [${list(messageIds)}]`]),
+    ...(requestIds.length === 0 ? [] : [`function_request_id in [${list(requestIds)}]`]),
+  ];
+  if (clauses.length === 0) {
+    return undefined;
+  }
+  return [
+    'fields @timestamp, message, commandId, messageId, deliveryAttempt, outcome, status, error, function_request_id',
+    `| filter ${clauses.join(' or ')}`,
+    '| sort @timestamp asc',
+    '| limit 50',
+  ].join(' ');
+}
+
+export type LogRow = Record<string, string>;
+
+const ACK_REDELIVERY = /acknowledging redelivery/;
+const INJECTED_FAULT = /^injected fault/;
+const SETTLED_LINE = /^command settled|acknowledging redelivery/;
+
+function nonEmpty(values: readonly (string | undefined)[]): string[] {
+  return [...new Set(values.filter((value): value is string => value !== undefined && value.length > 0))];
+}
+
+/**
+ * Deliveries of one command from the worker log rows of `commandTraceQuery` (`commandRows`) and
+ * `messageTraceQuery` (`messageRows`):
+ *
+ * - the command's SQS message ids = `messageId` of the command rows (the injected-fault line,
+ *   or any future line that carries both) plus the `messageId` of the message rows logged by
+ *   the same Lambda invocations (`function_request_id`);
+ * - deliveries = the highest `deliveryAttempt` logged for those messages;
+ * - lower bound 2 when the command was acknowledged as a redelivery ("command already settled;
+ *   acknowledging redelivery") or settled after an injected fault (the crashed delivery and
+ *   the one that settled).
+ */
+export function analyseWorkerTrace(
+  commandRows: readonly LogRow[],
+  messageRows: readonly LogRow[],
+): { deliveries?: number; faultInjected: boolean; messageIds: string[]; events: string[] } {
+  const seen = new Set<string>();
+  const rows: LogRow[] = [];
+  for (const row of [...commandRows, ...messageRows]) {
+    const key = JSON.stringify(row);
+    if (!seen.has(key)) {
+      seen.add(key);
+      rows.push(row);
+    }
+  }
+  rows.sort((a, b) => (a['@timestamp'] ?? '').localeCompare(b['@timestamp'] ?? ''));
+  const requestIds = new Set(nonEmpty(commandRows.map((row) => row.function_request_id)));
+  const messageIds = new Set(nonEmpty(commandRows.map((row) => row.messageId)));
+  for (const row of messageRows) {
+    if (row.messageId && row.function_request_id && requestIds.has(row.function_request_id)) {
+      messageIds.add(row.messageId);
+    }
+  }
+  const attempts = rows
+    .filter((row) => (row.messageId !== undefined && messageIds.has(row.messageId)) || (row.commandId ?? '').length > 0)
+    .map((row) => Number(row.deliveryAttempt))
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const faultIndex = rows.findIndex((row) => INJECTED_FAULT.test(row.message ?? ''));
+  const faultInjected = faultIndex !== -1;
+  const acknowledged = commandRows.some((row) => ACK_REDELIVERY.test(row.message ?? ''));
+  const settledAfterFault = faultInjected && rows.slice(faultIndex + 1).some((row) => SETTLED_LINE.test(row.message ?? ''));
+  const lowerBound = acknowledged || settledAfterFault ? 2 : 0;
+  const observed = attempts.length === 0 ? 0 : Math.max(...attempts);
+  const deliveries = Math.max(observed, lowerBound);
+  const events = rows.map(
+    (row) =>
+      `${row['@timestamp'] ?? ''} ${row.message ?? ''}${row.deliveryAttempt ? ` (delivery ${row.deliveryAttempt})` : ''}${row.outcome ? ` outcome=${row.outcome}` : ''}${row.status ? ` status=${row.status}` : ''}${row.messageId ? ` message=${row.messageId}` : ''}`,
+  );
+  return {
+    ...(deliveries > 0 ? { deliveries } : {}),
+    faultInjected,
+    messageIds: [...messageIds],
+    events,
+  };
 }
 
 export function createAwsOps(options: AwsOpsOptions): TargetOps {
@@ -369,51 +471,63 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
         const logGroupName = workerLogGroup(options.stage);
         const end = Date.now() + 60_000;
         const start = (sinceMs ?? Date.now() - 3_600_000) - 60_000;
-        const started = await client.send(
-          new StartQueryCommand({
-            logGroupName,
-            startTime: Math.floor(start / 1000),
-            endTime: Math.floor(end / 1000),
-            queryString: commandTraceQuery(commandId),
-          }),
-        );
-        const queryId = started.queryId;
-        if (queryId === undefined) {
-          return { available: false, detail: 'Logs Insights returned no queryId', events: [] };
-        }
-        const deadline = Date.now() + (options.logsQueryTimeoutMs ?? 60_000);
-        for (;;) {
-          const results = await client.send(new GetQueryResultsCommand({ queryId }));
-          const status = results.status ?? 'Unknown';
-          if (status === 'Complete') {
-            const rows = (results.results ?? []).map((fields) =>
-              Object.fromEntries(fields.map((field) => [field.field ?? '', field.value ?? ''])),
-            );
-            const attempts = rows
-              .map((row) => Number(row.deliveryAttempt))
-              .filter((value) => Number.isFinite(value) && value > 0);
-            const events = rows.map(
-              (row) =>
-                `${row['@timestamp'] ?? ''} ${row.message ?? ''}${row.deliveryAttempt ? ` (delivery ${row.deliveryAttempt})` : ''}${row.outcome ? ` outcome=${row.outcome}` : ''}`,
-            );
-            const trace: CommandTrace = {
-              available: true,
-              detail: `${rows.length} worker log lines in ${logGroupName}`,
-              events,
-            };
-            if (attempts.length > 0) {
-              trace.deliveries = Math.max(...attempts);
+        const query = async (queryString: string): Promise<{ ok: true; rows: LogRow[] } | { ok: false; detail: string }> => {
+          const started = await client.send(
+            new StartQueryCommand({
+              logGroupName,
+              startTime: Math.floor(start / 1000),
+              endTime: Math.floor(end / 1000),
+              queryString,
+            }),
+          );
+          const queryId = started.queryId;
+          if (queryId === undefined) {
+            return { ok: false, detail: 'Logs Insights returned no queryId' };
+          }
+          const deadline = Date.now() + (options.logsQueryTimeoutMs ?? 60_000);
+          for (;;) {
+            const results = await client.send(new GetQueryResultsCommand({ queryId }));
+            const status = results.status ?? 'Unknown';
+            if (status === 'Complete') {
+              return {
+                ok: true,
+                rows: (results.results ?? []).map((fields) =>
+                  Object.fromEntries(fields.map((field) => [field.field ?? '', field.value ?? ''])),
+                ),
+              };
             }
-            return trace;
+            if (status === 'Failed' || status === 'Cancelled' || status === 'Timeout') {
+              return { ok: false, detail: `Logs Insights query ${status}` };
+            }
+            if (Date.now() > deadline) {
+              return { ok: false, detail: 'Logs Insights query did not complete in time' };
+            }
+            await pause(1000);
           }
-          if (status === 'Failed' || status === 'Cancelled' || status === 'Timeout') {
-            return { available: false, detail: `Logs Insights query ${status}`, events: [] };
-          }
-          if (Date.now() > deadline) {
-            return { available: false, detail: 'Logs Insights query did not complete in time', events: [] };
-          }
-          await pause(1000);
+        };
+        const first = await query(commandTraceQuery(commandId));
+        if (!first.ok) {
+          return { available: false, detail: first.detail, events: [] };
         }
+        const messageQuery = messageTraceQuery(
+          nonEmpty(first.rows.map((row) => row.messageId)),
+          nonEmpty(first.rows.map((row) => row.function_request_id)),
+        );
+        const second = messageQuery === undefined ? { ok: true as const, rows: [] } : await query(messageQuery);
+        if (!second.ok) {
+          return { available: false, detail: `message lines: ${second.detail}`, events: [] };
+        }
+        const analysis = analyseWorkerTrace(first.rows, second.rows);
+        const trace: CommandTrace = {
+          available: true,
+          detail: `${first.rows.length} command + ${second.rows.length} message log lines in ${logGroupName}${analysis.faultInjected ? '; injected fault logged' : ''}`,
+          events: analysis.events,
+          faultInjected: analysis.faultInjected,
+        };
+        if (analysis.deliveries !== undefined) {
+          trace.deliveries = analysis.deliveries;
+        }
+        return trace;
       } catch (error) {
         return { ...unavailable(error), events: [] };
       }

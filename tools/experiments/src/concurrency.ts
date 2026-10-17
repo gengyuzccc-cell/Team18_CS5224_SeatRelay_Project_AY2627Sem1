@@ -2,6 +2,7 @@
 import type { CommandInput } from '@seatrelay/scripts';
 import { intOption } from '@seatrelay/scripts';
 import type { Account } from './lib/accounts';
+import { capacitiesFrom } from './lib/capacities';
 import { metricSum, metricsBaseline, metricsForRun, metricsSection } from './lib/metrics';
 import { SUMMARY_HEADERS, markdownTable, summarize, summaryRow, type CsvRow } from './lib/results';
 import { runExperiment, type ExperimentContext } from './lib/run';
@@ -20,8 +21,9 @@ import {
 import { errorText, sessionLabeller, trySend, type SendOutcome } from './lib/steps';
 
 /**
- * Table 3 "Concurrency" (plan §4): N accounts (default 50) race for 3 sessions × 5 seats in
- * parallel, then every account holding an offer fires ACCEPT, DECLINE and CANCEL for it at the
+ * Table 3 "Concurrency" (plan §4: "50 个账号并发争 3 场共 5 席"): N accounts (default 50) race
+ * in parallel for 3 sessions with 5 seats in total (capacities 2/2/1, i.e. 10 accounts per
+ * seat), then every account holding an offer fires ACCEPT, DECLINE and CANCEL for it at the
  * same time, then the accounts the queue moved up accept at once. After every phase `verify`
  * must be ok (C1, C2, no starvation) with 0 over-capacity and 0 double holds. Every command's
  * client- and server-side settle latency is recorded; the META conflict retries of the window
@@ -31,7 +33,11 @@ const USAGE = `
 concurrency — Table 3 "Concurrency": parallel registration race + same-account command race
 
   pnpm --filter @seatrelay/experiments concurrency --target local|dev [--runs N]
-       [--accounts 50] [--sessions 3] [--capacity 5] [--seed 1]
+       [--accounts 50] [--capacities 2,2,1] [--seed 1]
+
+--capacities LIST      per-session capacities, 2..5 sessions (default 2,2,1: plan §4 "3 sessions,
+                       5 seats in total")
+--sessions N --capacity C   alternative: N sessions of C seats each (instead of --capacities)
 
 Accounts: <prefix>-1 … <prefix>-<accounts>. Preferences are seeded random non-empty
 permutations of a subset of the sessions (reproducible with --seed).
@@ -119,7 +125,7 @@ async function runOnce(
   orgId: string,
   organiser: Account,
   accounts: readonly Account[],
-  params: { sessions: number; capacity: number; seed: number },
+  params: { capacities: number[]; seed: number },
   rows: CommandRow[],
   samples: LatencySample[],
   races: RaceOutcome[],
@@ -128,7 +134,7 @@ async function runOnce(
   const ws = await createWorkshop(organiser, orgId, {
     title: `Concurrency r${run} (${ctx.runId.slice(0, 8)})`,
     holdSeconds: ctx.options.holdSeconds,
-    sessions: Array.from({ length: params.sessions }, () => ({ capacity: params.capacity })),
+    sessions: params.capacities.map((capacity) => ({ capacity })),
   });
   const label = sessionLabeller(ws);
   ctx.param(`run${run}.workshopId`, ws.wsId);
@@ -168,7 +174,7 @@ async function runOnce(
     actual: positions.length <= 12 ? positions.join(',') : `${positions.length} entries`,
   });
   const offered = inv1.dashboard.offered;
-  const capacityTotal = params.sessions * params.capacity;
+  const capacityTotal = params.capacities.reduce((sum, capacity) => sum + capacity, 0);
   ctx.log(`phase 1 done: ${offered.length} offered, ${inv1.dashboard.queue.length} queued (capacity ${capacityTotal})`, {
     perSession: inv1.dashboard.sessions.map((session) => `${label(session.id)} held ${session.held}/${session.capacity}`).join(', '),
   });
@@ -257,7 +263,7 @@ async function runOnce(
   ctx.check({
     run, scenario: '3 accept storm', step: 'confirmed ≤ capacity in every session',
     ok: confirmedOk && inv3.dashboard.counts.confirmed === acceptedOk,
-    expected: `confirmed = ${acceptedOk}, ≤ ${params.capacity} per session`,
+    expected: `confirmed = ${acceptedOk}, ≤ capacity per session (${params.capacities.join('/')})`,
     actual: inv3.dashboard.sessions.map((session) => `${label(session.id)} ${session.confirmed}/${session.capacity}`).join(', '),
   });
   return {
@@ -277,6 +283,7 @@ runExperiment({
   defaultHoldSeconds: 900,
   options: {
     accounts: { type: 'string' },
+    capacities: { type: 'string' },
     sessions: { type: 'string' },
     capacity: { type: 'string' },
     seed: { type: 'string' },
@@ -284,21 +291,19 @@ runExperiment({
   async run(ctx) {
     const count = intOption(ctx.values, 'accounts', 50);
     const params = {
-      sessions: intOption(ctx.values, 'sessions', 3),
-      capacity: intOption(ctx.values, 'capacity', 5),
+      capacities: capacitiesFrom(ctx.values),
       seed: intOption(ctx.values, 'seed', 1),
     };
-    if (params.sessions < 2 || params.sessions > 5) {
-      throw new Error('--sessions must be 2..5');
-    }
+    const capacityTotal = params.capacities.reduce((sum, capacity) => sum + capacity, 0);
     const organiser = await ctx.accounts.organiser();
     ctx.log(`obtaining ${count} participant tokens`);
     const accounts = await ctx.accounts.participants(count);
     const org = await ensureOrganisation(organiser, ORG_NAME);
     ctx.param('orgId', org.id);
     ctx.param('accounts', count);
-    ctx.param('sessions', params.sessions);
-    ctx.param('capacity', params.capacity);
+    ctx.param('sessions', params.capacities.length);
+    ctx.param('capacities', params.capacities.join(','));
+    ctx.param('capacityTotal', capacityTotal);
     ctx.param('seed', params.seed);
 
     const baseline = await metricsBaseline(ctx);
@@ -332,6 +337,7 @@ runExperiment({
     const lines = [
       '## Result',
       '',
+      `- Setup: ${count} concurrent accounts race for ${params.capacities.length} sessions with ${capacityTotal} seats in total (capacities ${params.capacities.join('/')}; ${(count / capacityTotal).toFixed(1)} accounts per seat)`,
       `- Commands: ${rows.length} (${errors} transport errors / settle timeouts)`,
       `- Same-account races: ${races.filter((race) => race.ok).length}/${races.length} consistent; first effective command: ${Object.entries(firstCounts).map(([first, n]) => `${first} ${n}`).join(', ') || 'none'}`,
       `- META conflict retries in the window: **${conflicts === undefined ? 'not available' : conflicts}** (expected 0: FIFO, one consumer per workshop)`,
@@ -366,7 +372,7 @@ runExperiment({
       summary: lines.join('\n'),
       rows,
       ok: errors === 0,
-      extra: { settleMs: allClient, serverSettleMs: allServer, metaConflictRetries: conflicts ?? null, raceFirst: firstCounts, perRun },
+      extra: { capacities: params.capacities, settleMs: allClient, serverSettleMs: allServer, metaConflictRetries: conflicts ?? null, raceFirst: firstCounts, perRun },
     };
   },
 });

@@ -162,16 +162,20 @@ export function setupScenario(scenarioName) {
       `token cache ${CONFIG.tokenCache} is missing or empty: run get-tokens-keycloak (local) or create-test-users (dev)`,
     );
   }
-  const now = Date.now();
-  const stale = users.filter((user) => Date.parse(user.expiresAt) - 60000 < now);
-  if (stale.length > 0) {
-    exec.test.abort(
-      `${stale.length} of ${users.length} tokens in ${CONFIG.tokenCache} are expired: mint them again`,
-    );
-  }
   if (users.length < CONFIG.vus) {
     exec.test.abort(
       `VUS=${CONFIG.vus} needs one account per VU but ${CONFIG.tokenCache} has ${users.length}`,
+    );
+  }
+  // Only the accounts this run uses: VU n signs in as users[n − 1] and setup() as users[0]. The
+  // cache is shared with tools/experiments, which appends its own accounts after these; their
+  // expiry is irrelevant here (run-matrix pre-checks the same slice).
+  const used = users.slice(0, Math.max(CONFIG.vus, 1));
+  const now = Date.now();
+  const stale = used.filter((user) => Date.parse(user.expiresAt) - 60000 < now);
+  if (stale.length > 0) {
+    exec.test.abort(
+      `${stale.length} of the ${used.length} tokens VUS=${CONFIG.vus} uses in ${CONFIG.tokenCache} expire within a minute: mint them again`,
     );
   }
   const workshopIds = workshopIdsFor(scenarioName);

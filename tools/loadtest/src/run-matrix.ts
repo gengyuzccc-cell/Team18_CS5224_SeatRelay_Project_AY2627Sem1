@@ -21,7 +21,14 @@ import {
   stringOption,
   tokenCachePath,
 } from '@seatrelay/scripts';
-import { createCloudWatchClient, fetchRoundMetrics, type MetricDataClient } from './lib/cloudwatch';
+import {
+  alignedSpawnMs,
+  createCloudWatchClient,
+  lacksRoundMetrics,
+  measuredWindow,
+  pullRoundMetrics,
+  type MetricDataClient,
+} from './lib/cloudwatch';
 import {
   createDockerStatsSampler,
   dockerStatsPreflight,
@@ -38,6 +45,7 @@ import {
   checkTokenCacheForMatrix,
   durationToMs,
   estimateMatrixMs,
+  invocationId,
   k6Args,
   k6Env,
   mergeRows,
@@ -68,6 +76,10 @@ Options
   --warmup DUR           warm-up ramp per run (default 30s)
   --duration DUR         measured duration per run (default 60s)
   --pause DUR            pause between runs so queues drain (default 15s)
+  --metrics-wait S       CloudWatch: seconds to wait after the last measured window before the
+                         metrics are pulled (ingestion delay; default 180)
+  --refetch-cloudwatch   only pull CloudWatch again for this target's rows of <out>/runs.json
+                         that have a window but no CloudWatch figures yet (e.g. after Ctrl-C)
   --out DIR              output directory (default results/loadtest/<date>)
   --date YYYY-MM-DD      date used in the default output directory (default today, UTC)
   --k6 PATH              k6 binary (default k6 on PATH, or K6_BIN)
@@ -79,13 +91,19 @@ Options
   --dry-run              print the k6 command lines and exit
 
 Outputs (one directory per date, shared by every target and invocation of that day):
-  <out>/raw.csv            one row per run (re-running a target/scenario/VUs/round replaces it)
+  <out>/raw.csv            one row per run attempt; re-running a target/scenario/VUs/round adds a
+                           row and marks the older one supersededBy (nothing is overwritten)
   <out>/summary.md         p50/p95 per request kind and settle latency, error rate, per-level
-                           medians vs the plan §4 targets, per target; CloudWatch columns for dev
+                           medians vs the plan §4 targets, per target (latest attempt per cell);
+                           CloudWatch columns for dev; superseded attempts listed separately
   <out>/runs.json          the accumulated rows (raw.csv and summary.md are rebuilt from it)
-  <out>/k6/<target>/*.json k6 handleSummary files (<scenario>-<vus>-<round>.json)
-  <out>/logs/<target>/     k6 output per run
+  <out>/k6/<target>/<runId>/*.json   k6 handleSummary files (<scenario>-<vus>-<round>.json)
+  <out>/logs/<target>/<runId>/       k6 output per run
   <out>/docker-stats.csv   docker stats of the local containers every 2 s (--target local)
+
+With CloudWatch (dev/pilot with credentials) every k6 run is started so that its measured phase
+begins on a whole minute, and the metrics are pulled after the matrix (--metrics-wait), over the
+whole minutes of each measured phase.
 `;
 
 function parseList(value: string | undefined, fallback: string[]): string[] {
@@ -154,6 +172,20 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function appendNote(row: RunRow, note: string): void {
+  row.note = row.note === undefined ? note : `${row.note}; ${note}`;
+}
+
+/** A run id whose k6 directory does not exist yet (two invocations in the same second). */
+function freshRunId(outDir: string, target: string): string {
+  const base = invocationId(new Date());
+  let id = base;
+  for (let n = 2; fs.existsSync(path.join(outDir, 'k6', target, id)); n += 1) {
+    id = `${base}-${n}`;
+  }
+  return id;
+}
+
 runMain(async () => {
   const { values } = parseCli(
     {
@@ -173,6 +205,8 @@ runMain(async () => {
       'no-docker-stats': { type: 'boolean' },
       'no-cloudwatch': { type: 'boolean' },
       stage: { type: 'string' },
+      'metrics-wait': { type: 'string' },
+      'refetch-cloudwatch': { type: 'boolean' },
       'dry-run': { type: 'boolean' },
     },
     USAGE,
@@ -193,12 +227,12 @@ runMain(async () => {
   };
   const pauseMs = durationToMs(stringOption(values, 'pause', '15s') as string);
   const warmupMs = durationToMs(spec.warmup);
+  const durationMs = durationToMs(spec.duration);
+  const metricsWaitMs = intOption(values, 'metrics-wait', 180) * 1000;
   const date = stringOption(values, 'date') ?? new Date().toISOString().slice(0, 10);
   const outArg = stringOption(values, 'out');
   const outDir =
     outArg === undefined ? path.join(RESULTS_DIR, 'loadtest', date) : resolveUserPath(outArg);
-  const summaryDir = path.join(outDir, 'k6', targetName);
-  const logsDir = path.join(outDir, 'logs', targetName);
   const stateFile = path.join(outDir, 'runs.json');
   const k6Bin = stringOption(values, 'k6') ?? process.env.K6_BIN ?? 'k6';
   const tokenCache = tokenCachePath(targetName, stringOption(values, 'token-cache'));
@@ -207,6 +241,40 @@ runMain(async () => {
   const dockerStats = targetName === 'local' && values['no-docker-stats'] !== true;
   const cloudWatch = targetName !== 'local' && values['no-cloudwatch'] !== true;
   const stage = stringOption(values, 'stage') ?? targetName;
+
+  if (values['refetch-cloudwatch'] === true) {
+    if (targetName === 'local') {
+      throw new CliError('--refetch-cloudwatch: the local target has no CloudWatch metrics');
+    }
+    const client = createCloudWatchClient(awsRegion());
+    await assertAwsCredentials(client);
+    const state = readMatrixState(stateFile, date);
+    const copies = new Map<RunRow, RunRow>();
+    for (const row of state.rows) {
+      if (row.target === targetName && row.cwWindowEnd !== undefined && lacksRoundMetrics(row)) {
+        copies.set(row, { ...row });
+      }
+    }
+    const write = (): void => {
+      const next = { ...state, rows: state.rows.map((row) => copies.get(row) ?? row) };
+      writeMatrixState(stateFile, next);
+      fs.writeFileSync(path.join(outDir, 'raw.csv'), toCsv(next.rows));
+      fs.writeFileSync(path.join(outDir, 'summary.md'), renderSummaryMarkdown(next));
+    };
+    await pullRoundMetrics(client, stage, [...copies.values()], {
+      metricsWaitMs,
+      onUpdate: write,
+      log,
+    });
+    const filled = [...copies.values()].filter((row) => !lacksRoundMetrics(row)).length;
+    process.stdout.write(`${JSON.stringify({ outDir, rows: copies.size, filled }, null, 2)}\n`);
+    return;
+  }
+
+  const runId = freshRunId(outDir, targetName);
+  const summaryDir = path.join(outDir, 'k6', targetName, runId);
+  const logsDir = path.join(outDir, 'logs', targetName, runId);
+  const relative = (file: string): string => path.relative(outDir, file);
 
   const apiFlag = stringOption(values, 'api');
   const target = await resolveTarget({
@@ -246,7 +314,8 @@ runMain(async () => {
       hint: `pnpm --filter @seatrelay/loadtest prepare-scenario -- --target ${targetName}`,
     });
   }
-  const estimatedMs = estimateMatrixMs(spec, pauseMs);
+  // Aligning each run to a CloudWatch minute adds up to a minute per run.
+  const estimatedMs = estimateMatrixMs(spec, pauseMs, 15_000 + (cloudWatch ? 60_000 : 0));
   const tokenCheck = checkTokenCacheForMatrix(
     readTokenCache(tokenCache).users,
     Math.max(...spec.vus),
@@ -261,6 +330,7 @@ runMain(async () => {
     });
   }
   log('matrix', {
+    runId,
     runs: cells.length,
     estimatedMinutes: Math.round(estimatedMs / 60_000),
     accounts: tokenCheck.users,
@@ -326,10 +396,23 @@ runMain(async () => {
     for (const [index, cell] of cells.entries()) {
       const { args, env } = commandOf(cell);
       const logFile = path.join(logsDir, `${cell.name}.log`);
+      const summaryFile = summaryFileFor(cell, summaryDir);
+      // A summary left behind must never be read as this run's (k6 killed before handleSummary).
+      fs.rmSync(summaryFile, { force: true });
+      if (cw !== undefined) {
+        const waitMs = alignedSpawnMs(Date.now(), warmupMs) - Date.now();
+        if (waitMs > 0) {
+          log('aligning the measured phase to a CloudWatch minute', {
+            waitSeconds: Math.round(waitMs / 1000),
+          });
+          await sleep(waitMs);
+        }
+      }
       log(`run ${index + 1}/${cells.length}`, { ...cell, logFile });
       const outcome = await runK6(k6Bin, args, env, logFile);
       const measuredStart = new Date(outcome.startedAt.getTime() + warmupMs);
       const meta = {
+        runId,
         scenario: cell.scenario,
         target: target.name,
         vus: cell.vus,
@@ -341,8 +424,9 @@ runMain(async () => {
         duration: spec.duration,
         ...(commit === undefined ? {} : { commit }),
         exitCode: outcome.exitCode,
+        summaryFile: relative(summaryFile),
+        logFile: relative(logFile),
       };
-      const summaryFile = summaryFileFor(cell, summaryDir);
       let row: RunRow;
       if (fs.existsSync(summaryFile)) {
         const parsed: unknown = JSON.parse(fs.readFileSync(summaryFile, 'utf8'));
@@ -365,19 +449,20 @@ runMain(async () => {
           settleTimeouts: 0,
           thresholdsOk: false,
           failedThresholds: [],
-          note: `no summary written (k6 exit ${outcome.exitCode}); see ${path.relative(outDir, logFile)}`,
+          note: `no summary written (k6 exit ${outcome.exitCode}); see ${relative(logFile)}`,
         };
+        delete row.summaryFile;
       }
       if (cw !== undefined) {
-        try {
-          const metrics = await fetchRoundMetrics(cw, stage, {
-            start: measuredStart,
-            end: outcome.endedAt,
-          });
-          Object.assign(row, metrics);
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          row.note = `${row.note === undefined ? '' : `${row.note}; `}CloudWatch: ${message}`;
+        // Pulled after the matrix (pullRoundMetrics): the datapoints are ingested minutes late.
+        const window = measuredWindow(measuredStart.getTime(), durationMs);
+        row.cwWindowStart = window.start.toISOString();
+        row.cwWindowEnd = window.end.toISOString();
+        if (window.beyondMeasured) {
+          appendNote(
+            row,
+            'CloudWatch window reaches beyond the measured phase (no whole minute in it)',
+          );
         }
       }
       rows.push(row);
@@ -395,6 +480,9 @@ runMain(async () => {
         await sleep(pauseMs);
       }
     }
+    if (cw !== undefined) {
+      await pullRoundMetrics(cw, stage, rows, { metricsWaitMs, onUpdate: writeOutputs, log });
+    }
   } finally {
     if (sampler !== undefined) {
       await sampler.stop();
@@ -409,6 +497,6 @@ runMain(async () => {
     }
   }
   process.stdout.write(
-    `${JSON.stringify({ outDir, runs: rows.length, csv: csvFile, summary: mdFile }, null, 2)}\n`,
+    `${JSON.stringify({ outDir, runId, runs: rows.length, csv: csvFile, summary: mdFile }, null, 2)}\n`,
   );
 });

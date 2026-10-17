@@ -4,12 +4,14 @@ import os from 'node:os';
 import path from 'node:path';
 import { parseK6Summary, type RunRow } from '../src/lib/k6summary';
 import {
+  activeRows,
   aggregateByLevel,
   buildMatrix,
   checkTokenCacheForMatrix,
   CSV_COLUMNS,
   durationToMs,
   estimateMatrixMs,
+  invocationId,
   k6Args,
   k6Env,
   mergeRows,
@@ -112,6 +114,7 @@ describe('matrix', () => {
     expect(k6Args('/s/hotspot.js')).toEqual(['run', '--quiet', '/s/hotspot.js']);
     expect(summaryFileFor(cell, '/out/summaries')).toBe('/out/summaries/cross-workshop-25-2.json');
     expect(renderCommand('k6', ['run', 'a b.js'], { VUS: '25' })).toBe("VUS=25 k6 run 'a b.js'");
+    expect(invocationId(new Date('2026-10-17T12:41:59.123Z'))).toBe('20261017T124159Z');
   });
 
   it('writes raw.csv with every column, joins lists with | and quotes only when needed', () => {
@@ -184,39 +187,80 @@ describe('matrix', () => {
     expect(md).toContain('warm-up `30s`, measured `60s` per run; commit `abc1234`.');
     expect(md).toContain('commit `def5678`.');
     expect(md).toContain(
-      '| 10 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | 3 | 2 | 420 |',
+      '| 10 | 1 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | 3 | 2 | 420 / – |',
     );
     expect(md).toContain(
-      '| 10 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | – | – | – |',
+      '| 10 | 1 | 1 | 18 / 55 | 25 / 80 | 25 | 650 / 1400 | 600 | 0.20 % | 2 | 1 | pass | – | – | – / – |',
     );
+    expect(md).not.toContain('## Superseded runs');
     expect(md).toContain('| 10 | 1 | 55 | 80 | 1400 | 600 | 0.20 % | met |');
     expect(md).toContain('- Note: CloudWatch metrics skipped: no credentials');
   });
 
-  it('accumulates runs of one date across invocations; re-runs replace their row', () => {
+  it('accumulates runs of one date across invocations; re-runs supersede, never drop, rows', () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'matrix-state-'));
     const file = path.join(dir, 'runs.json');
     const first = readMatrixState(file, '2026-10-17');
     expect(first.rows).toEqual([]);
+    const failed = row({
+      runId: 'R1',
+      round: 1,
+      settleP95: 9000,
+      exitCode: 99,
+      thresholdsOk: false,
+      summaryFile: 'k6/local/R1/hotspot-10-1.json',
+    });
     writeMatrixState(file, {
       ...first,
       targets: { local: { apiBase: 'http://localhost:3000', notes: [] } },
-      rows: mergeRows(first.rows, [row({ round: 2 }), row({ round: 1, settleP95: 9000 })]),
+      rows: mergeRows(first.rows, [row({ runId: 'R1', round: 2 }), failed]),
     });
     const second = readMatrixState(file, '2026-10-17');
     const merged = mergeRows(second.rows, [
-      row({ round: 1, settleP95: 1200 }),
-      row({ target: 'dev' }),
-      row({ scenario: 'cross-workshop', vus: 25 }),
+      row({ runId: 'R2', round: 1, settleP95: 1200, startedAt: '2026-10-17T08:00:00.000Z' }),
+      row({ runId: 'R2', target: 'dev' }),
+      row({ runId: 'R2', scenario: 'cross-workshop', vus: 25 }),
     ]);
-    expect(merged.map((r) => `${r.target}/${r.scenario}/${r.vus}/${r.round}`)).toEqual([
-      'dev/hotspot/10/1',
-      'local/cross-workshop/25/1',
-      'local/hotspot/10/1',
-      'local/hotspot/10/2',
+    expect(merged.map((r) => `${r.target}/${r.scenario}/${r.vus}/${r.round}/${r.runId}`)).toEqual([
+      'dev/hotspot/10/1/R2',
+      'local/cross-workshop/25/1/R2',
+      'local/hotspot/10/1/R1',
+      'local/hotspot/10/1/R2',
+      'local/hotspot/10/2/R1',
     ]);
-    const replaced = merged.find((r) => rowKey(r) === 'local|hotspot|10|1');
-    expect(replaced?.settleP95).toBe(1200);
+    const old = merged.find((r) => rowKey(r) === 'local|hotspot|10|1' && r.runId === 'R1');
+    expect(old).toMatchObject({ settleP95: 9000, exitCode: 99, supersededBy: 'R2' });
+    expect(failed.supersededBy).toBeUndefined(); // rows are copied, not mutated
+    const active = activeRows(merged);
+    expect(active).toHaveLength(4);
+    expect(active.find((r) => rowKey(r) === 'local|hotspot|10|1')?.settleP95).toBe(1200);
+    // merging again (every write of the same invocation) is stable
+    expect(mergeRows(merged, [])).toEqual(merged);
+    // a third attempt supersedes the second; the first keeps its marker
+    const third = mergeRows(merged, [
+      row({ runId: 'R3', round: 1, startedAt: '2026-10-17T09:00:00.000Z' }),
+    ]);
+    expect(
+      third.filter((r) => rowKey(r) === 'local|hotspot|10|1').map((r) => [r.runId, r.supersededBy]),
+    ).toEqual([
+      ['R1', 'R2'],
+      ['R2', 'R3'],
+      ['R3', undefined],
+    ]);
+    // tables use the latest attempt; earlier attempts are listed, raw.csv keeps every row
+    const md = renderSummaryMarkdown({ version: 1, date: '2026-10-17', targets: {}, rows: third });
+    expect(md).toContain('## Superseded runs');
+    expect(md).toContain(
+      '| local | hotspot | 10 | 1 | R1 | 2026-10-17T06:58:00.000Z | 99 | FAIL | 9000 | R2 | `k6/local/R1/hotspot-10-1.json` |  |',
+    );
+    expect(md).toContain('| 10 | 1 | 3 | 18 / 55 |');
+    expect(
+      aggregateByLevel(third.filter((r) => r.target === 'local')).find(
+        (l) => l.vus === 10 && l.scenario === 'hotspot',
+      )?.rounds,
+    ).toBe(2);
+    expect(toCsv(third).trim().split('\n')).toHaveLength(1 + third.length);
+    expect(toCsv(third)).toContain(',R2,');
     fs.rmSync(dir, { recursive: true, force: true });
   });
 });
