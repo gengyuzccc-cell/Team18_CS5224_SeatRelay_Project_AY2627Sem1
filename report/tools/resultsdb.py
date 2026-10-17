@@ -1,4 +1,4 @@
-"""Shared helpers of report/tools/make_figures.py and report/tools/numbers.py.
+"""Shared helpers of report/tools/make_figures.py and report/tools/report_numbers.py.
 
 Both scripts run under ``python3 -I`` (isolated mode: neither the current directory nor the script
 directory is on ``sys.path``), so they load this module by its file path instead of importing it.

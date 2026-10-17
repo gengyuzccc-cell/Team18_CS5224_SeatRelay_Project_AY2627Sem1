@@ -28,7 +28,7 @@ Q&A preparation for the whole project: [../QA-prep.md](../QA-prep.md).
 
 1. **Quote only the numbers in your part's "Key numbers" table.** Each row names the file under
    `results/` (or the cited source) it comes from. The macro name in the table is the same number in
-   `report/generated/numbers.tex`, which is generated from those files by `report/tools/numbers.py`.
+   `report/generated/numbers.tex`, which is generated from those files by `report/tools/report_numbers.py`.
 2. A value written **[PENDING: …]** does not exist yet. Before the first timed rehearsal, replace it
    with the value from the named file. If it still does not exist on the day, say "not measured yet".
    Never estimate, round up, or quote a number from memory or chat.

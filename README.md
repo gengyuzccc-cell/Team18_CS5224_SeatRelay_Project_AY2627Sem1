@@ -41,7 +41,7 @@ pnpm workspace (Node 22, TypeScript, ESM). Dependency direction: `contracts` ←
 | `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, and the Bash deploy / web publish / teardown / cost-snapshot scripts |
 | `docs/` | | architecture, conventions, runbook, experiments, cost, demo, market sizing, interview and user-study packages, talk notes |
 | `results/` | | raw outputs of every run (the only source of report numbers), see section 9 |
-| `report/` | | Final report sources, `report/build.sh` (page and placeholder checks), `report/tools/numbers.py` (numbers file generator) |
+| `report/` | | Final report sources, `report/build.sh` (page and placeholder checks), `report/tools/report_numbers.py` (numbers file generator) |
 | `.github/workflows/ci.yml` | | CI: lint, typecheck, tests (with core coverage), web and Lambda builds, `pnpm audit`, `sam validate --lint` |
 
 Each package has its own README with module tables and environment variables; an index is in
@@ -204,7 +204,7 @@ SKIP_K6=1 TARGET=local tools/experiments/bin/run-table3.sh            # against 
 | Latency histogram and CDF | `python3 tools/experiments/analysis/plot_results.py results/<date>-backfill --value latencyMs --group cause` | `<run>/plots/` |
 | User study (completion, paired task time with Wilcoxon, SUS) | `python3 docs/user-study/analysis.py` | `results/user-study/` |
 | Demo and study presets | `pnpm --filter @seatrelay/scripts seed-demo --target dev --hold 3600`, `seed-study --track participant --dataset A` | stdout (JSON) |
-| Report numbers and figures | `python3 -I report/tools/numbers.py`, `python3 -I report/tools/make_figures.py` | `report/generated/numbers.tex`, `report/figures/generated/` |
+| Report numbers and figures | `python3 -I report/tools/report_numbers.py`, `python3 -I report/tools/make_figures.py` | `report/generated/numbers.tex`, `report/figures/generated/` |
 
 Fault flags (`_fault: BEFORE_COMMIT | AFTER_COMMIT | TIMER_SEND`) only work on dev. The pilot API strips
 them. Never run the k6 matrix against pilot: its throttle is 50 rps.
@@ -265,7 +265,7 @@ Rules (EXPERIMENTS §7–8):
 - Scripts create these directories, and nothing in them is edited by hand.
 - Dates are UTC. A run made from a dirty working tree is not a report run.
 - Failed and aborted runs are kept.
-- Every number in the Final report comes from one of these files. `report/tools/numbers.py` turns them
+- Every number in the Final report comes from one of these files. `report/tools/report_numbers.py` turns them
   into one LaTeX macro per number (`report/generated/numbers.tex`). A number with no data yet is printed
   as a visible `\pending{…}` placeholder, and the submission build must find none left.
 

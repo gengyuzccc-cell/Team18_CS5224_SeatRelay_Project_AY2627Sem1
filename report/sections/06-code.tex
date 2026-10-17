@@ -21,7 +21,7 @@ TARGET=dev tools/experiments/bin/run-table3.sh                 # acceptance-targ
 pnpm replay --seeds 1000                                       # mechanism comparison -> results/replay/
 python3 tools/experiments/cost/model.py                        # cost model -> results/cost/
 python3 -I tools/market/count.py                               # market own counts -> results/market/
-python3 -I report/tools/numbers.py && python3 -I report/tools/make_figures.py   # numbers, charts
+python3 -I report/tools/report_numbers.py && python3 -I report/tools/make_figures.py   # numbers, charts
 ./report/build.sh -t Final -m 10                               # this PDF, with its checks
 \end{verbatim}
 \end{minipage}
@@ -40,7 +40,7 @@ Per-offer timers and forwarder & \code{services/aws/src/adapters/sqs.ts}; \code{
 Sweep safety net & \code{packages/service/src/worker/sweep.ts}; \code{services/aws/templates/app.yaml}\\
 Polling back-off (browser) & \code{apps/web/src/commands/\{backoff,pollCommand,commandRunner\}.ts}\\
 Access control (C7) & \code{packages/service/src/api/context.ts}\\
-Experiments, replay, cost, report numbers & \code{tools/experiments/src/*.ts}; \code{tools/replay}; \code{tools/experiments/cost/model.py}; \code{report/tools/numbers.py}\\
+Experiments, replay, cost, report numbers & \code{tools/experiments/src/*.ts}; \code{tools/replay}; \code{tools/experiments/cost/model.py}; \code{report/tools/report\_numbers.py}\\
 \bottomrule
 \end{tabularx}
 \end{table}

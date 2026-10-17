@@ -277,7 +277,7 @@ The plan's page budget (plan §7.1) spends the space on what a reader must be ab
 Material that supports a conclusion without changing it lives in the repository, linked from the
 Code Explanation section: the full failure-mode table, the DynamoDB key design, each experiment's
 procedure and the per-service cost breakdown. Every number in the PDF is generated from `results/` by
-`report/tools/numbers.py`, so the shorter text loses no traceability. The build check fails on more
+`report/tools/report_numbers.py`, so the shorter text loses no traceability. The build check fails on more
 than 10 pages, overfull boxes, undefined references or leftover placeholders.
 **Where:** plan §7.1, `report/build.sh`, `report/generated/README.md`, `docs/ARCHITECTURE.md`, `docs/EXPERIMENTS.md`, `docs/COST.md`.
 

@@ -474,7 +474,7 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
         run.skip("loadtest-p95", f"{rel(date_dir)}/raw.csv: {target} matrix incomplete ({done} of {len(db.LOADTEST_LEVELS)} levels have {db.LOADTEST_ROUNDS} rounds)")
         return
     # The report figure shows the report target only (Fig. 4 is one row of two panels); other
-    # targets (the on-prem reference) are quoted in the text from numbers.py.
+    # targets (the on-prem reference) are quoted in the text from report_numbers.py.
     complete = [(t, s, v) for t in [target] for s, v in db.LOADTEST_LEVELS
                 if db.loadtest_rounds(frame, t, s, v) >= db.LOADTEST_ROUNDS]
     frame = frame[[(str(r.target), str(r.scenario), int(r.vus)) in complete for r in frame.itertuples()]]
@@ -482,7 +482,7 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
     frame = frame.copy()
     for column, *_ in present:
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
-    # Same rule as numbers.py: a round in which no command settled (p95 0 or empty, settle timeouts > 0)
+    # Same rule as report_numbers.py: a round in which no command settled (p95 0 or empty, settle timeouts > 0)
     # is above the client budget, so it enters the median as +inf, not as 0.
     if "settleTimeouts" in frame.columns:
         timeouts = pd.to_numeric(frame["settleTimeouts"], errors="coerce").fillna(0)
