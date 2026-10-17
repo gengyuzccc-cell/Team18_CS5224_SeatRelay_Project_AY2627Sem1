@@ -39,7 +39,7 @@ export function allocateResultsDir(baseDir: string, name: string, now: Date = ne
 export interface CommitInfo {
   hash: string;
   short: string;
-  /** Uncommitted changes in the working tree at the time of the run. */
+  /** Uncommitted changes outside results/ (i.e. in code or docs) at the time of the run. */
   dirty: boolean;
   branch?: string;
 }
@@ -53,7 +53,9 @@ export function gitCommitInfo(cwd: string = process.cwd()): CommitInfo | undefin
     const info: CommitInfo = {
       hash,
       short: hash.slice(0, 12),
-      dirty: git('status', '--porcelain').length > 0,
+      // Code provenance: results/ is data written by the runs themselves (and by run-table3.sh's
+      // status log), so changes there do not make the code differ from HEAD.
+      dirty: git('status', '--porcelain', '--', '.', ':(exclude)results').length > 0,
     };
     try {
       const branch = git('rev-parse', '--abbrev-ref', 'HEAD');

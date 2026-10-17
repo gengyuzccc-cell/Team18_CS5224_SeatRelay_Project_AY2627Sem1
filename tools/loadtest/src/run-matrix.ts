@@ -118,13 +118,19 @@ function parseList(value: string | undefined, fallback: string[]): string[] {
     .filter((item) => item.length > 0);
 }
 
-/** Short HEAD commit, with `-dirty` when tracked files differ from it (traceability). */
+/**
+ * Short HEAD commit, with `-dirty` when tracked files outside results/ differ from it
+ * (traceability). results/ is excluded because the matrix itself appends to tracked files there
+ * (raw.csv, runs.json, summary.md): counting them would mark every run after the first as dirty
+ * although the code is exactly HEAD.
+ */
 function gitCommit(): string | undefined {
   try {
     const run = (args: string[]): string =>
       execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
     const head = run(['rev-parse', '--short', 'HEAD']);
-    const dirty = run(['status', '--porcelain', '--untracked-files=no']).length > 0;
+    const dirty =
+      run(['status', '--porcelain', '--untracked-files=no', '--', '.', ':(exclude)results']).length > 0;
     return dirty ? `${head}-dirty` : head;
   } catch {
     return undefined;

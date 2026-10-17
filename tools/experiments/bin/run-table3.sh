@@ -11,7 +11,8 @@ TARGET="${TARGET:-dev}"
 RUNS="${RUNS:-3}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 DATE="$(date -u +%Y-%m-%d)"
-STATUS="$ROOT/results/${DATE}-table3-${TARGET}.status"
+# A new status file per invocation, so the runner never edits a committed file (code provenance).
+STATUS="$ROOT/results/${DATE}-table3-${TARGET}-$(date -u +%H%M%S).status"
 export AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 cd "$ROOT"
 mkdir -p results
