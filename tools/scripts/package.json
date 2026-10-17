@@ -9,22 +9,29 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "echo \"no tests\""
+    "test": "vitest run",
+    "create-test-users": "tsx src/create-test-users.ts",
+    "get-tokens-keycloak": "tsx src/get-tokens-keycloak.ts",
+    "seed-demo": "tsx src/seed-demo.ts",
+    "seed-study": "tsx src/seed-study.ts"
   },
   "dependencies": {
-    "@seatrelay/contracts": "workspace:*",
-    "@aws-sdk/client-cognito-identity-provider": "3.1152.0",
-    "@aws-sdk/client-s3": "3.1152.0",
-    "@aws-sdk/client-cloudfront": "3.1152.0",
     "@aws-sdk/client-cloudformation": "3.1152.0",
+    "@aws-sdk/client-cloudfront": "3.1152.0",
+    "@aws-sdk/client-cognito-identity-provider": "3.1152.0",
     "@aws-sdk/client-cost-explorer": "3.1152.0",
     "@aws-sdk/client-dynamodb": "3.1152.0",
-    "@aws-sdk/lib-dynamodb": "3.1152.0",
+    "@aws-sdk/client-s3": "3.1152.0",
     "@aws-sdk/client-sqs": "3.1152.0",
+    "@aws-sdk/lib-dynamodb": "3.1152.0",
+    "@seatrelay/contracts": "workspace:*",
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@seatrelay/service": "workspace:*",
+    "aws-sdk-client-mock": "4.1.0",
     "tsx": "4.23.15",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }

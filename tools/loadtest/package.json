@@ -9,11 +9,20 @@
   "types": "./src/index.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "echo \"k6 scripts are run with k6; see README\""
+    "test": "vitest run",
+    "prepare-scenario": "tsx src/prepare.ts",
+    "run-matrix": "tsx src/run-matrix.ts",
+    "docker-stats": "tsx src/docker-stats.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "3.1152.0",
+    "@seatrelay/contracts": "workspace:*",
+    "@seatrelay/scripts": "workspace:*"
+  },
   "devDependencies": {
+    "aws-sdk-client-mock": "4.1.0",
     "tsx": "4.23.15",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }

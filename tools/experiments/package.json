@@ -12,20 +12,22 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@seatrelay/contracts": "workspace:*",
-    "@seatrelay/core": "workspace:*",
     "@aws-sdk/client-cloudwatch": "3.1152.0",
     "@aws-sdk/client-cloudwatch-logs": "3.1152.0",
-    "@aws-sdk/client-dynamodb": "3.1152.0",
-    "@aws-sdk/lib-dynamodb": "3.1152.0",
-    "@aws-sdk/client-sqs": "3.1152.0",
-    "@aws-sdk/client-lambda": "3.1152.0",
     "@aws-sdk/client-cognito-identity-provider": "3.1152.0",
+    "@aws-sdk/client-dynamodb": "3.1152.0",
+    "@aws-sdk/client-lambda": "3.1152.0",
+    "@aws-sdk/client-sqs": "3.1152.0",
+    "@aws-sdk/lib-dynamodb": "3.1152.0",
+    "@seatrelay/contracts": "workspace:*",
+    "@seatrelay/core": "workspace:*",
+    "@seatrelay/scripts": "workspace:*",
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@seatrelay/service": "workspace:*",
     "tsx": "4.23.15",
-    "vitest": "3.2.7",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }

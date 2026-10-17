@@ -1,0 +1,3 @@
+# written by prepare.ts / get-tokens-keycloak / create-test-users (ids and tokens of a deployment)
+.scenario.*.json
+.token-cache*.json
