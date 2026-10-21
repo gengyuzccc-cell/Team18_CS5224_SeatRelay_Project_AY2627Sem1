@@ -32,6 +32,16 @@ try {
     }
     const r = poster.getBoundingClientRect();
     if (poster.scrollHeight > poster.clientHeight + 1) problems.push(`poster content ${poster.scrollHeight}px > ${poster.clientHeight}px`);
+    // nothing in the three columns may reach into the footer, and no SVG may be squeezed below its set width
+    const footerTop = poster.querySelector('footer').getBoundingClientRect().top;
+    for (const el of poster.querySelectorAll('.cols *')) {
+      if (el.getBoundingClientRect().bottom > footerTop + 0.5) problems.push(`${el.tagName.toLowerCase()}.${el.className?.baseVal ?? el.className} overlaps the footer`);
+    }
+    for (const svg of poster.querySelectorAll('svg[width$="mm"]')) {
+      const want = parseFloat(svg.getAttribute('width')) * 96 / 25.4;
+      const got = svg.getBoundingClientRect().width;
+      if (Math.abs(got - want) > 2) problems.push(`svg.${svg.getAttribute('class')} drawn ${got.toFixed(0)}px wide, set ${want.toFixed(0)}px`);
+    }
     return { problems, size: [r.width, r.height] };
   });
   if (overflow.problems.length > 0) {
