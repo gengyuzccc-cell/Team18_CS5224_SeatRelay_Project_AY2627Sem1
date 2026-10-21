@@ -38,6 +38,8 @@ import { HIGHLIGHT_STYLE, OBSERVER_SCRIPT, type ObservedEvent } from './lib/obse
 
 const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const VIEWPORT = { width: 1440, height: 900 } as const;
+/** Pixel density of the screenshots (E2E_SCALE, default 1); 2-3 gives print-quality images, e.g. for the poster. */
+const DEVICE_SCALE = Math.max(1, Number(process.env.E2E_SCALE ?? 1) || 1);
 const HOLD_SECONDS = 60;
 const CAPACITIES = [2, 1, 1] as const;
 
@@ -252,6 +254,7 @@ async function startActor(browser: Browser, key: ActorKey): Promise<Actor> {
   const person = PEOPLE[key];
   const context = await browser.newContext({
     viewport: VIEWPORT,
+    deviceScaleFactor: DEVICE_SCALE,
     colorScheme: 'light',
     locale: 'en-SG',
     timezoneId: 'Asia/Singapore',

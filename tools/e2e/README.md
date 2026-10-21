@@ -35,6 +35,7 @@ pnpm --filter @seatrelay/e2e walkthrough      # full run against dev, about 5 mi
 | `--no-publish` | publish on | keep screenshots and video in `out/` only |
 | `--no-results` | results on | do not write `results/…` |
 | `--beat <ms>` | `900` | pause after each visible step (pacing of the video) |
+| `E2E_SCALE` (env) | `1` | pixel density of the screenshots; `3` gives print-quality images (used for `docs/poster/`) |
 | `--type-delay <ms>` | `25` | per-key typing delay |
 | `--out`, `--screenshots`, `--video` | see above | output locations (relative to where `pnpm` was started) |
 
