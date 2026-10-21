@@ -75,7 +75,7 @@ def comparison_facets(m: dict[str, str]) -> str:
         parts.append(f'<text x="{x0:.1f}" y="8" class="f-title">{esc(title)}</text>')
         for j, (name, value, color) in enumerate((("Separate waitlist per session", before, BASELINE_GRAY),
                                                    ("SeatRelay, one queue", after, BLUE_DATA))):
-            y = 16 + j * 25
+            y = 16 + j * 22
             parts.append(f'<text x="{x0:.1f}" y="{y + 5.6:.1f}" class="f-label">{name}</text>')
             by = y + 8.4
             length = span * value / top if top else 0
@@ -87,7 +87,7 @@ def comparison_facets(m: dict[str, str]) -> str:
             parts.append(f'<line x1="{x0:.1f}" y1="{by - 1:.1f}" x2="{x0:.1f}" y2="{by + bar_h + 1:.1f}" stroke="{INK2}" stroke-width="0.5"/>')
             parts.append(f'<text x="{x0 + length + 2.6:.1f}" y="{by + bar_h - 0.6:.1f}" class="f-value">{esc(show(value))}</text>')
     total_w = 3 * w + 2 * gap
-    return (f'<svg class="facets" viewBox="-0.5 0 {total_w + 1:.0f} 63" width="{total_w + 1:.0f}mm" height="63mm" '
+    return (f'<svg class="facets" viewBox="-0.5 0 {total_w + 1:.0f} 60" width="{total_w + 1:.0f}mm" height="60mm" '
             f'role="img" aria-label="Simulation results: a separate waitlist per session versus one queue">{"".join(parts)}</svg>')
 
 
@@ -96,16 +96,17 @@ def load_chart(m: dict[str, str]) -> str:
     vus = [10, 25, 50]
     words = {10: "Ten", 25: "TwentyFive", 50: "Fifty"}
     series = [
-        ("Spread over 10 workshops", BLUE_DATA, [num(m, f"PerfDevCrossVU{words[v]}SettlePNinetyFiveMs") / 1000 for v in vus]),
-        ("All on one workshop", ORANGE, [num(m, f"PerfDevHotspotVU{words[v]}SettlePNinetyFiveMs") / 1000 for v in vus]),
+        ("10 workshops", BLUE_DATA, [num(m, f"PerfDevCrossVU{words[v]}SettlePNinetyFiveMs") / 1000 for v in vus]),
+        ("1 busy workshop", ORANGE, [num(m, f"PerfDevHotspotVU{words[v]}SettlePNinetyFiveMs") / 1000 for v in vus]),
     ]
     W, H = 166.0, 86.0
     left, right, top, bottom = 17.0, 32.0, 6.0, 24.0
     pw, ph = W - left - right, H - top - bottom
     ymax = 5.5
+    inset = 5.0                   # keeps the 10-user points off the y axis and its labels
 
     def X(v: float) -> float:
-        return left + (v - 10) / 40 * pw
+        return left + inset + (v - 10) / 40 * (pw - inset)
 
     def Y(s: float) -> float:
         return top + ph - s / ymax * ph
@@ -114,14 +115,22 @@ def load_chart(m: dict[str, str]) -> str:
     for s in range(0, 6):
         y = Y(s)
         p.append(f'<line x1="{left:.1f}" y1="{y:.2f}" x2="{left + pw:.1f}" y2="{y:.2f}" stroke="{GRID}" stroke-width="0.35"/>')
-        p.append(f'<text x="{left - 2.6:.1f}" y="{y + 2.4:.2f}" class="c-tick" text-anchor="end">{s} s</text>')
+        p.append(f'<text x="{left - 3.5:.1f}" y="{y + 2.4:.2f}" class="c-tick" text-anchor="end">{s} s</text>')
     # target line, labelled; solid and muted (not a gridline: it is the acceptance target)
     ty = Y(5.0)
     p.append(f'<line x1="{left:.1f}" y1="{ty:.2f}" x2="{left + pw:.1f}" y2="{ty:.2f}" stroke="{INK2}" stroke-width="0.6"/>')
     p.append(f'<text x="{left + pw + 2.6:.1f}" y="{ty + 2.4:.2f}" class="c-note">target</text>')
     for v in vus:
-        p.append(f'<text x="{X(v):.1f}" y="{top + ph + 8.6:.1f}" class="c-tick" text-anchor="middle">{v}</text>')
+        p.append(f'<text x="{X(v):.1f}" y="{top + ph + 9.6:.1f}" class="c-tick" text-anchor="middle">{v}</text>')
     p.append(f'<text x="{left + pw / 2:.1f}" y="{H - 3.2:.1f}" class="c-axis" text-anchor="middle">simulated users (k6), each registering non-stop</text>')
+    # legend in the empty top-left of the plot, in the order the lines end (orange above blue),
+    # one row centred in each of the two top gridline bands
+    for i, (name, color, _) in enumerate(reversed(series)):
+        ly = Y(4.5 - i) + 2.4
+        lx = left + inset + 2
+        p.append(f'<line x1="{lx:.1f}" y1="{ly - 2.1:.2f}" x2="{lx + 9:.1f}" y2="{ly - 2.1:.2f}" stroke="{color}" stroke-width="1.0" stroke-linecap="round"/>')
+        p.append(f'<circle cx="{lx + 4.5:.1f}" cy="{ly - 2.1:.2f}" r="1.6" fill="{color}" stroke="{PAPER}" stroke-width="0.7"/>')
+        p.append(f'<text x="{lx + 12:.1f}" y="{ly:.2f}" class="c-legend">{esc(name)}</text>')
     for name, color, values in reversed(series):  # the blue series last, so its first marker is not hidden
         pts = " ".join(f"{X(v):.2f},{Y(s):.2f}" for v, s in zip(vus, values))
         p.append(f'<polyline points="{pts}" fill="none" stroke="{color}" stroke-width="1.0" stroke-linejoin="round" stroke-linecap="round"/>')
@@ -162,6 +171,7 @@ def main() -> int:
         "RefillMeanPerSession": f"{num(m, 'ReplayRefillMeanPerSessionMean'):.1f}",
         "RefillMeanUnified": f"{num(m, 'ReplayRefillMeanUnifiedMean'):.1f}",
         "CrossoverThousands": f"{round(num(m, 'CostCrossoverListFullRegs') / 1000):.0f},000",
+        "CrossoverIncrement": f"{round(num(m, 'CostCrossoverListIncrementRegs'), -2):,.0f}",
     }
     html = fill((HERE / "poster.template.html").read_text(encoding="utf-8"), m, extra)
     (HERE / "poster.html").write_text(html, encoding="utf-8")

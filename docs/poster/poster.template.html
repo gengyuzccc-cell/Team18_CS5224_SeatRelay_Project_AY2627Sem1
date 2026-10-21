@@ -23,6 +23,8 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; background: var(--paper); }
 body { -webkit-font-smoothing: antialiased; }
+.poster p, .poster li, .stats .d { text-wrap: pretty; }
+.hero .d, .steps .t, .tagline { text-wrap: balance; }
 .poster {
   width: 594mm; height: 841mm; overflow: hidden; position: relative;
   padding: 24mm 28mm 18mm; background: var(--paper); color: var(--ink);
@@ -42,12 +44,12 @@ h1 { font-family: "SR Serif", serif; font-weight: 700; font-size: 100pt; line-he
 .try .url { font-size: 15pt; color: var(--ink2); margin: 0.6mm 0 0; line-height: 1.25; }
 
 /* ---------------------------------------------------------------- sections */
-.rule { border: 0; border-top: 0.6mm solid var(--ink); margin: 8mm 0 0; }
+.rule { border: 0; border-top: 0.6mm solid var(--ink); margin: 6mm 0 0; }
 h2 { font-family: "SR Serif", serif; font-weight: 600; font-size: 42pt; line-height: 1.08; margin: 5mm 0 4mm; }
 .band svg { display: block; }
 .note { font-size: 20pt; line-height: 1.3; color: var(--ink2); margin: 2.5mm 0 0; }
 .note b { color: var(--ink); font-weight: 600; }
-.sim-h { font-size: 23pt; font-weight: 600; margin: 6mm 0 2mm; }
+.sim-h { font-size: 23pt; font-weight: 600; margin: 5mm 0 2mm; }
 .sim-h span { font-weight: 400; color: var(--ink2); }
 
 .cols { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 14mm; flex: 1; min-height: 0; }
@@ -57,17 +59,18 @@ h2 { font-family: "SR Serif", serif; font-weight: 600; font-size: 42pt; line-hei
 /* steps */
 .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
 .steps li { counter-increment: s; margin: 0 0 5.5mm; }
+.steps li:last-child { margin-bottom: 0; }
 .steps .t { display: grid; grid-template-columns: 11mm 1fr; column-gap: 2mm; font-size: 25pt; line-height: 1.24; margin: 0 0 2.6mm; }
 .steps .t::before { content: counter(s); font-family: "SR Serif", serif; font-weight: 700; font-size: 30pt; line-height: 1.02; color: var(--blue); }
 .steps img { width: 100%; display: block; border: 0.45mm solid #CBC6BB; border-radius: 2.2mm; background: #fff; }
+.steps img.fade { -webkit-mask-image: linear-gradient(to right, #000 92%, transparent); mask-image: linear-gradient(to right, #000 92%, transparent); }
 .steps .cap { font-size: 19pt; color: var(--ink2); margin: 1.6mm 0 0; line-height: 1.25; }
 
 /* architecture */
 .rules { list-style: none; padding: 0; margin: 5mm 0 0; }
-.rules li { font-size: 24pt; line-height: 1.25; margin: 0 0 4mm; color: var(--ink2); }
-.rules b { color: var(--ink); font-weight: 600; }
+.rules li { font-size: 24pt; line-height: 1.25; margin: 0 0 3mm; color: var(--ink2); padding-left: 7mm; position: relative; }
+.rules li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 3.6mm; height: 0.7mm; background: var(--blue); }
 .cost { margin: 3mm 0 0; font-size: 24pt; line-height: 1.26; color: var(--ink2); border-top: 0.35mm solid var(--rule); padding-top: 4mm; }
-.cost b { color: var(--ink); font-weight: 600; }
 
 /* results */
 .hero { display: grid; grid-template-columns: auto 1fr; column-gap: 5mm; align-items: center; }
@@ -77,10 +80,9 @@ h2 { font-family: "SR Serif", serif; font-weight: 600; font-size: 42pt; line-hei
 .stats { margin: 0; padding: 0; list-style: none; border-top: 0.35mm solid var(--rule); }
 .stats li { display: grid; grid-template-columns: 34mm 1fr; column-gap: 4mm; padding: 2.4mm 0; border-bottom: 0.35mm solid var(--rule); align-items: baseline; }
 .stats .v { font-weight: 600; font-size: 34pt; line-height: 1; white-space: nowrap; }
-.stats .d { font-size: 22pt; line-height: 1.22; color: var(--ink2); }
+.stats .d { font-size: 23pt; line-height: 1.22; color: var(--ink2); }
 .chart-h { font-size: 23pt; font-weight: 600; line-height: 1.2; margin: 5mm 0 1.5mm; }
-.legend { display: flex; gap: 8mm; font-size: 20pt; color: var(--ink2); margin: 0 0 0.5mm; }
-.legend span::before { content: ""; display: inline-block; width: 10mm; height: 1.2mm; border-radius: 0.6mm; margin: 0 2.4mm 1.4mm 0; vertical-align: middle; background: var(--c); }
+.c-legend { font: 400 6.8px "SR Sans"; fill: var(--ink2); }
 .c-tick { font: 400 6.5px "SR Sans"; fill: var(--ink2); }
 .c-axis { font: 400 6.3px "SR Sans"; fill: var(--ink2); }
 .c-note { font: 500 6.5px "SR Sans"; fill: var(--ink2); }
@@ -104,18 +106,18 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
 .ill-title { font: 600 8.6px "SR Sans"; fill: var(--ink); }
 .sheet { fill: var(--sheet); stroke: #CBC6BB; stroke-width: 0.45; }
 .sheet-h { font: 600 7.6px "SR Sans"; fill: var(--ink); }
-.sheet-l { font: 600 5.6px "SR Sans"; fill: var(--ink2); letter-spacing: 0.4px; }
+.sheet-l { font: 600 6.3px "SR Sans"; fill: var(--ink2); letter-spacing: 0.35px; }
 .name { font: 400 6.8px "SR Sans"; fill: var(--ink); }
 .name-b { font: 600 6.8px "SR Sans"; fill: var(--ink); }
 .name-m { font: 400 6.8px "SR Sans"; fill: var(--ink2); }
 .slot { fill: #F4F2EC; }
 .dup { fill: url(#hatch); stroke: #4A5361; stroke-width: 0.6; }
 .gone { fill: none; stroke: #9A958A; stroke-width: 0.55; stroke-dasharray: 1.6 1.2; }
-.ann { font: 400 6.8px "SR Sans"; fill: var(--ink2); }
-.ann-b { font: 600 6.8px "SR Sans"; fill: var(--ink); }
+.ann { font: 400 7.0px "SR Sans"; fill: var(--ink2); }
+.ann-b { font: 600 7.0px "SR Sans"; fill: var(--ink); }
 .chip { fill: var(--blue-tint); }
-.chip-t { font: 600 5.8px "SR Sans"; fill: var(--blue); }
-.seat { fill: #fff; stroke: #CBC6BB; stroke-width: 0.45; }
+.chip-t { font: 600 6.4px "SR Sans"; fill: var(--blue); }
+.seat-sr { fill: var(--blue-tint); stroke: #2867B2; stroke-width: 0.45; }
 .held { fill: var(--orange-tint); stroke: var(--orange); stroke-width: 0.8; }
 .timer { font: 600 6.2px "SR Sans"; fill: var(--orange-text); }
 .flow { fill: none; stroke: var(--orange); stroke-width: 0.9; }
@@ -135,105 +137,107 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
   <div class="try">
     <img src="img/qr-live-demo.svg" alt="QR code to the live app">
     <p class="lbl">Live app on AWS</p>
-    <p class="url">demo stage · d2ni5e1z674t04<br>.cloudfront.net</p>
+    <p class="url">dev stage · d2ni5e1z674t04<br>.cloudfront.net</p>
   </div>
 </header>
 
 <hr class="rule">
 <section class="band">
   <h2>Why one form per session ties up seats</h2>
-  <svg viewBox="-0.5 -0.5 535 138" width="535mm" height="138mm" role="img" aria-label="Three separate sign-up forms where two people hold two seats each, versus one queue where nine people hold one seat each">
+  <svg viewBox="-0.5 -0.5 538 142" width="538mm" height="142mm" role="img" aria-label="Three separate sign-up forms where two people hold two seats each, versus one queue where everyone holds at most one seat">
     <defs>
       <marker id="arrow-o" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07000"/></marker>
       <pattern id="hatch" width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <rect width="2.2" height="2.2" fill="#ECEAE4"/><line x1="0" y1="0" x2="0" y2="2.2" stroke="#4A5361" stroke-width="0.45" stroke-opacity="0.35"/>
       </pattern>
     </defs>
-    <!-- ======================= left: today, one form per session -->
+    <!-- ======================= left: today, one form per session (the same people as on the right) -->
     <text x="0" y="7" class="ill-title">Today: a separate sign-up form for each session</text>
     <g transform="translate(0,13)">
-      <rect class="sheet" x="0" y="0" width="76" height="86" rx="2"/>
+      <rect class="sheet" x="0" y="0" width="76" height="90" rx="2"/>
       <text class="sheet-h" x="6" y="10.5">Session 1</text>
       <text class="sheet-l" x="6" y="18.5">SEATS</text>
-      <rect class="dup" x="4" y="21" width="68" height="10.5" rx="1.6"/><text class="name-b" x="8" y="28.4">Mei</text>
-      <rect class="dup" x="4" y="33" width="68" height="10.5" rx="1.6"/><text class="name-b" x="8" y="40.4">Arun</text>
-      <rect class="slot" x="4" y="45" width="68" height="10.5" rx="1.6"/><text class="name" x="8" y="52.4">Dev</text>
-      <text class="sheet-l" x="6" y="64">WAITLIST</text>
-      <text class="name-m" x="8" y="72">1. Sam</text>
-      <text class="name-m" x="8" y="80.5">2. Tom</text>
+      <rect class="dup" x="4" y="22" width="68" height="9.5" rx="1.6"/><text class="name-b" x="8" y="28.9">Mei</text>
+      <rect class="dup" x="4" y="33" width="68" height="9.5" rx="1.6"/><text class="name-b" x="8" y="39.9">Arun</text>
+      <rect class="slot" x="4" y="44" width="68" height="9.5" rx="1.6"/><text class="name" x="8" y="50.9">Dev</text>
+      <text class="sheet-l" x="6" y="61.5">WAITLIST</text>
+      <text class="name-m" x="8" y="69.5">1. Sam</text>
+      <text class="name-m" x="8" y="77.5">2. Tom</text>
+      <text class="name-m" x="8" y="85.5">3. Jia</text>
 
-      <rect class="sheet" x="86" y="0" width="76" height="86" rx="2"/>
+      <rect class="sheet" x="86" y="0" width="76" height="90" rx="2"/>
       <text class="sheet-h" x="92" y="10.5">Session 2</text>
       <text class="sheet-l" x="92" y="18.5">SEATS</text>
-      <rect class="dup" x="90" y="21" width="68" height="10.5" rx="1.6"/><text class="name-b" x="94" y="28.4">Arun</text>
-      <rect class="gone" x="90" y="33" width="68" height="10.5" rx="1.6"/><text class="name-m" x="94" y="40.4">Kim cancelled</text>
-      <rect class="slot" x="90" y="45" width="68" height="10.5" rx="1.6"/><text class="name" x="94" y="52.4">Ana</text>
-      <text class="sheet-l" x="92" y="64">WAITLIST</text>
-      <text class="name-m" x="94" y="72">1. Jia</text>
+      <rect class="dup" x="90" y="22" width="68" height="9.5" rx="1.6"/><text class="name-b" x="94" y="28.9">Arun</text>
+      <rect class="gone" x="90" y="33" width="68" height="9.5" rx="1.6"/><text class="name-m" x="94" y="39.9">Kim cancelled</text>
+      <rect class="slot" x="90" y="44" width="68" height="9.5" rx="1.6"/><text class="name" x="94" y="50.9">Ana</text>
+      <text class="sheet-l" x="92" y="61.5">WAITLIST</text>
+      <text class="name-m" x="94" y="69.5">1. Jia</text>
 
-      <rect class="sheet" x="172" y="0" width="76" height="86" rx="2"/>
+      <rect class="sheet" x="172" y="0" width="76" height="90" rx="2"/>
       <text class="sheet-h" x="178" y="10.5">Session 3</text>
       <text class="sheet-l" x="178" y="18.5">SEATS</text>
-      <rect class="dup" x="176" y="21" width="68" height="10.5" rx="1.6"/><text class="name-b" x="180" y="28.4">Mei</text>
-      <rect class="slot" x="176" y="33" width="68" height="10.5" rx="1.6"/><text class="name" x="180" y="40.4">Lee</text>
-      <rect class="slot" x="176" y="45" width="68" height="10.5" rx="1.6"/><text class="name" x="180" y="52.4">Ben</text>
-      <text class="sheet-l" x="178" y="64">WAITLIST</text>
-      <text class="name-m" x="180" y="72">1. Sam</text>
-      <text class="name-m" x="180" y="80.5">2. Zoe</text>
+      <rect class="dup" x="176" y="22" width="68" height="9.5" rx="1.6"/><text class="name-b" x="180" y="28.9">Mei</text>
+      <rect class="slot" x="176" y="33" width="68" height="9.5" rx="1.6"/><text class="name" x="180" y="39.9">Lee</text>
+      <rect class="slot" x="176" y="44" width="68" height="9.5" rx="1.6"/><text class="name" x="180" y="50.9">Ben</text>
+      <text class="sheet-l" x="178" y="61.5">WAITLIST</text>
+      <text class="name-m" x="180" y="69.5">1. Sam</text>
+      <text class="name-m" x="180" y="77.5">2. Zoe</text>
+      <text class="name-m" x="180" y="85.5">3. Kai</text>
 
-      <rect class="dup" x="0" y="94" width="10" height="6.5" rx="1.2"/>
-      <text class="ann" x="13.5" y="99.6"><tspan class="ann-b">Mei and Arun hold two seats each;</tspan> others miss out.</text>
-      <rect class="gone" x="0" y="105" width="10" height="6.5" rx="1.2"/>
-      <text class="ann" x="13.5" y="110.6"><tspan class="ann-b">Kim cancelled:</tspan> the seat waits for an organiser’s e-mail.</text>
+      <rect class="dup" x="0" y="98" width="10" height="6.5" rx="1.2"/>
+      <text class="ann" x="13.5" y="103.6"><tspan class="ann-b">Mei and Arun hold two seats each;</tspan> others miss out.</text>
+      <rect class="gone" x="0" y="109" width="10" height="6.5" rx="1.2"/>
+      <text class="ann" x="13.5" y="114.6"><tspan class="ann-b">Kim cancelled:</tspan> the seat waits for an organiser’s e-mail.</text>
     </g>
 
-    <line x1="264" y1="1" x2="264" y2="136" stroke="#D8D4CB" stroke-width="0.4"/>
+    <line x1="264" y1="1" x2="264" y2="140" stroke="#D8D4CB" stroke-width="0.4"/>
 
     <!-- ======================= right: SeatRelay, one queue -->
     <text x="278" y="7" class="ill-title">SeatRelay: one queue, at most one seat each</text>
     <g transform="translate(278,13)">
-      <rect class="sheet" x="0" y="0" width="78" height="86" rx="2"/>
+      <rect class="sheet" x="0" y="0" width="78" height="90" rx="2"/>
       <text class="sheet-h" x="6" y="10.5">One queue</text>
       <text class="sheet-l" x="6" y="18.5">IN ARRIVAL ORDER</text>
-      <text class="name" x="7" y="29.4">1. Tom</text>
-      <rect class="chip" x="58" y="23.3" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="29.2" text-anchor="middle">1</text>
-      <rect x="3.5" y="35" width="71" height="12" rx="1.6" fill="#FFF8F1" stroke="#E07000" stroke-width="0.55" stroke-dasharray="1.6 1.2"/>
-      <text class="name-b" x="7" y="43.4">2. Jia</text>
-      <rect class="chip" x="48" y="37" width="8" height="8" rx="1.4"/><text class="chip-t" x="52" y="42.9" text-anchor="middle">2</text>
-      <rect class="chip" x="58" y="37" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="42.9" text-anchor="middle">1</text>
-      <text class="name" x="7" y="57.4">3. Kai</text>
-      <rect class="chip" x="58" y="51.3" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="57.2" text-anchor="middle">3</text>
+      <text class="name" x="7" y="30.7">1. Tom</text>
+      <rect class="chip" x="58" y="24.25" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="30.55" text-anchor="middle">1</text>
+      <rect x="3.5" y="46.25" width="71" height="12" rx="1.6" fill="#FFF8F1" stroke="#E07000" stroke-width="0.55" stroke-dasharray="1.6 1.2"/>
+      <text class="name-b" x="7" y="54.7">2. Jia</text>
+      <rect class="chip" x="48" y="48.25" width="8" height="8" rx="1.4"/><text class="chip-t" x="52" y="54.55" text-anchor="middle">2</text>
+      <rect class="chip" x="58" y="48.25" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="54.55" text-anchor="middle">1</text>
+      <text class="name" x="7" y="78.7">3. Kai</text>
+      <rect class="chip" x="58" y="72.25" width="8" height="8" rx="1.4"/><text class="chip-t" x="62" y="78.55" text-anchor="middle">3</text>
 
       <g transform="translate(96,0)">
-        <rect class="sheet" x="0" y="0" width="160" height="86" rx="2"/>
+        <rect class="sheet" x="0" y="0" width="163" height="90" rx="2"/>
         <text class="sheet-h" x="6" y="10.5">Seats</text>
         <text class="sheet-l" x="6" y="18.5">AT MOST ONE PER PERSON</text>
-        <text class="name-b" x="6" y="29.4">Session 1</text>
-        <rect class="seat" x="40" y="22" width="37" height="10.5" rx="1.6"/><text class="name" x="44" y="29.4">Mei</text>
-        <rect class="seat" x="80" y="22" width="37" height="10.5" rx="1.6"/><text class="name" x="84" y="29.4">Dev</text>
-        <rect class="seat" x="120" y="22" width="37" height="10.5" rx="1.6"/><text class="name" x="124" y="29.4">Sam</text>
-        <text class="name-b" x="6" y="52.4">Session 2</text>
-        <rect class="seat" x="40" y="45" width="37" height="10.5" rx="1.6"/><text class="name" x="44" y="52.4">Arun</text>
-        <rect class="seat" x="80" y="45" width="37" height="10.5" rx="1.6"/><text class="name" x="84" y="52.4">Ana</text>
-        <rect class="held" x="120" y="45" width="37" height="10.5" rx="1.6"/><text class="name-b" x="123.5" y="52.4">Jia</text><text class="timer" x="154" y="52.2" text-anchor="end">14:59</text>
-        <text class="name-b" x="6" y="75.4">Session 3</text>
-        <rect class="seat" x="40" y="68" width="37" height="10.5" rx="1.6"/><text class="name" x="44" y="75.4">Lee</text>
-        <rect class="seat" x="80" y="68" width="37" height="10.5" rx="1.6"/><text class="name" x="84" y="75.4">Ben</text>
-        <rect class="seat" x="120" y="68" width="37" height="10.5" rx="1.6"/><text class="name" x="124" y="75.4">Zoe</text>
+        <text class="name-b" x="6" y="30.4">Session 1</text>
+        <rect class="seat-sr" x="40" y="23.5" width="38" height="9.5" rx="1.6"/><text class="name" x="44" y="30.4">Mei</text>
+        <rect class="seat-sr" x="81" y="23.5" width="38" height="9.5" rx="1.6"/><text class="name" x="85" y="30.4">Dev</text>
+        <rect class="seat-sr" x="122" y="23.5" width="38" height="9.5" rx="1.6"/><text class="name" x="126" y="30.4">Sam</text>
+        <text class="name-b" x="6" y="54.4">Session 2</text>
+        <rect class="seat-sr" x="40" y="47.5" width="38" height="9.5" rx="1.6"/><text class="name" x="44" y="54.4">Arun</text>
+        <rect class="seat-sr" x="81" y="47.5" width="38" height="9.5" rx="1.6"/><text class="name" x="85" y="54.4">Ana</text>
+        <rect class="held" x="122" y="47.5" width="38" height="9.5" rx="1.6"/><text class="name-b" x="125.5" y="54.4">Jia</text><text class="timer" x="157" y="54.2" text-anchor="end">14:59</text>
+        <text class="name-b" x="6" y="78.4">Session 3</text>
+        <rect class="seat-sr" x="40" y="71.5" width="38" height="9.5" rx="1.6"/><text class="name" x="44" y="78.4">Lee</text>
+        <rect class="seat-sr" x="81" y="71.5" width="38" height="9.5" rx="1.6"/><text class="name" x="85" y="78.4">Ben</text>
+        <rect class="seat-sr" x="122" y="71.5" width="38" height="9.5" rx="1.6"/><text class="name" x="126" y="78.4">Zoe</text>
       </g>
-      <path class="flow" d="M74.5,41 C 86,41 88,38.8 100,38.8 L 228,38.8 Q 234.5,38.8 234.5,43.6" marker-end="url(#arrow-o)"/>
+      <path class="flow" d="M74.5,52.25 C 86,52.25 86,40 98,40 L 230.5,40 Q 237,40 237,46.1" marker-end="url(#arrow-o)"/>
 
-      <rect class="held" x="0" y="94" width="10" height="6.5" rx="1.2"/>
-      <text class="ann" x="13.5" y="99.6"><tspan class="ann-b">Kim cancelled:</tspan> Tom wants only Session 1, so Jia gets the hold.</text>
-      <rect class="chip" x="0" y="105" width="10" height="6.5" rx="1.2"/>
-      <text class="ann" x="13.5" y="110.6"><tspan class="ann-b">Chips:</tspan> the sessions each person accepts, best first.</text>
-      <path class="flow" d="M0,119.3 h9.5" marker-end="url(#arrow-o)"/>
-      <text class="ann" x="13.5" y="121.6"><tspan class="ann-b">No organiser step:</tspan> the hand-over is part of the same update.</text>
+      <rect class="held" x="0" y="98" width="10" height="6.5" rx="1.2"/>
+      <text class="ann" x="13.5" y="103.6"><tspan class="ann-b">Kim cancelled:</tspan> Tom wants only Session 1, so Jia gets the hold.</text>
+      <rect class="chip" x="0" y="109" width="10" height="6.5" rx="1.2"/>
+      <text class="ann" x="13.5" y="114.6"><tspan class="ann-b">Chips:</tspan> the sessions each person accepts, best first.</text>
+      <path class="flow" d="M0,123.3 h9.5" marker-end="url(#arrow-o)"/>
+      <text class="ann" x="13.5" y="125.6"><tspan class="ann-b">No organiser step:</tspan> the hand-over is part of the same update.</text>
     </g>
   </svg>
-  <p class="sim-h">Simulated on {{ReplaySeeds}} random workshops <span>— the same arrivals replayed through both designs</span></p>
+  <p class="sim-h">Simulated on {{ReplaySeeds}} random workshops: <span>the same arrivals replayed through both designs</span></p>
   {{FACETS}}
-  <p class="note"><b>Not field data:</b> our allocation engine with assumed behaviour; means per workshop, refill time as the median workshop (the means are {{RefillMeanPerSession}} vs {{RefillMeanUnified}} min). The baseline’s waitlists are automatic too (no organiser delay modelled), so the gap comes only from people holding several seats.</p>
+  <p class="note">A simulation, not field data: our allocation engine with assumed behaviour; means per workshop, refill time (incl. people’s replies) as the median workshop (means {{RefillMeanPerSession}} vs {{RefillMeanUnified}} min). The baseline’s waitlists are automatic too, so the gap comes only from people holding several seats.</p>
 </section>
 
 <hr class="rule">
@@ -241,16 +245,16 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
   <section class="col">
     <h2>How it works</h2>
     <ol class="steps">
-      <li><div class="t">Tick every session you could attend and rank them.</div><img src="img/ui-register.png" alt="Registration form with ranked sessions"></li>
+      <li><div class="t">Tick every session you could attend and rank them.</div><img class="fade" src="img/ui-register.png" alt="Registration form: two sessions ticked and ranked, one left out"></li>
       <li><div class="t">Wait in one queue. When a seat you can take frees up and you are first, it is held for you (15&nbsp;min by&nbsp;default).</div><img src="img/ui-offer.png" alt="Offer card with a countdown"><p class="cap">Staged run with test accounts and 1-minute&nbsp;holds.</p></li>
-      <li><div class="t">Accept to keep it. Decline or let it expire: only that session is dropped, and the seat is held for the next person at once.</div></li>
-      <li><div class="t">Organisers see every hand-over and its delay.</div><img src="img/ui-backfill-log.png" alt="Organiser backfill log"></li>
+      <li><div class="t">Accept to keep it. Decline or let it lapse: you lose only that session, and the seat moves on at once.</div></li>
+      <li><div class="t">Organisers see every hand-over and its delay.</div><img src="img/ui-backfill-log.png" alt="Organiser backfill log"><p class="cap">Top row: an offer expired; the seat was re-held 189&nbsp;ms later.</p></li>
     </ol>
   </section>
 
   <section class="col">
     <h2>Serverless on AWS</h2>
-    <svg class="arch" viewBox="-0.5 -0.5 167 171" width="166mm" height="170mm" role="img" aria-label="Serverless architecture on AWS">
+    <svg class="arch" viewBox="-0.5 -0.5 171 170" width="170mm" height="169.5mm" role="img" aria-label="Serverless architecture on AWS">
       <defs>
         <marker id="arrow-i" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4A5361"/></marker>
         <marker id="arrow-o2" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#E07000"/></marker>
@@ -259,60 +263,59 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
         .nd { fill: #fff; stroke: #003D7C; stroke-width: 0.6; }
         .nd-o { fill: #fff; stroke: #E07000; stroke-width: 0.7; }
         .nt { font: 600 7.4px "SR Sans"; fill: #1B2430; }
-        .ns { font: 400 5.7px "SR Sans"; fill: #1B2430; }
+        .ns { font: 400 6.3px "SR Sans"; fill: #1B2430; }
         .ar { stroke: #4A5361; stroke-width: 0.55; fill: none; }
         .ao { stroke: #E07000; stroke-width: 0.7; fill: none; }
-        .al { font: 400 5.8px "SR Sans"; fill: #4A5361; }
-        .alo { font: 500 5.8px "SR Sans"; fill: #9A4C00; }
+        .al { font: 400 6.3px "SR Sans"; fill: #4A5361; }
+        .alo { font: 500 6.3px "SR Sans"; fill: #9A4C00; }
       </style>
       <!-- main path -->
       <rect class="nd" x="0" y="0" width="100" height="25" rx="2.2"/>
       <text class="nt" x="5" y="10.5">Web app</text><text class="ns" x="5" y="19.5">S3, CloudFront, Cognito</text>
-      <path class="ar" d="M30,25 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="10" y="32">request</text>
-      <path class="ar" d="M64,35 v-9.5" marker-end="url(#arrow-i)" stroke-dasharray="1.4 1"/><text class="al" x="68" y="32">polls for the answer</text>
-      <rect class="nd" x="0" y="36" width="100" height="25" rx="2.2"/>
-      <text class="nt" x="5" y="46.5">API</text><text class="ns" x="5" y="55.5">API Gateway + Lambda</text>
-      <path class="ar" d="M50,61 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="46" y="68" text-anchor="end">replies at once</text>
-      <rect class="nd" x="0" y="72" width="100" height="25" rx="2.2"/>
-      <text class="nt" x="5" y="82.5">One lane per workshop</text><text class="ns" x="5" y="91.5">SQS FIFO message group</text>
-      <path class="ar" d="M50,97 v9.5" marker-end="url(#arrow-i)"/>
-      <rect class="nd" x="0" y="108" width="100" height="25" rx="2.2"/>
-      <text class="nt" x="5" y="118.5">Worker decides</text><text class="ns" x="5" y="127.5">Lambda: allocation engine</text>
-      <path class="ar" d="M50,133 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="54" y="140">one transaction</text>
-      <rect class="nd" x="0" y="144" width="100" height="25" rx="2.2"/>
-      <text class="nt" x="5" y="154.5">Database</text><text class="ns" x="5" y="163.5">DynamoDB, one table</text>
+      <path class="ar" d="M30,25 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="27.5" y="31.6" text-anchor="end">request</text>
+      <path class="ar" d="M64,35 v-9.5" marker-end="url(#arrow-i)" stroke-dasharray="1.4 1"/><text class="al" x="68" y="31.6">polls for the answer</text>
+      <rect class="nd" x="0" y="35" width="100" height="25" rx="2.2"/>
+      <text class="nt" x="5" y="45.5">API</text><text class="ns" x="5" y="54.5">API Gateway + Lambda</text>
+      <path class="ar" d="M50,60 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="46" y="66.6" text-anchor="end">enqueues</text>
+      <rect class="nd" x="0" y="70" width="100" height="25" rx="2.2"/>
+      <text class="nt" x="5" y="80.5">One lane per workshop</text><text class="ns" x="5" y="89.5">SQS FIFO message group</text>
+      <path class="ar" d="M50,95 v9.5" marker-end="url(#arrow-i)"/>
+      <rect class="nd" x="0" y="105" width="100" height="25" rx="2.2"/>
+      <text class="nt" x="5" y="115.5">Worker decides</text><text class="ns" x="5" y="124.5">Lambda: allocation engine</text>
+      <path class="ar" d="M50,130 v9.5" marker-end="url(#arrow-i)"/><text class="al" x="54" y="136.6">one transaction</text>
+      <rect class="nd" x="0" y="140" width="100" height="25" rx="2.2"/>
+      <text class="nt" x="5" y="150.5">Database</text><text class="ns" x="5" y="159.5">DynamoDB, one table</text>
       <!-- side column: timing (orange) and e-mail -->
-      <rect class="nd-o" x="112" y="36" width="54" height="33" rx="2.2"/>
-      <text class="nt" x="116" y="46.5">Safety sweep</text><text class="ns" x="116" y="55.5">EventBridge</text><text class="ns" x="116" y="63.5">every 5 min</text>
-      <path class="ao" d="M124,69 V78 H101.5" marker-end="url(#arrow-o2)" stroke-dasharray="1.6 1.2"/>
-      <rect class="nd-o" x="112" y="104" width="54" height="33" rx="2.2"/>
-      <text class="nt" x="116" y="114.5">Hold timer</text><text class="ns" x="116" y="123.5">SQS delay queue</text><text class="ns" x="116" y="131.5">+ Lambda</text>
-      <path class="ao" d="M100,120.5 h11" marker-end="url(#arrow-o2)"/>
-      <path class="ao" d="M154,104 V90 H101.5" marker-end="url(#arrow-o2)"/><text class="alo" x="127" y="87.5">time’s up</text>
-      <rect class="nd" x="112" y="144" width="54" height="25" rx="2.2"/>
-      <text class="nt" x="116" y="154.5">E-mail</text><text class="ns" x="116" y="163.5">Streams → SES</text>
-      <path class="ar" d="M100,156.5 h11" marker-end="url(#arrow-i)"/>
+      <rect class="nd-o" x="112" y="35" width="58" height="31" rx="2.2"/>
+      <text class="nt" x="116" y="45.5">Safety sweep</text><text class="ns" x="116" y="54">EventBridge</text><text class="ns" x="116" y="61.5">every 5 min</text>
+      <path class="ao" d="M124,66 V76 H101.5" marker-end="url(#arrow-o2)" stroke-dasharray="1.6 1.2"/>
+      <rect class="nd-o" x="112" y="101" width="58" height="31" rx="2.2"/>
+      <text class="nt" x="116" y="111.5">Hold timer</text><text class="ns" x="116" y="120">SQS delay queue</text><text class="ns" x="116" y="127.5">+ Lambda</text>
+      <path class="ao" d="M100,117.5 h11" marker-end="url(#arrow-o2)"/>
+      <path class="ao" d="M156,101 V88 H101.5" marker-end="url(#arrow-o2)"/><text class="alo" x="118" y="85.6">time’s up</text>
+      <rect class="nd" x="112" y="138" width="58" height="31" rx="2.2"/>
+      <text class="nt" x="116" y="148.5">E-mail</text><text class="ns" x="116" y="157">Streams →</text><text class="ns" x="116" y="164.5">Lambda → SES</text>
+      <path class="ar" d="M100,152.5 h11" marker-end="url(#arrow-i)"/>
     </svg>
     <ul class="rules">
-      <li><b>One lane per workshop,</b> decided in arrival order; a version check catches any overlap.</li>
-      <li><b>One transaction:</b> seats, queue, offer and notice change together.</li>
-      <li><b>One timer per hold:</b> a late timer cannot touch a newer offer.</li>
+      <li>Each workshop’s requests are decided in arrival order; a version check catches any overlap.</li>
+      <li>Seats, queue, offer and notice change in one transaction.</li>
+      <li>Each hold has its own timer, and a late timer cannot touch a newer offer.</li>
     </ul>
-    <p class="cost"><b>Cost follows use:</b> US${{CostUnitOneKCloudListUsd}} → US${{CostUnitHundredKCloudListUsd}} per 1,000 registrations from 1k to 100k a month (list prices, our cost model); self-hosting is cheaper above about {{CrossoverThousands}}.</p>
+    <p class="cost">Cost model, list prices: US${{CostUnitOneKCloudListUsd}} per 1,000 registrations at 1k a month, US${{CostUnitHundredKCloudListUsd}} at 100k. An own server is cheaper above about {{CrossoverThousands}} a month if fully costed, or about {{CrossoverIncrement}} if one is already running.</p>
   </section>
 
   <section class="col">
     <h2>Measured on AWS</h2>
-    <div class="hero"><div class="v">{{SeriesPassed}}/{{SeriesExperiments}}</div><div class="d">acceptance tests from our proposal (Table 3) pass on the deployed system</div></div>
+    <div class="hero"><div class="v">{{SeriesPassed}}/{{SeriesExperiments}}</div><div class="d">scripted experiments from our proposal (Table 3) pass on AWS</div></div>
     <p class="hero-note">A first run hit the new account’s Lambda limit of 10 and lost requests but broke no rule; we re-ran everything at 1,000.</p>
     <ul class="stats">
       <li><span class="v">0</span><span class="d">overbooked sessions or people with two seats ({{CorrectnessChecksTotal}} checks)</span></li>
-      <li><span class="v">{{ConcurrencyAccounts}}:{{ConcurrencySeats}}</span><span class="d">accounts racing for seats; every rule held</span></li>
+      <li><span class="v">{{ConcurrencyAccounts}}</span><span class="d">accounts raced for {{ConcurrencySeats}} seats; every invariant held ({{ConcurrencyChecksTotal}} checks)</span></li>
       <li><span class="v">{{BackfillPNinetyFiveS}} s</span><span class="d">from a hold expiring to the next person’s hold (p95; target 120&nbsp;s)</span></li>
-      <li><span class="v">{{RecoveryMin}} min</span><span class="d">to apply a request once after the worker crashed mid-way (target 5&nbsp;min)</span></li>
+      <li><span class="v">{{FailureBeforeCommitPassed}}/{{FailureBeforeCommitCases}}</span><span class="d">forced worker crashes: each request applied once on the queue’s {{RecoveryMin}}-min retry (target 5&nbsp;min)</span></li>
     </ul>
     <p class="chart-h">Time to the final answer (p95)</p>
-    <div class="legend"><span style="--c:#2867B2">10 workshops</span><span style="--c:#E07000">1 busy workshop</span></div>
     {{LOADCHART}}
     <p class="note" style="margin-top:1mm">k6; median of 3 runs per point; {{PerfDevHotspotVUFiftyErrorPct}} % errors. One workshop is decided one request at a time, so it slows first.</p>
   </section>
@@ -321,8 +324,8 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
 <footer>
   <div>
     <p class="next"><b>Next:</b> a user study with twelve students and a live two-session pilot with real participants.</p>
-    <p class="src"><b>Code, data and every measurement:</b> github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 (results/). Measured on our AWS deployment (ap-southeast-1) on 17 Oct 2026, UTC; screens from a staged run with test accounts on 21 Oct 2026.</p>
-    <p class="ai"><b>AI use:</b> Claude Code, an AI coding assistant, generated the code, infrastructure templates, tests and experiment scripts, ran the deployments and measurements with our credentials, and drafted this poster’s text, diagrams and charts. The scope, allocation rules, constraints and acceptance targets are the team’s (Final report, AI declaration). No AI-generated images: every figure is drawn from data or is a screenshot of the app.</p>
+    <p class="src"><b>Code, data and every measurement:</b> github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 (results/). Measured on our AWS deployment (ap&#8209;southeast&#8209;1) on 17 Oct 2026, UTC; screens from a staged run with test accounts on 21 Oct 2026.</p>
+    <p class="ai"><b>AI use:</b> Claude Code, an AI coding assistant, generated the code, infrastructure templates, tests and experiment scripts, ran the deployments and measurements with our credentials, and drafted this poster’s text and SVG figures. The scope, allocation rules, constraints and acceptance targets are the team’s (Final report, AI declaration). No&nbsp;image&#8209;generation model was used: the charts are plotted from results/ and the screens are screenshots of the app.</p>
   </div>
   <div class="code"><img src="img/qr-repo.svg" alt="QR code to the GitHub repository"><div>code &amp; data</div></div>
 </footer>

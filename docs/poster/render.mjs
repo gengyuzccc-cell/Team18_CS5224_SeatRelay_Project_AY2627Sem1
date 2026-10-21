@@ -42,8 +42,17 @@ try {
       const got = svg.getBoundingClientRect().width;
       if (Math.abs(got - want) > 2) problems.push(`svg.${svg.getAttribute('class')} drawn ${got.toFixed(0)}px wide, set ${want.toFixed(0)}px`);
     }
-    return { problems, size: [r.width, r.height] };
+    // each column must end inside the grid (above the footer's margin); report the space left in each
+    const mm = (px) => px * 25.4 / 96;
+    const colsBottom = poster.querySelector('.cols').getBoundingClientRect().bottom;
+    const free = [...poster.querySelectorAll('.cols > .col')].map((col, i) => {
+      const bottom = Math.max(...[...col.querySelectorAll('*')].map((el) => el.getBoundingClientRect().bottom));
+      if (bottom > colsBottom + 0.5) problems.push(`column ${i + 1} runs ${mm(bottom - colsBottom).toFixed(1)} mm past the grid`);
+      return mm(colsBottom - bottom).toFixed(1);
+    });
+    return { problems, size: [r.width, r.height], free };
   });
+  console.log(`space left at the bottom of the columns: ${overflow.free.join(' / ')} mm`);
   if (overflow.problems.length > 0) {
     console.error('layout overflow:', overflow.problems.join(', '));
     process.exitCode = 1;
