@@ -35,6 +35,7 @@ Generated from the run directories; the notes column is written by hand. Failed 
 | 2026-10-17T21:11:33.047Z | correctness | dev | d34e0ac | 211a1a57 | 3 | PASS 672/672 | 2026-10-17-correctness-3 | regression after deploying d34e0ac to dev |
 | 2026-10-17T21:16:19.960Z | access-control | dev | d34e0ac | d65305fd | 3 | PASS 177/177 | 2026-10-17-access-control-3 | regression after deploying d34e0ac to dev |
 | 2026-10-17T21:21:17.227Z | web-walkthrough-dev | dev | a563d92 (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev-2 | real-browser walkthrough after deploying d34e0ac (ended card, named holders); screenshots and backup video in docs/demo/; not user evidence |
+| 2026-10-24T08:25:04.593Z | web-walkthrough-dev | dev | cb160d2 (dirty) |  |  | PASS (45 checks) | 2026-10-24-web-walkthrough-dev | redesigned web app after the 24 Oct SPA redeploy; screenshots and backup video in docs/demo/; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 
@@ -44,3 +45,6 @@ Not harness runs (no `meta.json`), listed for completeness:
   `results/2026-10-17-table3-dev-q1000.status` / `.log` / `-provenance.md`: the re-run at quota 1000.
 - `results/loadtest/<date>/`: k6 matrices (`runs.json` lists every invocation; a superseded round carries `supersededBy` in `raw.csv`).
 - `results/replay/`, `results/cost/`, `results/market/`: simulation, cost model and market counts.
+- `results/2026-10-24-ses-production-check/`: SES production access confirmed (`sesv2 get-account`) and end-to-end
+  notifier check on dev after the `bcd7bd1` redeploy (06:22-06:24 UTC): 3 sent to the SES mailbox simulator, 3 skipped
+  (reserved domain).

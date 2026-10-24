@@ -116,7 +116,7 @@ dead-letter queue and raises an alarm; alarms also fire on messages older than 1
 and API 5xx responses. We inject all three crash points with `_fault` flags on dev: BEFORE_COMMIT and
 TIMER_SEND settled exactly once on redelivery (3/3 each, median about 120 s, the visibility timeout),
 AFTER_COMMIT 3/3 at once (median 65 ms), a stopped notifier's backlog cleared at most 53.9 s after the
-restore (e-mail is disabled on dev, so those notifications are SKIPPED), and no message reached a
+restore (e-mail was off on dev during the series, so those notifications were SKIPPED), and no message reached a
 dead-letter queue. The demo shows AFTER_COMMIT live.
 **Where:** `results/2026-10-17-failure-recovery-2/summary.md`, `packages/service/src/worker/processCommand.ts`, `services/aws/src/handlers/worker.ts`, `services/aws/templates/app.yaml` (queues, alarms), ARCHITECTURE §12, `docs/RUNBOOK.md` §5.
 
@@ -312,12 +312,13 @@ than 10 pages, overfull boxes, undefined references or leftover placeholders.
 ### 20. How did you use AI, and how did you make sure the result is correct?
 
 Answer from the AI usage declaration in the Final report, and say no more than it says. An AI coding
-assistant generated the code, templates, tests, scripts, desk research, documentation, and the report
-and slide text (including revisions), and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
+assistant generated the code, templates, tests, scripts, desk research, documentation, speaker notes,
+interview and user-study materials, figures, and the report, slide and poster text (including revisions), and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
 The scope, rules R1–R7, constraints C1–C7 and acceptance targets are the team's, from the Preliminary
-report. The interviews, the user study and the pilot are run by the team: [PENDING: their status on
-the day; none had run on 2026-10-17]. How each member reviewed the generated work and what they
-learned is in their own statement in the declaration ([PENDING: each member's confirmed statement]).
+report. The interviews, the user study and the pilot are run by the team: none had run on 2026-10-24 (study
+planned 29 Oct-5 Nov, pilot 3-4 Nov); give their status on the day. The members' statements say what
+each learned; the assistant drafted them and the team approved them. The checks on the generated work
+were automated (below); do not claim a manual review beyond that.
 Correctness does not rest on trusting generated code; it rests on independent checks:
 - the engine's property test and 95 % coverage threshold;
 - CI on every push;

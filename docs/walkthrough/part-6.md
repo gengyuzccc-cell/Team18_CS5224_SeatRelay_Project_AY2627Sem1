@@ -8,13 +8,14 @@
 
 ## What to say (about 300 spoken words, 2:00 at 150 words a minute; the Division-of-work line is not read out)
 
-**Slide 12, user study and pilot.** Our evaluation with independent users has not run yet. The plan: First come four to six student interviews and a record of what our pilot organisers do
-today. Then twelve non-team university students, at least four with organising experience, will each
+**Slide 12, user study and pilot.** Our evaluation with independent users has not run yet. The plan: First come four to six student interviews, two to three organiser interviews and a record
+of what our own pilot organisers do today. Then twelve non-team university students, at least four with organising experience, will each
 use SeatRelay and today's practice, one Google Form per session plus a spreadsheet with
 duplicate-detection formulas. Half start with each tool. The targets
 are 90 percent task completion, task times 25 percent shorter, and a usability score of at least 75.
-[PENDING: the results on the day, or say "not run yet".] The live pilot, two sessions of one real
-workshop, is also still to come: [PENDING: pilot status, from results/pilot/].
+Not run yet: the study is planned for 29 Oct to 5 Nov (on the day, give the results if
+`results/user-study/summary.md` exists). The live pilot, two sessions of one real workshop, is also
+still to come: planned for 3-4 Nov (on the day, give its status from `results/pilot/`).
 
 Before the pilot we rehearsed it on the pilot stage with 20 synthetic accounts and scripted actions.
 That is **staged**, not user evidence: all 43 commands were applied, 9 released seats were relayed, and
@@ -22,18 +23,20 @@ the invariants held throughout.
 
 **Slide 13, limitations and future work.** One writer per workshop is the price of ordering: hot
 workshops settle slower, though within target. A Lambda quota of ten throttled our first runs; the
-re-runs passed. We run in one region. E-mail reaches only verified addresses until SES production
-access is granted. The mechanism comparison is a simulation, and the cost is modelled. Next we would
-batch commands per workshop, obtain SES production access, and try a cheaper Cognito tier, our largest
+re-runs passed. We run in one region. SES is out of the sandbox, but our sender is a gmail.com
+address, so in-app notifications stay primary and sign-up codes still come from Cognito's default
+mailer. The mechanism comparison is a simulation, and the cost is modelled. Next we would
+batch commands per workshop, send from our own mail domain with DKIM, and try a cheaper Cognito tier, our largest
 cost at scale.
 
-**AI use.** An AI coding assistant generated our code, tests, scripts, desk research, and the report
-and slide text, and ran the deployments and experiments with our credentials. The scope, rules and
-targets are ours, from the Preliminary report. The report's declaration gives the details, with each member's own
-statement of what they learned.
+**AI use.** An AI coding assistant generated our code, tests, scripts, documentation, desk research,
+and the report, slide and poster text, and ran the deployments and experiments with our credentials.
+The scope, rules and targets are ours, from the Preliminary report. The report's declaration gives the
+details, with each member's statement of what they learned, drafted by the assistant from the project
+record and approved by the team.
 
-**Division of work.** Point at the slide instead of reading it out. The mapping of names to work lines
-is provisional until each member confirms it ([PENDING: `docs/ai-declaration-drafts.md`]).
+**Division of work.** Point at the slide instead of reading it out. The name-to-line mapping was
+approved by the team on 2026-10-24 (`docs/ai-declaration-drafts.md`).
 
 **Slide 14.** Thank you. We are happy to take questions.
 
@@ -48,9 +51,9 @@ is provisional until each member confirms it ([PENDING: `docs/ai-declaration-dra
 | Errors and help requests | [PENDING] | same (`\StudyErrorsSR`, `\StudyHelpSR`) |
 | Pilot: workshops, registrations, confirmed, cancelled, backfills, attended, distinct participants | [PENDING] | `results/pilot/` (`\PilotWorkshops`, `\PilotRegistrations`, `\PilotBackfills`, `\PilotAttended`, `\PilotDistinctParticipants`) |
 | Staged pilot rehearsal (synthetic accounts, scripted; not user evidence) | 20 participants; 43/43 commands applied; 9 seats relayed (expiry relays 72–74 ms; decline, cancellation and capacity relays 0 ms); 42 notifications SENT to the SES mailbox simulator; invariants held at all 8 phase checks; 85/85 checks | `results/2026-10-17-pilot-rehearsal-3/summary.md` (`\RehearsalParticipants`, `\RehearsalCommandsApplied`, `\RehearsalBackfills`, `\RehearsalNotificationsSent`, `\RehearsalInvariantReads`) |
-| Roles (work lines of the Preliminary report, in title-block order) | as in the AI usage declaration; [PENDING: each member to confirm] | `docs/ai-declaration-drafts.md` |
-| SES production access | denied on 2026-10-17 (sender identity not yet verified) | `docs/deployment-state.md` |
-| SES sandbox limits | verified recipients only, 200 mails per 24 h, 1 mail/s | `docs/deployment-state.md` |
+| Roles (work lines of the Preliminary report, in title-block order) | as in the AI usage declaration; approved by the team 2026-10-24 | `docs/ai-declaration-drafts.md` |
+| SES production access | granted 2026-10-24 (50,000 per 24 h, 14/s); denied 2026-10-17 while the sender was unverified | `results/2026-10-24-ses-production-check/`, `docs/deployment-state.md` |
+| Cognito sign-up codes | default mailer, 50 per day | `results/2026-10-24-ses-production-check/summary.md` |
 | Region and recovery | `ap-southeast-1`; DynamoDB point-in-time recovery enabled | `services/aws/templates/app.yaml` (`PointInTimeRecoveryEnabled: true`) |
 | Cognito share of the 100k list price | US$500 of US$591.24 per month (the Lite-tier sensitivity is in `docs/COST.md` §7, not in a results file; do not quote its figure) | `results/cost/model-summary.md` §4 |
 
@@ -80,7 +83,9 @@ directed, and what each member learned. The checks did not depend on trusting th
 - every measured number in the report generated from `results/`, never typed in.
 
 The scope, the rules and the acceptance targets are the team's, from the Preliminary report; the
-assistant ran the deployment and experiment scripts with the team's credentials. How each member
-reviewed the generated work is in their own statement in the declaration ([PENDING: each member's
-confirmed statement]); do not claim more than it says. The interviews, the user study and the pilot
-are run by the team ([PENDING: their status on the day]).
+assistant ran the deployment and experiment scripts with the team's credentials. The members'
+statements say what each learned; the assistant drafted them and the team approved them. The checks on
+the generated work were automated: the engine's property tests and coverage threshold, CI, the
+Table 3 experiments with `verify`, and the number trace (`check_numbers.py`). Do not claim a manual
+review beyond that. The interviews, the user study and the pilot are run by the team (on 2026-10-24
+none had run: study planned 29 Oct-5 Nov, pilot 3-4 Nov; give their status on the day).

@@ -3,12 +3,11 @@
 SeatRelay replaces one form per session with one registration, one queue and a timed hold per
 workshop, and relays every released seat automatically. Each workshop is serialised through one
 FIFO message group, and every decision commits in one conditional DynamoDB transaction. On the
-deployed system \SeriesPassed{} of the \SeriesExperiments{} system experiments met their targets
-(failure recovery without e-mail, off on \code{dev}), no \code{verify} call found an
+deployed system \SeriesPassed{} of \SeriesExperiments{} system experiments met their targets
+(failure recovery without e-mail, then off on \code{dev}), no \code{verify} call found an
 invariant violation, and the load test met every target up to \PerfDevMaxVUsMet{} virtual users,
-also with all of them on one workshop. A first series failed under the account's Lambda quota of
-10, where CloudWatch tied every HTTP 503 to a throttled invocation, and on one late expiry-race
-probe; with the quota raised and the probe's send time calibrated, the same deployed code passed.
+also with all of them on one workshop. A first series failed for two reasons: the account's Lambda quota
+of 10 (CloudWatch tied every HTTP 503 to a throttled invocation) and one late expiry-race probe; with the quota raised and the probe's send time calibrated, the same deployed code passed.
 Per-offer timers with tick-first semantics take the
 sweep interval off the backfill path (\IfPending{\BackfillExpiredPNinetyFiveS}{\TimerPathRelaysN{} timer-path relays on
 \code{dev} so far, at most \TimerPathRelayMaxMs\,ms}{expiry-driven backfill p95 \BackfillExpiredPNinetyFiveS\,s on
@@ -20,9 +19,12 @@ registrations a month. Of the hypotheses (\S\ref{sec:hypotheses}), H2 is support
 shown); \IfPending{\StudyParticipants}{H1 and the organiser side of H3 await the user
 study}{\pending{H1 and H3 verdicts with the user-study results}}.
 
-Open items: \IfPending{\PerfLocalCpuPeakPct}{the on-prem load test, }{}the student and organiser
-interviews ($p$, price), the user study and the pilot. Future work: (i)~batch commands of one
+\IfPending{\InterviewN}{Open items: \IfPending{\PerfLocalCpuPeakPct}{the on-prem load test; }{}the student and
+organiser interviews ($p$, price)\IfPending{\StudyParticipants}{; the user study}{}\IfPending{\PilotWorkshops}{; the
+pilot}{}. }{\IfPending{\StudyParticipants}{Open items: the user study\IfPending{\PilotWorkshops}{; the pilot}{}.
+}{\IfPending{\PilotWorkshops}{Open items: the pilot. }{}}}Future work: (i)~batch commands of one
 workshop per worker invocation, with a shared snapshot, for throughput; (ii)~server push only if
 the user study finds the 10\,s status refresh too slow; (iii)~billing and limits for the
 organiser plan; (iv)~a second region with a replicated table and identity store, if one region's
-availability is not enough; (v)~the Cognito Lite tier, as Cognito dominates the cost at scale.
+availability is not enough; (v)~the Cognito Lite tier, as Cognito dominates the cost at scale; (vi)~a mail domain of our own
+with DKIM, for notifications and sign-up codes.

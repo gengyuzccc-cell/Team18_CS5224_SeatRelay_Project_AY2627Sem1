@@ -306,8 +306,9 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
     not what makes this fast."
 - At 00:00 A's countdown reads *expired*. **Accept seat** stays enabled, because the server decides.
   The page refreshes once at zero. On dev the timer usually relays the seat within a second, and
-  A's offered card gives way to the *Ended* card about 2 s after 00:00 (1,976 ms in the published
-  browser walkthrough, `results/2026-10-17-web-walkthrough-dev-2/`, `bobEndedCardAfterExpiryMs`).
+  A's offered card gives way to the *Ended* card about 2-3 s after 00:00 (3,084 ms in the published
+  browser walkthrough of 24 Oct, `results/2026-10-24-web-walkthrough-dev/`, `bobEndedCardAfterExpiryMs`;
+  1,976 ms on 17 Oct).
 - **Do (Window A), optional, at 00:00 while the Accept button is still visible:** **Accept seat**.
   Skip this if the card is already gone.
 - **Expect:** *Accept rejected — The offer expired before your answer arrived.* At the next refresh
@@ -474,19 +475,19 @@ Outputs, overwritten only by a passing run:
 - `results/<date>-web-walkthrough-dev[-n]/summary.md`: what was checked and observed (staged, not
   user evidence).
 
-Observed in the published run (dev, 2026-10-17, 45 checks passed, evidence
-`results/2026-10-17-web-walkthrough-dev-2/`, after the redeploy; the first run is `results/2026-10-17-web-walkthrough-dev/`):
+Observed in the published run (dev, 2026-10-24, redesigned app `cb160d2`, 45 checks passed, evidence
+`results/2026-10-24-web-walkthrough-dev/`; earlier runs: `results/2026-10-17-web-walkthrough-dev[-2]/`):
 
 - All four sign-ins used the authorization code flow with PKCE (S256) through the hosted UI. Each
   returned to the page it started from, with no `code`/`state` left in the address bar. Sign-out
   cleared the stored user, and the hosted UI asked for the password again.
-- Register: 1.8 s from the click (*Sending…*) to the offer card. The 202 came back in 0.4–0.8 s;
+- Register: 1.8 s (1,771 ms) from the click (*Sending…*) to the offer card. The 202 came back in 0.4–0.7 s;
   the first poll, about 0.3 s later, already saw every command settled.
-- Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 5.4 s later, on
-  its 10 s refresh.
-- Expiry backfill: latency 186 ms on the dashboard (179 ms in the first walkthrough). Carol's page
-  showed the relayed offer 9.0 s after `expiresAt`, on its 10 s refresh. Bob's offered card gave way
-  to the *Ended* card 2.0 s after `expiresAt` (`bobEndedCardAfterExpiryMs` 1,976 in `meta.json`).
+- Cancellation backfill: latency 0 ms on the dashboard. Bob's page showed the offer 5.2 s after the
+  cancellation, on its 10 s refresh.
+- Expiry backfill: latency 137 ms on the dashboard (186 ms on 17 Oct). Carol's page showed the
+  relayed offer 7.2 s after `expiresAt`, on its 10 s refresh. Bob's offered card gave way to the
+  *Ended* card 3.1 s after `expiresAt` (`bobEndedCardAfterExpiryMs` 3,084 in `meta.json`).
 - 0 API responses ≥ 400, 0 browser console errors.
 
 ---

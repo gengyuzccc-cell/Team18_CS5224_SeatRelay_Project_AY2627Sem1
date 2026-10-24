@@ -23,8 +23,8 @@ Validation performed: hosted UI login page HTTP 200; OIDC discovery OK (note: Co
 test user `smoke1@example.com` (created with `MessageAction=SUPPRESS`) minted an ID token through the
 tooling client with `email` and `name` claims.
 
-SES: account is in the **sandbox** (200 mails/24 h, 1 mail/s, verified recipients only). Production
-access request: **submitted 2026-10-17 00:5x UTC via `sesv2 put-account-details`** (status PENDING; mail type
+SES: out of the sandbox since 2026-10-24 (see below). History: the account was in the sandbox (200
+mails/24 h, 1 mail/s, verified recipients only); production access request: **submitted 2026-10-17 00:5x UTC via `sesv2 put-account-details`** (status PENDING; mail type
 TRANSACTIONAL, website URL = CloudFront URL, use case = `docs/ses-production-request.md` §3). Account-level
 suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounce/Complaint, with headers)
 published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for the team sender mailbox is
@@ -161,3 +161,12 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   can be minted from public information.
 - **SES:** the sender identity (the team sender address) is verified; production access still shows **DENIED** for
   case `179219791000451` (the team replied to the case; waiting for AWS). The sandbox fallback applies.
+
+## 2026-10-24: SES production access, notifier and web redeploys
+
+- **2026-10-24** `seatrelay-app-dev` and `seatrelay-app-pilot` redeployed from `bcd7bd1` (only
+  `NotifierFunction` changed: reserved test domains are skipped; dev now `EmailEnabled=true`). About
+  08:24 UTC the dev and pilot SPAs were republished from `cb160d2` (redesigned web app;
+  `index-_vrUTyTT.js` / `index-DnGuptRW.css`; supersedes the `d34e0ac` bundle named above). Checks:
+  `results/2026-10-24-ses-production-check/`, `results/2026-10-24-web-walkthrough-dev/` (45/45). Smoke,
+  correctness and access-control were not re-run after these redeploys (last regression: 17 Oct, `d34e0ac`).

@@ -63,7 +63,8 @@
 \setlength{\bibitemsep}{0pt}
 \DefineBibliographyStrings{english}{urlseen={accessed}}
 % Cited web pages have urldate 2026-10-17 (references.bib); the date is stated once above the
-% list (end of document). An entry read on another day says so in its titleaddon (two on-prem prices).
+% list (end of document). An entry read on another day says so in its titleaddon (two on-prem prices) or, for
+% the two market pages re-read on 2026-10-24, in the header line above the list.
 \AtEveryBibitem{\clearfield{note}\clearlist{organization}\clearfield{urlyear}\clearfield{urlmonth}\clearfield{urlday}}
 \DeclareFieldFormat{url}{\url{#1}}
 \DeclareFieldFormat{urldate}{(accessed #1)}
@@ -135,7 +136,7 @@
 \input{sections/07-declaration}
 
 \section{References}\label{sec:refs}
-{\scriptsize All web pages were accessed on 2026-10-17 unless stated.\par}
+{\scriptsize All web pages were accessed on 2026-10-17 unless stated; \cite{nus-osa-getstarted,sit-find-your-tribe,smu-student-experiences} were read on 2026-10-24 (dated screenshots in \code{results/market/screenshots/}).\par}
 \begin{multicols}{2}
 \printbibliography[heading=none]
 \end{multicols}

@@ -2,7 +2,7 @@
 % Source of truth: docs/ARCHITECTURE.md (§1-§14) and the code it names; README.md §8 (claim -> code).
 \section{Architecture and implementation}\label{sec:architecture}
 
-\begin{figure}[t]
+\begin{figure}[b]
   \centering\input{figures/fig-architecture}
   \caption{Cloud architecture; the numbers follow one write, as in the Preliminary report's Figure~2:
   (1)~SPA from S3 via CloudFront; (2)~Cognito sign-in; (3)~POST through the JWT authorizer, where
@@ -28,8 +28,11 @@ any authenticated route~\cite{aws-apigw-jwt}. Five Lambda functions (arm64, Node
 work (Fig.~\ref{fig:arch}); two Simple Queue Service (SQS) queues, a first-in-first-out (FIFO)
 command queue and a standard delay queue, carry commands and timers; state lives in one DynamoDB
 table (on-demand, point-in-time recovery (PITR), Streams, time-to-live (TTL)). Pay-per-request
-services suit bursty, mostly idle registration traffic: they span AZs with no servers to patch, and
-idle cost is close to zero after the free allowances (\S\ref{sec:business}). All business rules are
+services suit bursty, mostly idle registration traffic, span AZs with no servers to patch and cost
+close to zero when idle (\S\ref{sec:business}): DynamoDB rather than a relational database needs no
+instance or connection pool for Lambda, and its stream drives the notifier after the commit (C6);
+Lambda rather than containers scales to zero; the HTTP API rather than a REST API has a lower request
+price and a built-in JWT authorizer; Cognito gives managed sign-in with verified e-mail (R1). All business rules are
 in a pure engine, \code{decide(snapshot, command, now)} in \code{packages/core}, which returns the
 writes, notifications, timers and backfill records of one decision without I/O; adapters map them
 to DynamoDB or PostgreSQL, so one engine runs in the cloud, on-prem and in the replay simulator
@@ -70,7 +73,7 @@ hold, because TTL deletion can lag by days~\cite{aws-ddb-ttl}.
 
 \subsection{Rules R1--R7 and constraints C1--C7}\label{sec:rules}
 Table~\ref{tab:rules} restates the rules and constraints in the Preliminary report's wording and
-maps each to its enforcement. The Final refines four points. R2: the server accepts a request when
+maps each to its enforcement. This report refines four points. R2: the server accepts a request when
 it enqueues it, so queue order is the FIFO enqueue order, recorded as the \code{seq} that the
 workshop's single writer assigns. R4: the hold is configurable per workshop (\code{holdSeconds},
 default 900\,s, minimum 30\,s; the expiry experiments use 60\,s). C5 is strengthened to tick
@@ -175,4 +178,4 @@ is also an accepted audience, and both stages share one user pool. The applicati
 address, display name and Cognito user id; access and function logs are kept for 14 days, raw
 request events never. SES production access~\cite{aws-ses-production-access} was granted in
 October, so participants get e-mail as well as in-app notifications; addresses on reserved test
-domains (the synthetic accounts) are never e-mailed.
+domains (the synthetic example.com accounts) are never e-mailed.

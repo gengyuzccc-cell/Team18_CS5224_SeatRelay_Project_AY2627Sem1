@@ -7,34 +7,36 @@
 Commands went through the \code{dev} stage's public API as the browser sends them (client
 \code{commandId}, POST, 202, polling as in \S\ref{sec:timers}). Crashes were injected with
 \code{\_fault} flags that only \code{dev} honours, stale TICKs were sent directly to the FIFO queue,
-and the notifier outage was simulated by setting its reserved concurrency to 0; \code{dev} records
-notifications as SKIPPED without sending e-mail. Each script asserts its checks, calls \code{verify}
+and the notifier outage was simulated by setting its reserved concurrency to 0; on 17 Oct \code{dev} had
+e-mail off and recorded notifications as SKIPPED. Each script asserts its checks, calls \code{verify}
 after its scenario steps and writes \code{results/<date>-<experiment>/}; each invocation repeats its
 scenarios 3 times, and the invocation pinned in \code{report/series.json} is quoted. Expiry
-experiments use $\text{holdSeconds} = 60$. The smoke test passed first
+experiments use \code{holdSeconds}~=~60. The smoke test passed first
 (\SmokeChecksPassed/\SmokeChecksTotal{} checks, run \code{\SmokeRunId}). The \SeriesExperiments{}
 quoted invocations ran from a clean checkout of commit \code{\SeriesCommits}; all \SeriesDirtyRuns{}
 are flagged dirty only because the runner appended to its own status log under \code{results/}.
 After the series we downloaded the five deployed Lambda bundles: they are byte-identical to a build
 of that commit, and no stack changed during the series
-(\code{results/2026-10-17-table3-dev-q1000-provenance.md}). After the last redeploy (commit
+(\code{results/2026-10-17-table3-dev-q1000-provenance.md}). After the 17 October redeploy (commit
 \code{\RegressionCommit}: web interface, participant read views and notification wording; engine
 decision code unchanged) we re-ran \RegressionExperiments: \RegressionChecksPassed/\RegressionChecksTotal{}
-checks passed. Run ids and commits of every number are listed in \code{report/generated/numbers.tex}.
+checks passed. The 24 October redeploys changed only the notifier (reserved test domains are never
+e-mailed, \code{bcd7bd1}) and the web interface (\code{cb160d2}); an SES mailbox-simulator check and a
+staged browser walkthrough passed afterwards (\code{results/2026-10-24-*/}).
 
 \subsection{System results against the acceptance targets}\label{sec:results}
 Table~\ref{tab:results} reproduces the Preliminary report's Table~3, the acceptance contract,
 verbatim with the measured values; its last three rows cover its \S4--5. Verdicts come from the
 scripts' checks, derived from these targets (\code{docs/EXPERIMENTS.md}).
 
-\begin{table}[t]
+\begin{table}[b]
 \centering\footnotesize
 \caption{Acceptance targets of the Preliminary report (Table~3, verbatim) vs measured values (dev
 stage, 3 runs per experiment unless stated). Source directories:
 \code{results/2026-10-17-<experiment>[-<n>]/}, \code{results/loadtest/}, \code{results/replay/},
 \code{results/cost/}.}
 \label{tab:results}
-\begin{tabularx}{\textwidth}{@{}P{4.45cm}P{2.55cm}LP{1.0cm}@{}}
+\begin{tabularx}{\textwidth}{@{}P{4.0cm}P{2.45cm}LP{1.0cm}@{}}
 \toprule
 Aspect: scenario and method & Target & Measured & Verdict\\
 \midrule
@@ -45,22 +47,22 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences (\CorePropertySteps{} steps), invariants after every step; \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
  & \IfPending{\CorePropertySequences}{\PrefOrderVerdict{} (dev part)}{\PrefOrderVerdict}\\
 \textbf{Concurrency}: 50 requests contending for few seats; one account acting on several sessions & Final state satisfies every invariant
- & \ConcurrencyAccounts{} accounts race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} commands failed; same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} with exactly one effect; version-conflict retries \ConcurrencyMetaRetries{} (one consumer per workshop); server settle p95 \ConcurrencySettleServerPNinetyFiveMs\,ms; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
+ & \ConcurrencyAccounts{} accounts, each listing several sessions, race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} commands failed; same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} consistent; version-conflict retries \ConcurrencyMetaRetries{} (one consumer per workshop); server settle p95 \ConcurrencySettleServerPNinetyFiveMs\,ms; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
  & \ConcurrencyVerdict\\
 \textbf{Repeat execution}: Duplicate submits, message redelivery, response lost after submit & No double decrement or release
- & \RepeatDupProbesPassed/\RepeatDupProbes{} probes sending one \code{commandId} \RepeatDupCopies{} times concurrently; \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes: redelivery acknowledged without a second effect, one record
+ & \RepeatDupProbesPassed/\RepeatDupProbes{} probes sending one \code{commandId} \RepeatDupCopies{} times concurrently; \RepeatAfterCommitPassed/\RepeatAfterCommitCases{} crash-after-commit probes: redelivery acknowledged without a second effect, one record; a re-POST after settlement returned the same record
  & \RepeatVerdict\\
 \textbf{Expiry race}: Confirmation concurrent with expiry; a delayed stale expiry task & Stale offers rejected; newer state intact
  & ACCEPT 200\,ms before \code{expiresAt} applied \ExpiryRaceEarlyApplied/\ExpiryRaceEarlyAttempts, 200\,ms after rejected OFFER\_EXPIRED \ExpiryRaceLateRejected/\ExpiryRaceLateTrials{} (timer first in \ExpiryRaceOrderTimerFirst, see text); stale ticks without effect \ExpiryRaceLateTicksNoEffect/\ExpiryRaceLateTicks
  & \ExpiryRaceVerdict\\
 \textbf{Failure recovery}: Worker killed before and after the transaction; notifier down; task retried & Recoverable and traceable; recovery within 5 min
- & Crash before commit \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} and at the timer step \FailureTimerSendPassed/\FailureTimerSendCases{} settled on the redelivery (median \FailureBeforeCommitSettleMedianS{} and \FailureTimerSendSettleMedianS\,s); after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s), redelivery acknowledged; dead letters \FailureDeadLetters; notifier backlog of \FailureNotifierOutageNotifications{} processed $\leq$\,\FailureNotifierOutageMaxS\,s after restore, all SKIPPED (no e-mail on dev)
+ & Crash before commit \FailureBeforeCommitPassed/\FailureBeforeCommitCases{} and at the timer step \FailureTimerSendPassed/\FailureTimerSendCases{} settled on the redelivery (median \FailureBeforeCommitSettleMedianS{} and \FailureTimerSendSettleMedianS\,s); after commit \FailureAfterCommitPassed/\FailureAfterCommitCases{} settled at once (median \FailureAfterCommitSettleMedianS\,s), redelivery acknowledged; every redelivery traced in the worker log; dead letters \FailureDeadLetters; notifier backlog of \FailureNotifierOutageNotifications{} processed $\leq$\,\FailureNotifierOutageMaxS\,s after restore, all SKIPPED (e-mail then off on dev)
  & \FailureVerdict{} (e-mail not sent)\\
 \textbf{Access control}: Confirming another account's offer; cross-organisation dashboard access & All unauthorised operations rejected
  & \IfPending{\AccessVerdict}{\pending{access-control run (dev) not yet complete}}{\AccessProbesPassed/\AccessProbes{} probes in \AccessProbeGroups{} groups answered as expected: every unauthorised request refused (401/403/404/400/409, OFFER\_NOT\_YOURS), the \AccessExpectedTwoHundred{} authorised controls (health, issuer and organiser reading a command) answered 200; nothing changed}
  & \IfPending{\AccessVerdict}{--}{\AccessVerdict}\\
 \textbf{Performance}: 10\,/\,25\,/\,50 concurrent users; cross-workshop and single-workshop hot spot separately & Read/accept p95 $<$\,1\,s; settled p95 $<$\,5\,s
- & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels, up to \PerfDevMaxVUsMet{} VUs. At 50 VUs across 10 workshops: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, 202 \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUFiftyErrorPct\,\%; on one hot workshop: read \PerfDevHotspotVUFiftyReadPNinetyFiveMs, 202 \PerfDevHotspotVUFiftyAcceptPNinetyFiveMs, settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%; Fig.~\ref{fig:perf}}
+ & \IfPending{\PerfDevVerdict}{\pending{k6 matrix (dev) not yet complete}}{Targets met in \PerfDevLevelsMet{} of \PerfDevLevels{} levels, up to \PerfDevMaxVUsMet{} VUs. At 50 VUs across 10 workshops: read \PerfDevCrossVUFiftyReadPNinetyFiveMs, command \PerfDevCrossVUFiftyAcceptPNinetyFiveMs, settle \PerfDevCrossVUFiftyServerSettlePNinetyFiveMs{} (server) / \PerfDevCrossVUFiftySettlePNinetyFiveMs{} (client) ms, errors \PerfDevCrossVUFiftyErrorPct\,\%; on one hot workshop: read \PerfDevHotspotVUFiftyReadPNinetyFiveMs, command \PerfDevHotspotVUFiftyAcceptPNinetyFiveMs, settle \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs{} / \PerfDevHotspotVUFiftySettlePNinetyFiveMs{} ms, errors \PerfDevHotspotVUFiftyErrorPct\,\%; Fig.~\ref{fig:perf}}
  & \IfPending{\PerfDevVerdict}{--}{\PerfDevVerdict}\\
 \textbf{Backfill latency}: Time from hold expiry to reallocation under normal operation & p95 $\leq$\,120\,s; outliers reported
  & \IfPending{\BackfillExpiredPNinetyFiveS}{\IfPending{\BackfillVerdict}{\pending{backfill run (dev) not yet complete}}{Run aborted: HTTP 503 when creating its workshop (see text); \pending{backfill re-run}}. Interim, smoke and failure-recovery runs on dev: \TimerPathRelaysN{} timer-path expiry relays, max \TimerPathRelayMaxMs\,ms; cancellation relay \SmokeCancelBackfillMs\,ms. Staged rehearsal on pilot (\S\ref{sec:pilot}): \RehearsalBackfillExpiredN{} more, \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms}{Expiry-driven p50 / p95 / max \BackfillExpiredPFiftyS{} / \BackfillExpiredPNinetyFiveS{} / \BackfillExpiredMaxS\,s (n = \BackfillExpiredN), \BackfillExpiredUnrelayed{} not relayed, \BackfillOutliers{} outliers (Fig.~\ref{fig:backfill}); cancellation-driven max \BackfillCancelMaxMs\,ms; \code{SweepLateExpiries} \BackfillSweepLateExpiries{} (the sweep never had to act)}
@@ -86,25 +88,24 @@ Aspect: scenario and method & Target & Measured & Verdict\\
 The first series on \code{dev} ran under the new account's Lambda quota of
 \ThrottleConcurrencyAccountConcurrencyMax{} concurrent executions, shared by all functions of both
 stages. Its concurrency run passed \ThrottleFirstConcurrencyChecksPassed/\ThrottleFirstConcurrencyChecksTotal{}
-checks, with HTTP 503 responses that carried no application error code; the backfill run failed
-when one of its ten parallel workshop creations got the same 503 (the other nine lost REGISTERs
-to it, yet relayed every expiry and passed \code{verify}); and the k6 matrix lost requests
-from 25 VUs on. CloudWatch shows the cause (\code{results/2026-10-17-throttling-evidence/}): in all
-\ThrottleWindows{} windows the API function's throttles, the API's 5xx count and the 503s in its access log are equal
+checks, with HTTP 503s that carried no application error code; the backfill run failed when one
+of its ten parallel workshop creations got a 503 (the other nine also lost REGISTERs, yet relayed
+every expiry and passed \code{verify}); the k6 matrix lost requests from 25 VUs on. CloudWatch shows
+the cause (\code{results/2026-10-17-throttling-evidence/}): in all \ThrottleWindows{} windows the API
+function's throttles, the API's 5xx count and the 503s in its access log are equal
 (\ThrottleConcurrencyApiThrottles, \ThrottleBackfillApiThrottles{} and \ThrottleKsixApiThrottles{} of
 \ThrottleKsixRequests{} requests), and account-wide concurrency peaked at exactly
-\ThrottleKsixAccountConcurrencyMax. API Gateway answers 503 when it cannot invoke a throttled Lambda
-integration. Even then \code{verify} found no invariant violation after any phase of that
-concurrency run: throttling lost requests, not correctness. AWS then raised the quota to 1{,}000,
-and we re-ran the whole series, smoke test first, on the same deployed code (only the sweep schedule
-was renamed in between). Table~\ref{tab:results} quotes these re-runs: \SeriesPassed{} of
-\SeriesExperiments{} experiments passed every check, and the failed runs remain in \code{results/}. The
-first series' \emph{expiry-race} run also failed one check, unrelated to the quota: a probe meant to
+\ThrottleKsixAccountConcurrencyMax; API Gateway answers 503 when it cannot invoke a throttled Lambda.
+\code{verify} still found no invariant violation after any phase: throttling lost requests, not
+correctness. With the quota raised to 1{,}000 we re-ran the whole series, smoke test first, on the same
+deployed code (only the sweep schedule was renamed); Table~\ref{tab:results} quotes these re-runs
+(\SeriesPassed{} of \SeriesExperiments{} passed every check; the failed runs stay in \code{results/}).
+The first series' \emph{expiry-race} run also failed one check, unrelated to the quota: a probe meant to
 arrive 200\,ms before \code{expiresAt} arrived after it (client send-timing jitter) and was rejected
-as expired, as the server clock requires; the harness was changed to calibrate the send time
-before the quoted re-run (\code{\ExpiryRaceRunId}). In all \ExpiryRaceOrderTimerFirst{} late
-trials the timer had expired the offer before the ACCEPT arrived, so the opposite order did not occur
-on \code{dev} (the engine's unit tests cover it). No stale tick changed a newer offer.
+as expired, as the server clock requires; the quoted re-run (\code{\ExpiryRaceRunId}) calibrates the
+send time. In all \ExpiryRaceOrderTimerFirst{} late trials the timer had expired the offer before the
+ACCEPT arrived (the opposite order, not seen on \code{dev}, is covered by unit tests); no stale tick
+changed a newer offer.
 
 \paragraph{Latency.}
 In the correctness run the server settled commands with p95 \CorrectnessSettleServerPNinetyFiveMs\,ms
@@ -157,7 +158,7 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
 \begin{figure}[t]
   \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
   \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{expiresAt}) on dev with
-  $\text{holdSeconds} = 60$: (a)~histogram with the p95, (b)~empirical cumulative distribution (dotted:
+  \code{holdSeconds}~=~60: (a)~histogram with the p95, (b)~empirical cumulative distribution (dotted:
   95\,\%); the 120\,s target lies far off the scale (maximum \BackfillExpiredMaxS\,s). Source:
   \code{results/\BackfillDir/raw.csv} (run \code{\BackfillRunId}).}
   \label{fig:backfill}
@@ -195,11 +196,18 @@ Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was 
 \end{figure}
 
 \subsection{User study}\label{sec:study}
-\IfPending{\StudyParticipants}{\emph{Not yet run.} }{}The protocol (\code{docs/user-study/}),
-as in the Preliminary report: four to six student interviews come first, with a record of what the
-pilot organisers do today (\IfPending{\InterviewParticipants}{neither held yet}{\InterviewParticipants{}
-students interviewed, \code{results/interviews/}}). The study then recruits twelve non-team university
-students, at least four with organising experience, and a two-person pilot run that is excluded; each
+% Two branches: until the study has run, the protocol in full; once results/user-study/ exists, a
+% one-sentence protocol and the measured values only (the plan is labelled as the plan). This keeps
+% the report within 10 pages when the data arrive: a scratch build with every pending macro set to
+% "00.0" must still print pages<=10 (docs/SUBMISSION-CHECKLIST.md, row 3.1). The study charts
+% (docs/user-study/analysis.py) stay in results/user-study/ and can go on the slides.
+\IfPending{\StudyParticipants}{\emph{Not yet run.} The protocol (\code{docs/user-study/})
+follows the Preliminary report: four to six student interviews come first, with a record of what the
+team's own pilot organisers do today (\IfPending{\InterviewParticipants}{neither held yet}{\InterviewParticipants{}
+students interviewed, \code{results/interviews/}}); two to three organiser interviews, added since, give
+$p$, $h$ and the willingness to pay (\IfPending{\InterviewOrganisers}{none held yet}{\InterviewOrganisers{}
+held}). The study will then recruit twelve non-team university
+students, at least four with organising experience, and a two-person dry run that is excluded; each
 uses SeatRelay and a control that mirrors current practice, one Google Form per session plus a shared
 Sheet with duplicate-detection formulas, in counterbalanced order with equivalent data sets. If
 recruitment falls short, the real sample and its limits are reported. Participants do five tasks
@@ -207,34 +215,28 @@ recruitment falls short, the real sample and its limits are reported. Participan
 organisers four (create a multi-session workshop, handle a cancellation, inspect the backfill, read
 the distinct count and export). The measures are completion, paired task time (Wilcoxon signed-rank
 test~\cite{wilcoxon1945}), the original ten-item SUS~\cite{brooke1996sus}, erroneous actions, help
-requests, the organiser's manual steps and a short interview.
-\IfPending{\StudyParticipants}{}{With
-\StudyParticipants{} participants (\StudyOrganiserTrack{} on the organiser track), completion was \StudyCompletionSRPct\,\% with SeatRelay and
+requests, the organiser's manual steps and a short interview.}{The study followed the protocol of the
+Preliminary report (\code{docs/user-study/}): SeatRelay against one Google Form per session plus a
+shared Sheet, counterbalanced, measured by completion, paired task time (Wilcoxon signed-rank
+test~\cite{wilcoxon1945}), SUS~\cite{brooke1996sus}, errors, help requests and the organiser's manual
+steps (interviews: \IfPending{\InterviewN}{none held}{\InterviewParticipants{} students and
+\InterviewOrganisers{} organisers, \code{results/interviews/}}). With \StudyParticipants{} participants
+(planned: twelve; \StudyOrganiserTrack{} on the organiser track), completion was \StudyCompletionSRPct\,\% with SeatRelay and
 \StudyCompletionCtrlPct\,\% with the control; the median paired task time was
 \StudyTimeImprovementPct\,\% lower (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS was \StudySusSRMean{}
 [\StudySusSRLo, \StudySusSRHi] against \StudySusCtrlMean{} [\StudySusCtrlLo, \StudySusCtrlHi];
 participants made \StudyErrorsSR{} erroneous actions and \StudyHelpSR{} help requests with SeatRelay
-against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control.}
+against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control (charts in \code{results/user-study/}).}
 
-% Fig. 7 is printed only once docs/user-study/analysis.py has drawn the charts (the results
-% sentence above carries the [PENDING] marker until then). It needs about 5 cm: when the study data
-% arrive, the protocol paragraph above is the text to shorten.
-\IfFileExists{figures/generated/study-time.pdf}{%
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.49\textwidth]{figures/generated/study-time}\hfill
-  \includegraphics[width=0.49\textwidth]{figures/generated/study-sus}
-  \caption{User study: total task time per participant in both conditions (left) and SUS scores
-  (right), SeatRelay vs one form per session plus a Sheet.}
-  \label{fig:study}
-\end{figure}}{}
-
-\subsection{Real pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-The pilot\IfPending{\PilotWorkshops}{, planned for 3--4 November 2026 and not yet run,}{} serves a
+\subsection{Live pilot, and a staged rehearsal reported separately}\label{sec:pilot}
+\IfPending{\PilotWorkshops}{The pilot, planned for 3--4 November 2026 and not yet run, will serve a
 real workshop in two sessions on the \code{pilot} stage (no fault injection; e-mail and in-app
 notifications), with registration open for at least five days; the organiser's CSV exports and the
-backfill log are the evidence.\IfPending{\PilotWorkshops}{}{ \pending{pilot observations: natural
-cancellations, backfills, notifications, attendance, organiser feedback}}
+backfill log will be the evidence.}{The pilot (planned as two sessions with registration open for at
+least five days) ran on the \code{pilot} stage: \PilotWorkshops{} workshop(s), \PilotRegistrations{}
+registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended
+(organiser CSV exports and backfill log, \code{results/pilot/}). \pending{pilot observations: natural
+cancellations, notifications, organiser feedback}}
 \emph{Staged, not user evidence:} before the pilot, a scripted rehearsal on the pilot stage with
 \RehearsalParticipants{} synthetic accounts (\code{results/2026-10-17-pilot-rehearsal-3/}) applied
 \RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
@@ -242,15 +244,14 @@ cancellations, backfills, notifications, attendance, organiser feedback}}
 \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms), sent \RehearsalNotificationsSent{} e-mails to the SES
 mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; the invariants
 held at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, rehearsed
-events are logged apart from natural ones and are operational, not user, evidence.
+events are logged apart from natural ones and, like observations by the team's own organisers, are
+operational evidence; only independent participants' behaviour and feedback are user evidence.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}
 \item \textbf{H2} (the cross-session constraint removes the capacity waste of duplicate holds):
-  \emph{supported in simulation, not yet in the field.} One queue had no duplicate holds against
-  \ReplayDupHoldEventsPerSessionMean{} duplicate-hold events per workshop with per-session queues and
-  served \ReplayDistinctUnifiedMean{} instead of \ReplayDistinctPerSessionMean{} distinct participants
-  (\S\ref{sec:mechanism}); seats left empty at cut-off did not differ, so the waste removed is
+  \emph{supported in simulation, not yet in the field.} One queue had no duplicate holds and
+  served more distinct participants than per-session queues (\S\ref{sec:mechanism}); seats left empty at cut-off did not differ, so the waste removed is
   capacity tied up by duplicates, not seats empty at the end. No \code{verify} call on \code{dev}
   found a C2 violation.
 \item \textbf{H3} (automatic backfill reduces the organiser's manual handling): \emph{partly
@@ -259,8 +260,7 @@ events are logged apart from natural ones and are operational, not user, evidenc
   \TimerPathRelayMaxMs\,ms}{on \code{dev} \BackfillExpiredN{} expiry-driven backfills took p95
   \BackfillExpiredPNinetyFiveS\,s against the 120\,s target}; a cancellation is
   relayed inside its own transaction, \SmokeCancelBackfillMs\,ms), and in simulation per-session forms left
-  \ReplayDupConfirmedPerSessionMean{} duplicate confirmed seats per workshop to clean up, against
-  \ReplayDupConfirmedUnifiedMean{} with one queue. Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the
+  duplicate confirmed seats to clean up and one queue none (\S\ref{sec:business}). Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the
   backfill-latency target (run aborted, \S\ref{sec:results}) and }{}\IfPending{\StudyParticipants}{the
   organiser's manual steps in the user study (\S\ref{sec:study}).}{\pending{H3: compare the organiser's
   manual steps in the user study}}

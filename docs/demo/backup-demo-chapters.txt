@@ -23,4 +23,5 @@
 2:31  Alice · My registrations: her cancelled registration is listed under Past
 2:33  Bob · My registrations: his registration ended when the hold expired
 2:34  Bob · In-app notifications (e-mail is off on dev): the offer, then its expiry
+      (caption outdated: since 24 Oct dev sends e-mail; these accounts are on example.com, which the notifier never e-mails)
 2:37  Alice · Signs out: the app forgets her and the hosted UI session ends too

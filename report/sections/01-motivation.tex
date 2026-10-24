@@ -32,7 +32,7 @@ and offers. We make no claim about attendance rates, satisfaction or paying cust
   \caption{Participant flow and seat state machine (Figure~1 of the Preliminary report, kept). Dashed
   blue marks the backfill path that returns a released seat to the queue; the callout lists the
   invariants the allocation transaction enforces. The hold is \code{holdSeconds} per workshop
-  (default 900\,s) and never extends past the cut-off (R4).}
+  (default 900\,s) and never extends past the cut-off (rule R4, Table~\ref{tab:rules}).}
   \label{fig:flow}
 \end{figure}
 
@@ -42,9 +42,8 @@ of the \MarketNusLibcalWorkshops{} events tagged Workshop were repeats of \Marke
 titles (a library tour \MarketNusLibcalRepeatTitleOneEvents{} times, an orientation workshop
 \MarketNusLibcalRepeatTitleTwoEvents{} times)~\cite{nus-libcal}; on the SMU Libraries calendar in the
 same window, \MarketSmuLibcalRepeatTitles{} titles ran twice among \MarketSmuLibcalEvents{}
-events~\cite{smu-libcal}. These are our script's counts of the public calendars
-(\code{results/market/}). Most titles ran once, so calendars show that the situation exists but not
-how often an organiser faces it; that share, $p$, must come from organiser interviews.
+events~\cite{smu-libcal} (our script's counts, \code{results/market/}). Most titles ran once, so calendars show that the situation exists but not
+how often an organiser faces it; that share, $p$, must come from interviews.
 
 \paragraph{Market size.}
 We size the market bottom-up (Table~\ref{tab:market}): the number of organisers who could run
@@ -64,8 +63,8 @@ a closed institutional system; the first-year obtainable market, NUS student org
 adoption share $a$, is $\text{SOM} = \text{\MarketNusOrgs} \times p \times a \times
 \text{\sd\MarketPriceSgd} \leq \text{\sd\MarketSomNusMaxSgd}$ a year (\IfPending{\InterviewOrganisers}{$s$
 and $a$ are set after those interviews}{\pending{$s$ from the organiser interviews; the team's assumed
-adoption share $a$}}). Even at $p = 1$ the counted campus market is only about \sd\MarketTamCampusSgd{} a year (more with SUSS
-and the polytechnics, but of the same order), so the business case rests on the time each organiser
+adoption share $a$}}). Even at $p = 1$ the counted campus market is only \sd\MarketTamCampusSgd{} a year (more with SUSS
+and the polytechnics, but similar), so the business case rests on the time each organiser
 saves (\S\ref{sec:business}), not on market size.
 
 \begin{table}[t]
@@ -92,10 +91,9 @@ Price $P$ per organiser & \sd\MarketPriceSgd/year & \S\ref{sec:business} & \sd10
 Table~\ref{tab:competitors} compares the services of the Preliminary report's Table~1 (Luma,
 Eventbrite, Humanitix, per-session forms plus a spreadsheet) and two more, from vendor documentation.
 Eventbrite relays a released ticket automatically with a claim window. Humanitix e-mails an offer to
-the first waitlisted guest and then to the next every 30 minutes while tickets remain; the interval
-cannot be changed and \enquote{tickets are not reserved}~\cite{humanitix-waitlist}, so the
-Preliminary report's \enquote{host-configured offer time limit} is not supported by that page and is
-withdrawn. In every tool the waitlist belongs to one date, ticket type or slot; none ties several
+the first waitlisted guest, then to the next every 30 minutes (fixed) while tickets remain, and
+\enquote{tickets are not reserved}~\cite{humanitix-waitlist}; the Preliminary report's
+\enquote{host-configured offer time limit} is therefore withdrawn. In every tool the waitlist belongs to one date, ticket type or slot; none ties several
 acceptable sessions to one queue position with one seat per person, which is what removes duplicate
 holds.
 

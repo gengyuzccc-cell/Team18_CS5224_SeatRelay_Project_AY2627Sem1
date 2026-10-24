@@ -1,10 +1,11 @@
 % Final -- Assumptions and AI usage declaration (plan §7.1: 0.5 pages).
 \section*{Assumptions}
 \begin{itemize}
-\item \emph{Market:} organisation counts are official lower bounds, re-checked with dated browser
-  screenshots on 24 Oct 2026 (\code{results/market/screenshots/}; SIT's rose from 150 to 170, SMU's is
-  from its campus-life page as the 2022 page is gone); $p$, $s$ and the value per event come only from
-  the organiser interviews.
+\item \emph{Market:} organisation counts are lower bounds (official figures; NTU counted by us); NUS,
+  SMU and SIT were re-checked with dated browser screenshots on 24 Oct 2026
+  (\code{results/market/screenshots/}; SIT's rose from 150 to 170, SMU's is from its campus-life page
+  as the 2022 page is gone); $p$, $s$ and the value per event come only from the organiser interviews;
+  the price (\sd10 a month) is our proposal and the adoption share $a$ our assumption.
 \item \emph{Cost:} usage per registration is modelled (\S\ref{sec:business}), as CloudWatch does
   not count registrations; X-Ray is priced at 100\,\% sampling (an upper bound); operations labour
   and the on-prem machine's capacity are assumed\IfPending{\PerfLocalCpuPeakPct}{ (the on-prem stack has not been load-tested)}{};
@@ -19,32 +20,30 @@
 \emph{Where.} As the Preliminary report declared, AI assistance was used before it to compare
 candidate topics, locate vendor documentation, discuss architecture options and draft prose. Since
 then, as it promised to declare, an AI coding assistant (Claude Code) generated, from the team's
-Preliminary report and decisions: the execution plan; the implementation code (engine, API and Lambda
-handlers, on-prem server, React SPA); the infrastructure-as-code templates; the tests; the
-experiment, load-test, replay, analysis and cost-model scripts; the market captures and counts, the
-competitor scan and other desk research; the documentation; and the text of this report and the
-slides, including all revisions up to this build. \emph{How.} The scope, rules R1--R7, constraints
+Preliminary report and decisions: the execution plan; the code (engine, API and Lambda handlers,
+on-prem server, React SPA and its redesign); the infrastructure templates; the tests; the experiment,
+load-test, replay, analysis and cost scripts; the market captures and desk research; the
+documentation, speaker notes and study materials; the figures; and the text of this report, the
+slides and the poster, with all revisions up to this build. \emph{How.} The scope, rules R1--R7, constraints
 C1--C7 and acceptance targets are the team's, from the Preliminary report; the team owns the AWS
 account and the repository; the assistant ran the deployments and all scripts with the team's
 credentials and built both PDFs. The interviews, the user study and the
-pilot are the team's to run (none had run when this PDF was built). Every measured, simulated and
+pilot are the team's to run (at this build: interviews \IfPending{\InterviewN}{not held}{held}, study
+\IfPending{\StudyParticipants}{not run}{run}, pilot \IfPending{\PilotWorkshops}{not run}{run}). Every measured, simulated and
 own-count number is written by a script from a raw file in \code{results/} (configuration values come
 from the code and \code{docs/deployment-state.md}; external facts are cited);
-\code{report/tools/check\_numbers.py} regenerates them all and checks every cited file (passed for
-this build; ZHANG TIANYI re-runs it on the final build). \emph{What we learned.} The assistant drafted these statements
+\code{report/tools/check\_numbers.py}, run by every build, regenerates them all and checks that the
+source file of every generated number exists; ZHANG TIANYI is the member responsible for the number check. \emph{What we learned.} The assistant drafted these statements
 from the project record (\code{docs/ai-declaration-drafts.md} cites it for each); the team approved
-them. \textbf{LI ZONGZE} (product, front end): A 202 response is not a result: I learned to design around
+them. \textbf{LI ZONGZE} (product, front end): a 202 response is not a result, so I learned to design around
 request received, queued and confirmed, to poll with back-off instead of WebSockets, and to check
 generated code against the rules. \textbf{CHEN YANG} (allocation, API): I learned that DynamoDB's
 100-action transaction limit caps a decision, which then continues as a follow-up command, and that
 judging expiry by server time makes late or duplicate timers harmless. \textbf{LIN JIE} (AWS,
 monitoring): our Lambda quota was 10, shared by both stages, so I learned to check quotas before
-measuring; a second stage failed to deploy because both sweep schedules had one name. \textbf{ZHU
+measuring; a second stage once failed to deploy over a duplicate schedule name. \textbf{ZHU
 GENGYU} (data, local reference): running our engine on PostgreSQL showed me that a fair comparison
-needs equal load, retention and function, and that labour and the network line, not hardware,
-dominate a small self-hosted service. \textbf{LIANG ZIHAN} (user research, evaluation tooling): timing
+needs equal load, retention and function, and that labour and the network line, not hardware, dominate a small server's cost. \textbf{LIANG ZIHAN} (user research, evaluation tooling): timing
 an expiry race at $\pm$200\,ms taught me that network delay is part of the experiment, so the harness
-calibrates send times, and to report the study's real sample, whatever its size. \textbf{ZHANG
-TIANYI} (dashboard, QA, documentation): SES production access was refused while our sender was
-unverified and granted once we fixed it; I learned to plan approvals early, to keep test accounts
-from sending real mail, and to report failures as failures.
+calibrates send times; preparing the study, I learned to report its real sample, whatever its size. \textbf{ZHANG
+TIANYI} (dashboard, QA, documentation): SES production access was refused while our sender was unverified and granted once we fixed that; I learned to plan approvals early, keep test accounts from sending real mail, and report failures as failures.

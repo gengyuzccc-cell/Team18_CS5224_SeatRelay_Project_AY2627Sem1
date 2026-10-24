@@ -14,7 +14,7 @@ This README is the source of Final report §6 (Code Explanation). The design as 
 |---|---|---|
 | Public repository | https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 | this code |
 | Web app, pilot stage | https://diiztwl34x7s1.cloudfront.net | for the live pilot (not yet run; so far it holds only the staged rehearsal with synthetic accounts); fault flags off, e-mail on |
-| Web app, dev stage | https://d2ni5e1z674t04.cloudfront.net | experiments and demo; fault flags on, e-mail off |
+| Web app, dev stage | https://d2ni5e1z674t04.cloudfront.net | experiments and demo; fault flags on, e-mail on (test accounts on reserved domains such as example.com are never e-mailed) |
 | API, dev | https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com | `GET /health` is public; everything else needs a Cognito ID token |
 | API, pilot | https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com | as above |
 
@@ -144,7 +144,7 @@ STAGE=dev tools/scripts/bin/teardown.sh           # empties the bucket, deletes 
 | `--config-env` | Stack | Template | Stage parameters |
 |---|---|---|---|
 | `auth` | `seatrelay-auth` | `templates/auth.yaml` | budgets US$20/month and US$60/year |
-| `dev` | `seatrelay-app-dev` | `templates/app.yaml` | `AllowFaultFlags=true`, `EmailEnabled=false`, throttle 300 rps / 500 burst, no table deletion protection |
+| `dev` | `seatrelay-app-dev` | `templates/app.yaml` | `AllowFaultFlags=true`, `EmailEnabled=true` (false until 2026-10-24), throttle 300 rps / 500 burst, no table deletion protection |
 | `pilot` | `seatrelay-app-pilot` | `templates/app.yaml` | `AllowFaultFlags=false`, `EmailEnabled=true`, throttle 50 / 100, deletion protection on |
 | `web-dev`, `web-pilot` | `seatrelay-web-<stage>` | `templates/web.yaml` | private S3 bucket + CloudFront with Origin Access Control |
 

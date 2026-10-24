@@ -11,9 +11,9 @@
 **Slide 1, title (5 s).** Good afternoon. We are Team 18, and this is SeatRelay.
 
 **Slide 2, problem and market.**
-Many campus workshops run the same content several times. Today the organiser opens one form per
-session and keeps a spreadsheet. Students sign up for two sessions to be safe, so one person holds two
-seats, and the organiser finds the duplicates by hand. When someone drops out, the seat stays empty
+Many campus workshops run the same content several times. Typically the organiser opens one form per
+session and keeps a spreadsheet. A student who could attend two sessions can sign up for both to be
+safe, so one person holds two seats, and the organiser finds the duplicates by hand. When someone drops out, the seat stays empty
 unless somebody e-mails the waiting list.
 
 SeatRelay replaces this with one registration per workshop. You rank every session you can attend and
@@ -32,8 +32,8 @@ month. The market is small, so the case rests on the hours an organiser saves
 per multi-session event: [PENDING: median hours per event and willingness to pay, from
 results/interviews/summary.md]. In our simulation, per-session forms left 3.87 duplicate confirmed
 seats per workshop to chase; one queue left none. Eventbrite relays tickets, but only within one date;
-no tool we scanned ties sessions to one queue place. Our first users would be NUS student organisations, starting with the
-organiser of our planned pilot.
+no tool we scanned ties sessions to one queue place. Our first users would be NUS student organisations, starting with our
+planned pilot workshop (once the pilot has run, drop "planned").
 
 Next, CHEN YANG explains the rules that make this work.
 

@@ -1330,7 +1330,10 @@ async function participantsLookBack(): Promise<void> {
   });
 
   await step("Bob's notifications", async () => {
-    director.cut('bob', 'In-app notifications (e-mail is off on dev): the offer, then its expiry');
+    director.cut(
+      'bob',
+      'In-app notifications (test accounts on reserved domains get no e-mail): the offer, then its expiry',
+    );
     const { page } = actor('bob');
     await click(
       page

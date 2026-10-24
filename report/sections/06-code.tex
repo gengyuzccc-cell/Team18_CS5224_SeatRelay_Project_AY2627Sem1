@@ -10,17 +10,14 @@ templates, five Lambda handlers, DynamoDB/SQS/SES adapters), \code{services/loca
 reference, \S\ref{sec:business}), \code{apps/web} (React SPA),
 \code{tools/experiments}, \code{tools/loadtest} (k6), \code{tools/replay}, \code{tools/market}
 (page captures and counts), \code{results/} (raw outputs; the only source of measured numbers) and
-\code{report/}; Table~\ref{tab:code} maps the main claims to their files.
+\code{report/}; Table~\ref{tab:code} maps the main claims to their files. The main commands follow;
+\code{README.md} gives the rest (on-prem stack, replay, cost model, market counts, charts):
 
 \noindent\begin{minipage}{\textwidth}\footnotesize
 \begin{verbatim}
 corepack enable && pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test   # as in CI
 STAGE=dev ALARM_EMAIL=<e-mail> tools/scripts/bin/deploy-all.sh  # bundles, sam deploy, SPA upload
-pnpm local:up                                                  # on-prem reference (Docker Compose)
 TARGET=dev tools/experiments/bin/run-table3.sh                 # acceptance-target experiments, then k6
-pnpm replay --seeds 1000 && python3 tools/experiments/cost/model.py   # mechanism comparison, cost model
-python3 -I tools/market/count.py                               # market own counts -> results/market/
-python3 -I report/tools/report_numbers.py && python3 -I report/tools/make_figures.py   # numbers, charts
 ./report/build.sh -t Final -m 10                               # this PDF, with its checks
 \end{verbatim}
 \end{minipage}
@@ -33,13 +30,13 @@ python3 -I report/tools/report_numbers.py && python3 -I report/tools/make_figure
 Claim & Implementation\\
 \midrule
 Tick-first decision, R1--R7, invariants & \code{packages/core/src/\{decide,tick,apply,allocate,drain,invariants\}.ts}\\
-Idempotent intake (C3); transaction with version lock & \code{packages/service/src/api/routes/commands.ts}; \code{services/aws/src/adapters/dynamo/store.ts}\\
+Idempotent intake (C3); version lock & \code{packages/service/src/api/routes/commands.ts}; \code{services/aws/src/adapters/dynamo/store.ts}\\
 Worker protocol, retries, fault injection & \code{packages/service/src/worker/processCommand.ts}; \code{services/aws/src/handlers/worker.ts}\\
 Per-offer timers and forwarder & \code{services/aws/src/adapters/sqs.ts}; \code{services/aws/src/handlers/expiryForwarder.ts}\\
 Sweep safety net & \code{packages/service/src/worker/sweep.ts}; \code{services/aws/templates/app.yaml}\\
 Polling back-off (browser) & \code{apps/web/src/commands/\{backoff,pollCommand,commandRunner\}.ts}\\
 Access control (C7) & \code{packages/service/src/api/context.ts}\\
-Experiments, replay, cost, report numbers & \code{tools/experiments/src/*.ts}; \code{tools/replay}; \code{tools/experiments/cost/model.py}; \code{report/tools/report\_numbers.py}\\
+Experiments, replay, cost, report numbers & \code{tools/experiments/\{src/*.ts,cost/model.py\}}; \code{tools/replay}; \code{report/tools/report\_numbers.py}\\
 \bottomrule
 \end{tabularx}
 \end{table}

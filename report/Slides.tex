@@ -62,7 +62,7 @@
 % source line at the bottom of the content area
 \newcommand{\source}[1]{\par\vfill{\fontsize{13}{15}\selectfont\color{srMuted}#1\par}\vspace{0.06in}}
 % per-slide layout helpers (defined here: a frame body cannot define macros with parameters)
-\newcommand{\stat}[2]{\begin{minipage}[t]{3.85in}%
+\newcommand{\stat}[2]{\begin{minipage}[t]{3.85in}\raggedright%
     {\fontsize{40}{46}\selectfont\bfseries\color{srBlue}#1\par}\vspace{0.06in}#2\end{minipage}}
 \newcommand{\rid}[1]{\textbf{\color{srBlue}#1}\enspace}
 \newcommand{\beat}[2]{\textbf{\color{srBlue}#1}\enspace #2\par\vspace{0.10in}}
@@ -144,14 +144,14 @@
 
 \begin{frame}{Problem: one form per session wastes seats}
   \begin{itemize}
-    \item Students book two sessions ``to be safe'': one person, two seats
+    \item A student who can attend two sessions may book both ``to be safe'': one person, two seats
     \item A dropout's seat stays empty unless someone e-mails the waitlist
     \item \hl{SeatRelay:} one registration, ranked sessions, one queue, a timed hold
   \end{itemize}
   \vspace{0.40in}
   \stat{$\geq$\,\MarketStudentOrgs}{student organisations\\at five universities}\hfill
   \stat{\MarketNusLibcalRepeatEvents{} of \MarketNusLibcalWorkshops}{NUS Libraries workshop\\events were repeats}\hfill
-  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{from the organiser interviews}{\InterviewPEventWeightedPct\,\%}}
+  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{from interviews (not yet held)}{\InterviewPEventWeightedPct\,\%}}
   \source{Bottom-up sizing, lower bounds: market = organisations $\times$ $p$ (share with multi-session
     sign-ups) $\times$ \sd\MarketPriceSgd{} a year. NUS Libraries calendar \MarketLibcalFrom{} to
     \MarketLibcalTo. Final report \S1, Table 1; \code{results/market/}.}
@@ -165,7 +165,7 @@
     \item Hours saved and willingness to pay: \IfPending{\InterviewHoursMedian}{from the organiser interviews (not yet held)}{median \InterviewHoursMedian{} h per event; bargain at \sd\InterviewWtpBargainMedian/month}
     \item Simulation: forms leave \hl{\ReplayDupConfirmedPerSessionMean} duplicate confirmed seats per workshop, one queue \ReplayDupConfirmedUnifiedMean
     \item Eventbrite relays a ticket, but per date; no tool ties sessions to one queue place
-    \item First users: NUS student organisations, starting with the organiser of our planned pilot
+    \item First users: NUS student organisations, starting with our \IfPending{\PilotWorkshops}{planned }{}pilot workshop
   \end{itemize}
   \source{Competitor scan from vendor documentation (Luma, Eventbrite, Humanitix, SignUpGenius,
     Peatix, forms + spreadsheet): Final report Table 2. Simulation: \ReplaySeeds{} workshops,
@@ -196,11 +196,11 @@
 % =============================================================================== Part 3
 \speaker{LIN JIE}
 \begin{frame}{Architecture: serverless, one writer per workshop}
-  \centering\tikzfig{0.86\textwidth}{fig-architecture}\par
-  \vspace{0.12in}\raggedright
-  Three templates, five stacks (auth; app and web for dev and pilot) in \code{ap-southeast-1}\par
-  Numbers follow one write \textperiodcentered{} $\ast$ new since the Preliminary report \textperiodcentered{} grey: safety net\par
-  \source{Final report Fig.~2; \code{docs/ARCHITECTURE.md} \S1.2; templates in \code{services/aws/templates/}.}
+  \centering\tikzfig{\textwidth}{fig-architecture}\par
+  \raggedright
+  \source{Numbers follow one write; $\ast$ new since the Preliminary report; grey: safety net. Three
+    templates, five stacks (auth; app and web for dev and pilot) in \code{ap-southeast-1}. Final report
+    Fig.~2; \code{docs/ARCHITECTURE.md} \S1.2; templates in \code{services/aws/templates/}.}
 \end{frame}
 
 \begin{frame}{Request path: 202 at once, then poll until settled}
@@ -252,8 +252,8 @@
 \speaker{ZHANG TIANYI \textperiodcentered{} operator LI ZONGZE}
 \begin{frame}{Live demo on the dev stage}
   \vspace{0.10in}
-  \beat{D1}{Register for Session 3, then 1 \textrightarrow{} seat offered \textrightarrow{} accept}
-  \beat{D2}{Demo 2 queues; Demo 1 cancels \textrightarrow{} seat relayed in the same transaction}
+  \beat{D1}{A registers for Session 3, then 1 \textrightarrow{} seat offered \textrightarrow{} accept}
+  \beat{D2}{B queues; A cancels \textrightarrow{} seat relayed in the same transaction}
   \beat{D5a}{Crash the worker right after its commit (fault flag, dev only)}
   \beat{D3}{60\,s hold runs out \textrightarrow{} the timer relays the seat, nobody clicks}
   \beat{D5b}{Redelivered after 120\,s: settled once \textperiodcentered{} \textbf{\color{srBlue}D4}\enspace Verify invariants}
@@ -261,7 +261,7 @@
   \tikz\node[fill=srPaleBlue, draw=srBlue!40, rounded corners=4pt, inner sep=9pt, text width=11.85in]
     {\textbf{Backup:} staged recording \code{docs/demo/backup-demo.mp4} (B1) and its screenshots (B2--B5):
      the same beats with other accounts (Alice, Bob, Carol); fallback script in \code{docs/walkthrough/part-4.md}};
-  \source{Plan A: \url{https://d2ni5e1z674t04.cloudfront.net} (dev). Plan B: local Docker stack, same
+  \source{Accounts: A = Demo 1, B = Demo 2. Plan A: \url{https://d2ni5e1z674t04.cloudfront.net} (dev). Plan B: local Docker stack, same
     code. Plan C: the recording. Click path and fallback: \code{docs/DEMO.md} \S5--6. Values on screen
     are demo values, not measurements.}
 \end{frame}
@@ -272,7 +272,7 @@
   \vspace{0.06in}
   \tileL{\CorrectnessVerdict}{Core correctness}{\CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks}\hfill
   \tile{\FailureVerdict}{Failure recovery}{\FailureBeforeCommitSettleMedianS\,s median}\par\vspace{0.20in}
-  \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable; \CorePropertySequences{} random runs}\hfill
+  \tileL{\PrefOrderVerdict}{Preference, order}{\PrefOrderNonAcceptable{} unacceptable}\hfill
   \tile{\AccessVerdict}{Access control}{\AccessProbesPassed/\AccessProbes{} as expected}\par\vspace{0.20in}
   \tileL{\ConcurrencyVerdict}{Concurrency}{\ConcurrencyAccounts{} accounts, \ConcurrencySeats{} seats}\hfill
   \tile{\PerfDevVerdict}{Performance}{met up to \PerfDevMaxVUsMet{} users}\par\vspace{0.20in}
@@ -283,8 +283,8 @@
   \SeriesPassed{} of \SeriesExperiments{} scripted experiments pass; the k6 load test meets every target up to \PerfDevMaxVUsMet{} users
   \source{Dev stage, 3 runs per experiment, re-run after the Lambda quota rose from 10 to 1{,}000: in the first
     series the quota throttled the API (HTTP 503 = Lambda throttles, \ThrottleConcurrencyApiThrottles{} and
-    \ThrottleBackfillApiThrottles), failing concurrency and backfill; kept in \code{results/}. Failure recovery
-    on dev without e-mail. No \code{verify} call found a violation. Final report Table 5; \code{results/2026-10-17-*/}.}
+    \ThrottleBackfillApiThrottles), failing concurrency and backfill; kept in \code{results/}. Failure recovery:
+    target 5 min; the median is about the 120\,s SQS visibility timeout; e-mail then off on dev. Preference: \CorePropertySequences{} random sequences in the engine, no unacceptable offer. No \code{verify} call found a violation. Final report Table 5; \code{results/2026-10-17-*/}.}
 \end{frame}
 
 \begin{frame}{Latency, backfill and the mechanism comparison}
@@ -326,7 +326,7 @@
         On-prem, fully amortised & \CostTierOneKOnpremFullThreeYearUsd & \CostTierTenKOnpremFullThreeYearUsd & \CostTierHundredKOnpremFullThreeYearUsd\\
         \bottomrule
       \end{tabular}\par\vspace{0.30in}
-      Cloud dearer above \hl{\CostCrossoverListIncrementRegs} / \hl{\CostCrossoverListFullRegs} a month
+      Cloud dearer than on-prem above\\ \hl{\CostCrossoverListIncrementRegs}/month (increment only),\\ \hl{\CostCrossoverListFullRegs}/month (fully amortised)
     \end{column}
     \begin{column}{5.45in}
       \includegraphics[width=5.45in]{figures/generated/cost-crossover}
@@ -342,9 +342,9 @@
 \speaker{LIANG ZIHAN}
 \begin{frame}{User study and pilot: status, and a staged rehearsal}
   \vspace{0.06in}
-  \textbf{Independent users} \mute{(Preliminary report \S5; planned, not yet run)}\par\vspace{0.08in}
+  \textbf{Independent users} \mute{(Preliminary report \S5\IfPending{\StudyParticipants}{; planned, not yet run}{})}\par\vspace{0.08in}
   \begin{itemize}
-    \item 4--6 student interviews and the organisers' current practice: \IfPending{\InterviewParticipants}{not yet held}{n = \InterviewParticipants}
+    \item 4--6 student and 2--3 organiser interviews: \IfPending{\InterviewParticipants}{not yet held}{\InterviewParticipants{} student, \InterviewOrganisers{} organiser interviews}
     \item User study, 12 non-team university students: \IfPending{\StudyParticipants}{planned 29 Oct--5 Nov}{n = \StudyParticipants, completion \StudyCompletionSRPct\,\%, SUS \StudySusSRMean}
     \item Live pilot, two sessions: \IfPending{\PilotWorkshops}{planned 3--4 Nov}{\PilotRegistrations{} registrations, \PilotBackfills{} backfills}
   \end{itemize}
@@ -363,13 +363,13 @@
   \vspace{0.06in}
   \textbf{Limits:} one writer per workshop (hot spot server settle p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} e-mail from a gmail.com sender\par\vspace{0.12in}
   \textbf{Next:} batch commands per workshop \textperiodcentered{} own mail domain (DKIM) \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
-  \textbf{AI use:} an AI assistant generated the code, tests, scripts, desk research, and the report and slide text, and ran
+  \textbf{AI use:} an AI assistant generated the code, tests, scripts, documentation, desk research, and the report, slide and poster text, and ran
   deployments and experiments with our credentials; scope, rules and targets are ours\par\vspace{0.24in}
   \textbf{Work lines} \mute{(Preliminary report \S4)}\par\vspace{0.08in}
   \role{LI ZONGZE}{product, front end}\hfill\role{CHEN YANG}{allocation logic, API}\par\vspace{0.10in}
   \role{LIN JIE}{AWS, monitoring}\hfill\role{ZHU GENGYU}{data, local (on-prem) reference}\par\vspace{0.10in}
   \role{LIANG ZIHAN}{user research, evaluation}\hfill\role{ZHANG TIANYI}{dashboard, QA, docs}\par
-  \source{AI use in full, with each member's statement: Final report, AI usage declaration.}
+  \source{AI use in full, with each member's statement (drafted by the assistant, approved by the team): Final report, AI usage declaration.}
 \end{frame}
 
 \begin{frame}{Thank you. Questions?}
@@ -392,12 +392,12 @@
   \vspace{0.06in}
   \code{docs/demo/backup-demo.mp4}: 2:44, silent, captions say who acts\par\vspace{0.10in}
   Staged on dev: synthetic accounts, scripted clicks; not user evidence\par\vspace{0.30in}
-  \chap{D1}{0:39}{Alice registers, Session 2 first \textrightarrow{} offer \textrightarrow{} accept}
-  \chap{D2}{1:06}{Bob queues; Alice cancels \textrightarrow{} Bob's offer (1:29)}
-  \chap{D3}{1:34}{Carol queues; Bob's 60\,s hold expires \textrightarrow{} Carol's offer (2:11)}
-  \chap{D4}{2:19}{Backfill log, attendance, CSV export, verify invariants (2:26)}
+  \chap{D1}{0:36}{Alice registers, Session 2 first \textrightarrow{} offer \textrightarrow{} accept}
+  \chap{D2}{1:05}{Bob queues; Alice cancels \textrightarrow{} Bob's offer (1:30)}
+  \chap{D3}{1:35}{Carol queues; Bob's 60\,s hold expires \textrightarrow{} Carol's offer (2:13)}
+  \chap{D4}{2:20}{Backfill log, attendance, CSV export, verify invariants (2:26)}
   \source{Chapter list: \code{docs/demo/backup-demo-chapters.txt}. The recording has no fault
-    injection (D5 is a terminal step; see B6). Recorded by \code{tools/e2e} on 2026-10-17 (UTC).}
+    injection (D5 is a terminal step; see B6). Recorded by \code{tools/e2e} on 2026-10-24 (UTC).}
 \end{frame}
 
 % B2-B6: the demo narrator (Plan D, and B6 for beat D5)
@@ -429,7 +429,7 @@
   {Nobody acted between the two screens.}
 
 \shotslide{Demo beat D4, staged: backfill log and verify}
-  {190 175 190 470}{24-dashboard-backfill-log.png}{Both relays with their latency (demo values): hold expired \textrightarrow{} Carol in 137\,ms; cancellation \textrightarrow{} Bob in 0\,ms}
+  {450 175 210 470}{24-dashboard-backfill-log.png}{Both relays with their latency (demo values): hold expired \textrightarrow{} Carol in 137\,ms; cancellation \textrightarrow{} Bob in 0\,ms}
   {190 580 370 140}{26-dashboard-verify-ok.png}{CSV export; all invariants hold}
   {Dashboard values in a demo are demo values, not measurements.}
 

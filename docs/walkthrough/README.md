@@ -24,9 +24,8 @@ front end opens with the problem, market and business model; allocation logic an
 rules; AWS and monitoring the architecture; the organiser-dashboard owner narrates the demo while the
 front-end owner operates the participant browser; data and the local reference presents the results,
 the cost and the on-prem reference; user research and evaluation tooling presents the user study,
-the pilot and the close, and opens the Q&A. The name-to-line mapping itself is still the provisional
-one of `docs/ai-declaration-drafts.md` until each member ticks their row there. If a member's line
-changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (roles) and in the
+the pilot and the close, and opens the Q&A. The name-to-line mapping was approved by the team on
+2026-10-24 (`docs/ai-declaration-drafts.md`). If a member's line changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (roles) and in the
 `\speaker{...}` lines of `report/Slides.tex`.
 
 ## Timing
@@ -76,6 +75,10 @@ changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (ro
    - No results yet: the interviews, the user study and the live pilot.
    - Final: the dev smoke run (`results/2026-10-17-smoke-2/`), the mechanism comparison
      (`results/replay/`) and the cost model (`results/cost/model-summary.md`).
+   Status on 2026-10-24: SES production access granted (e-mail on in both stages; reserved test
+   domains never e-mailed); market lower bound 713 organisations (SIT 170); the web app redesigned
+   (`cb160d2`), and the backup screenshots and video come from the 24 Oct walkthrough
+   (`results/2026-10-24-web-walkthrough-dev/`). Interviews, user study and pilot: not yet run.
 4. Values seen during the demo are demo values. The rehearsal values in the DEMO.md appendix are not
    report measurements.
 5. A missed target is reported as missed, with the measured value and the explanation.
@@ -108,7 +111,7 @@ changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (ro
 
 - [ ] Every `[PENDING: …]` in parts 1–6 replaced from its file, or explicitly kept as "not measured
       yet".
-- [ ] The speaker mapping above confirmed by the team (or changed in the three places named above).
+- [x] The speaker mapping above confirmed by the team (or changed in the three places named above).
 - [ ] Two timed run-throughs, each at most 15:00 (plan §3 step 28). Note the clock at each hand-over.
 - [ ] Each speaker can answer the three questions at the end of their part without notes, and has
       read [../QA-prep.md](../QA-prep.md).

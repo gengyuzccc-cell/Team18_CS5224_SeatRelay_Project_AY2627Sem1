@@ -107,8 +107,9 @@ down. No AI-generated code appears here; **if code is generated with AI during i
 report declares that specifically.** Each member records their own learning from this work."
 
 The Final's declaration (`report/sections/07-declaration.tex`) quotes the first sentence as what the
-Preliminary report declared, and prints a member's learning statement only after that member has written
-or confirmed it (`docs/ai-declaration-drafts.md`).
+Preliminary report declared, and prints the members' learning statements, drafted by the assistant from the
+project record and approved by the team on 2026-10-24 (`docs/ai-declaration-drafts.md`); a member may replace
+theirs with their own words (checklist 1.7).
 
 ## Prelim references to keep
 
