@@ -14,7 +14,7 @@ log "deploying web stack seatrelay-web-$STAGE"; sam deploy --config-env "web-$ST
 WEB_URL="$(stack_output "seatrelay-web-$STAGE" WebUrl)"
 log "deploying app stack seatrelay-app-$STAGE (WebOrigin=$WEB_URL)"
 EXTRA="Stage=$STAGE WebOrigin=$WEB_URL ${ALARM_EMAIL:+AlarmEmail=$ALARM_EMAIL}"
-if [[ "$STAGE" == "dev" ]]; then EXTRA="$EXTRA AllowFaultFlags=true EmailEnabled=${EMAIL_ENABLED:-false}"; else EXTRA="$EXTRA AllowFaultFlags=false EmailEnabled=${EMAIL_ENABLED:-true}"; fi
+if [[ "$STAGE" == "dev" ]]; then EXTRA="$EXTRA AllowFaultFlags=true EmailEnabled=${EMAIL_ENABLED:-true}"; else EXTRA="$EXTRA AllowFaultFlags=false EmailEnabled=${EMAIL_ENABLED:-true}"; fi
 sam deploy --config-env "$STAGE" --parameter-overrides $EXTRA
 log "registering $WEB_URL as Cognito callback/logout URL"
 EXISTING_CB="$(aws cloudformation describe-stacks --stack-name "$AUTH_STACK" --query "Stacks[0].Parameters[?ParameterKey=='WebCallbackUrls'].ParameterValue" --output text)"

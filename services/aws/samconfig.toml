@@ -49,7 +49,7 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 fail_on_empty_changeset = false
 tags = "Project=SeatRelay Stage=dev"
-parameter_overrides = "Stage=dev AllowFaultFlags=true EmailEnabled=false"
+parameter_overrides = "Stage=dev AllowFaultFlags=true EmailEnabled=true"
 
 # ---------------------------------------------------------------- app: pilot
 [pilot.global.parameters]

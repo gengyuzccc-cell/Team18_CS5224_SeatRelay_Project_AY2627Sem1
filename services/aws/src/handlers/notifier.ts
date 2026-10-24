@@ -35,6 +35,26 @@ export interface NotifierDeps {
   lifecycle?: InvocationLifecycle;
   /** Backoff between SENT status write attempts (tests inject a no-op). */
   sleep?: (ms: number) => Promise<void>;
+  /**
+   * Addresses that must never be e-mailed (marked SKIPPED, in-app only). The deployed handler
+   * passes `isReservedAddress`: synthetic test accounts use reserved domains, which would
+   * hard-bounce now that the SES account is out of the sandbox.
+   */
+  undeliverable?: (email: string) => boolean;
+}
+
+/** Domains reserved for documentation and testing (RFC 2606, RFC 6761); they never receive mail. */
+const RESERVED_DOMAINS = ['example.com', 'example.net', 'example.org'];
+const RESERVED_TLDS = ['example', 'test', 'invalid', 'localhost'];
+
+/** True for an address on a reserved domain (or a subdomain of one), e.g. `u1@example.com`. */
+export function isReservedAddress(email: string): boolean {
+  const at = email.lastIndexOf('@');
+  if (at < 0) return true;
+  const domain = email.slice(at + 1).trim().toLowerCase().replace(/\.$/, '');
+  if (RESERVED_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`))) return true;
+  const tld = domain.slice(domain.lastIndexOf('.') + 1);
+  return RESERVED_TLDS.includes(tld);
 }
 
 /** Attempts to record SENT after SES accepted the e-mail (see `recordSent`). */
@@ -70,7 +90,8 @@ export function notificationOfRecord(record: DynamoDBRecord): Notification | und
 
 /**
  * DynamoDB Streams → SES (plan §2.4). INSERT NOTIFICATION items only (the event source filter):
- * - `EMAIL_ENABLED !== 'true'`: the notification is marked SKIPPED (in-app only);
+ * - `EMAIL_ENABLED !== 'true'`, or an address `undeliverable` rejects (reserved test domains):
+ *   the notification is marked SKIPPED (in-app only);
  * - otherwise one e-mail (text + minimal HTML) per notification, paced by the token bucket,
  *   then SENT; a permanent SES error (`MessageRejected`, sandbox) marks it FAILED and never
  *   throws; a transient error (throttling) stops the batch at that record, which is reported
@@ -117,6 +138,12 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
             await deps.store.markStatus(notification, 'SKIPPED', notification.attempts);
             summary.skipped += 1;
             deps.logger.info('notification skipped (e-mail disabled)', fields);
+            continue;
+          }
+          if (deps.undeliverable?.(notification.email) === true) {
+            await deps.store.markStatus(notification, 'SKIPPED', notification.attempts, 'reserved domain');
+            summary.skipped += 1;
+            deps.logger.info('notification skipped (reserved test domain)', fields);
             continue;
           }
           const status = await deps.store.getStatus(notification);
@@ -213,6 +240,7 @@ const defaultHandler = lazy(() => {
       ? { sender: new SesEmailSender(sesClient(), requireEnv('SENDER_EMAIL')) }
       : {}),
     emailEnabled,
+    undeliverable: isReservedAddress,
     rate: new TokenBucket(Math.max(0.1, envNumber('EMAIL_RATE_PER_SEC', 1))),
     logger: runtime().logger,
     metrics: runtime().metrics,

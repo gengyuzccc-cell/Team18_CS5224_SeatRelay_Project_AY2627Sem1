@@ -10,7 +10,7 @@ import {
 } from '../src/adapters/dynamo/notifications';
 import { liveOfferItem, notificationItem } from '../src/adapters/dynamo/mapping';
 import type { EmailMessage, EmailSendResult, EmailSender } from '../src/adapters/ses';
-import { createNotifierHandler, notificationOfRecord } from '../src/handlers/notifier';
+import { createNotifierHandler, isReservedAddress, notificationOfRecord } from '../src/handlers/notifier';
 import { T0, notification, offer } from './fixtures';
 import { streamRecord } from './harness';
 
@@ -64,7 +64,7 @@ class FakeSender implements EmailSender {
   }
 }
 
-function build(emailEnabled: boolean) {
+function build(emailEnabled: boolean, undeliverable?: (email: string) => boolean) {
   const store = new FakeStatusStore();
   const sender = new FakeSender();
   const logger = new InMemoryLogger();
@@ -81,6 +81,7 @@ function build(emailEnabled: boolean) {
     sleep: async (ms) => {
       sleeps.push(ms);
     },
+    ...(undeliverable === undefined ? {} : { undeliverable }),
   });
   return { handler, store, sender, logger, metrics, take, sleeps };
 }
@@ -109,7 +110,46 @@ describe('notificationOfRecord', () => {
   });
 });
 
+describe('isReservedAddress', () => {
+  test('reserved documentation and test domains are never e-mailed', () => {
+    for (const email of [
+      'u1@example.com',
+      'Smoke1@EXAMPLE.COM',
+      'a@sub.example.org',
+      'b@example.net',
+      'c@uni.test',
+      'd@host.invalid',
+      'e@localhost',
+      'f@foo.example',
+      'no-at-sign',
+    ]) {
+      expect(isReservedAddress(email), email).toBe(true);
+    }
+  });
+
+  test('ordinary addresses are e-mailed', () => {
+    for (const email of ['e0123456@u.nus.edu', 'someone@gmail.com', 'x@example.com.sg', 'y@notexample.com', 'z@testing.org']) {
+      expect(isReservedAddress(email), email).toBe(false);
+    }
+  });
+});
+
 describe('notifier handler', () => {
+  test('an address the undeliverable check rejects is marked SKIPPED and never sent', async () => {
+    const { handler, store, sender, take } = build(true, isReservedAddress);
+    const records = [
+      insert(notification({ id: 'n-1', email: 'u1@example.com' }), '1'),
+      insert(notification({ id: 'n-2', email: 'student@u.nus.edu' }), '2'),
+    ];
+    await expect(handler({ Records: records })).resolves.toEqual({ batchItemFailures: [] });
+    expect(store.marks).toEqual([
+      { id: 'n-1', status: 'SKIPPED', attempts: 0, lastError: 'reserved domain' },
+      { id: 'n-2', status: 'SENT', attempts: 1 },
+    ]);
+    expect(sender.sent.map((m) => m.to)).toEqual(['student@u.nus.edu']);
+    expect(take).toHaveBeenCalledTimes(1);
+  });
+
   test('EMAIL_ENABLED=false: every notification is marked SKIPPED without touching SES', async () => {
     const { handler, store, sender, take } = build(false);
     const records = [
