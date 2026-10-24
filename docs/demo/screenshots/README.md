@@ -1,6 +1,6 @@
 # Walkthrough screenshots
 
-Captured by `tools/e2e/src/walkthrough.ts` on 2026-10-17 against the deployed **dev** stack
+Captured by `tools/e2e/src/walkthrough.ts` on 2026-10-24 against the deployed **dev** stack
 (https://d2ni5e1z674t04.cloudfront.net), Chromium, 1440×900, light theme. **Staged:** test accounts whose names say "(staged)",
 scripted actions; not user evidence. Regenerate with `pnpm --filter @seatrelay/e2e walkthrough`.
 

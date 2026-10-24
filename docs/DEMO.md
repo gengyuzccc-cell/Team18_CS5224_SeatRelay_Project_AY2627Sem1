@@ -209,11 +209,14 @@ message pauses only *its own* workshop: the expiry runs on another workshop's qu
 Notation: **Do** = operator action, **Expect** = what appears (exact UI text where it matters),
 **Say** = narrator line. Times are relative to the start of the demo block.
 
-> **Deployed build.** Dev and pilot run commit `d34e0ac` since 2026-10-17 21:08 / 21:19 UTC (ended-status
-> card with **Register again**, named *New holder* in the backfill log). The browser walkthrough re-ran
-> against it at 21:21 UTC and refreshed `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and the
-> timings below (`results/2026-10-17-web-walkthrough-dev-2/`). The first walkthrough
-> (`results/2026-10-17-web-walkthrough-dev/`) shows the earlier UI and is kept as history.
+> **Deployed build.** Since 2026-10-24 08:24 UTC dev and pilot serve the redesigned web app (commit
+> `cb160d2`: poster colours and fonts, hold meter, seat bars, animated preference reordering, grouped
+> dashboard actions; every visible text the demo relies on is unchanged). The browser walkthrough re-ran
+> against it at 08:25 UTC (45/45 checks) and refreshed `docs/demo/screenshots/`,
+> `docs/demo/backup-demo.mp4` and the backup slides (`results/2026-10-24-web-walkthrough-dev/`). The
+> 17 Oct walkthroughs (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as
+> history. The app stacks run the notifier change of 24 Oct (`bcd7bd1`): with SES out of the sandbox,
+> real participants get e-mail, test accounts on reserved domains never do.
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 
@@ -323,7 +326,7 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
   seat** → confirmed.
 - **Do (Window O, tab 2):** **Refresh**. The **Backfill log** shows *Session A · offer expired* with
   a latency of a few hundred milliseconds to a few seconds (released at `expiresAt`, re-allocated
-  when the tick was processed; two browser walkthroughs on dev, 2026-10-17: 179–186 ms).
+  when the tick was processed; browser walkthroughs on dev: 179–186 ms on 2026-10-17, 137 ms on 2026-10-24).
 - **Say:** "Nobody pressed anything: the seat moved on by itself, within a second or two."
 
 ### D5b (4:00–4:30): exactly-once, proven (terminal + Window O)
