@@ -1,6 +1,8 @@
 # SES production access request (ap-southeast-1)
 
 > 团队摘要：SES 新账号处于 **sandbox**（每 24 h 200 封、1 封/秒、只能发给已验证地址）。试点要给真实参与者发邮件，必须申请 production access（免费，通常 24 小时内回复）。§2 是表单每一栏填什么，§3 是直接粘贴的用例说明，§5 是操作步骤。申请前先把发件身份验证完成（点邮件里的链接）。获批前 Cognito 继续用 `COGNITO_DEFAULT`（plan §2.4）。
+>
+> **状态（2026-10-24）：已获批。** AWS 回复：每日配额 50,000 封、最高 14 封/秒，账号已移出 sandbox（ap-southeast-1，立即生效）。`dev` 与 `pilot` 均已开启邮件；测试账号所用的保留域名（example.com 等）不会发信。核验记录见 `results/2026-10-24-ses-production-check/summary.md`。Cognito 验证码仍用 `COGNITO_DEFAULT`（每天 50 封），原因见该文件末段。
 
 Plan reference: `docs/plan/execution-plan.md` §2.4 (SES identity, notifier, `COGNITO_DEFAULT` until approval), §8 (10/15: submit the request), §9 (fallback if not approved: pilot e-mails only to verified team addresses, participants rely on in-app notifications). Live identifiers: `docs/deployment-state.md`.
 
@@ -81,5 +83,5 @@ You receive this because you registered for this workshop with this address. To 
 **After submitting**
 
 8. Expect a reply within 24 h (up to 2 business days) from AWS Support to the account's root e-mail and the additional contact; if they ask for more information, reply in the same case with: the sample in §4, the repository URL, and the two sentences on opt-in and bounce handling from §3.
-9. On approval: the Account dashboard shows "Production access: Enabled" and the new daily quota. Update `docs/deployment-state.md`. Deploy the pilot stage with `EmailEnabled=true` (`docs/RUNBOOK.md` §1.2). Optionally switch the Cognito user pool to send through SES (`EmailSendingAccount: DEVELOPER`, source ARN = the identity) to escape the 50 e-mails/day Cognito limit; do **not** do this before approval (sandbox would break sign-up verification codes for unverified addresses).
+9. On approval: the Account dashboard shows "Production access: Enabled" and the new daily quota. Update `docs/deployment-state.md`. Deploy the pilot stage with `EmailEnabled=true` (`docs/RUNBOOK.md` §1.2). Done on 2026-10-24 except this optional step, which was deliberately not taken because the only identity is a gmail.com address (see `results/2026-10-24-ses-production-check/summary.md`): optionally switch the Cognito user pool to send through SES (`EmailSendingAccount: DEVELOPER`, source ARN = the identity) to escape the 50 e-mails/day Cognito limit; do **not** do this before approval (sandbox would break sign-up verification codes for unverified addresses).
 10. If denied: reply with clarifications (they usually ask about opt-in or complaint handling) and resubmit once; if still denied by 10/29, apply plan §9: pilot e-mails go only to verified team addresses, participants use in-app notifications, and the report states this.

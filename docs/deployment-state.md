@@ -30,7 +30,14 @@ suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounc
 published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for the team sender mailbox is
 pending confirmation (click the SNS confirmation e-mail).
 
-**2026-10-17 07:0x UTC: SES production access DENIED** (support case `179219791000451`). At review time the
+**2026-10-24: SES production access GRANTED** (same case, after the team's reply): out of the sandbox in
+ap-southeast-1, 50,000 messages per 24 h, 14 per second; `sesv2 get-account` shows `ProductionAccessEnabled: true`,
+`EnforcementStatus: HEALTHY`. The notifier now skips reserved test domains (commit `bcd7bd1`), `dev` was redeployed
+with `EmailEnabled=true` and `pilot` keeps it; end-to-end check with the SES mailbox simulator in
+`results/2026-10-24-ses-production-check/`. Cognito's sign-up codes still use its default mailer (50/day) because the
+only SES identity is a gmail.com address (see that summary).
+
+History: **2026-10-17 07:0x UTC: SES production access DENIED** (support case `179219791000451`). At review time the
 sender identity was still *unverified*, which is the usual cause. Next steps for the team: (1) click the SES
 verification e-mail sent to the team sender mailbox; (2) confirm the SNS subscription e-mail; (3) reply to the case
 in the AWS Support Center console (Basic support cannot reply via CLI) with the use-case text of
@@ -51,7 +58,7 @@ Callback/logout URLs registered in Cognito: localhost:5173, the dev CloudFront U
 
 ## seatrelay-app-dev (deployed 2026-10-17, CREATE_COMPLETE)
 
-Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=false WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address>`.
+Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=true WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address>` (`EmailEnabled=false` until 2026-10-24).
 
 | Output | Value |
 |---|---|
@@ -102,7 +109,7 @@ Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https
 | TableName | `seatrelay-pilot` (deletion protection ON, PITR ON, on-demand, stream NEW_AND_OLD_IMAGES) |
 | Throttling | 50 rps / burst 100 (dev: 300 / 500) |
 | Fault flags | `ALLOW_FAULT_FLAGS=false` (the API strips `_fault`) |
-| E-mail | `EMAIL_ENABLED=true`, sender `<team sender address>` (verified). While SES is in the sandbox only verified recipients receive mail; other recipients are recorded as FAILED and see in-app notifications |
+| E-mail | `EMAIL_ENABLED=true`, sender `<team sender address>` (verified). Since 2026-10-24 SES is out of the sandbox, so every participant receives e-mail; addresses on reserved test domains are skipped (in-app only) |
 | Sweep schedule | `seatrelay-pilot-sweep` (EventBridge Scheduler, rate 5 min) |
 
 Checks after deployment: `/health` 200 `{"ok":true,"stage":"pilot"}`, `/me` without token 401, pilot SPA `env.js`

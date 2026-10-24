@@ -1,0 +1,14 @@
+{
+ "ProductionAccessEnabled": true,
+ "SendingEnabled": true,
+ "EnforcementStatus": "HEALTHY",
+ "SendQuota": {
+  "Max24HourSend": 50000.0,
+  "MaxSendRate": 14.0,
+  "SentLast24Hours": 0.0
+ },
+ "ReviewDetails": {
+  "Status": "GRANTED",
+  "CaseId": "179219791000451"
+ }
+}

@@ -1,0 +1,50 @@
+[
+ {
+  "time": "2026-10-24T06:22:55.222Z",
+  "event": "notification sent",
+  "kind": "OFFER",
+  "notificationId": "c8f8c3e9-4afc-441d-ac63-7cc2e7ad0d9f",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": "010e01a16c939a62-4a93222d-d6d2-42e9-8cc2-6f6f3f952fd1-000000"
+ },
+ {
+  "time": "2026-10-24T06:22:55.913Z",
+  "event": "notification skipped (reserved test domain)",
+  "kind": "OFFER",
+  "notificationId": "1d43a4c3-72ad-4139-97f4-3efed90ea055",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": null
+ },
+ {
+  "time": "2026-10-24T06:23:55.481Z",
+  "event": "notification skipped (reserved test domain)",
+  "kind": "EXPIRED",
+  "notificationId": "e2e1db1a-1019-49ee-9139-412940d440a1",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": null
+ },
+ {
+  "time": "2026-10-24T06:23:55.505Z",
+  "event": "notification skipped (reserved test domain)",
+  "kind": "OFFER",
+  "notificationId": "1253f2fe-0713-4ef5-a770-df95bfac64c0",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": null
+ },
+ {
+  "time": "2026-10-24T06:23:56.481Z",
+  "event": "notification sent",
+  "kind": "OFFER",
+  "notificationId": "c34044c3-05cb-4752-abe1-f4d30b155f30",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": "010e01a16c9489d0-0140dc73-23af-47a3-9dc1-9fa2a0194dc0-000000"
+ },
+ {
+  "time": "2026-10-24T06:23:57.378Z",
+  "event": "notification sent",
+  "kind": "EXPIRED",
+  "notificationId": "9dbfdda2-e772-45a2-b617-a529e84181a1",
+  "workshopId": "0bd77679-9df1-4490-b0bd-60e46a4496fe",
+  "sesMessageId": "010e01a16c948d55-affb1c09-9a52-48da-bf48-ecf0d16b66ca-000000"
+ }
+]
