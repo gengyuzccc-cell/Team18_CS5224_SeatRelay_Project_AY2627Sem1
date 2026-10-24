@@ -230,22 +230,19 @@ against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control.}
 \end{figure}}{}
 
 \subsection{Real pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-The \code{pilot} stage (fault injection disabled; e-mail and in-app notifications, SES production
-access granted) is deployed to serve a real workshop in two sessions with registration open for at
-least five days; the organiser's CSV exports and the dashboard's backfill log will be the evidence.
-\IfPending{\PilotWorkshops}{The pilot is planned for 3--4 November 2026 and has not yet run.}{\pending{pilot
-observations: natural cancellations, backfills, notifications, attendance, organiser feedback}}
+The pilot\IfPending{\PilotWorkshops}{, planned for 3--4 November 2026 and not yet run,}{} serves a
+real workshop in two sessions on the \code{pilot} stage (no fault injection; e-mail and in-app
+notifications), with registration open for at least five days; the organiser's CSV exports and the
+backfill log are the evidence.\IfPending{\PilotWorkshops}{}{ \pending{pilot observations: natural
+cancellations, backfills, notifications, attendance, organiser feedback}}
 \emph{Staged, not user evidence:} before the pilot, a scripted rehearsal on the pilot stage with
 \RehearsalParticipants{} synthetic accounts (\code{results/2026-10-17-pilot-rehearsal-3/}) applied
 \RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
 (\RehearsalBackfillExpiredN{} expiries through the timer path in
-\RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms; declines, cancellations and a
-capacity increase in their own transaction), sent \RehearsalNotificationsSent{} e-mails to the SES
+\RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms), sent \RehearsalNotificationsSent{} e-mails to the SES
 mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; the invariants
-held at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, these
-rehearsed events are logged apart from the pilot's natural events and, like the team organiser's
-observations, are internal operational evidence; only independent participants' feedback is user
-evidence.
+held at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, rehearsed
+events are logged apart from natural ones and are operational, not user, evidence.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}
