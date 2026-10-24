@@ -64,7 +64,7 @@ h2 { font-family: "SR Serif", serif; font-weight: 600; font-size: 42pt; line-hei
 .steps .t::before { content: counter(s); font-family: "SR Serif", serif; font-weight: 700; font-size: 30pt; line-height: 1.02; color: var(--blue); }
 .steps img { width: 100%; display: block; border: 0.45mm solid #CBC6BB; border-radius: 2.2mm; background: #fff; }
 .steps img.fade { -webkit-mask-image: linear-gradient(to right, #000 92%, transparent); mask-image: linear-gradient(to right, #000 92%, transparent); }
-.steps .cap { font-size: 19pt; color: var(--ink2); margin: 1.6mm 0 0; line-height: 1.25; }
+.steps .cap { font-size: 19pt; color: var(--ink2); margin: 1.6mm 0 0; line-height: 1.25; text-wrap: balance; }
 
 /* architecture */
 .rules { list-style: none; padding: 0; margin: 5mm 0 0; }
@@ -245,10 +245,10 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
   <section class="col">
     <h2>How it works</h2>
     <ol class="steps">
-      <li><div class="t">Tick every session you could attend and rank them.</div><img class="fade" src="img/ui-register.png" alt="Registration form: two sessions ticked and ranked, one left out"></li>
-      <li><div class="t">Wait in one queue. When a seat you can take frees up and you are first, it is held for you (15&nbsp;min by&nbsp;default).</div><img src="img/ui-offer.png" alt="Offer card with a countdown"><p class="cap">Staged run with test accounts and 1-minute&nbsp;holds.</p></li>
+      <li><div class="t">Tick every session you could attend and rank them.</div><img class="fade" src="img/ui-register.png" alt="Registration form: two sessions ticked and ranked"></li>
+      <li><div class="t">Wait in one queue. When a seat you can take frees up and you are first, it is held for you (15&nbsp;min by&nbsp;default).</div><img class="fade" src="img/ui-offer.png" alt="Offer card with a countdown and a hold meter"><p class="cap">Staged run with test accounts and 1-minute&nbsp;holds.</p></li>
       <li><div class="t">Accept to keep it. Decline or let it lapse: you lose only that session, and the seat moves on at once.</div></li>
-      <li><div class="t">Organisers see every hand-over and its delay.</div><img src="img/ui-backfill-log.png" alt="Organiser backfill log"><p class="cap">Top row: an offer expired; the seat was re-held 189&nbsp;ms later.</p></li>
+      <li><div class="t">Organisers see every hand-over and its delay.</div><img class="fade" src="img/ui-backfill-log.png" alt="Organiser backfill log"><p class="cap">Top row: an offer expired; the seat was re-held 109&nbsp;ms later.</p></li>
     </ol>
   </section>
 
@@ -324,7 +324,7 @@ footer .code div { font-size: 15pt; color: var(--ink2); text-align: center; marg
 <footer>
   <div>
     <p class="next"><b>Next:</b> a user study with twelve students and a live two-session pilot with real participants.</p>
-    <p class="src"><b>Code, data and every measurement:</b> github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 (results/). Measured on our AWS deployment (ap&#8209;southeast&#8209;1) on 17 Oct 2026, UTC; screens from a staged run with test accounts on 21 Oct 2026.</p>
+    <p class="src"><b>Code, data and every measurement:</b> github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 (results/). Measured on our AWS deployment (ap&#8209;southeast&#8209;1) on 17 Oct 2026, UTC; screens from a staged run with test accounts on 24 Oct 2026.</p>
     <p class="ai"><b>AI use:</b> Claude Code, an AI coding assistant, generated the code, infrastructure templates, tests and experiment scripts, ran the deployments and measurements with our credentials, and drafted this poster’s text and SVG figures. The scope, allocation rules, constraints and acceptance targets are the team’s (Final report, AI declaration). No&nbsp;image&#8209;generation model was used: the charts are plotted from results/ and the screens are screenshots of the app.</p>
   </div>
   <div class="code"><img src="img/qr-repo.svg" alt="QR code to the GitHub repository"><div>code &amp; data</div></div>

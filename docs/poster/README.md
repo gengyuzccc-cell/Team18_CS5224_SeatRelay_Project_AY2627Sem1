@@ -7,7 +7,7 @@
 | `poster.template.html` | The source: layout, text, the comparison illustration and the architecture diagram (HTML + inline SVG) |
 | `build.py` | Fills the numbers into the template and draws the two charts, then calls `render.mjs` |
 | `render.mjs` | Prints `poster.html` with Chromium (Playwright from `tools/e2e`) to the PNG and the PDF |
-| `img/ui-*.png` | Contiguous crops (nothing edited in or out; the poster fades the register crop's right edge with a CSS mask) of the deployed web app at 3× pixel density: a staged walkthrough on dev with test accounts on 21 Oct 2026, `E2E_SCALE=3 pnpm --filter @seatrelay/e2e walkthrough -- --stage dev --no-publish --no-results --no-video` (44 checks passed; not a measurement run, so not in `results/`) |
+| `img/ui-*.png` | Contiguous crops (nothing edited in or out; the poster fades each crop's right edge with a CSS mask) of the deployed web app at 3× pixel density: a staged walkthrough on dev with test accounts on 24 Oct 2026, after the web redesign, `E2E_SCALE=3 pnpm --filter @seatrelay/e2e walkthrough -- --stage dev --no-publish --no-results --no-video` (44 checks passed; not a measurement run, so not in `results/`; the published 1× run of the same day is `results/2026-10-24-web-walkthrough-dev/`) |
 | `img/qr-*.svg` | QR codes: the live demo (`https://d2ni5e1z674t04.cloudfront.net`) and this repository |
 | `fonts/` | Source Serif 4 (Fontsource WOFF2) and Inter (converted from the Inter OTFs to TrueType outlines and subset, so the print PDF embeds CID TrueType fonts, not Type 3), both under the SIL Open Font License (licence files included) |
 
