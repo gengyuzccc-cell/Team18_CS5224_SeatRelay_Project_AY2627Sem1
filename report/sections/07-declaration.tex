@@ -11,8 +11,9 @@
   availability is not equalised.
 \item \emph{Experiments:} \code{dev} stage, synthetic accounts, 60\,s expiry holds; the replay
   assumes a behaviour model and ideal timers.
-\item \emph{Operations:} one AWS region; SES sandbox until production access is granted (in-app
-  notifications for unverified addresses).
+\item \emph{Operations:} one AWS region; SES production access was granted in October (50{,}000 e-mails a
+  day), but the sender is a gmail.com address, so in-app notifications stay the primary channel, and
+  Cognito's sign-up codes are capped at 50 a day.
 \end{itemize}
 
 \section*{AI usage declaration}
@@ -27,14 +28,25 @@ slides, including all revisions up to this build. \emph{How.} The scope, rules R
 C1--C7 and acceptance targets are the team's, from the Preliminary report; the team owns the AWS
 account and the repository; the assistant ran the deployment, experiment, load-test, replay and cost
 scripts with the team's credentials and built both PDFs. The interviews, the user study and the
-pilot are the team's to run (none had run when this PDF was built). Every measured, simulated and own-count number is written by a script from a raw file in
-\code{results/}; configuration values (hold times, poll intervals, the account's Lambda quota) come
-from the code and \code{docs/deployment-state.md}, external facts are cited, and missing data are
-marked pending. A named member checks every number against \code{results/} before submission
-(\pending{name of the member who did the check}). \emph{What we learned.} As the Preliminary
-report promised, each member records their own learning; only statements a member has written or
-approved appear here: \pending{each member's own statement of what they learned and how they reviewed
-the generated code and approved deployments (drafts to confirm or rewrite: docs/ai-declaration-drafts.md)}.
-% When a member has confirmed or rewritten their statement in docs/ai-declaration-drafts.md, add it
-% here as  \textbf{NAME} (work line). Statement in the first person, at most 45 words.  and remove
-% that member from the \pending{...} above; delete the marker when all six are in.
+pilot are the team's to run (none had run when this PDF was built). Every measured, simulated and
+own-count number is written by a script from a raw file in \code{results/} (configuration values come
+from the code and \code{docs/deployment-state.md}; external facts are cited);
+\code{report/tools/check\_numbers.py} regenerates them all and checks every cited file (passed for
+this build; ZHANG TIANYI re-runs it on the final build). \emph{What we learned.} The assistant drafted these statements
+from the project record (\code{docs/ai-declaration-drafts.md} cites it for each); the team approved
+them. \textbf{LI ZONGZE} (product, front end): A 202 response is not a result; I learned to build
+the interface around three states (request received, queued with a position, seat confirmed), to
+poll with back-off rather than add WebSockets, and to check generated code against the rules.
+\textbf{CHEN YANG} (allocation, API): DynamoDB allows 100 actions per transaction, so a decision is
+capped and continues as a follow-up command; judging expiry by server time at processing makes a late
+or duplicate timer harmless to newer offers. \textbf{LIN JIE} (AWS, monitoring): our Lambda quota was
+10, shared by both stages; I learned to check service quotas before measuring. A second stage failed to
+deploy because both stages' sweep schedules had the same name. \textbf{ZHU GENGYU} (data, local
+reference): running our engine on PostgreSQL showed that a fair comparison needs equal load, retention
+and function, and that labour and the network line, not hardware, dominate a small self-hosted
+service. \textbf{LIANG ZIHAN} (user research, evaluation tooling): timing an expiry race at
+$\pm$200\,ms taught me that network delay is part of the experiment, so the harness calibrates send
+times; preparing the study, I learned to report the real sample, whatever its size.
+\textbf{ZHANG TIANYI} (dashboard, QA, documentation): SES production access was refused while our
+sender was unverified and granted after we verified it and replied; I learned to plan approvals early
+and to keep test accounts from sending real mail, and to report failed experiments as failures.

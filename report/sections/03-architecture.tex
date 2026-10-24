@@ -173,5 +173,6 @@ narrowed. The API is throttled per stage and admits cross-origin requests only f
 CloudFront and the local development origins; the experiment scripts' password sign-in client
 is also an accepted audience, and both stages share one user pool. The application stores e-mail
 address, display name and Cognito user id; access and function logs are kept for 14 days, raw
-request events never. In the SES sandbox only verified addresses get
-mail~\cite{aws-ses-production-access}, so pilot participants rely on in-app notifications.
+request events never. SES production access~\cite{aws-ses-production-access} was granted in
+October, so participants get e-mail as well as in-app notifications; addresses on reserved test
+domains (the synthetic accounts) are never e-mailed.

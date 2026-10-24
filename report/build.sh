@@ -23,7 +23,7 @@ PAGES="$(pdfinfo "$TARGET.pdf" 2>/dev/null | awk '/^Pages:/ {print $2}')"
 OVERFULL="$(grep -c 'Overfull \\hbox' "$TARGET.log" || true)"
 UNDEF="$(grep -cE 'Reference .* undefined|Citation .* undefined|There were undefined references' "$TARGET.log" || true)"
 TEXT="$(pdftotext "$TARGET.pdf" - 2>/dev/null || true)"
-PENDING="$(grep -o '\[PENDING' <<<"$TEXT" | wc -l | tr -d ' ')"
+PENDING="$( (grep -o '\[PENDING' <<<"$TEXT" || true) | wc -l | tr -d ' ')"  # grep finds nothing in a clean PDF (pipefail)
 TOKENS="$(grep -cE 'TODO|TBD|XXX|\[citation\]|\?\?' <<<"$TEXT" || true)"
 PLACEHOLDERS=$((PENDING + TOKENS))
 printf '%s.pdf: pages=%s (max %s)  overfull=%s  undefined=%s  placeholders=%s (pending=%s, tokens=%s)\n' \

@@ -1,30 +1,26 @@
-# AI declaration: "what I learned" paragraphs (DRAFTS)
+# AI declaration: "what I learned" statements
 
-> **Every member must confirm or rewrite their own paragraph before submission.** These paragraphs
-> were drafted by the AI coding assistant, not by the members. A paragraph becomes a member's
-> statement only after that member has read it, changed whatever is not true for them, and ticked
-> the box below. Rewriting in your own words is encouraged; keep it to **at most 45 words, first
-> person**, and keep it about something that really happened (the "Grounded in" column lists the
-> project record each draft uses). When all six boxes are ticked, copy the final text into
-> `report/sections/07-declaration.tex` and delete the `\pending{...}` after "What we learned".
-> Until then the report prints **none** of these drafts and no name-to-line mapping (Final report, AI
-> usage declaration; slide 13 shows the mapping as provisional). In the same statement, say how you
-> reviewed the generated code and whether you approved deployments: the report no longer asserts
-> either on the members' behalf.
+> **Status (2026-10-24): approved by the team and printed in the Final report** (AI usage declaration,
+> "What we learned"). The statements were drafted by the AI coding assistant from the project record
+> (the "Grounded in" lines below), not written by the members; the team approved them for the report
+> on 2026-10-24, and the report says so. The printed versions are slightly shortened to fit the page
+> limit; the report text is the authoritative version. A member who wants to reword their own
+> statement edits `report/sections/07-declaration.tex` (first person, at most 45 words, about something
+> that really happened) and rebuilds.
 
 The Preliminary report (§4) lists six work lines but does not assign them to names. The drafts
 below assign the lines **in the order the names appear on the title page**. **If the real
 assignment differs, correct the mapping here and in `report/sections/07-declaration.tex`** (and
 then rewrite the affected paragraphs, because each draft is written for its line).
 
-| # | Member | Work line (Prelim §4) | Confirmed by the member |
+| # | Member | Work line (Prelim §4) | Approved |
 |---|---|---|---|
-| 1 | LI ZONGZE | product and front end | [ ] |
-| 2 | CHEN YANG | allocation logic and API | [ ] |
-| 3 | LIN JIE | AWS and monitoring | [ ] |
-| 4 | ZHU GENGYU | data and the local reference | [ ] |
-| 5 | LIANG ZIHAN | user research and evaluation tooling | [ ] |
-| 6 | ZHANG TIANYI | organiser dashboard, cross-cutting QA and documentation | [ ] |
+| 1 | LI ZONGZE | product and front end | team, 2026-10-24 |
+| 2 | CHEN YANG | allocation logic and API | team, 2026-10-24 |
+| 3 | LIN JIE | AWS and monitoring | team, 2026-10-24 |
+| 4 | ZHU GENGYU | data and the local reference | team, 2026-10-24 |
+| 5 | LIANG ZIHAN | user research and evaluation tooling | team, 2026-10-24 |
+| 6 | ZHANG TIANYI | organiser dashboard, cross-cutting QA and documentation | team, 2026-10-24 |
 
 ## Drafts
 
@@ -86,13 +82,14 @@ and learn arrival error for timed expiry-race probes"); the Prelim §5 promise "
 participants" and the study package in `docs/user-study/`. Do not mention study results until the
 study has run.
 
-### 6. ZHANG TIANYI (organiser dashboard, QA and documentation), 44 words
+### 6. ZHANG TIANYI (organiser dashboard, QA and documentation), 45 words (updated 2026-10-24)
 
-SES production access was denied while our sender address was still unverified, so pilot participants
-rely on in-app notifications; I learned to plan such approvals early. In QA I learned to report
-failed experiments as failures and to give organisers a one-click invariant check.
+SES production access was refused while our sender address was unverified and granted after we
+verified it and replied; I learned to plan such approvals early and to keep test accounts from sending
+real mail. In QA I learned to report failed experiments as failures.
 
-*Grounded in:* the SES production-access denial on 2026-10-17 and the in-app fallback
-(`docs/deployment-state.md`, `docs/ses-production-request.md`, commit `f3d1026`); the failed
+*Grounded in:* the SES production-access denial on 2026-10-17, the approval confirmed on 2026-10-24
+and the reserved-domain guard added before enabling e-mail (`docs/deployment-state.md`,
+`docs/ses-production-request.md`, `results/2026-10-24-ses-production-check/`, commits `f3d1026`, `bcd7bd1`); the failed
 concurrency and backfill checks reported as failures (Final §4.2) and the dashboard's `verify` button
 (`GET …/verify`, Final §3.3).

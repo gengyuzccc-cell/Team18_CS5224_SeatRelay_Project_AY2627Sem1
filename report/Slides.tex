@@ -151,7 +151,7 @@
   \vspace{0.40in}
   \stat{$\geq$\,\MarketStudentOrgs}{student organisations\\at five universities}\hfill
   \stat{\MarketNusLibcalRepeatEvents{} of \MarketNusLibcalWorkshops}{NUS Libraries workshop\\events were repeats}\hfill
-  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{\pending{interviews}}{\InterviewPEventWeightedPct\,\%}}
+  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{from the organiser interviews}{\InterviewPEventWeightedPct\,\%}}
   \source{Bottom-up sizing, lower bounds: market = organisations $\times$ $p$ (share with multi-session
     sign-ups) $\times$ \sd\MarketPriceSgd{} a year. NUS Libraries calendar \MarketLibcalFrom{} to
     \MarketLibcalTo. Final report \S1, Table 1; \code{results/market/}.}
@@ -162,7 +162,7 @@
     \setlength{\itemsep}{0.42em}
     \item Free tier: one open workshop \textperiodcentered{} organiser plan: \hl{\sd10 a month} (\sd120 a year)
     \item Worth it if hours saved per event $\times$ value of an hour $\times$ events a year $\geq$ \sd120
-    \item Hours saved and willingness to pay: \IfPending{\InterviewHoursMedian}{\pending{organiser interviews}}{median \InterviewHoursMedian{} h per event; bargain at \sd\InterviewWtpBargainMedian/month}
+    \item Hours saved and willingness to pay: \IfPending{\InterviewHoursMedian}{from the organiser interviews (not yet held)}{median \InterviewHoursMedian{} h per event; bargain at \sd\InterviewWtpBargainMedian/month}
     \item Simulation: forms leave \hl{\ReplayDupConfirmedPerSessionMean} duplicate confirmed seats per workshop, one queue \ReplayDupConfirmedUnifiedMean
     \item Eventbrite relays a ticket, but per date; no tool ties sessions to one queue place
     \item First users: NUS student organisations, starting with the organiser of our planned pilot
@@ -344,9 +344,9 @@
   \vspace{0.06in}
   \textbf{Independent users} \mute{(Preliminary report \S5; planned, not yet run)}\par\vspace{0.08in}
   \begin{itemize}
-    \item 4--6 student interviews and the organisers' current practice: \IfPending{\InterviewParticipants}{\pending{not yet done}}{n = \InterviewParticipants}
-    \item User study, 12 non-team university students: \IfPending{\StudyParticipants}{\pending{not yet run}}{n = \StudyParticipants, completion \StudyCompletionSRPct\,\%, SUS \StudySusSRMean}
-    \item Live pilot, two sessions: \IfPending{\PilotWorkshops}{\pending{not yet run}}{\PilotRegistrations{} registrations, \PilotBackfills{} backfills}
+    \item 4--6 student interviews and the organisers' current practice: \IfPending{\InterviewParticipants}{not yet held}{n = \InterviewParticipants}
+    \item User study, 12 non-team university students: \IfPending{\StudyParticipants}{planned 29 Oct--5 Nov}{n = \StudyParticipants, completion \StudyCompletionSRPct\,\%, SUS \StudySusSRMean}
+    \item Live pilot, two sessions: \IfPending{\PilotWorkshops}{planned 3--4 Nov}{\PilotRegistrations{} registrations, \PilotBackfills{} backfills}
   \end{itemize}
   \vspace{0.30in}
   \textbf{Staged rehearsal on the pilot stage} \mute{(synthetic accounts, scripted: not user evidence)}\par\vspace{0.08in}
@@ -361,16 +361,15 @@
 
 \begin{frame}{Limitations, future work, AI use and roles}
   \vspace{0.06in}
-  \textbf{Limits:} one writer per workshop (hot spot server settle p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} SES sandbox\par\vspace{0.12in}
-  \textbf{Next:} batch commands per workshop \textperiodcentered{} SES production \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
+  \textbf{Limits:} one writer per workshop (hot spot server settle p95 \PerfDevHotspotVUFiftyServerSettlePNinetyFiveMs\,ms at 50 users) \textperiodcentered{} one region \textperiodcentered{} e-mail from a gmail.com sender\par\vspace{0.12in}
+  \textbf{Next:} batch commands per workshop \textperiodcentered{} own mail domain (DKIM) \textperiodcentered{} Cognito Lite\par\vspace{0.12in}
   \textbf{AI use:} an AI assistant generated the code, tests, scripts, desk research, and the report and slide text, and ran
   deployments and experiments with our credentials; scope, rules and targets are ours\par\vspace{0.24in}
-  \textbf{Work lines} \mute{(Preliminary report \S4; mapping to names provisional)}\par\vspace{0.08in}
+  \textbf{Work lines} \mute{(Preliminary report \S4)}\par\vspace{0.08in}
   \role{LI ZONGZE}{product, front end}\hfill\role{CHEN YANG}{allocation logic, API}\par\vspace{0.10in}
   \role{LIN JIE}{AWS, monitoring}\hfill\role{ZHU GENGYU}{data, local (on-prem) reference}\par\vspace{0.10in}
   \role{LIANG ZIHAN}{user research, evaluation}\hfill\role{ZHANG TIANYI}{dashboard, QA, docs}\par
-  \source{AI use in full: Final report, AI usage declaration. Work lines assigned in title-page order:
-    \pending{each member to confirm their line}.}
+  \source{AI use in full, with each member's statement: Final report, AI usage declaration.}
 \end{frame}
 
 \begin{frame}{Thank you. Questions?}

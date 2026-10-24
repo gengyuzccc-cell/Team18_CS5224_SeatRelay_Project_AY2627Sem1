@@ -73,10 +73,10 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
 \textbf{User study} (Prelim.\ \S5): 4--6 student interviews, then 12 non-team university students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
- & \IfPending{\StudyParticipants}{\pending{interviews and user study not yet run}}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
+ & \IfPending{\StudyParticipants}{not yet run (planned 29 Oct--5 Nov; protocol and analysis script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
  & --\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
- & \IfPending{\PilotWorkshops}{\pending{pilot not yet run}}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
+ & \IfPending{\PilotWorkshops}{not yet run (planned 3--4 Nov on the \code{pilot} stage, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
 \bottomrule
 \end{tabularx}
@@ -197,7 +197,7 @@ Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was 
 \subsection{User study}\label{sec:study}
 \IfPending{\StudyParticipants}{\emph{Not yet run.} }{}The protocol (\code{docs/user-study/}),
 as in the Preliminary report: four to six student interviews come first, with a record of what the
-pilot organisers do today (\IfPending{\InterviewParticipants}{\pending{neither done yet}}{\InterviewParticipants{}
+pilot organisers do today (\IfPending{\InterviewParticipants}{neither held yet}{\InterviewParticipants{}
 students interviewed, \code{results/interviews/}}). The study then recruits twelve non-team university
 students, at least four with organising experience, and a two-person pilot run that is excluded; each
 uses SeatRelay and a control that mirrors current practice, one Google Form per session plus a shared
@@ -208,8 +208,7 @@ organisers four (create a multi-session workshop, handle a cancellation, inspect
 the distinct count and export). The measures are completion, paired task time (Wilcoxon signed-rank
 test~\cite{wilcoxon1945}), the original ten-item SUS~\cite{brooke1996sus}, erroneous actions, help
 requests, the organiser's manual steps and a short interview.
-\IfPending{\StudyParticipants}{\pending{user-study results: completion, paired time with Wilcoxon $p$,
-SUS with 95\,\% CI, errors and help requests per condition, organiser manual steps}}{With
+\IfPending{\StudyParticipants}{}{With
 \StudyParticipants{} participants (\StudyOrganiserTrack{} on the organiser track), completion was \StudyCompletionSRPct\,\% with SeatRelay and
 \StudyCompletionCtrlPct\,\% with the control; the median paired task time was
 \StudyTimeImprovementPct\,\% lower (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS was \StudySusSRMean{}
@@ -231,11 +230,11 @@ against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control.}
 \end{figure}}{}
 
 \subsection{Real pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-The \code{pilot} stage (fault injection disabled, e-mail enabled; in the SES sandbox only
-verified addresses get mail, others see in-app notifications) is deployed to serve a real
-workshop in two sessions with registration open for at least five days; the organiser's CSV exports
-and the dashboard's backfill log will be the evidence. \pending{pilot workshop, dates and
-observations: natural cancellations, backfills, notifications, attendance, organiser feedback}.
+The \code{pilot} stage (fault injection disabled; e-mail and in-app notifications, SES production
+access granted) is deployed to serve a real workshop in two sessions with registration open for at
+least five days; the organiser's CSV exports and the dashboard's backfill log will be the evidence.
+\IfPending{\PilotWorkshops}{The pilot is planned for 3--4 November 2026 and has not yet run.}{\pending{pilot
+observations: natural cancellations, backfills, notifications, attendance, organiser feedback}}
 \emph{Staged, not user evidence:} before the pilot, a scripted rehearsal on the pilot stage with
 \RehearsalParticipants{} synthetic accounts (\code{results/2026-10-17-pilot-rehearsal-3/}) applied
 \RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
