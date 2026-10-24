@@ -9,7 +9,7 @@ import {
   type WorkshopPublic,
 } from '@seatrelay/contracts';
 import { useMutation } from '@tanstack/react-query';
-import { useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
 import { useDashboard, useInvalidateWorkshopInfo } from '../api/queries';
@@ -20,13 +20,53 @@ import { AsyncButton, type AsyncState } from '../components/AsyncButton';
 import { BackfillLog } from '../components/BackfillLog';
 import { CopyLink } from '../components/CopyLink';
 import { Countdown } from '../components/Countdown';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
+import { Participant } from '../components/Participant';
+import { RefreshButton } from '../components/RefreshButton';
+import { SeatLegend } from '../components/SeatLegend';
 import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
 import { describeError } from '../util/errors';
-import { participantLabel } from '../util/people';
+import { seatBarStyle } from '../util/seatBar';
 import { formatDateTime, formatSeconds, formatTime } from '../util/time';
+import { useArrivals } from '../util/useArrivals';
+import { useDocumentTitle } from '../util/useDocumentTitle';
+import { useInlineConfirm } from '../util/useInlineConfirm';
 import { buildWorkshopPatch } from '../util/workshopPatch';
+
+/** How many times `value` has changed since mount (0 on first render). */
+function useChangeCount(value: string): number {
+  const ref = useRef({ value, count: 0 });
+  if (ref.current.value !== value) {
+    ref.current = { value, count: ref.current.count + 1 };
+  }
+  return ref.current.count;
+}
+
+/** One counter tile: the value eases in when it changes, never on the first load. */
+function Stat({
+  label,
+  value,
+  tone,
+  active,
+}: {
+  label: string;
+  value: string | number;
+  tone: 'data' | 'held' | 'ok' | 'blue';
+  active?: boolean;
+}) {
+  const n = useChangeCount(String(value));
+  return (
+    <div className={`stat stat-${tone}${active ? ' is-active' : ''}`}>
+      <dt>{label}</dt>
+      <dd key={n} className={n > 0 ? 'stat-tick' : undefined}>
+        {value}
+      </dd>
+    </div>
+  );
+}
 
 /** A definitive (4xx) failure is not retried: the button offers the action again (fresh id). */
 function commandState(command: CommandHandle): AsyncState {
@@ -86,7 +126,8 @@ function SessionRow({
   const capacity = useCommand(wsId, { sessions, onSettled: refetch });
   const cancel = useCommand(wsId, { sessions, onSettled: refetch });
   const [value, setValue] = useState(String(session.capacity));
-  const [confirm, setConfirm] = useState(false);
+  const confirmBox = useInlineConfirm();
+  const confirm = confirmBox.open;
   const closed = workshopClosed || isCancelledLike(session.status);
   const apply = () => {
     const next = Number(value);
@@ -103,18 +144,23 @@ function SessionRow({
   return (
     <tr className={isCancelledLike(session.status) ? 'row-muted' : undefined}>
       <th scope="row">
-        {session.title}
-        <div className="muted small">{formatDateTime(session.startsAt)}</div>
+        <span className="nowrap">{session.title}</span>
+        <div className="muted small session-date">{formatDateTime(session.startsAt)}</div>
       </th>
       <td>
         <StatusBadge status={session.status} />
       </td>
-      <td className="num">{session.capacity}</td>
+      <td
+        className={`num${isCancelledLike(session.status) ? '' : ' seat-bar'}`}
+        style={isCancelledLike(session.status) ? undefined : seatBarStyle(session)}
+      >
+        {session.capacity}
+      </td>
       <td className="num">{session.confirmed}</td>
-      <td className="num">{session.held}</td>
+      <td className={`num col-held${session.held > 0 ? ' is-active' : ''}`}>{session.held}</td>
       <td className="num">{session.free}</td>
       <td className="num">{session.queueLength}</td>
-      <td>
+      <td className="manage-cell focus-target" ref={confirmBox.fallback} tabIndex={-1}>
         {closed ? (
           <span className="muted small">—</span>
         ) : (
@@ -159,6 +205,7 @@ function SessionRow({
             <CommandFeedback command={capacity} />
             {!confirm ? (
               <AsyncButton
+                ref={confirmBox.triggerRef}
                 className="btn-small"
                 variant="danger"
                 state={commandState(cancel)}
@@ -166,26 +213,27 @@ function SessionRow({
                 pending="Cancelling…"
                 done="Cancelled"
                 error="Retry"
-                onClick={() => (cancel.canRetry ? void cancel.retry() : setConfirm(true))}
+                onClick={() => (cancel.canRetry ? void cancel.retry() : confirmBox.show())}
                 disabled={cancel.busy}
               />
             ) : (
-              <span className="confirm-inline small">
-                Release every seat in {session.title}?{' '}
+              <span className="confirm-inline small" {...confirmBox.groupProps}>
+                <span id={confirmBox.questionId}>Release every seat in {session.title}?</span>{' '}
                 <button
                   type="button"
                   className="btn btn-danger btn-small"
                   onClick={() => {
-                    setConfirm(false);
+                    confirmBox.settle();
                     void cancel.run({ type: 'CANCEL_SESSION', sessionId: session.id });
                   }}
                 >
                   Yes
                 </button>{' '}
                 <button
+                  ref={confirmBox.safeRef}
                   type="button"
                   className="btn btn-secondary btn-small"
-                  onClick={() => setConfirm(false)}
+                  onClick={confirmBox.dismiss}
                 >
                   No
                 </button>
@@ -242,7 +290,10 @@ function AttendanceCell({
         disabled={state === 'pending'}
         onChange={(event) => void toggle(event.target.checked)}
       />
-      <label htmlFor={id} className="small">
+      <label
+        htmlFor={id}
+        className={`small${state === 'idle' && attended === true ? ' is-attended' : ''}`}
+      >
         {state === 'pending'
           ? 'Saving…'
           : state === 'done'
@@ -264,7 +315,8 @@ function AttendanceCell({
   );
 }
 
-function VerifyPanel({ orgId, wsId }: { orgId: string; wsId: string }) {
+/** "Verify invariants": the button sits in the actions row, the result banner spans the card. */
+function useVerify(orgId: string, wsId: string) {
   const api = useApi();
   const verify = useMutation({ mutationFn: () => api.verify(orgId, wsId) });
   const [result, setResult] = useState<VerifyView | undefined>(undefined);
@@ -279,53 +331,63 @@ function VerifyPanel({ orgId, wsId }: { orgId: string; wsId: string }) {
     try {
       setResult(await verify.mutateAsync());
     } catch {
-      // surfaced below through verify.error
+      // surfaced next to the button through verify.error
     }
   };
+  return { verify, result, state, run };
+}
+
+function VerifyButton({ check }: { check: ReturnType<typeof useVerify> }) {
+  const { verify, result, state, run } = check;
   return (
-    <div className="stack-tight">
-      <div className="actions">
-        <AsyncButton
-          variant="secondary"
-          state={state}
-          idle="Verify invariants"
-          pending="Checking…"
-          done={result?.ok ? 'OK — verify again' : 'Violations — verify again'}
-          error="Retry verify"
-          onClick={() => void run()}
-        />
-        {verify.isError && (
-          <span className="error-text small" role="alert">
-            {describeError(verify.error)}
-          </span>
-        )}
-      </div>
-      {result !== undefined && (
-        <div className={`banner ${result.ok ? 'banner-success' : 'banner-error'}`} role="status">
-          <div>
-            <strong>
-              {result.ok
-                ? 'All invariants hold'
-                : `${result.violations.length} violation${result.violations.length === 1 ? '' : 's'}`}
-            </strong>
-            <p className="small">
-              checked {formatDateTime(result.checkedAt)} — C1 no over-capacity, C2 no double holds,
-              and the other engine invariants.
-            </p>
-            {!result.ok && (
-              <ul className="error-list">
-                {result.violations.map((violation, index) => (
-                  <li key={`${violation.code}-${index}`}>
-                    <code>{violation.code}</code> {violation.message}
-                    {violation.sessionId !== undefined && ` (session ${violation.sessionId})`}
-                    {violation.userId !== undefined && ` (user ${violation.userId})`}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+    <>
+      <AsyncButton
+        variant="secondary"
+        className={result !== undefined && !result.ok ? 'btn-verify-bad' : undefined}
+        state={state}
+        idle="Verify invariants"
+        pending="Checking…"
+        done={result?.ok ? 'OK — verify again' : 'Violations — verify again'}
+        error="Retry verify"
+        onClick={() => void run()}
+      />
+      {verify.isError && (
+        <span className="error-text small" role="alert">
+          {describeError(verify.error)}
+        </span>
       )}
+    </>
+  );
+}
+
+function VerifyResult({ result }: { result: VerifyView }) {
+  return (
+    <div className={`banner ${result.ok ? 'banner-success' : 'banner-error'}`} role="status">
+      <div className="banner-lead">
+        <Icon name={result.ok ? 'check' : 'alert'} />
+        <div>
+          <strong>
+            {result.ok
+              ? 'All invariants hold'
+              : `${result.violations.length} violation${result.violations.length === 1 ? '' : 's'}`}
+          </strong>
+          <p className="small">
+            checked {formatDateTime(result.checkedAt)} — C1 no over-capacity, C2 no double holds,
+            and the other engine invariants.
+          </p>
+          {!result.ok && (
+            <ul className="error-list">
+              {result.violations.map((violation, index) => (
+                <li key={`${violation.code}-${index}`}>
+                  <code>{violation.code}</code> {violation.message}
+                  {violation.sessionId !== undefined && ` (session ${violation.sessionId})`}
+                  {violation.userId !== undefined && ` (user ${violation.userId})`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -492,7 +554,8 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
   const { workshop, sessions } = view;
   const toggle = useCommand(workshop.id, { sessions, onSettled: refetch });
   const cancel = useCommand(workshop.id, { sessions, onSettled: refetch });
-  const [confirm, setConfirm] = useState(false);
+  const confirmBox = useInlineConfirm();
+  const confirm = confirmBox.open;
   if (isCancelledLike(workshop.status)) {
     return (
       <p className="banner banner-info">
@@ -505,7 +568,7 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
     );
   }
   return (
-    <div className="actions">
+    <div className="actions focus-target" ref={confirmBox.fallback} tabIndex={-1}>
       <AsyncButton
         variant="secondary"
         state={commandState(toggle)}
@@ -525,32 +588,34 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
       <CommandFeedback command={toggle} />
       {!confirm ? (
         <AsyncButton
+          ref={confirmBox.triggerRef}
           variant="danger"
           state={commandState(cancel)}
           idle="Cancel workshop"
           pending="Cancelling…"
           done="Cancelled"
           error="Retry"
-          onClick={() => (cancel.canRetry ? void cancel.retry() : setConfirm(true))}
+          onClick={() => (cancel.canRetry ? void cancel.retry() : confirmBox.show())}
           disabled={cancel.busy}
         />
       ) : (
-        <span className="confirm-inline">
-          Cancel the whole workshop and release every seat?{' '}
+        <span className="confirm-inline" {...confirmBox.groupProps}>
+          <span id={confirmBox.questionId}>Cancel the whole workshop and release every seat?</span>{' '}
           <button
             type="button"
             className="btn btn-danger btn-small"
             onClick={() => {
-              setConfirm(false);
+              confirmBox.settle();
               void cancel.run({ type: 'CANCEL_WORKSHOP' });
             }}
           >
             Yes, cancel it
           </button>{' '}
           <button
+            ref={confirmBox.safeRef}
             type="button"
             className="btn btn-secondary btn-small"
-            onClick={() => setConfirm(false)}
+            onClick={confirmBox.dismiss}
           >
             Keep it
           </button>
@@ -561,9 +626,63 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
   );
 }
 
+/** Actions card: workshop commands and export / verify side by side, the verify result below. */
+function ActionsCard({
+  orgId,
+  wsId,
+  view,
+  refetch,
+  publicUrl,
+}: {
+  orgId: string;
+  wsId: string;
+  view: DashboardView;
+  refetch: () => void;
+  publicUrl: string;
+}) {
+  const check = useVerify(orgId, wsId);
+  const groupId = useId();
+  return (
+    <section className="card" aria-labelledby="actions-heading">
+      <header className="card-header">
+        <h2 id="actions-heading">Actions</h2>
+      </header>
+      <div className="action-groups">
+        <div className="action-group" role="group" aria-labelledby={`${groupId}-workshop`}>
+          <p className="action-group-label" id={`${groupId}-workshop`}>
+            Workshop
+          </p>
+          <WorkshopActions view={view} refetch={refetch} />
+        </div>
+        <div className="action-group" role="group" aria-labelledby={`${groupId}-export`}>
+          <p className="action-group-label" id={`${groupId}-export`}>
+            Export &amp; verify
+          </p>
+          <div className="actions">
+            <ExportButton orgId={orgId} wsId={wsId} />
+            <VerifyButton check={check} />
+          </div>
+        </div>
+      </div>
+      {check.result !== undefined && <VerifyResult result={check.result} />}
+      <div className="actions-share">
+        <CopyLink url={publicUrl} label="Share link (public page)" />
+      </div>
+    </section>
+  );
+}
+
 function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
   const query = useDashboard(orgId, wsId);
   const refetch = () => void query.refetch();
+  useDocumentTitle(
+    query.data === undefined ? undefined : `${query.data.workshop.title} · Dashboard`,
+  );
+  // New offered / confirmed rows flash once; rows present on the first load never do.
+  const offeredArrivals = useArrivals(query.data?.offered.map((entry) => String(entry.seq)));
+  const confirmedArrivals = useArrivals(
+    query.data?.confirmed.map((entry) => `${entry.seq}-${entry.sessionId}`),
+  );
   if (query.isPending) {
     return <Loading label="Loading dashboard…" />;
   }
@@ -579,11 +698,17 @@ function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
     view.attendance.map((record) => [record.userId, record.attended]),
   );
   const publicUrl = `${window.location.origin}/workshops/${encodeURIComponent(workshop.id)}`;
+  /** A hold cut short by the session's cut-off: no meter (it would start mostly drained). */
+  const clippedByCutoff = (offer: { sessionId: string; expiresAt: string }) => {
+    const cutoffAt = sessions.find((s) => s.id === offer.sessionId)?.cutoffAt;
+    return cutoffAt !== undefined && Date.parse(cutoffAt) === Date.parse(offer.expiresAt);
+  };
 
   return (
     <div className="stack">
       <header className="page-header">
         <div>
+          <p className="kicker">Dashboard</p>
           <h1>{workshop.title}</h1>
           <p className="muted">
             <StatusBadge status={workshop.status} /> · {workshop.mode} · hold{' '}
@@ -594,67 +719,36 @@ function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
         <div className="actions">
           <Link
             to={`/workshops/${encodeURIComponent(workshop.id)}`}
-            className="btn btn-secondary btn-small"
+            className="btn btn-secondary btn-small link-arrow"
           >
             Public page
+            <Icon name="arrow-right" />
           </Link>
-          <button
-            type="button"
-            className="btn btn-secondary btn-small"
-            onClick={refetch}
-            disabled={query.isFetching}
-          >
-            {query.isFetching ? 'Refreshing…' : 'Refresh'}
-          </button>
+          <RefreshButton onRefresh={() => query.refetch()} />
         </div>
       </header>
       {workshop.description.length > 0 && <p className="description">{workshop.description}</p>}
       <WorkshopDetailsEditor key={workshop.id} orgId={orgId} workshop={workshop} />
 
       <dl className="stats">
-        <div>
-          <dt>Queued</dt>
-          <dd>{counts.queued}</dd>
-        </div>
-        <div>
-          <dt>Offered</dt>
-          <dd>{counts.offered}</dd>
-        </div>
-        <div>
-          <dt>Confirmed</dt>
-          <dd>{counts.confirmed}</dd>
-        </div>
-        <div>
-          <dt>Distinct served</dt>
-          <dd>{view.distinctParticipantsServed}</dd>
-        </div>
-        <div>
-          <dt>Backfills</dt>
-          <dd>
-            {counts.backfillsReallocated}/{counts.backfills}
-          </dd>
-        </div>
-        <div>
-          <dt>Attended</dt>
-          <dd>{counts.attended}</dd>
-        </div>
+        <Stat label="Queued" value={counts.queued} tone="data" />
+        <Stat label="Offered" value={counts.offered} tone="held" active={counts.offered > 0} />
+        <Stat label="Confirmed" value={counts.confirmed} tone="ok" />
+        <Stat label="Distinct served" value={view.distinctParticipantsServed} tone="blue" />
+        <Stat
+          label="Backfills"
+          value={`${counts.backfillsReallocated}/${counts.backfills}`}
+          tone="blue"
+        />
+        <Stat label="Attended" value={counts.attended} tone="ok" />
       </dl>
 
-      <section className="card" aria-labelledby="actions-heading">
-        <header className="card-header">
-          <h2 id="actions-heading">Actions</h2>
-        </header>
-        <WorkshopActions view={view} refetch={refetch} />
-        <div className="actions">
-          <ExportButton orgId={orgId} wsId={wsId} />
-        </div>
-        <VerifyPanel orgId={orgId} wsId={wsId} />
-        <CopyLink url={publicUrl} label="Share link (public page)" />
-      </section>
+      <ActionsCard orgId={orgId} wsId={wsId} view={view} refetch={refetch} publicUrl={publicUrl} />
 
       <section className="card" aria-labelledby="sessions-heading">
         <header className="card-header">
           <h2 id="sessions-heading">Sessions</h2>
+          <SeatLegend />
         </header>
         <div className="table-wrap">
           <table>
@@ -696,87 +790,106 @@ function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
         </div>
       </section>
 
-      <section className="card" aria-labelledby="queue-heading">
-        <header className="card-header">
-          <h2 id="queue-heading">Queue ({view.queue.length})</h2>
-        </header>
-        {view.queue.length === 0 ? (
-          <p className="muted">Nobody is waiting.</p>
-        ) : (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" className="num">
-                    Position
-                  </th>
-                  <th scope="col" className="num">
-                    Seq
-                  </th>
-                  <th scope="col">Participant</th>
-                  <th scope="col">Acceptable (in order)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view.queue.map((entry) => (
-                  <tr key={entry.seq}>
-                    <td className="num">{entry.queuePosition}</td>
-                    <td className="num">{entry.seq}</td>
-                    <td>{participantLabel(entry)}</td>
-                    <td className="small">
-                      {entry.acceptable.map((id) => sessionTitle(sessions, id)).join(' › ')}
-                    </td>
+      <div className="dash-pair">
+        <section className="card" aria-labelledby="queue-heading">
+          <header className="card-header">
+            <h2 id="queue-heading">Queue ({view.queue.length})</h2>
+          </header>
+          {view.queue.length === 0 ? (
+            <EmptyState>Nobody is waiting.</EmptyState>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" className="num">
+                      Position
+                    </th>
+                    <th scope="col" className="num">
+                      Seq
+                    </th>
+                    <th scope="col">Participant</th>
+                    <th scope="col">Acceptable (in order)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {view.queue.map((entry) => (
+                    <tr key={entry.seq}>
+                      <td className="num">{entry.queuePosition}</td>
+                      <td className="num">{entry.seq}</td>
+                      <td>
+                        <Participant {...entry} />
+                      </td>
+                      <td className="small">
+                        {entry.acceptable.map((id) => sessionTitle(sessions, id)).join(' › ')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
-      <section className="card" aria-labelledby="offered-heading">
-        <header className="card-header">
-          <h2 id="offered-heading">Offered ({view.offered.length})</h2>
-        </header>
-        {view.offered.length === 0 ? (
-          <p className="muted">No seat is currently held.</p>
-        ) : (
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col" className="num">
-                    Seq
-                  </th>
-                  <th scope="col">Participant</th>
-                  <th scope="col">Session</th>
-                  <th scope="col">Expires</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view.offered.map((entry) => (
-                  <tr key={entry.seq}>
-                    <td className="num">{entry.seq}</td>
-                    <td>{participantLabel(entry)}</td>
-                    <td>{sessionTitle(sessions, entry.offer.sessionId)}</td>
-                    <td>
-                      <Countdown expiresAt={entry.offer.expiresAt} onExpire={refetch} />{' '}
-                      <span className="muted small">({formatTime(entry.offer.expiresAt)})</span>
-                    </td>
+        <section className="card" aria-labelledby="offered-heading">
+          <header className="card-header">
+            <h2 id="offered-heading">Offered ({view.offered.length})</h2>
+          </header>
+          {view.offered.length === 0 ? (
+            <EmptyState>No seat is currently held.</EmptyState>
+          ) : (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" className="num">
+                      Seq
+                    </th>
+                    <th scope="col">Participant</th>
+                    <th scope="col">Session</th>
+                    <th scope="col">Expires</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                </thead>
+                <tbody>
+                  {view.offered.map((entry) => (
+                    <tr
+                      key={entry.seq}
+                      className={`row-held${offeredArrivals.has(String(entry.seq)) ? ' row-new' : ''}`}
+                    >
+                      <td className="num">{entry.seq}</td>
+                      <td>
+                        <Participant {...entry} />
+                      </td>
+                      <td className="nowrap">{sessionTitle(sessions, entry.offer.sessionId)}</td>
+                      <td>
+                        <div className="countdown-line">
+                          <Countdown
+                            expiresAt={entry.offer.expiresAt}
+                            onExpire={refetch}
+                            {...(clippedByCutoff(entry.offer)
+                              ? {}
+                              : { holdSeconds: workshop.holdSeconds })}
+                          />{' '}
+                          <span className="muted small nowrap">
+                            ({formatTime(entry.offer.expiresAt)})
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
 
       <section className="card" aria-labelledby="confirmed-heading">
         <header className="card-header">
           <h2 id="confirmed-heading">Confirmed ({view.confirmed.length})</h2>
         </header>
         {view.confirmed.length === 0 ? (
-          <p className="muted">No confirmed seat yet.</p>
+          <EmptyState>No confirmed seat yet.</EmptyState>
         ) : (
           <div className="table-wrap">
             <table>
@@ -793,11 +906,20 @@ function Dashboard({ orgId, wsId }: { orgId: string; wsId: string }) {
               </thead>
               <tbody>
                 {view.confirmed.map((entry) => (
-                  <tr key={`${entry.seq}-${entry.sessionId}`}>
+                  <tr
+                    key={`${entry.seq}-${entry.sessionId}`}
+                    className={
+                      confirmedArrivals.has(`${entry.seq}-${entry.sessionId}`)
+                        ? 'row-new row-new-ok'
+                        : undefined
+                    }
+                  >
                     <td className="num">{entry.seq}</td>
-                    <td>{participantLabel(entry)}</td>
-                    <td>{sessionTitle(sessions, entry.sessionId)}</td>
-                    <td>{formatDateTime(entry.confirmedAt)}</td>
+                    <td>
+                      <Participant {...entry} />
+                    </td>
+                    <td className="nowrap">{sessionTitle(sessions, entry.sessionId)}</td>
+                    <td className="nowrap">{formatDateTime(entry.confirmedAt)}</td>
                     <td>
                       <AttendanceCell
                         orgId={orgId}
@@ -828,7 +950,7 @@ export function DashboardPage() {
   }
   return (
     <div className="stack">
-      <p className="muted small">
+      <p className="muted small back-link">
         <Link to={`/org/${encodeURIComponent(orgId)}/workshops`}>← Workshops</Link>
       </p>
       <RequireAuth purpose="Sign in as an organiser to open the dashboard.">

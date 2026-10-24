@@ -50,4 +50,46 @@ describe('styles.css layout rules', () => {
     expect(sheet.get('.field-row')?.get('align-items')).toBe('flex-end');
     expect(sheet.get('.field-row.field-row-top')?.get('align-items')).toBe('flex-start');
   });
+
+  it('honours reduced motion: every animation is cut short, the infinite ones stop', () => {
+    const start = css.indexOf('@media (prefers-reduced-motion: reduce)');
+    expect(start).toBeGreaterThan(-1);
+    const block = rules(css.slice(start + '@media (prefers-reduced-motion: reduce) {'.length));
+    expect(block.get('*')?.get('animation-duration')).toBe('0.01ms !important');
+    expect(block.get('*')?.get('animation-iteration-count')).toBe('1 !important');
+    expect(block.get('*')?.get('transition-duration')).toBe('0.01ms !important');
+    // Each rule that loops forever is switched off outright in the reduced-motion block.
+    for (const [selector, declarations] of sheet) {
+      if (/\binfinite\b/.test(declarations.get('animation') ?? '')) {
+        expect(block.get(selector)?.get('animation'), selector).toBe('none !important');
+      }
+    }
+    for (const selector of [
+      '.badge-cancelling',
+      '.badge-offered::before',
+      '.spinner',
+      '.icon.spin',
+    ]) {
+      expect(block.get(selector)?.get('animation'), selector).toBe('none !important');
+    }
+  });
+
+  it('table cells do not use tabular figures (tabular hyphens pad "cut-off" and e-mails)', () => {
+    expect(sheet.get('table')?.get('font-variant-numeric')).toBeUndefined();
+    expect(sheet.get('.num')?.get('font-variant-numeric')).toBe('tabular-nums');
+  });
+
+  it('the small capacity input in a copy row keeps its own width', () => {
+    expect(sheet.get('.copy-row .input-small')?.get('flex')).toBe('0 0 5.5rem');
+  });
+
+  it('the preference checkbox stays a visible native control', () => {
+    for (const [selector, declarations] of sheet) {
+      if (!selector.includes('.pref-row') || !selector.includes('input')) {
+        continue;
+      }
+      expect(declarations.get('opacity'), selector).not.toBe('0');
+      expect(declarations.get('display'), selector).not.toBe('none');
+    }
+  });
 });

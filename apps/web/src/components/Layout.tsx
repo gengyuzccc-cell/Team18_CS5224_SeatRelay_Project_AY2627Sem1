@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useNotifications } from '../api/queries';
 import { useSession } from '../auth/useSession';
 import { useEnv } from '../env-context';
+import { BrandMark } from './Icon';
 
 function UnreadCount() {
   const notifications = useNotifications();
@@ -11,10 +12,14 @@ function UnreadCount() {
   if (unread === 0) {
     return null;
   }
+  // The visible count is decorative; the link name reads "Notifications 3 unread".
   return (
-    <span className="pill" aria-label={`${unread} unread`}>
-      {unread}
-    </span>
+    <>
+      <span key={unread} className="pill" aria-hidden="true">
+        {unread}
+      </span>
+      <span className="sr-only"> {unread} unread</span>
+    </>
   );
 }
 
@@ -29,6 +34,7 @@ export function Layout() {
       <header className="topbar">
         <div className="topbar-inner">
           <NavLink to="/" className="brand">
+            <BrandMark />
             SeatRelay{' '}
             <span className="badge badge-stage" title={`Deployment stage: ${env.stage}`}>
               {env.stage}

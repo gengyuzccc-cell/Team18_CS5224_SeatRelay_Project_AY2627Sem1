@@ -4,10 +4,13 @@ import { Link } from 'react-router-dom';
 import { useAddMember, useCreateOrg, useMe } from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
 import { describeError } from '../util/errors';
 import { formatDateTime } from '../util/time';
+import { useDocumentTitle } from '../util/useDocumentTitle';
 
 function CreateOrgForm() {
   const create = useCreateOrg();
@@ -23,7 +26,7 @@ function CreateOrgForm() {
       await create.mutateAsync(name.trim());
       setName('');
       setState('done');
-      setTimeout(() => setState('idle'), 2000);
+      setTimeout(() => setState('idle'), 3000);
     } catch {
       setState('error');
     }
@@ -91,7 +94,7 @@ function AddMemberForm({ orgId }: { orgId: string }) {
     }
   };
   return (
-    <form className="inline-form" onSubmit={(event) => void submit(event)}>
+    <form className="inline-form add-member" onSubmit={(event) => void submit(event)}>
       <label className="field-label" htmlFor={`member-${orgId}`}>
         Add organiser (email or user id)
       </label>
@@ -129,12 +132,13 @@ function OrgRow({ org }: { org: Organization }) {
         <h3>{org.name}</h3>
         <Link
           to={`/org/${encodeURIComponent(org.id)}/workshops`}
-          className="btn btn-primary btn-small"
+          className="btn btn-primary btn-small link-arrow"
         >
           Workshops
+          <Icon name="arrow-right" />
         </Link>
       </header>
-      <p className="muted small">
+      <p className="muted small org-meta">
         {org.members.length} organiser{org.members.length === 1 ? '' : 's'} · created{' '}
         {formatDateTime(org.createdAt)} · id <code>{org.id}</code>
       </p>
@@ -162,7 +166,7 @@ function OrgList() {
     <section className="stack" aria-labelledby="orgs-heading">
       <h2 id="orgs-heading">My organisations</h2>
       {orgs.length === 0 ? (
-        <p className="muted">You are not an organiser yet. Create an organisation below.</p>
+        <EmptyState>You are not an organiser yet. Create an organisation below.</EmptyState>
       ) : (
         <ul className="stack list-plain">
           {orgs.map((org) => (
@@ -175,6 +179,7 @@ function OrgList() {
 }
 
 export function OrgsPage() {
+  useDocumentTitle('Organiser area');
   return (
     <div className="stack">
       <h1>Organiser area</h1>

@@ -19,53 +19,92 @@ import { AsyncButton, type AsyncState } from '../components/AsyncButton';
 import { CopyLink } from '../components/CopyLink';
 import { EndedStatusCard } from '../components/EndedStatusCard';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
+import { RefreshButton } from '../components/RefreshButton';
+import { SeatLegend } from '../components/SeatLegend';
 import { isCancelledLike, StatusBadge } from '../components/StatusBadge';
 import { StatusCard } from '../components/StatusCard';
-import { preferenceRank, preferenceReducer } from '../preferences/reducer';
+import {
+  describePreferenceChange,
+  preferenceRank,
+  preferenceReducer,
+  type PreferenceAction,
+} from '../preferences/reducer';
 import { describeError, isNotFound } from '../util/errors';
+import { seatBarStyle } from '../util/seatBar';
 import { serverNow } from '../util/serverClock';
 import { formatDateTime, formatSeconds } from '../util/time';
+import { useDocumentTitle } from '../util/useDocumentTitle';
 
 function SessionsTable({ sessions }: { sessions: readonly SessionView[] }) {
   return (
-    <div className="table-wrap">
-      <table>
-        <caption className="sr-only">Sessions, capacity and queue</caption>
-        <thead>
-          <tr>
-            <th scope="col">Session</th>
-            <th scope="col">Starts</th>
-            <th scope="col">Status</th>
-            <th scope="col" className="num">
-              Capacity
-            </th>
-            <th scope="col" className="num">
-              Free
-            </th>
-            <th scope="col" className="num">
-              Waiting
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sessions.map((session) => (
-            <tr key={session.id}>
-              <th scope="row">{session.title}</th>
-              <td>
-                {formatDateTime(session.startsAt)}
-                <div className="muted small">cut-off {formatDateTime(session.cutoffAt)}</div>
-              </td>
-              <td>
-                <StatusBadge status={session.status} />
-              </td>
-              <td className="num">{session.capacity}</td>
-              <td className="num">{isCancelledLike(session.status) ? '—' : session.free}</td>
-              <td className="num">{session.queueLength}</td>
+    <div className="sheet">
+      <div className="table-wrap">
+        <table>
+          <caption className="sr-only">Sessions, capacity and queue</caption>
+          <thead>
+            <tr>
+              <th scope="col">Session</th>
+              <th scope="col">Starts</th>
+              <th scope="col" className="hide-sm">
+                Status
+              </th>
+              <th scope="col" className="num hide-sm">
+                Capacity
+              </th>
+              <th scope="col" className="num hide-sm">
+                Free
+              </th>
+              <th scope="col" className="num hide-sm">
+                Waiting
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sessions.map((session) => {
+              const cancelled = isCancelledLike(session.status);
+              return (
+                <tr key={session.id}>
+                  <th scope="row">
+                    {session.title}
+                    {/* Phone layout only (the four columns it summarises are hidden there). */}
+                    <span className="small session-compact">
+                      <StatusBadge status={session.status} />
+                      {cancelled
+                        ? ` ${session.queueLength} waiting`
+                        : ` ${session.free} free of ${session.capacity} · ${session.queueLength} waiting`}
+                      {!cancelled && (
+                        <span
+                          className="seat-bar-inline"
+                          style={seatBarStyle(session)}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </span>
+                  </th>
+                  <td>
+                    {formatDateTime(session.startsAt)}
+                    <div className="muted small">cut-off {formatDateTime(session.cutoffAt)}</div>
+                  </td>
+                  <td className="hide-sm">
+                    <StatusBadge status={session.status} />
+                  </td>
+                  <td
+                    className={`num hide-sm${cancelled ? '' : ' seat-bar'}`}
+                    style={cancelled ? undefined : seatBarStyle(session)}
+                  >
+                    {session.capacity}
+                  </td>
+                  <td className="num hide-sm">{cancelled ? '—' : session.free}</td>
+                  <td className="num hide-sm">{session.queueLength}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <SeatLegend />
     </div>
   );
 }
@@ -121,6 +160,54 @@ function RegistrationForm({
     }
   }, [autoFocus]);
   const [selected, dispatch] = useReducer(preferenceReducer, []);
+  // Which row the last ▲/▼ moved (restarts its settle animation on every press), where focus
+  // goes back after the move, and what a screen reader hears.
+  // `moved` is cleared when the settle animation ends, so a row React re-inserts later does not
+  // replay it; the press counter lives in a ref to survive that reset.
+  const [moved, setMoved] = useState<{ id: string; dir: 'up' | 'down'; n: number }>();
+  const moveCount = useRef(0);
+  const pendingFocus = useRef<
+    { kind: 'move'; id: string; dir: 'up' | 'down' } | { kind: 'toggle'; id: string }
+  >();
+  const listRef = useRef<HTMLOListElement>(null);
+  const [announce, setAnnounce] = useState('');
+  const titleOf = (id: string) => sessions.find((s) => s.id === id)?.title ?? 'Session';
+  /** A choice made by the participant (not a prune): apply it and describe the new order. */
+  const choose = (action: PreferenceAction) => {
+    dispatch(action);
+    setAnnounce(describePreferenceChange(action, preferenceReducer(selected, action), titleOf));
+  };
+  const move = (id: string, dir: 'up' | 'down') => {
+    pendingFocus.current = { kind: 'move', id, dir };
+    choose(dir === 'up' ? { type: 'moveUp', id } : { type: 'moveDown', id });
+    moveCount.current += 1;
+    setMoved({ id, dir, n: moveCount.current });
+  };
+  const order = selected.join();
+  useEffect(() => {
+    const target = pendingFocus.current;
+    if (target === undefined) {
+      return;
+    }
+    pendingFocus.current = undefined;
+    if (target.kind === 'toggle') {
+      // Ticking or unticking re-sorts the list; moving the focused row blurs its checkbox.
+      document.getElementById(`pref-${target.id}`)?.focus();
+      return;
+    }
+    const buttons = Array.from(
+      listRef.current?.querySelectorAll<HTMLButtonElement>('button[data-move]') ?? [],
+    );
+    const same = buttons.find((b) => b.dataset.move === `${target.id}:${target.dir}`);
+    const opposite = buttons.find(
+      (b) => b.dataset.move === `${target.id}:${target.dir === 'up' ? 'down' : 'up'}`,
+    );
+    if (same !== undefined && !same.disabled) {
+      same.focus();
+    } else if (opposite !== undefined && !opposite.disabled) {
+      opposite.focus();
+    }
+  }, [order]);
   const command = useCommand(workshop.id, { sessions, onSettled: onChanged });
   const [validation, setValidation] = useState<string | undefined>(undefined);
 
@@ -157,7 +244,7 @@ function RegistrationForm({
   return (
     <form ref={formRef} className="card" onSubmit={submit} aria-labelledby="register-heading">
       <header className="card-header">
-        <h3 id="register-heading">Register</h3>
+        <h2 id="register-heading">Register</h2>
       </header>
       <p className="muted">
         {perSession
@@ -171,7 +258,7 @@ function RegistrationForm({
       ) : (
         <fieldset className="fieldset" disabled={locked}>
           <legend>{perSession ? 'Session' : 'Acceptable sessions, in preference order'}</legend>
-          <ol className="pref-list">
+          <ol className="pref-list" ref={listRef}>
             {(perSession
               ? joinable
               : [...joinable].sort((a, b) => {
@@ -184,19 +271,34 @@ function RegistrationForm({
               const checked = rank !== undefined;
               const inputId = `pref-${session.id}`;
               return (
-                <li key={session.id} className={`pref-row${checked ? ' pref-selected' : ''}`}>
+                <li
+                  key={session.id}
+                  className={`pref-row${checked ? ' pref-selected' : ''}`}
+                  data-moved={
+                    moved?.id === session.id ? (moved.n % 2 === 1 ? 'a' : 'b') : undefined
+                  }
+                  data-dir={moved?.id === session.id ? moved.dir : undefined}
+                  onAnimationEnd={(event) => {
+                    if (event.target === event.currentTarget && moved?.id === session.id) {
+                      setMoved(undefined);
+                    }
+                  }}
+                >
                   <input
                     id={inputId}
                     type={perSession ? 'radio' : 'checkbox'}
                     name="acceptable"
                     checked={checked}
-                    onChange={() =>
-                      dispatch(
+                    onChange={() => {
+                      if (!perSession) {
+                        pendingFocus.current = { kind: 'toggle', id: session.id };
+                      }
+                      choose(
                         perSession
                           ? { type: 'selectOnly', id: session.id }
                           : { type: 'toggle', id: session.id },
-                      )
-                    }
+                      );
+                    }}
                   />
                   <label htmlFor={inputId}>
                     {checked && !perSession && (
@@ -217,18 +319,20 @@ function RegistrationForm({
                         className="btn btn-icon"
                         aria-label={`Move ${session.title} up`}
                         disabled={rank === 1}
-                        onClick={() => dispatch({ type: 'moveUp', id: session.id })}
+                        data-move={`${session.id}:up`}
+                        onClick={() => move(session.id, 'up')}
                       >
-                        ▲
+                        <Icon name="tri-up" />
                       </button>
                       <button
                         type="button"
                         className="btn btn-icon"
                         aria-label={`Move ${session.title} down`}
                         disabled={rank === selected.length}
-                        onClick={() => dispatch({ type: 'moveDown', id: session.id })}
+                        data-move={`${session.id}:down`}
+                        onClick={() => move(session.id, 'down')}
                       >
-                        ▼
+                        <Icon name="tri-down" />
                       </button>
                     </span>
                   )}
@@ -238,6 +342,9 @@ function RegistrationForm({
           </ol>
         </fieldset>
       )}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announce}
+      </p>
       {validation !== undefined && (
         <p className="error-text" role="alert">
           {validation}
@@ -287,7 +394,8 @@ function RegistrationForm({
           </span>
         )}
       </div>
-      <p className="muted small">
+      <p className="muted small hold-note">
+        <Icon name="clock" />
         Offers are held for {formatSeconds(workshop.holdSeconds)} (shorter near a session's cut-off,
         30 min before start).
       </p>
@@ -303,6 +411,7 @@ export function WorkshopPage() {
   const registrations = useMyRegistrations({ poll: false });
   const [registerAgainFor, setRegisterAgainFor] = useState<string | undefined>(undefined);
   const refetch = () => void query.refetch();
+  useDocumentTitle(query.data?.workshop.title);
 
   const loaded = query.data;
   const me = loaded?.me;
@@ -426,6 +535,7 @@ export function WorkshopPage() {
     <div className="stack">
       <header className="page-header">
         <div>
+          <p className="kicker">Workshop</p>
           <h1>{workshop.title}</h1>
           <p className="muted">
             <StatusBadge status={workshop.status} /> ·{' '}
@@ -433,14 +543,7 @@ export function WorkshopPage() {
             {formatSeconds(workshop.holdSeconds)} · {view.queueLength} waiting in total
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary btn-small"
-          onClick={refetch}
-          disabled={query.isFetching}
-        >
-          {query.isFetching ? 'Refreshing…' : 'Refresh'}
-        </button>
+        <RefreshButton onRefresh={() => query.refetch()} />
       </header>
       {workshop.description.length > 0 && <p className="description">{workshop.description}</p>}
 
@@ -450,7 +553,8 @@ export function WorkshopPage() {
         <Loading label="Checking your session…" />
       ) : !session.isAuthenticated ? (
         <section className="card panel-center">
-          <h3>Want a seat?</h3>
+          <Icon name="seat" className="panel-icon" />
+          <h2>Want a seat?</h2>
           <p className="muted">Sign in to register; you will come straight back to this page.</p>
           <button
             type="button"

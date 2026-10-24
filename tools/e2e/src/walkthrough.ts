@@ -373,6 +373,10 @@ async function click(target: Locator, hold = 350): Promise<void> {
 async function shot(key: ActorKey, name: string, caption: string, fullPage = false): Promise<void> {
   shotCounter += 1;
   const file = `${String(shotCounter).padStart(2, '0')}-${name}.png`;
+  // First-load shots never capture the fallback fonts (the SPA ships its own web fonts).
+  await actor(key)
+    .page.evaluate(() => document.fonts.ready.then(() => undefined))
+    .catch(() => undefined);
   await actor(key).page.screenshot({ path: join(opts.outDir, 'screenshots', file), fullPage });
   shots.push({ file, actor: key, caption });
   log(`shot ${file} (${key})`);
@@ -635,8 +639,10 @@ async function organiserSetsUp(browser: Browser): Promise<void> {
       .locator('li.card')
       .filter({ has: page.getByRole('heading', { name: ctx.orgName, exact: true }) });
     await expect(row).toBeVisible({ timeout: 15_000 });
+    // Shot right away (no beat) and with the pointer off the button, so it still shows the
+    // green "Created" confirmation rather than the hover colour.
+    await page.mouse.move(0, 0);
     await scrollToTop(page, row);
-    await beat();
     await shot('organiser', 'organisation-created', 'Organiser area: the new organisation');
     await click(row.getByRole('link', { name: 'Workshops' }));
     await expect(page.getByRole('heading', { name: 'Organisation workshops' })).toBeVisible();

@@ -17,12 +17,15 @@ import { useApi } from '../api/ApiProvider';
 import { queryKeys, useOrgWorkshops } from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
 import { AsyncButton, type AsyncState } from '../components/AsyncButton';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
 import { StatusBadge } from '../components/StatusBadge';
 import { describeError } from '../util/errors';
 import { serverNow } from '../util/serverClock';
 import { defaultLocalInput, formatDateTime, formatSeconds, localInputToIso } from '../util/time';
+import { useDocumentTitle } from '../util/useDocumentTitle';
 
 interface SessionDraft {
   key: number;
@@ -158,13 +161,14 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
               aria-current={step === n ? 'step' : undefined}
             >
               {n === 1 ? 'Basics' : n === 2 ? 'Sessions' : 'Review'}
+              {step > n && <span className="sr-only"> (done)</span>}
             </li>
           ))}
         </ol>
       </header>
 
       {step === 1 && (
-        <div className="stack-tight">
+        <div className="stack-tight wizard-step">
           <div className="field">
             <label className="field-label" htmlFor="ws-title">
               Title
@@ -234,7 +238,7 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
       )}
 
       {step === 2 && (
-        <div className="stack-tight">
+        <div className="stack-tight wizard-step">
           <p className="muted small">
             {MIN_SESSIONS_PER_WORKSHOP}–{MAX_SESSIONS_PER_WORKSHOP} sessions. Registration for a
             session closes 30 minutes before it starts.
@@ -309,7 +313,7 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
       )}
 
       {step === 3 && (
-        <div className="stack-tight">
+        <div className="stack-tight wizard-step">
           <dl className="review">
             <dt>Title</dt>
             <dd>{basics.title}</dd>
@@ -340,7 +344,7 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
         </ul>
       )}
       {issues.length === 0 && warnings.length > 0 && (
-        <ul className="error-list" role="status">
+        <ul className="error-list warning-list" role="status">
           {warnings.map((warning) => (
             <li key={warning}>{warning}</li>
           ))}
@@ -383,10 +387,11 @@ function CreateWorkshopWizard({ orgId }: { orgId: string }) {
 }
 
 function WorkshopRow({ orgId, workshop }: { orgId: string; workshop: Workshop }) {
+  const dashboard = `/org/${encodeURIComponent(orgId)}/workshops/${encodeURIComponent(workshop.id)}`;
   return (
     <li className="list-row">
       <div>
-        <Link to={`/org/${encodeURIComponent(orgId)}/workshops/${encodeURIComponent(workshop.id)}`}>
+        <Link className="workshop-link" to={dashboard}>
           <strong>{workshop.title}</strong>
         </Link>
         <div className="muted small">
@@ -395,12 +400,19 @@ function WorkshopRow({ orgId, workshop }: { orgId: string; workshop: Workshop })
         </div>
       </div>
       <StatusBadge status={workshop.status} />
-      <Link
-        to={`/workshops/${encodeURIComponent(workshop.id)}`}
-        className="btn btn-secondary btn-small"
-      >
-        Public page
-      </Link>
+      <span className="actions">
+        <Link to={dashboard} className="btn btn-primary btn-small link-arrow">
+          Dashboard
+          <Icon name="arrow-right" />
+        </Link>
+        <Link
+          to={`/workshops/${encodeURIComponent(workshop.id)}`}
+          className="btn btn-secondary btn-small link-arrow"
+        >
+          Public page
+          <Icon name="arrow-right" />
+        </Link>
+      </span>
     </li>
   );
 }
@@ -424,9 +436,9 @@ function WorkshopList({ orgId }: { orgId: string }) {
     <section className="stack" aria-labelledby="ws-list-heading">
       <h2 id="ws-list-heading">Workshops</h2>
       {workshops.length === 0 ? (
-        <p className="muted">No workshop yet.</p>
+        <EmptyState>No workshop yet.</EmptyState>
       ) : (
-        <ul className="list">
+        <ul className="list sheet-list workshop-list">
           {workshops.map((workshop) => (
             <WorkshopRow key={workshop.id} orgId={orgId} workshop={workshop} />
           ))}
@@ -438,12 +450,13 @@ function WorkshopList({ orgId }: { orgId: string }) {
 
 export function OrgWorkshopsPage() {
   const { orgId } = useParams<{ orgId: string }>();
+  useDocumentTitle('Organisation workshops');
   if (orgId === undefined) {
     return <ErrorBanner error={new Error('Missing organisation id')} />;
   }
   return (
     <div className="stack">
-      <p className="muted small">
+      <p className="muted small back-link">
         <Link to="/org">← Organisations</Link>
       </p>
       <h1>Organisation workshops</h1>

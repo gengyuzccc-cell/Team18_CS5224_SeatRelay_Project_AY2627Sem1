@@ -1,6 +1,9 @@
 import type { DashboardBackfillEntry, SessionView } from '@seatrelay/contracts';
 import { BACKFILL_CAUSE_TEXT, sessionTitle } from '../commands/copy';
 import { participantLabel } from '../util/people';
+import { useArrivals } from '../util/useArrivals';
+import { EmptyState } from './EmptyState';
+import { Participant } from './Participant';
 import { formatLatency, formatTime, percentile } from '../util/time';
 
 /**
@@ -31,21 +34,22 @@ export function BackfillLog({
     record.latencyMs === undefined ? [] : [record.latencyMs],
   );
   const rows = [...backfills].reverse();
+  const arrivals = useArrivals(backfills.map((record) => record.id));
   return (
     <section className="card" aria-labelledby="backfill-heading">
       <header className="card-header">
         <h2 id="backfill-heading">Backfill log</h2>
-        <span className="muted small">
+        <span className="muted small backfill-summary">
           {latencies.length}/{backfills.length} reallocated
           {latencies.length > 0 &&
             ` · p50 ${formatLatency(percentile(latencies, 50))} · p95 ${formatLatency(percentile(latencies, 95))} · max ${formatLatency(Math.max(...latencies))}`}
         </span>
       </header>
       {rows.length === 0 ? (
-        <p className="muted">No seat has been released yet.</p>
+        <EmptyState>No seat has been released yet.</EmptyState>
       ) : (
         <div className="table-wrap">
-          <table>
+          <table className="backfill-table">
             <thead>
               <tr>
                 <th scope="col">Released</th>
@@ -62,11 +66,15 @@ export function BackfillLog({
               {rows.map((record) => {
                 const holder = newHolderLabel(record);
                 return (
-                  <tr key={record.id}>
-                    <td>{formatTime(record.releasedAt)}</td>
-                    <td>{sessionTitle(sessions, record.sessionId)}</td>
-                    <td>{BACKFILL_CAUSE_TEXT[record.cause]}</td>
-                    <td>
+                  <tr key={record.id} className={arrivals.has(record.id) ? 'row-new' : undefined}>
+                    <td className="nowrap">{formatTime(record.releasedAt)}</td>
+                    <td className="nowrap">{sessionTitle(sessions, record.sessionId)}</td>
+                    <td className="cause-cell">{BACKFILL_CAUSE_TEXT[record.cause]}</td>
+                    <td
+                      className={
+                        record.reallocatedAt === undefined ? undefined : 'nowrap is-reallocated'
+                      }
+                    >
                       {record.reallocatedAt === undefined ? (
                         <span className="muted">waiting for a taker</span>
                       ) : (
@@ -74,7 +82,18 @@ export function BackfillLog({
                       )}
                     </td>
                     <td className="num">{formatLatency(record.latencyMs)}</td>
-                    <td title={record.newUserId}>{holder ?? '—'}</td>
+                    <td title={record.newUserId}>
+                      {record.newHolderEmail !== undefined ? (
+                        <Participant
+                          email={record.newHolderEmail}
+                          {...(record.newHolderDisplayName !== undefined
+                            ? { displayName: record.newHolderDisplayName }
+                            : {})}
+                        />
+                      ) : (
+                        (holder ?? '—')
+                      )}
+                    </td>
                   </tr>
                 );
               })}

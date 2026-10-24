@@ -2,10 +2,13 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { isLiveStatus, useMyRegistrations } from '../api/queries';
 import { useSession } from '../auth/useSession';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
 import { StatusBadge } from '../components/StatusBadge';
 import { sessionTitle } from '../commands/copy';
+import { useDocumentTitle } from '../util/useDocumentTitle';
 
 function GoToWorkshop() {
   const navigate = useNavigate();
@@ -20,7 +23,7 @@ function GoToWorkshop() {
     }
   };
   return (
-    <form className="inline-form" onSubmit={submit}>
+    <form className="inline-form card open-workshop" onSubmit={submit}>
       <label className="field-label" htmlFor="ws-id">
         Open a workshop by link or id
       </label>
@@ -67,7 +70,7 @@ function MySummary() {
         </Link>
       </header>
       {live.length === 0 ? (
-        <p className="muted">No active registration. Open a workshop link to join a queue.</p>
+        <EmptyState>No active registration. Open a workshop link to join a queue.</EmptyState>
       ) : (
         <ul className="list">
           {live.slice(0, 5).map((entry) => (
@@ -94,57 +97,92 @@ function MySummary() {
 
 export function HomePage() {
   const session = useSession();
+  useDocumentTitle();
   return (
     <div className="stack">
       <section className="hero">
-        <h1>One queue, many sessions, no double holds.</h1>
-        <p className="lead">
-          SeatRelay lets you register once for a multi-session workshop, rank the sessions you can
-          attend, and get a seat offered the moment one frees up — held for you for a short, fair
-          window.
-        </p>
-        {session.isLoading ? (
-          <Loading label="Checking your session…" />
-        ) : session.isAuthenticated ? (
-          <p className="muted">
-            Signed in as <strong>{session.profile?.email}</strong>.
+        <div className="hero-copy">
+          <p className="kicker">Multi-session workshop waitlist</p>
+          <h1>
+            One queue, many sessions, <span className="accent">no double holds.</span>
+          </h1>
+          <p className="lead">
+            SeatRelay lets you register once for a multi-session workshop, rank the sessions you can
+            attend, and get a seat offered the moment one frees up — held for you for a short, fair
+            window.
           </p>
-        ) : (
-          <div className="actions">
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => void session.signIn('/')}
-            >
-              Sign in
-            </button>
-            <span className="muted">
-              Sign in with your account to register, or open a workshop link to look first.
+          {session.isLoading ? (
+            <Loading label="Checking your session…" />
+          ) : session.isAuthenticated ? (
+            <p className="muted">
+              Signed in as <strong>{session.profile?.email}</strong>.
+            </p>
+          ) : (
+            <div className="actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => void session.signIn('/')}
+              >
+                Sign in
+              </button>
+              <span className="muted">
+                Sign in with your account to register, or open a workshop link to look first.
+              </span>
+            </div>
+          )}
+          {session.error !== undefined && (
+            <ErrorBanner error={session.error} title="Sign-in problem" />
+          )}
+        </div>
+        <ol className="hero-steps" aria-label="How it works">
+          <li>
+            <span className="hero-step-n" aria-hidden="true">
+              1
             </span>
-          </div>
-        )}
-        {session.error !== undefined && (
-          <ErrorBanner error={session.error} title="Sign-in problem" />
-        )}
+            <span>
+              <strong>Rank</strong> the sessions you can attend
+            </span>
+          </li>
+          <li>
+            <span className="hero-step-n" aria-hidden="true">
+              2
+            </span>
+            <span>
+              <strong>Wait</strong> in one queue for all of them
+            </span>
+          </li>
+          <li className="hero-step-held">
+            <span className="hero-step-n" aria-hidden="true">
+              <Icon name="clock" />
+            </span>
+            <span>
+              <strong>Accept</strong> the seat held for you before its timer ends
+            </span>
+          </li>
+        </ol>
       </section>
 
       <GoToWorkshop />
 
-      {session.isAuthenticated && <MySummary />}
+      <div className="home-grid">
+        {session.isAuthenticated && <MySummary />}
 
-      <section className="card" aria-labelledby="org-heading">
-        <header className="card-header">
-          <h2 id="org-heading">Organisers</h2>
-        </header>
-        <p className="muted">
-          Create an organisation, publish a workshop with 2–5 sessions, watch the queue, offers and
-          backfills on the dashboard, change capacity, cancel sessions, mark attendance and export
-          CSV.
-        </p>
-        <Link to="/org" className="btn btn-secondary">
-          Go to the organiser area
-        </Link>
-      </section>
+        <section className="card" aria-labelledby="org-heading">
+          <header className="card-header">
+            <h2 id="org-heading">Organisers</h2>
+          </header>
+          <p className="muted">
+            Create an organisation, publish a workshop with 2–5 sessions, watch the queue, offers
+            and backfills on the dashboard, change capacity, cancel sessions, mark attendance and
+            export CSV.
+          </p>
+          <Link to="/org" className="btn btn-secondary link-arrow">
+            Go to the organiser area
+            <Icon name="arrow-right" />
+          </Link>
+        </section>
+      </div>
     </div>
   );
 }

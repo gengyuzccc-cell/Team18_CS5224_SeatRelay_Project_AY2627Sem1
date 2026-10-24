@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from './Icon';
 
 /** Share link with a copy-to-clipboard button (falls back to a selectable input). */
 export function CopyLink({ url, label = 'Share link' }: { url: string; label?: string }) {
@@ -21,11 +22,18 @@ export function CopyLink({ url, label = 'Share link' }: { url: string; label?: s
         <input
           id={`copy-${label}`}
           type="text"
+          className="mono-url"
           readOnly
           value={url}
           onFocus={(event) => event.currentTarget.select()}
         />
-        <button type="button" className="btn btn-secondary" onClick={() => void copy()}>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          data-state={copied === 'copied' ? 'done' : copied === 'failed' ? 'error' : undefined}
+          onClick={() => void copy()}
+        >
+          <Icon name={copied === 'copied' ? 'check' : 'copy'} />
           {copied === 'copied' ? 'Copied' : copied === 'failed' ? 'Select & copy' : 'Copy'}
         </button>
       </div>

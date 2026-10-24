@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 
 export type AsyncState = 'idle' | 'pending' | 'done' | 'error';
 
@@ -12,21 +12,25 @@ interface Props extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'
 }
 
 /** Button with three-state copy (idle / pending / done + error) and `aria-busy`. */
-export function AsyncButton({
-  state,
-  idle,
-  pending = 'Working…',
-  done = 'Done',
-  error = 'Retry',
-  variant = 'primary',
-  className = '',
-  disabled,
-  ...rest
-}: Props) {
+export const AsyncButton = forwardRef<HTMLButtonElement, Props>(function AsyncButton(
+  {
+    state,
+    idle,
+    pending = 'Working…',
+    done = 'Done',
+    error = 'Retry',
+    variant = 'primary',
+    className = '',
+    disabled,
+    ...rest
+  },
+  ref,
+) {
   const label =
     state === 'pending' ? pending : state === 'done' ? done : state === 'error' ? error : idle;
   return (
     <button
+      ref={ref}
       type="button"
       className={`btn btn-${variant} ${className}`.trim()}
       aria-busy={state === 'pending'}
@@ -37,4 +41,4 @@ export function AsyncButton({
       {state === 'pending' && <span className="spinner" aria-hidden="true" />} {label}
     </button>
   );
-}
+});

@@ -7,11 +7,13 @@ import {
   useMyRegistrations,
 } from '../api/queries';
 import { RequireAuth } from '../auth/RequireAuth';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorBanner } from '../components/ErrorBanner';
 import { Loading } from '../components/Loading';
 import { StatusCard } from '../components/StatusCard';
 import { pastStatusText } from '../commands/copy';
 import { formatDateTime } from '../util/time';
+import { useDocumentTitle } from '../util/useDocumentTitle';
 
 function RegistrationsList() {
   const query = useMyRegistrations();
@@ -35,10 +37,10 @@ function RegistrationsList() {
   const refetch = () => void query.refetch();
   return (
     <div className="stack">
-      <section aria-labelledby="current-heading" className="stack">
+      <section aria-labelledby="current-heading" className="stack current-list">
         <h2 id="current-heading">Current</h2>
         {current.length === 0 ? (
-          <p className="muted">Nothing active. Open a workshop link to join a queue.</p>
+          <EmptyState>Nothing active. Open a workshop link to join a queue.</EmptyState>
         ) : (
           current.map((entry) => (
             <div key={`${entry.workshop.id}-${entry.registration.seq}`} className="stack-tight">
@@ -74,13 +76,16 @@ function RegistrationsList() {
       {past.length > 0 && (
         <section aria-labelledby="past-heading" className="stack">
           <h2 id="past-heading">Past</h2>
-          <ul className="list">
+          <ul className="list sheet-list">
             {past.map((entry) => (
-              <li key={`${entry.workshop.id}-${entry.registration.seq}`} className="list-row muted">
+              <li
+                key={`${entry.workshop.id}-${entry.registration.seq}`}
+                className={`list-row past-row past-${entry.registration.status.toLowerCase()}`}
+              >
                 <Link to={`/workshops/${encodeURIComponent(entry.workshop.id)}`}>
                   {entry.workshop.title}
                 </Link>
-                <span>
+                <span className="muted small">
                   {pastStatusText(entry.registration, entry.sessions, entry.workshop.mode)} ·{' '}
                   {formatDateTime(entry.registration.updatedAt)}
                 </span>
@@ -94,6 +99,7 @@ function RegistrationsList() {
 }
 
 export function MyRegistrationsPage() {
+  useDocumentTitle('My registrations');
   return (
     <div className="stack">
       <h1>My registrations</h1>

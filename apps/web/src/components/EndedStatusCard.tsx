@@ -36,7 +36,7 @@ export function EndedStatusCard({
       aria-labelledby="ended-status-heading"
     >
       <header className="card-header">
-        <h3 id="ended-status-heading">{title}</h3>
+        <h2 id="ended-status-heading">{title}</h2>
         <StatusBadge status={registration.status} />
       </header>
       <p className="status-line">{copy.detail}</p>

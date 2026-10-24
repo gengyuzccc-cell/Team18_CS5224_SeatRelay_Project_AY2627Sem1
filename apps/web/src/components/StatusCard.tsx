@@ -9,8 +9,10 @@ import { useCommand, type CommandPhase } from '../commands/useCommand';
 import { COMMAND_TYPE_TEXT, endReasonText, rejectReasonText, sessionTitle } from '../commands/copy';
 import { describeError } from '../util/errors';
 import { formatDateTime } from '../util/time';
+import { useInlineConfirm } from '../util/useInlineConfirm';
 import { AsyncButton, type AsyncState } from './AsyncButton';
 import { Countdown } from './Countdown';
+import { Icon } from './Icon';
 import { isCancelledLike, StatusBadge } from './StatusBadge';
 
 interface Props {
@@ -58,16 +60,21 @@ export function StatusCard({
     onSettled: onChanged,
   });
   const [active, setActive] = useState<'accept' | 'decline' | 'cancel' | undefined>(undefined);
-  const [confirmCancel, setConfirmCancel] = useState(false);
+  const confirm = useInlineConfirm();
+  const confirmCancel = confirm.open;
   const mode: WorkshopMode = workshop.mode;
   const workshopClosed = isCancelledLike(workshop.status);
   const offer = registration.currentOffer;
   const offeredSession =
     offer === undefined ? undefined : sessions.find((s) => s.id === offer.sessionId);
+  const clippedByCutoff =
+    offer !== undefined &&
+    offeredSession !== undefined &&
+    Date.parse(offer.expiresAt) === Date.parse(offeredSession.cutoffAt);
 
   const act = (kind: 'accept' | 'decline' | 'cancel') => {
     setActive(kind);
-    setConfirmCancel(false);
+    confirm.settle();
     if (kind === 'accept' && offer !== undefined) {
       void command.run({ type: 'ACCEPT_OFFER', offerId: offer.id });
     } else if (kind === 'decline' && offer !== undefined) {
@@ -88,18 +95,22 @@ export function StatusCard({
 
   return (
     <section
-      className={`card status-card status-${registration.status.toLowerCase()}`}
+      ref={confirm.fallback}
+      tabIndex={-1}
+      className={`card status-card status-${registration.status.toLowerCase()} focus-target`}
       aria-live="polite"
     >
       <header className="card-header">
-        <h3>{compact ? workshop.title : 'My status'}</h3>
+        {compact ? <h3>{workshop.title}</h3> : <h2>My status</h2>}
         <StatusBadge status={registration.status} />
       </header>
 
       {registration.status === 'QUEUED' && (
         <p className="status-line">
           Queued at position{' '}
-          <strong className="big-number">{registration.queuePosition ?? '?'}</strong>
+          <strong key={registration.queuePosition ?? '?'} className="big-number">
+            {registration.queuePosition ?? '?'}
+          </strong>
           {mode === 'PER_SESSION'
             ? ` for ${sessionTitle(sessions, registration.acceptable[0])}`
             : ''}
@@ -118,7 +129,13 @@ export function StatusCard({
             held for you.
           </p>
           <p className="countdown-line">
-            Confirm within <Countdown expiresAt={offer.expiresAt} onExpire={onChanged} />{' '}
+            Confirm within{' '}
+            <Countdown
+              expiresAt={offer.expiresAt}
+              onExpire={onChanged}
+              // A hold cut short by the session's cut-off would start with a mostly drained meter.
+              {...(clippedByCutoff ? {} : { holdSeconds: workshop.holdSeconds })}
+            />{' '}
             <span className="muted">(until {formatDateTime(offer.expiresAt)})</span>
           </p>
         </div>
@@ -126,6 +143,7 @@ export function StatusCard({
 
       {registration.status === 'CONFIRMED' && (
         <p className="status-line">
+          <Icon name="check" className="status-icon" />
           Seat confirmed in{' '}
           <strong>{sessionTitle(sessions, registration.confirmedSessionId)}</strong>
           {(() => {
@@ -190,6 +208,7 @@ export function StatusCard({
             )}
             {!confirmCancel ? (
               <AsyncButton
+                ref={confirm.triggerRef}
                 variant="danger"
                 state={stateOf(command.state, active === 'cancel')}
                 idle={
@@ -198,14 +217,14 @@ export function StatusCard({
                 pending="Cancelling…"
                 done="Cancelled"
                 error="Retry cancel"
-                onClick={() =>
-                  retryActive('cancel') ? void command.retry() : setConfirmCancel(true)
-                }
+                onClick={() => (retryActive('cancel') ? void command.retry() : confirm.show())}
                 disabled={command.busy}
               />
             ) : (
-              <span className="confirm-inline">
-                Release your {registration.status === 'CONFIRMED' ? 'seat' : 'place'}?{' '}
+              <span className="confirm-inline" {...confirm.groupProps}>
+                <span id={confirm.questionId}>
+                  Release your {registration.status === 'CONFIRMED' ? 'seat' : 'place'}?
+                </span>{' '}
                 <button
                   type="button"
                   className="btn btn-danger btn-small"
@@ -214,9 +233,10 @@ export function StatusCard({
                   Yes, cancel
                 </button>{' '}
                 <button
+                  ref={confirm.safeRef}
                   type="button"
                   className="btn btn-secondary btn-small"
-                  onClick={() => setConfirmCancel(false)}
+                  onClick={confirm.dismiss}
                 >
                   Keep it
                 </button>

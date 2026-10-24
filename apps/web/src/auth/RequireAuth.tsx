@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Icon } from '../components/Icon';
 import { Loading } from '../components/Loading';
 import { useSession } from './useSession';
 
@@ -20,6 +21,7 @@ export function RequireAuth({ children, purpose }: Props) {
     const returnTo = `${location.pathname}${location.search}`;
     return (
       <section className="card panel-center" aria-labelledby="signin-heading">
+        <Icon name="seat" className="panel-icon" />
         <h2 id="signin-heading">Sign in required</h2>
         <p className="muted">{purpose ?? 'Sign in to continue.'}</p>
         <button

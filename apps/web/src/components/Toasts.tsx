@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Icon } from './Icon';
 
 /**
  * Toast region (`aria-live="polite"`). `push({ id })` updates an existing toast in place, which
@@ -93,7 +94,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={`toast toast-${toast.kind}`}
             role={toast.kind === 'error' ? 'alert' : 'status'}
           >
-            <div className="toast-body">
+            <span className="toast-icon" aria-hidden="true">
+              <Icon
+                name={
+                  toast.kind === 'success' ? 'check' : toast.kind === 'error' ? 'alert' : 'clock'
+                }
+              />
+            </span>
+            {/* Keyed by title: an in-place update cross-fades the text, the toast stays. */}
+            <div key={toast.title} className="toast-body">
               <strong>{toast.title}</strong>
               {toast.message !== undefined && <p>{toast.message}</p>}
             </div>
@@ -103,7 +112,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               aria-label="Dismiss notification"
               onClick={() => dismiss(toast.id)}
             >
-              ×
+              <Icon name="x" />
             </button>
           </div>
         ))}

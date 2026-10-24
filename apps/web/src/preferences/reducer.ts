@@ -60,3 +60,36 @@ export function preferenceRank(state: PreferenceState, id: string): number | und
   const index = state.indexOf(id);
   return index < 0 ? undefined : index + 1;
 }
+
+/**
+ * What a screen reader hears after the participant changes the order (polite live region):
+ * "Session 2 added as choice 2 of 2.", "Session 1 removed; 1 session chosen.",
+ * "Session 2 moved to choice 1 of 2.". Pure: `next` is the reducer's result for `action`.
+ */
+export function describePreferenceChange(
+  action: PreferenceAction,
+  next: PreferenceState,
+  titleOf: (id: string) => string,
+): string {
+  const n = next.length;
+  switch (action.type) {
+    case 'toggle': {
+      const rank = preferenceRank(next, action.id);
+      if (rank === undefined) {
+        return `${titleOf(action.id)} removed; ${n} session${n === 1 ? '' : 's'} chosen.`;
+      }
+      return `${titleOf(action.id)} added as choice ${rank} of ${n}.`;
+    }
+    case 'remove':
+      return `${titleOf(action.id)} removed; ${n} session${n === 1 ? '' : 's'} chosen.`;
+    case 'selectOnly':
+      return `${titleOf(action.id)} selected.`;
+    case 'moveUp':
+    case 'moveDown': {
+      const rank = preferenceRank(next, action.id);
+      return rank === undefined ? '' : `${titleOf(action.id)} moved to choice ${rank} of ${n}.`;
+    }
+    default:
+      return '';
+  }
+}
