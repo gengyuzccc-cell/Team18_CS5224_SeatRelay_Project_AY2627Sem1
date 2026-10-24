@@ -54,6 +54,8 @@ report/*-submission.pdf
 # built PDFs are delivered directly, not published (only the -s build carries student numbers)
 report/Final.pdf
 report/Slides.pdf
+# PowerPoint copies of the slides (report/tools/make_pptx.py), delivered like the PDFs
+report/*.pptx
 # latexmk/biber crash leftovers
 report/*-SAVE-ERROR
 report/*.nav
