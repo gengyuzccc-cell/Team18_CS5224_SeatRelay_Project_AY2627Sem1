@@ -21,8 +21,8 @@ join one queue, and you hold at most one seat. A freed seat is offered to the ne
 who accepts that session, for a limited time; unanswered, it moves on by itself.
 
 Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of the 37 workshop
-events were repeats. Five universities list at least 693 student
-organisations, a lower bound. At our price the campus market is 693 times p times S$120, about S$83,200
+events were repeats. Five universities list at least 713 student
+organisations, a lower bound. At our price the campus market is 713 times p times S$120, about S$85,600
 times p a year, where p is the share of organisers with multi-session sign-ups, from our interviews:
 [PENDING: p, from results/interviews/summary.md].
 
@@ -42,11 +42,11 @@ Next, CHEN YANG explains the rules that make this work.
 | Number | Value | Source |
 |---|---|---|
 | Autonomous universities / polytechnics in Singapore | 6 / 5 | `docs/market-sizing.md` §2 rows 1–2 (`moe-au`, `moe-psei` in `report/references.bib`) |
-| Student organisations at five universities (lower bound) | ≥ 693 (NUS 200, NTU 113, SMU 150, SUTD 80, SIT 150) | `docs/market-sizing.md` §2 rows 3–7. The NUS, SMU and SIT counts were read from search excerpts and need dated screenshots (§8 checklist). Fetched and own-count rows alone give 288. |
+| Student organisations at five universities (lower bound) | ≥ 713 (NUS 200, NTU 113, SMU 150, SUTD 80, SIT 170) | `docs/market-sizing.md` §2 rows 3–7. The NUS, SMU and SIT counts were confirmed with dated browser screenshots on 2026-10-24 (`results/market/screenshots/`); SIT's page now says 170 (it said 150 on 17 Oct). |
 | Repeats on the NUS Libraries calendar, 1 Aug–16 Oct 2026 | 11 of 37 events tagged Workshop: two titles, a library tour 8 times and an orientation workshop 3 times | `results/market/2026-10-17/summary.md` (`tools/market/count.py` over the captures in `raw/`; `nus-libcal`) |
 | CET training providers (context, 2016) | more than 700 | `docs/market-sizing.md` §2 row 10 (`ssg-credit-progress-2016`) |
 | Price | S$10/month = S$120 per organisation per year | plan §1.1 (a design decision, not data) |
-| Campus TAM | 693 × p × S$120 ≈ S$83,200 × p per year (three significant figures; a lower bound like the 693) | `results/market/2026-10-17/counts.json` (`\MarketTamCampusSgd`); `docs/market-sizing.md` §3 |
+| Campus TAM | 713 × p × S$120 ≈ S$85,600 × p per year (three significant figures; a lower bound like the 713) | `results/market/2026-10-17/counts.json` (`\MarketTamCampusSgd`); `docs/market-sizing.md` §3 |
 | p (share of organisers with multi-session sign-ups) | [PENDING: from organiser interviews] | `results/interviews/summary.md` (`\InterviewPEventWeightedPct`) |
 | Interviews held (organisers / participants) | [PENDING] | `results/interviews/summary.md` (`\InterviewN`, `\InterviewOrganisers`, `\InterviewParticipants`) |
 | Hours of coordination per multi-session event | [PENDING] | `results/interviews/summary.md` (`\InterviewHoursMedian`) |

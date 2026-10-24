@@ -1418,13 +1418,13 @@ Source: `results/market/2026-10-17` — 26/26 with data.
 | `\MarketNusOrgs` | 200 | results/market/2026-10-17/counts.json: cited.nus_student_orgs (tools/market/inputs.json) |
 | `\MarketSmuOrgs` | 150 | results/market/2026-10-17/counts.json: cited.smu_student_orgs (tools/market/inputs.json) |
 | `\MarketSutdOrgs` | 80 | results/market/2026-10-17/counts.json: cited.sutd_student_groups (tools/market/inputs.json) |
-| `\MarketSitOrgs` | 150 | results/market/2026-10-17/counts.json: cited.sit_student_orgs (tools/market/inputs.json) |
+| `\MarketSitOrgs` | 170 | results/market/2026-10-17/counts.json: cited.sit_student_orgs (tools/market/inputs.json) |
 | `\MarketCetProviders` | 700 | results/market/2026-10-17/counts.json: cited.cet_training_providers (tools/market/inputs.json) |
 | `\MarketPriceSgd` | 120 | results/market/2026-10-17/counts.json: price_sgd_per_year |
-| `\MarketStudentOrgs` | 693 | results/market/2026-10-17/counts.json: derived.student_orgs_five_universities |
+| `\MarketStudentOrgs` | 713 | results/market/2026-10-17/counts.json: derived.student_orgs_five_universities |
 | `\MarketStudentOrgsFetched` | 288 | results/market/2026-10-17/counts.json: derived.student_orgs_fetched_or_own_count |
-| `\MarketTamCampusSgd` | 83,200 | results/market/2026-10-17/counts.json: derived.tam_campus_sgd_per_p_3sf |
-| `\MarketTamCampusCetSgd` | 167,000 | results/market/2026-10-17/counts.json: derived.tam_campus_cet_sgd_per_p_3sf |
+| `\MarketTamCampusSgd` | 85,600 | results/market/2026-10-17/counts.json: derived.tam_campus_sgd_per_p_3sf |
+| `\MarketTamCampusCetSgd` | 170,000 | results/market/2026-10-17/counts.json: derived.tam_campus_cet_sgd_per_p_3sf |
 | `\MarketTamFetchedSgd` | 34,600 | results/market/2026-10-17/counts.json: derived.tam_campus_fetched_sgd_per_p_3sf |
 | `\MarketSomNusMaxSgd` | 24,000 | results/market/2026-10-17/counts.json: derived.som_nus_max_sgd |
 

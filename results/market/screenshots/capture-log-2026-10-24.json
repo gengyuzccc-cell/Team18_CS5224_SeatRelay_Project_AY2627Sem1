@@ -1,0 +1,194 @@
+[
+ {
+  "key": "nus-osa-getstarted",
+  "url": "https://osa.nus.edu.sg/experience-communities/leadership/student-leader-resources/get-started/",
+  "route": "live",
+  "browser": "Chromium 141.0.7390.37",
+  "first_status": 200,
+  "reloads": 0,
+  "unstyled": false,
+  "http_status": 200,
+  "final_url": "https://osa.nus.edu.sg/experience-communities/leadership/student-leader-resources/get-started/",
+  "title": "Get Started - NUS OSA",
+  "captured_utc": "2026-10-24T06:34:11.235Z",
+  "server_date": "Sat, 24 Oct 2026 06:34:03 GMT",
+  "last_modified": null,
+  "files": {
+   "text": "nus-osa-getstarted-2026-10-24.txt",
+   "viewport": "nus-osa-getstarted-2026-10-24.png",
+   "full": "nus-osa-getstarted-2026-10-24-full.png"
+  },
+  "sentence": "NUS has more than 200 official student organisations.",
+  "numbers_in_text": [],
+  "text_mentions_150": false,
+  "dom_mentions_150": [
+   "-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-g",
+   "assList.add(\"sr7-fade-in\"),t.appendChild(l.preloaderClone)},150))},hide:function(t){if(!this.requests.has(t))return;const e",
+   "te(360deg);}}@keyframes uabb-dash {0% {stroke-dasharray: 1, 150;stroke-dashoffset: 0;}50% {stroke-dasharray: 90, 150;stroke",
+   "-dashoffset: -35;}100% {stroke-dasharray: 90, 150;stroke-dashoffset: -124;}}.uabb-search-form.uabb-search-for",
+   "&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement(\"canvas\")).getContext(\"2d\",{willRea"
+  ],
+  "page_dates": {
+   "article:modified_time": "2026-06-17T09:19:02+00:00",
+   "ld_json": [
+    "\"datePublished\":\"2024-02-27T17:18:03+00:00\"",
+    "\"dateModified\":\"2026-06-17T09:19:02+00:00\""
+   ]
+  },
+  "outlined_element": {
+   "tag": "div",
+   "text": "NUS has more than 200 official student organisations. These are the only student organisations that are allowed to use the NUS name and trademarks. If you are intending to use the NUS name and trademarks as part of the student organisation’s name or identity, you are required to register with the Of"
+  },
+  "banner": "Captured 2026-10-24 06:34 UTC (14:34 SGT, 2026-10-24) · https://osa.nus.edu.sg/experience-communities/leadership/student-leader-resources/get-started/ · HTTP 200 · headless Chromium 141.0.7390.37 (Playwright) · this banner and the red outline were added by the capture script (capture.mjs)",
+  "sha256": {
+   "nus-osa-getstarted-2026-10-24.txt": "c314a6713d534c1a61f8a28c0d7d141d1eaae4db52f07d4b0982e7c9df262b0a",
+   "nus-osa-getstarted-2026-10-24.png": "fcee5569e6314c0db115be614cf6ff30b6f7c58fe4c7981fb5caa49f5d8391a8",
+   "nus-osa-getstarted-2026-10-24-full.png": "85098ee0230d4a4f06b489817230242c53205d519ba34631898b07d3799f02c5"
+  },
+  "bytes": {
+   "nus-osa-getstarted-2026-10-24.txt": 3108,
+   "nus-osa-getstarted-2026-10-24.png": 316176,
+   "nus-osa-getstarted-2026-10-24-full.png": 706445
+  }
+ },
+ {
+  "key": "sit-find-your-tribe",
+  "url": "https://www.singaporetech.edu.sg/life-at-sit/find-your-tribe",
+  "route": "live",
+  "browser": "Chromium 141.0.7390.37",
+  "first_status": 200,
+  "reloads": 0,
+  "unstyled": false,
+  "http_status": 200,
+  "final_url": "https://www.singaporetech.edu.sg/life-at-sit/find-your-tribe",
+  "title": "Find Your Tribe | Singapore Institute of Technology",
+  "captured_utc": "2026-10-24T06:34:22.888Z",
+  "server_date": "Sat, 24 Oct 2026 06:34:14 GMT",
+  "last_modified": "Thu, 22 Oct 2026 05:57:25 GMT",
+  "files": {
+   "text": "sit-find-your-tribe-2026-10-24.txt",
+   "viewport": "sit-find-your-tribe-2026-10-24.png",
+   "full": "sit-find-your-tribe-2026-10-24-full.png"
+  },
+  "sentence": "With over 170 student organisations spanning various interests, we cultivate a vibrant, safe, and inclusive campus community.",
+  "numbers_in_text": [
+   "170"
+  ],
+  "text_mentions_150": false,
+  "dom_mentions_150": [],
+  "page_dates": {},
+  "outlined_element": {
+   "tag": "p",
+   "text": "The Office of SITizen Experience is committed to shaping students into competent, compassionate changemakers and leaders who embodies the SITizen-DNA. We offer diverse platforms such as leadership development, varsity sports, performing arts, special interests initiatives and wellness programmes. Wi"
+  },
+  "banner": "Captured 2026-10-24 06:34 UTC (14:34 SGT, 2026-10-24) · https://www.singaporetech.edu.sg/life-at-sit/find-your-tribe · HTTP 200 · headless Chromium 141.0.7390.37 (Playwright) · this banner and the red outline were added by the capture script (capture.mjs)",
+  "sha256": {
+   "sit-find-your-tribe-2026-10-24.txt": "051881ddc36f39bb2ea981d422111607da1a90a28c6cada1614654d7b6108598",
+   "sit-find-your-tribe-2026-10-24.png": "03525814b3f2bf503d959ca1263cb59909d5044cf5e138db23c9457fc3b96ccc",
+   "sit-find-your-tribe-2026-10-24-full.png": "23ad1477cdf8f48572dfebeff3b34e9da9db70578b82983bfdc16bda62b440e0"
+  },
+  "bytes": {
+   "sit-find-your-tribe-2026-10-24.txt": 8649,
+   "sit-find-your-tribe-2026-10-24.png": 181910,
+   "sit-find-your-tribe-2026-10-24-full.png": 2386212
+  }
+ },
+ {
+  "key": "smu-student-experiences",
+  "url": "https://www.smu.edu.sg/campus-life/student-experiences",
+  "route": "live",
+  "browser": "Chromium 141.0.7390.37",
+  "alternative_for": "smu-osl-2022",
+  "first_status": 200,
+  "reloads": 0,
+  "unstyled": false,
+  "http_status": 200,
+  "final_url": "https://www.smu.edu.sg/campus-life/student-experiences",
+  "title": "Co-curricular & Student Life Experiences | Singapore Management University (SMU)",
+  "captured_utc": "2026-10-24T06:34:39.821Z",
+  "server_date": "Sat, 24 Oct 2026 06:34:28 GMT",
+  "last_modified": null,
+  "files": {
+   "text": "smu-student-experiences-2026-10-24.txt",
+   "viewport": "smu-student-experiences-2026-10-24.png",
+   "full": "smu-student-experiences-2026-10-24-full.png"
+  },
+  "sentence": "From over 150 student clubs and societies to meaningful leadership opportunities, build a university life that reflects who you are.",
+  "numbers_in_text": [
+   "150"
+  ],
+  "text_mentions_150": true,
+  "dom_mentions_150": [
+   "ss=\"az-element az-text ck-content\" id=\"Dok71u\"><p>From over 150 student clubs and societies to meaningful leadership opport"
+  ],
+  "page_dates": {},
+  "outlined_element": {
+   "tag": "div",
+   "text": "From over 150 student clubs and societies to meaningful leadership opportunities, build a university life that reflects who you are.​"
+  },
+  "banner": "Captured 2026-10-24 06:34 UTC (14:34 SGT, 2026-10-24) · https://www.smu.edu.sg/campus-life/student-experiences · HTTP 200 · alternative official page for smu-osl-2022 · headless Chromium 141.0.7390.37 (Playwright) · this banner and the red outline were added by the capture script (capture.mjs)",
+  "sha256": {
+   "smu-student-experiences-2026-10-24.txt": "a93f7862c2f5019b8a1fec7e857f61587a312146a31ac5158f6519f5e126019b",
+   "smu-student-experiences-2026-10-24.png": "49d5a3c5d1d2bc75384d838e1e6b6fcedd436f70624726661f18be6d13a429d5",
+   "smu-student-experiences-2026-10-24-full.png": "a57de9da0c39f2c83133553fd906f36d0d497815ea782fcddf7032903c97237d"
+  },
+  "bytes": {
+   "smu-student-experiences-2026-10-24.txt": 3202,
+   "smu-student-experiences-2026-10-24.png": 477213,
+   "smu-student-experiences-2026-10-24-full.png": 1979848
+  }
+ },
+ {
+  "key": "smu-osl-2022",
+  "url": "https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl",
+  "route": "live-sg",
+  "browser": "Chromium 141.0.7390.37",
+  "first_status": 403,
+  "reloads": 0,
+  "unstyled": false,
+  "http_status": 403,
+  "final_url": "https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl",
+  "title": "Access denied | Freshmen Orientation | Singapore Management University (SMU)",
+  "captured_utc": "2026-10-24T06:35:20.861Z",
+  "server_date": "Sat, 24 Oct 2026 06:34:44 GMT",
+  "last_modified": null,
+  "files": {
+   "text": "smu-osl-2022-2026-10-24.txt",
+   "viewport": "smu-osl-2022-2026-10-24.png",
+   "full": "smu-osl-2022-2026-10-24-full.png"
+  },
+  "sentence": null,
+  "numbers_in_text": [],
+  "text_mentions_150": false,
+  "dom_mentions_150": [],
+  "page_dates": {},
+  "outlined_element": null,
+  "banner": "Captured 2026-10-24 06:35 UTC (14:35 SGT, 2026-10-24) · https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl · HTTP 403 · headless Chromium 141.0.7390.37 (Playwright) · this banner was added by the capture script (capture.mjs); no sentence to outline",
+  "sha256": {
+   "smu-osl-2022-2026-10-24.txt": "bd46635ad68952b138f707473a79c978c39ecdb444f6489396ed077e78d3c728",
+   "smu-osl-2022-2026-10-24.png": "4de73b41bcbfc3be8ff82c9b5c33efb0db11e6b06d5e0047c0c00cdde498872f",
+   "smu-osl-2022-2026-10-24-full.png": "4de73b41bcbfc3be8ff82c9b5c33efb0db11e6b06d5e0047c0c00cdde498872f"
+  },
+  "bytes": {
+   "smu-osl-2022-2026-10-24.txt": 327,
+   "smu-osl-2022-2026-10-24.png": 136015,
+   "smu-osl-2022-2026-10-24-full.png": 136015
+  }
+ },
+ {
+  "key": "smu-osl-2022",
+  "url": "https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl",
+  "route": "wayback",
+  "browser": "Chromium 141.0.7390.37",
+  "wayback": {
+   "timestamp": "20230131040749",
+   "status": "200",
+   "url": "https://web.archive.org/web/20230131040749/https://orientation.smu.edu.sg/2022/student-life/offices/office-of-student-life-osl"
+  },
+  "first_status": 502,
+  "reloads": 0,
+  "unstyled": true,
+  "http_status": 502,
+  "result": "archived page did not load (HTTP 502)"
+ }
+]

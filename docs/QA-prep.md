@@ -286,8 +286,8 @@ were answered as expected.
 ### 18. How big is the market really? (TA comment 1)
 
 We sized it bottom-up from official counts. Five of the six autonomous universities list at least
-693 student organisations. That is a lower bound: "more than X" counts as X, and the polytechnics are
-excluded. The campus TAM is 693 × p × S$120, about S$83,000 × p a year, where p is the share of
+713 student organisations. That is a lower bound: "more than X" counts as X, and the polytechnics are
+excluded. The campus TAM is 713 × p × S$120, about S$85,600 × p a year, where p is the share of
 organisers who run multi-session sign-ups, taken from our interviews: [PENDING:
 `\InterviewPEventWeightedPct`]. That market is small, so the case rests on value per organiser: the
 hours saved per multi-session event must be worth more than S$120 a year ([PENDING:

@@ -1,6 +1,6 @@
 # Market sizing and competitor scan: verified inputs for Final §1
 
-> 团队摘要：§2 是 2026-10-17 逐项核实过的计数表（每行有出处键、页面日期、核实等级）；NUS / SIT / SMU 三校官网对自动抓取有防护，只能从搜索引擎摘录核对，**提交前请组员用浏览器打开并截图**（§6 清单）。p 还没有（访谈未做），所以 §3 的公式里 p 保持符号，§4 只给 p = 0.2 / 0.4 的**示意**算例。§5 是竞品表，§7 是可直接放进 Final §1 的约 120 词段落（用 `\pending{}` 标出缺的 p）。所有出处键在 `report/references.bib`，每条的用途和核实方式在 `report/sources.md`。
+> 团队摘要：§2 是 2026-10-17 逐项核实过的计数表（每行有出处键、页面日期、核实等级）；NUS / SIT / SMU 三行原先只能从搜索引擎摘录核对，**2026-10-24 已用浏览器打开并保存带日期的截图**（`results/market/screenshots/`，§8）：NUS 200 不变；**SIT 由 150 变为 170**（N_clubs 693 → 713）；SMU 2022 页面现返回 403（页面已不公开），SMU 主站 campus-life 页面写 "over 150 student clubs and societies"，150 不变。p 还没有（访谈未做），所以 §3 的公式里 p 保持符号，§4 只给 p = 0.2 / 0.4 的**示意**算例。§5 是竞品表，§7 是可直接放进 Final §1 的约 120 词段落（用 `\pending{}` 标出缺的 p）。所有出处键在 `report/references.bib`，每条的用途和核实方式在 `report/sources.md`。
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (method, candidate figures, TAM/SAM/SOM, 4-row table and about 120 words), §7.1 (Final §1 page budget), §10 (placeholder check). Interview inputs: `docs/interviews/README.md` §5 (`results/interviews/summary.md`, not yet produced). Citation keys: `report/references.bib`. Per-source claims and verification notes: `report/sources.md`.
 
@@ -11,23 +11,24 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (method, candidate figures, 
 3. Price **P = S$120 per organisation per year** (S$10/month, plan §1.1). Value check: person-hours saved per event × hourly rate × multi-session events per year must be at least P.
 4. Every count is a dated estimate with a source key and a verification level. Counts given as "more than X" or "X+" enter the sum as X, so the totals are **lower bounds**.
 
-## 2. Verified inputs (all accessed 2026-10-17)
+## 2. Verified inputs (accessed 2026-10-17; rows 3, 5 and 7 re-checked with dated browser screenshots on 2026-10-24)
 
 Verification levels:
 
 - **fetched**: the official page was downloaded and the quote was copied from its text.
 - **own count**: we counted entries listed on official pages downloaded on the access date.
-- **official excerpt**: the page is on the institution's own domain, but direct download was blocked (bot protection, HTTP 403, or client-side rendering), so the quote was read from the search engine's excerpt of that page. **Team action:** open these pages in a browser and keep a dated screenshot before submission (§8).
+- **official excerpt**: the page is on the institution's own domain, but direct download was blocked (bot protection, HTTP 403, or client-side rendering), so the quote was read from the search engine's excerpt of that page. Rows 3, 5 and 7 were re-checked in a browser on 2026-10-24, with dated screenshots in `results/market/screenshots/` (§8). Row 10 is now the only count that rests on an excerpt alone.
+- **fetched + dated browser screenshot**: the page was opened in headless Chromium on 2026-10-24. The screenshot (with a banner stating URL and capture time), the visible text and the HTTP status are in `results/market/screenshots/`.
 
 | # | Population | Count used | Exact quote or basis | Source key(s) | Page date | Verification |
 |---|---|---|---|---|---|---|
 | 1 | Autonomous universities (AUs) | 6 | "The 6 autonomous universities provide a wide range of academic, research, work-learn, and student life programmes …" | `moe-au` | last updated 05 Mar 2026 | fetched |
 | 2 | Polytechnics | 5 | "There are currently 5 polytechnics in Singapore" (NYP, NP, RP, SP, TP) | `moe-psei` | last updated 23 Jan 2026 | fetched |
-| 3 | NUS student organisations | 200 | "NUS has more than 200 official student organisations. These are the only student organisations that are allowed to use the NUS name and trademarks." Also "network with over 200 student organisations" (Get NUSync) | `nus-osa-getstarted`, `nus-nusync` | undated | official excerpt |
+| 3 | NUS student organisations | 200 | "NUS has more than 200 official student organisations. These are the only student organisations that are allowed to use the NUS name and trademarks." Also "network with over 200 student organisations" (Get NUSync). Unchanged on 2026-10-24 (HTTP 200; `results/market/screenshots/nus-osa-getstarted-2026-10-24.png`). | `nus-osa-getstarted`, `nus-nusync` | modified 17 Jun 2026 | fetched + dated browser screenshot (2026-10-24); `nus-nusync` official excerpt |
 | 4 | NTU student organisations | 113 | Own count: 71 clubs listed under "A myriad of exciting activities awaits you when you join one of NTU's student organisations" + 19 Students' Union constituent clubs ("The Union consists of 16 academic constituent clubs and 3 non-academic constituent clubs.") + 23 hall councils ("There are 23 Halls of Residence in NTU and each hall has its own council."). Excludes the 58 Varsity Sports Association teams and the Graduate Students' Council. **Replaces** the old figure of 103 (Nanyang Bulletin 2009/10, whose page now returns 404). | `ntu-special-interest-clubs`, `ntu-su-council`, `ntu-clubs-societies` | HTTP Last-Modified 16 Oct 2026 | own count |
-| 5 | SMU student organisations | 150 | "out of the 150+ student organizations in SMU, more than 90 are overseen by OSL" (2022 orientation page). Fetched lower bound on the 2025 orientation page: 95 clubs (Arts & Cultural Fraternity 21, Sports Union 32, SICS 22, SMUX 6, ICON 14 cultural clubs). **Replaces** the plan's "over 100". | `smu-osl-2022` (150); `smu-cb-2025` (95) | 2022; 2025 | official excerpt (150); own count (95) |
+| 5 | SMU student organisations | 150 | "out of the 150+ student organizations in SMU, more than 90 are overseen by OSL" (2022 orientation page). On 2026-10-24 that page returned HTTP 403 "Access denied" (`results/market/screenshots/smu-osl-2022-2026-10-24.png`), and its Wayback capture (20230131040749) could not be loaded. SMU's main site states the same figure: "From over 150 student clubs and societies to meaningful leadership opportunities, build a university life that reflects who you are." (https://www.smu.edu.sg/campus-life/student-experiences, `results/market/screenshots/smu-student-experiences-2026-10-24.png`). Fetched lower bound on the 2025 orientation page: 95 clubs (Arts & Cultural Fraternity 21, Sports Union 32, SICS 22, SMUX 6, ICON 14 cultural clubs). **Replaces** the plan's "over 100". | `smu-osl-2022` (150); `smu-cb-2025` (95) | 2022; 2025; main-site page undated, read 2026-10-24 | official excerpt (150; the 2022 page is no longer public); fetched + dated browser screenshot of the main-site page (150, 2026-10-24); own count (95) |
 | 6 | SUTD student groups | 80 | "There are over 80 student groups on campus, and they are grouped into 5 clusters" | `sutd-fifth-row` | modified 25 Sep 2026 | fetched |
-| 7 | SIT student organisations | 150 | Find Your Tribe: "more than 150 student clubs, chapters and interest groups". Life@SIT gives a higher figure, "170+ Student Organisations"; we use the lower one. | `sit-find-your-tribe`, `sit-life` | undated | official excerpt |
+| 7 | SIT student organisations | 170 | Find Your Tribe on 2026-10-24: "With over 170 student organisations spanning various interests, we cultivate a vibrant, safe, and inclusive campus community." (`results/market/screenshots/sit-find-your-tribe-2026-10-24.png`). **Replaces 150**: the 2026-10-17 search excerpt of the same page read "more than 150 student clubs, chapters and interest groups", and "150" no longer appears on the page. Life@SIT agrees ("170+ Student Organisations"; "We support 170+ student groups"). | `sit-find-your-tribe`, `sit-life` | HTTP Last-Modified 22 Oct 2026 | fetched + dated browser screenshot (2026-10-24) |
 | 8 | SUSS and polytechnic student groups | not counted | SUSS interest-group page returned HTTP 403; polytechnic CCA directories were not checked. Their absence makes N_clubs a lower bound. | none | none | not counted |
 | 9 | Institutional units that run workshops | not counted | No official count exists; the earlier "about 10 per institution" was our own assumption and is dropped from the numbers. | none | none | not counted |
 | 10 | CET training providers | 700 | "over 18,000 approved skills-related courses, provided by over 700 training providers" (end of 2016). No newer official provider count was found: SSG Annual Report FY2024/25, SWDA newsroom and MOE parliamentary replies 2025–26 were checked. | `ssg-credit-progress-2016` | 2016 | official excerpt (old) |
@@ -39,8 +40,8 @@ Verification levels:
 
 Derived counts:
 
-- **N_clubs = 200 + 113 + 150 + 80 + 150 = 693** student organisations at five AUs (rows 3–7). SUSS and the polytechnics are excluded.
-- Fetched or own-count rows alone give **288** (NTU 113 + SUTD 80 + SMU 95). We use this as the sensitivity case if the excerpt-only figures cannot be confirmed by screenshot.
+- **N_clubs = 200 + 113 + 150 + 80 + 170 = 713** student organisations at five AUs (rows 3–7). SUSS and the polytechnics are excluded. It was 693 until 2026-10-24, when SIT's figure was found to have changed from 150 to 170 (row 7).
+- Fetched or own-count rows alone give **288** (NTU 113 + SUTD 80 + SMU 95). This was the sensitivity case in case the excerpt-only figures could not be confirmed by screenshot. Since 2026-10-24, NUS (200) and SIT (170) are fetched, and SMU's 150 is fetched from a different official page (row 5), so that premise no longer holds. `tools/market/count.py` still generates 288 (`\MarketStudentOrgsFetched`) until the team decides whether to keep the case.
 - **N_cet = 700** (row 10, 2016). It is old and excerpt-only, so the TAM is reported with and without it.
 - The library calendars (rows 13–14) show that same-content sessions occur in practice. They also show that most titles run once, so they do **not** estimate p. A third calendar we checked, the NUS Centre for Future-ready Graduates PG career-workshop list for AY2026/27 Sem 1, has six titles with one session each (`report/sources.md`, "checked, not cited").
 
@@ -48,7 +49,7 @@ Derived counts:
 
 | Symbol | Meaning | Source |
 |---|---|---|
-| `N_clubs` | student organisations, rows 3–7 (693; 288 in the sensitivity case) | §2 |
+| `N_clubs` | student organisations, rows 3–7 (713; 288 in the sensitivity case) | §2 |
 | `N_cet` | CET training providers, row 10 (700, 2016) | §2 |
 | `N_org` | `N_clubs` (campus TAM) or `N_clubs + N_cet` (campus + CET TAM) | §2 |
 | `p` | share of organisers whose events include ≥ 2 equivalent sessions (event-weighted A2 ÷ A1) | `results/interviews/summary.md` (**pending**) |
@@ -69,8 +70,8 @@ Value per organiser-year = h × w × k ;  price is defensible if  h × w × k �
 With the verified counts, and only p, s and a left symbolic:
 
 ```
-TAM_campus        = 693   × p × S$120 = S$83,160  × p   per year
-TAM_campus+CET    = 1,393 × p × S$120 = S$167,160 × p   per year
+TAM_campus        = 713   × p × S$120 = S$85,560  × p   per year
+TAM_campus+CET    = 1,413 × p × S$120 = S$169,560 × p   per year
 TAM_campus (288)  = 288   × p × S$120 = S$34,560  × p   per year   (fetched / own-count rows only)
 SAM               = TAM × s
 SOM (NUS only)    = 200 × p × a × S$120 = S$24,000 × p × a   per year   (+ N_pilot × p × a × S$120)
@@ -82,11 +83,11 @@ SOM (NUS only)    = 200 × p × a × S$120 = S$24,000 × p × a   per year   (+ 
 
 | Quantity | p = 0.2 (illustrative) | p = 0.4 (illustrative) |
 |---|---|---|
-| Organisers with the problem, campus (693 × p) | 138.6 | 277.2 |
-| TAM_campus = 693 × p × S$120 | S$16,632 / year | S$33,264 / year |
-| TAM_campus+CET = 1,393 × p × S$120 | S$33,432 / year | S$66,864 / year |
+| Organisers with the problem, campus (713 × p) | 142.6 | 285.2 |
+| TAM_campus = 713 × p × S$120 | S$17,112 / year | S$34,224 / year |
+| TAM_campus+CET = 1,413 × p × S$120 | S$33,912 / year | S$67,824 / year |
 | TAM_campus, sensitivity (288 × p × S$120) | S$6,912 / year | S$13,824 / year |
-| SAM = TAM × s (campus) | S$16,632 × s | S$33,264 × s |
+| SAM = TAM × s (campus) | S$17,112 × s | S$34,224 × s |
 | SOM (NUS only) = 200 × p × a × S$120 | S$4,800 × a | S$9,600 × a |
 
 Reading: even at the illustrative upper value the campus market is a few tens of thousands of dollars a year. The business case therefore rests on the hours each organiser saves (`h × w × k ≥ P`), not on market size, and the report should say so. Once p, s, a and h are known, keep at most three significant figures.
@@ -113,22 +114,22 @@ Reading: Eventbrite is the only scanned tool with automatic relay and a timed cl
 
 | Population | Count | Source | Estimation basis |
 |---|---|---|---|
-| Student organisations, 5 AUs | ≥ 693 | `nus-osa-getstarted`, `ntu-special-interest-clubs`, `ntu-su-council`, `smu-osl-2022`, `sutd-fifth-row`, `sit-find-your-tribe` | official counts as lower bounds; NTU counted from its directory pages on 2026-10-17 |
+| Student organisations, 5 AUs | ≥ 713 | `nus-osa-getstarted`, `ntu-special-interest-clubs`, `ntu-su-council`, `smu-osl-2022`, `sutd-fifth-row`, `sit-find-your-tribe` | official counts as lower bounds; NTU counted from its directory pages on 2026-10-17; NUS, SMU and SIT re-checked with dated browser screenshots on 2026-10-24 |
 | CET training providers | > 700 (2016) | `ssg-credit-progress-2016` | latest official count found; context, reported separately |
-| Organisers with multi-session sign-ups | 693 × p | organiser interviews | `\pending{p from organiser interviews}` |
+| Organisers with multi-session sign-ups | 713 × p | organiser interviews | `\pending{p from organiser interviews}` |
 | Price | S$120 per organiser-year | plan §1.1 | S$10/month; justified by `h × w × k ≥ P` |
 
 ## 7. Paragraph for Final §1 (about 120 words, LaTeX)
 
 ```latex
 We size the market bottom-up. Singapore has six autonomous universities and five
-polytechnics~\cite{moe-au,moe-psei}; five of the universities alone list at least 693 student
+polytechnics~\cite{moe-au,moe-psei}; five of the universities alone list at least 713 student
 organisations~\cite{nus-osa-getstarted,ntu-special-interest-clubs,ntu-su-council,ntu-clubs-societies,smu-osl-2022,sutd-fifth-row,sit-find-your-tribe},
 and SSG-supported training reached 606{,}000 learners in 2025~\cite{ssg-10th-anniversary-2026}.
 Repeated sessions occur in practice: 11 of 37 workshop events on the NUS Libraries calendar
 (1~Aug--16~Oct 2026) were repeats of two titles~\cite{nus-libcal}. With \(p\) the share of
 organisers running multi-session sign-ups (\pending{p from organiser interviews}) and S\$120 per
-organiser-year, the campus TAM is \(693 \times p \times \text{S\$}120 \approx \text{S\$}83{,}000\,p\)
+organiser-year, the campus TAM is \(713 \times p \times \text{S\$}120 \approx \text{S\$}85{,}600\,p\)
 a year; SAM and SOM apply the shares on free or SaaS tools and adopting in year one. No scanned
 tool combines one queue across sessions with timed relay (Table~\ref{tab:competitors}).
 ```
@@ -138,7 +139,7 @@ About 120 words of prose (citations excluded). The only placeholder is `\pending
 ## 8. Checklist before the paragraph enters the report
 
 - [x] Rows 1, 2, 4, 6, 10–14 verified on 2026-10-17 (fetched or own count; row 10 is an excerpt of an old page)
-- [ ] Rows 3, 5, 7 (NUS, SMU, SIT): a team member opens each official page in a browser and saves a dated screenshot. If a figure has changed, update §2 and the derived N_clubs.
+- [x] Rows 3, 5, 7 (NUS, SMU, SIT): dated browser screenshots taken on 2026-10-24 (`results/market/screenshots/`, with README, capture script and SHA-256). NUS: "more than 200", unchanged. SIT: **changed to "over 170"**, so row 7, `tools/market/inputs.json` and N_clubs (693 → 713) were updated, and `count.py` and `report_numbers.py` were re-run (`\MarketSitOrgs` 170, `\MarketStudentOrgs` 713, `\MarketTamCampusSgd` 85,600, `\MarketTamCampusCetSgd` 170,000). SMU: the cited 2022 page now returns HTTP 403 and its Wayback capture could not be loaded here; SMU's main site states "over 150 student clubs and societies", so 150 stands. Still open: report text that states these figures were read from search excerpts (`report/sections/07-declaration.tex`, Assumptions), and hard-coded 693 / 83,000 / 83,200 in `docs/QA-prep.md` and `docs/walkthrough/part-1.md`.
 - [ ] `p`, `h`, `s` taken from `results/interviews/summary.md` (not from memory); replace the illustrative §4 rows.
 - [ ] `w` (hourly rate) has a citation.
 - [ ] Optional: count SUSS and polytechnic student groups to raise the lower bound.

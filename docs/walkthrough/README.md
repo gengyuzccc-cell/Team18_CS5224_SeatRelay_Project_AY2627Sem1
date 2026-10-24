@@ -85,7 +85,7 @@ changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (ro
 | Slide | Owner | Content | Source |
 |---|---|---|---|
 | 1 | LI ZONGZE | title, team, repository URL | README §1 |
-| 2 | LI ZONGZE | problem, SeatRelay in one line, market figures (≥ 693 organisations, 11 of 37 repeats, campus market × p) | Final report §1, Table 1; `results/market/` |
+| 2 | LI ZONGZE | problem, SeatRelay in one line, market figures (≥ 713 organisations, 11 of 37 repeats, campus market × p) | Final report §1, Table 1; `results/market/` |
 | 3 | LI ZONGZE | pricing, value test, interview figures (pending), simulated duplicate clean-up, competitors | Final report §2, Table 2; `results/replay/summary.md` |
 | 4 | CHEN YANG | Fig. 1 flow, R1–R7 and C1–C7 one line each (abridged; full wording in Final report Table 4) | Final report Fig. 1, Table 4; `docs/ARCHITECTURE.md` §9–10 |
 | 5 | LIN JIE | architecture (Final report Fig. 2) | `docs/ARCHITECTURE.md` §1.2, `report/figures/fig-architecture.tex` |

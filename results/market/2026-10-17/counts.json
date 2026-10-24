@@ -129,17 +129,17 @@
   "smu_student_orgs": 150,
   "smu_student_orgs_fetched": 95,
   "sutd_student_groups": 80,
-  "sit_student_orgs": 150,
+  "sit_student_orgs": 170,
   "cet_training_providers": 700
  },
  "price_sgd_per_year": 120,
  "derived": {
-  "student_orgs_five_universities": 693,
+  "student_orgs_five_universities": 713,
   "student_orgs_fetched_or_own_count": 288,
-  "tam_campus_sgd_per_p": 83160,
-  "tam_campus_sgd_per_p_3sf": 83200,
-  "tam_campus_cet_sgd_per_p": 167160,
-  "tam_campus_cet_sgd_per_p_3sf": 167000,
+  "tam_campus_sgd_per_p": 85560,
+  "tam_campus_sgd_per_p_3sf": 85600,
+  "tam_campus_cet_sgd_per_p": 169560,
+  "tam_campus_cet_sgd_per_p_3sf": 170000,
   "tam_campus_fetched_sgd_per_p": 34560,
   "tam_campus_fetched_sgd_per_p_3sf": 34600,
   "som_nus_max_sgd": 24000
