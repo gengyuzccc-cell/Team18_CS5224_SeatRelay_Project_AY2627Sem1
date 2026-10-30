@@ -50,6 +50,8 @@ report/team-ids.tex
 
 # submission build of the report (student numbers; see report/build.sh -s)
 report/*-submission.pdf
+# rehearsal copy of the slides (speaker footer tags; report/build.sh -p)
+report/*-rehearsal.pdf
 
 # built PDFs are delivered directly, not published (only the -s build carries student numbers)
 report/Final.pdf

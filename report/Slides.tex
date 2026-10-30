@@ -11,7 +11,9 @@
 % are typed: they are not measurements. Figures: the report's TikZ files (figures/*.tex) and
 % charts (figures/generated/*.pdf), and the staged walkthrough screenshots in docs/demo/screenshots.
 % Speaker notes: docs/walkthrough/part-1.md ... part-6.md (each member presents their own work line
-% of the Preliminary report, docs/walkthrough/README.md; the footer tag of every slide names its speaker).
+% of the Preliminary report, docs/walkthrough/README.md). The delivered slides carry no speaker names;
+% the rehearsal build (./report/build.sh -t Slides -m 30 -p, Slides-rehearsal.pdf) adds a footer tag
+% naming the speaker of each slide (\SRSpeakerTags=1).
 % Student numbers: as in Final.tex, only the submission build prints them, from the git-ignored
 % team-ids.tex:  ./report/build.sh -t Slides -m 30 -s  ->  Slides-submission.pdf (git-ignored).
 % Without -s, or without team-ids.tex, the title slide shows names only.
@@ -46,7 +48,8 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\hl}[1]{\textbf{\color{srBlue}#1}}
 \newcommand{\mute}[1]{{\color{srMuted}#1}}
-% speaker of the following slides (footer tag)
+% speaker of the following slides (footer tag, rehearsal build only)
+\providecommand{\SRSpeakerTags}{0}
 \newcommand{\srspeaker}{}
 \newcommand{\speaker}[1]{\renewcommand{\srspeaker}{#1}}
 % verdict badge from a verdict macro (PASS / FAIL / anything else in grey)
@@ -99,9 +102,9 @@
 \setbeamertemplate{footline}{%
   \leavevmode\hbox to\paperwidth{\hspace*{0.6in}%
     \parbox[b]{4.4in}{\raggedright\srfootfont
-      \ifx\srspeaker\empty\else
+      \ifnum\SRSpeakerTags=1 \ifx\srspeaker\empty\else
         \tikz[baseline=(t.base)]\node[fill=srBlue!10, text=srBlue!75!black, rounded corners=3pt,
-          inner xsep=6pt, inner ysep=2.5pt](t){Speaker: \textbf{\srspeaker}};\fi}%
+          inner xsep=6pt, inner ysep=2.5pt](t){Speaker: \textbf{\srspeaker}};\fi\fi}%
     \hfill\parbox[b]{3.0in}{\centering\srfootfont\color{srMuted}SeatRelay \textperiodcentered{} CS5224 Group 18}%
     \hfill\parbox[b]{4.4in}{\raggedleft\srfootfont\color{srMuted}\srpagelabel}%
     \hspace*{0.6in}}\vspace*{0.22in}}

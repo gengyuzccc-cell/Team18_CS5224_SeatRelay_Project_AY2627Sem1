@@ -3,8 +3,10 @@
 Speaker notes for the 13 November presentation (plan §7.2). Every member speaks. One file per part.
 The slides are `report/Slides.tex` (build: `cd report && latexmk -pdf Slides.tex`, or
 `./report/build.sh -t Slides -m 30` for the same build plus its checks; add `-s` for the copy with
-student numbers on the title slide, `report/Slides-submission.pdf`, git-ignored). Every slide shows
-its speaker in the footer tag. Main slides are numbered 1–14; backup slides are B1–B8 (PDF pages
+student numbers on the title slide, `report/Slides-submission.pdf`, git-ignored). The delivered
+slides and the PowerPoint copy (`python3 -I report/tools/make_pptx.py`) name no speaker; the
+rehearsal copy, `./report/build.sh -t Slides -m 30 -p` → `report/Slides-rehearsal.pdf`, adds a footer
+tag naming each slide's speaker. Main slides are numbered 1–14; backup slides are B1–B8 (PDF pages
 15–22).
 
 | Part | File | Speaker (work line) | Clock | Length | Slides |
