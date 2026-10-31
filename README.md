@@ -18,7 +18,7 @@ This README is the source of Final report §6 (Code Explanation). The design as 
 | What | URL | Notes |
 |---|---|---|
 | Public repository | https://github.com/gengyuzccc-cell/Team18_CS5224_SeatRelay_Project_AY2627Sem1 | this code |
-| Web app, pilot stage | https://diiztwl34x7s1.cloudfront.net | for the live pilot (not yet run; so far it holds only the staged rehearsal with synthetic accounts); fault flags off, e-mail on |
+| Web app, pilot stage | https://diiztwl34x7s1.cloudfront.net | for the live pilot (not run before submission; it holds only the staged rehearsals with synthetic accounts, last run 31 Oct on the submitted build); fault flags off, e-mail on |
 | Web app, dev stage | https://d2ni5e1z674t04.cloudfront.net | experiments and demo; fault flags on, e-mail on (test accounts on reserved domains such as example.com are never e-mailed) |
 | API, dev | https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com | `GET /health` is public; everything else needs a Cognito ID token |
 | API, pilot | https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com | as above |

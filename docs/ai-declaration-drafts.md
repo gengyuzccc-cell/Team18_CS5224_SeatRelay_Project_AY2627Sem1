@@ -1,5 +1,9 @@
 # AI declaration: "what I learned" statements
 
+> **Open (2026-10-31): LIANG ZIHAN to re-approve statement 5.** Its second sentence was amended on
+> 31 Oct, when the study became a simulated package ("I learned to report the real sample, even when
+> it is none"); the other five statements are unchanged.
+>
 > **Status (2026-10-24): approved by the team and printed in the Final report** (AI usage declaration,
 > "What we learned"). The statements were drafted by the AI coding assistant from the project record
 > (the "Grounded in" lines below), not written by the members; the team approved them for the report
