@@ -55,9 +55,7 @@ export async function atomic<T>(
   if (isPool(executor)) {
     const client = await executor.connect();
     try {
-      await client.query(
-        `BEGIN ISOLATION LEVEL ${isolation}${readOnly ? ' READ ONLY' : ''}`,
-      );
+      await client.query(`BEGIN ISOLATION LEVEL ${isolation}${readOnly ? ' READ ONLY' : ''}`);
       try {
         const result = await fn(client);
         await client.query('COMMIT');

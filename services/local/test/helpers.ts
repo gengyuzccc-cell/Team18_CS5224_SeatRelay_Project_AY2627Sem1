@@ -25,7 +25,11 @@ export const TEST_SCHEMA = 'seatrelay_test';
 
 /** `undefined` when PostgreSQL answers, otherwise the reason it does not. */
 export async function probePostgres(): Promise<string | undefined> {
-  const pool = new pg.Pool({ connectionString: DATABASE_URL, connectionTimeoutMillis: 3_000, max: 1 });
+  const pool = new pg.Pool({
+    connectionString: DATABASE_URL,
+    connectionTimeoutMillis: 3_000,
+    max: 1,
+  });
   try {
     await pool.query('SELECT 1');
     return undefined;
@@ -66,9 +70,7 @@ export interface Fixture {
   s2: string;
 }
 
-export function workerPorts(
-  pool: pg.Pool,
-): Pick<Fixture, 'store' | 'queue' | 'timers' | 'ports'> {
+export function workerPorts(pool: pg.Pool): Pick<Fixture, 'store' | 'queue' | 'timers' | 'ports'> {
   const store = new PostgresWorkshopStore(pool);
   const queue = new PostgresCommandQueue(pool);
   const timers = new PostgresTimerScheduler(pool);
@@ -165,7 +167,10 @@ export async function accept(store: PostgresWorkshopStore, cmd: UserCommand): Pr
   }
 }
 
-export async function snapshotOf(store: PostgresWorkshopStore, wsId: string): Promise<WorkshopSnapshot> {
+export async function snapshotOf(
+  store: PostgresWorkshopStore,
+  wsId: string,
+): Promise<WorkshopSnapshot> {
   const snapshot = await store.loadSnapshot(wsId);
   if (snapshot === undefined) {
     throw new Error(`workshop ${wsId} not found`);
@@ -173,8 +178,16 @@ export async function snapshotOf(store: PostgresWorkshopStore, wsId: string): Pr
   return snapshot;
 }
 
-export async function count(pool: pg.Pool, table: string, where = 'TRUE', values: unknown[] = []): Promise<number> {
-  const result = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM ${table} WHERE ${where}`, values);
+export async function count(
+  pool: pg.Pool,
+  table: string,
+  where = 'TRUE',
+  values: unknown[] = [],
+): Promise<number> {
+  const result = await pool.query<{ n: string }>(
+    `SELECT count(*)::text AS n FROM ${table} WHERE ${where}`,
+    values,
+  );
   return Number(result.rows[0]?.n ?? 0);
 }
 

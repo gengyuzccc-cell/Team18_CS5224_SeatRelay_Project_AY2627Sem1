@@ -426,7 +426,11 @@ export function aggregateByLevel(rows: readonly RunRow[]): LevelAggregate[] {
     const readP95 = pick('readP95');
     const commandP95 = pick('commandP95');
     const pickSettle = (field: 'settleP95' | 'serverSettleP95'): number | undefined =>
-      median(group.map((row) => settleValue(row, field)).filter((v): v is number => typeof v === 'number'));
+      median(
+        group
+          .map((row) => settleValue(row, field))
+          .filter((v): v is number => typeof v === 'number'),
+      );
     const settleP95 = pickSettle('settleP95');
     const errorRate = Math.max(...group.map((row) => row.httpReqFailedRate));
     const aggregate: LevelAggregate = {

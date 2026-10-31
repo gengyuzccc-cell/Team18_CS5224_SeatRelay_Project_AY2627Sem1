@@ -75,7 +75,9 @@ export async function awaitRedelivery(
       events: [],
     };
   }
-  ctx.log(`waiting up to ${Math.round(Math.max(0, deadline - Date.now()) / 1000)} s for the redelivery of ${commandId} (visibility timeout)`);
+  ctx.log(
+    `waiting up to ${Math.round(Math.max(0, deadline - Date.now()) / 1000)} s for the redelivery of ${commandId} (visibility timeout)`,
+  );
   await sleep(Math.max(0, deadline - Date.now()));
   let trace = await ctx.ops.commandTrace(commandId, options.sinceMs);
   const graceEnd = Date.now() + (options.logsGraceMs ?? 90_000);
@@ -84,7 +86,11 @@ export async function awaitRedelivery(
     trace = await ctx.ops.commandTrace(commandId, options.sinceMs);
   }
   if (!trace.available) {
-    return { how: 'waited', detail: `worker logs not readable (${trace.detail}); waited ${Math.round(ctx.options.redeliveryWaitMs / 1000)} s`, events: [] };
+    return {
+      how: 'waited',
+      detail: `worker logs not readable (${trace.detail}); waited ${Math.round(ctx.options.redeliveryWaitMs / 1000)} s`,
+      events: [],
+    };
   }
   return {
     how: 'trace',
@@ -116,11 +122,18 @@ export function redeliveryMustBeObserved(kind: 'local' | 'aws'): boolean {
  * Verdict of a fault case's redelivery: ≥ 2 deliveries (and, locally, the row DONE) passes; an
  * unobservable count passes only where it need not be observed (local without psql access).
  */
-export function redeliveryOk(kind: 'local' | 'aws', outcome: RedeliveryOutcome, minDeliveries = 2): boolean {
+export function redeliveryOk(
+  kind: 'local' | 'aws',
+  outcome: RedeliveryOutcome,
+  minDeliveries = 2,
+): boolean {
   if (outcome.deliveries === undefined) {
     return !redeliveryMustBeObserved(kind);
   }
-  return outcome.deliveries >= minDeliveries && (outcome.status === undefined || outcome.status === 'DONE');
+  return (
+    outcome.deliveries >= minDeliveries &&
+    (outcome.status === undefined || outcome.status === 'DONE')
+  );
 }
 
 /**

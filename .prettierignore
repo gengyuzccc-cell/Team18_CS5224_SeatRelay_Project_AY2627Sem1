@@ -8,3 +8,10 @@ results
 *.md
 *.csv
 tools/e2e/out
+# Kept byte-identical on purpose (31 Oct formatting pass): the poster template and its generated page
+# (the rendered PNG/PDF depend on their exact markup), the deployed Cognito/budget template (flow-style
+# notifications as deployed), and two hand-laid-out data tables the cost and market tools read.
+docs/poster/*.html
+services/aws/templates/auth.yaml
+tools/experiments/cost/pricing.json
+tools/market/inputs.json

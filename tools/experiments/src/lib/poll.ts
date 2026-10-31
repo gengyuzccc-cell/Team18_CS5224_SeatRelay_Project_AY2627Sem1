@@ -23,7 +23,9 @@ export function isSettled(status: CommandStatus): boolean {
 }
 
 /** Server-side settle latency `settledAt − acceptedAt` (plan §1.3), when settled. */
-export function serverSettleMs(record: Pick<CommandResultView, 'acceptedAt' | 'settledAt'>): number | undefined {
+export function serverSettleMs(
+  record: Pick<CommandResultView, 'acceptedAt' | 'settledAt'>,
+): number | undefined {
   if (record.settledAt === undefined) {
     return undefined;
   }
@@ -71,7 +73,12 @@ export async function pollCommand(
     const record = await client.getCommand(commandId);
     polls += 1;
     if (isSettled(record.status)) {
-      return { record, polls, elapsedMs: now() - startedAt, serverSettleMs: serverSettleMs(record) };
+      return {
+        record,
+        polls,
+        elapsedMs: now() - startedAt,
+        serverSettleMs: serverSettleMs(record),
+      };
     }
     delay = pollDelayMs(polls, now() - startedAt);
   }
@@ -83,8 +90,7 @@ export function commandBody(input: CommandInput, commandId: string): CommandBody
 }
 
 export type PostOutcome =
-  | { ok: true; view: CommandAcceptedView; ms: number }
-  | { ok: false; error: unknown; ms: number };
+  { ok: true; view: CommandAcceptedView; ms: number } | { ok: false; error: unknown; ms: number };
 
 /**
  * POSTs the same body `copies` times at once (the "same commandId submitted 5× concurrently"
@@ -115,7 +121,9 @@ export function canonicalJson(value: unknown): string {
   return JSON.stringify(value, (_key, inner: unknown) => {
     if (inner !== null && typeof inner === 'object' && !Array.isArray(inner)) {
       return Object.fromEntries(
-        Object.entries(inner as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)),
+        Object.entries(inner as Record<string, unknown>).sort(([a], [b]) =>
+          a < b ? -1 : a > b ? 1 : 0,
+        ),
       );
     }
     return inner;

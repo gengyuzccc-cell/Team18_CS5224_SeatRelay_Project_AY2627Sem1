@@ -13,9 +13,7 @@
   "ssoSessionIdleTimeout": 28800,
   "ssoSessionMaxLifespan": 86400,
   "roles": {
-    "realm": [
-      { "name": "user", "description": "Default role for every SeatRelay account" }
-    ]
+    "realm": [{ "name": "user", "description": "Default role for every SeatRelay account" }]
   },
   "defaultRoles": ["user", "offline_access", "uma_authorization"],
   "clients": [

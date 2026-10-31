@@ -95,13 +95,18 @@ function sampleOf(run: number, ws: CreatedWorkshop, record: BackfillRecord): Sam
     releasedAt: record.releasedAt,
     reallocatedAt: record.reallocatedAt ?? '',
     latencyMs: record.latencyMs,
-    recomputedMs: record.reallocatedAt === undefined ? undefined : Date.parse(record.reallocatedAt) - Date.parse(record.releasedAt),
+    recomputedMs:
+      record.reallocatedAt === undefined
+        ? undefined
+        : Date.parse(record.reallocatedAt) - Date.parse(record.releasedAt),
     backfillId: record.id,
   };
 }
 
 const expiredReallocated = (dash: DashboardView): BackfillRecord[] =>
-  dash.backfills.filter((record) => record.cause === 'EXPIRED' && record.reallocatedAt !== undefined);
+  dash.backfills.filter(
+    (record) => record.cause === 'EXPIRED' && record.reallocatedAt !== undefined,
+  );
 
 async function workshopFlow(
   ctx: ExperimentContext,
@@ -123,7 +128,14 @@ async function workshopFlow(
     sessions: Array.from({ length: layout.sessions }, () => ({ capacity: layout.capacity })),
   });
   const outcome: WorkshopOutcome = {
-    run, ws, registered: 0, expectedExpiries: layout.seats * layout.rounds, expiredReallocated: 0, cancellations: 0, waitedSeconds: 0, verifyOk: false,
+    run,
+    ws,
+    registered: 0,
+    expectedExpiries: layout.seats * layout.rounds,
+    expiredReallocated: 0,
+    cancellations: 0,
+    waitedSeconds: 0,
+    verifyOk: false,
   };
   const dashboard = () => organiser.client.dashboard(orgId, ws.wsId);
   try {
@@ -131,20 +143,44 @@ async function workshopFlow(
     const random = seededRandom(seed * 7_919 + run * 104_729 + index);
     const registrants = accounts.slice(0, layout.registrantsPerWorkshop);
     const results = await mapWithConcurrency(registrants, 8, (account) =>
-      trySend(account, ws.wsId, { type: 'REGISTER', acceptable: shuffle(ws.sessionIds, random) }, timeout),
+      trySend(
+        account,
+        ws.wsId,
+        { type: 'REGISTER', acceptable: shuffle(ws.sessionIds, random) },
+        timeout,
+      ),
     );
-    outcome.registered = results.filter((result) => result.ok && result.settled.record.status === 'APPLIED').length;
-    const failures = results.filter((result) => !result.ok || result.settled.record.status !== 'APPLIED');
+    outcome.registered = results.filter(
+      (result) => result.ok && result.settled.record.status === 'APPLIED',
+    ).length;
+    const failures = results.filter(
+      (result) => !result.ok || result.settled.record.status !== 'APPLIED',
+    );
     ctx.check({
-      run, scenario: `w${index + 1}`, step: 'every REGISTER applied',
-      ok: failures.length === 0, expected: String(registrants.length), actual: String(outcome.registered),
-      detail: failures.slice(0, 3).map((result) => (result.ok ? `${result.settled.record.status}(${result.settled.record.reason})` : errorText(result.error))).join('; ') || undefined,
+      run,
+      scenario: `w${index + 1}`,
+      step: 'every REGISTER applied',
+      ok: failures.length === 0,
+      expected: String(registrants.length),
+      actual: String(outcome.registered),
+      detail:
+        failures
+          .slice(0, 3)
+          .map((result) =>
+            result.ok
+              ? `${result.settled.record.status}(${result.settled.record.reason})`
+              : errorText(result.error),
+          )
+          .join('; ') || undefined,
     });
 
     // Wait for every expected expiry to be relayed (rounds × seats EXPIRED records reallocated).
     let dash = await dashboard();
     const firstExpiry = Math.min(...dash.offered.map((entry) => Date.parse(entry.offer.expiresAt)));
-    const deadline = (Number.isFinite(firstExpiry) ? firstExpiry : Date.now()) + layout.rounds * ctx.options.holdSeconds * 1000 + waitExtraMs;
+    const deadline =
+      (Number.isFinite(firstExpiry) ? firstExpiry : Date.now()) +
+      layout.rounds * ctx.options.holdSeconds * 1000 +
+      waitExtraMs;
     const waitStarted = Date.now();
     while (expiredReallocated(dash).length < outcome.expectedExpiries && Date.now() < deadline) {
       await sleep(2000);
@@ -154,8 +190,11 @@ async function workshopFlow(
     const relayed = expiredReallocated(dash);
     outcome.expiredReallocated = relayed.length;
     ctx.check({
-      run, scenario: `w${index + 1}`, step: `${outcome.expectedExpiries} expired offers relayed to the queue`,
-      ok: relayed.length >= outcome.expectedExpiries, expected: String(outcome.expectedExpiries),
+      run,
+      scenario: `w${index + 1}`,
+      step: `${outcome.expectedExpiries} expired offers relayed to the queue`,
+      ok: relayed.length >= outcome.expectedExpiries,
+      expected: String(outcome.expectedExpiries),
       actual: `${relayed.length} (EXPIRED records ${dash.backfills.filter((record) => record.cause === 'EXPIRED').length}, waited ${outcome.waitedSeconds} s)`,
     });
 
@@ -166,13 +205,24 @@ async function workshopFlow(
         const account = byUser.get(entry.userId);
         return account === undefined ? [] : [account];
       });
-      const cancelled = await Promise.all(holders.map((account) => trySend(account, ws.wsId, { type: 'CANCEL_REGISTRATION' }, timeout)));
-      outcome.cancellations = cancelled.filter((result) => result.ok && result.settled.record.status === 'APPLIED').length;
+      const cancelled = await Promise.all(
+        holders.map((account) =>
+          trySend(account, ws.wsId, { type: 'CANCEL_REGISTRATION' }, timeout),
+        ),
+      );
+      outcome.cancellations = cancelled.filter(
+        (result) => result.ok && result.settled.record.status === 'APPLIED',
+      ).length;
       dash = await dashboard();
       const cancelRecords = dash.backfills.filter((record) => record.cause === 'CANCELLED_OFFER');
       ctx.check({
-        run, scenario: `w${index + 1}`, step: 'cancellation-driven backfills relayed in the same settlement',
-        ok: outcome.cancellations === holders.length && cancelRecords.length === holders.length && cancelRecords.every((record) => record.latencyMs === 0),
+        run,
+        scenario: `w${index + 1}`,
+        step: 'cancellation-driven backfills relayed in the same settlement',
+        ok:
+          outcome.cancellations === holders.length &&
+          cancelRecords.length === holders.length &&
+          cancelRecords.every((record) => record.latencyMs === 0),
         expected: `${holders.length} × CANCELLED_OFFER, latencyMs 0`,
         actual: `${outcome.cancellations} cancels applied; ${cancelRecords.length} records, latencies ${cancelRecords.map((record) => record.latencyMs ?? 'none').join(',')}`,
       });
@@ -184,7 +234,11 @@ async function workshopFlow(
     const inv = await invariantSnapshot(organiser, orgId, ws.wsId);
     outcome.verifyOk = inv.ok;
     ctx.check({
-      run, scenario: `w${index + 1}`, step: 'verify', ok: inv.ok, expected: 'verify ok',
+      run,
+      scenario: `w${index + 1}`,
+      step: 'verify',
+      ok: inv.ok,
+      expected: 'verify ok',
       actual: `verify ${inv.verify.ok ? 'ok' : `FAILED ${inv.verify.violations.map((v) => v.code).join(',')}`}, overCapacity ${inv.overCapacity}, doubleHolds ${inv.doubleHolds}`,
     });
   } catch (error) {
@@ -202,7 +256,8 @@ async function workshopFlow(
 runExperiment({
   name: 'backfill',
   tableRow: 'Backfill latency (plan §4, Table 3)',
-  criterion: 'expiry-driven backfill p95 ≤ 120 s (reallocatedAt − releasedAt; single-digit seconds expected), every expiry relayed, outliers listed; cancellation-driven backfills reported separately (≈ 0 ms); SweepLateExpiries = 0',
+  criterion:
+    'expiry-driven backfill p95 ≤ 120 s (reallocatedAt − releasedAt; single-digit seconds expected), every expiry relayed, outliers listed; cancellation-driven backfills reported separately (≈ 0 ms); SweepLateExpiries = 0',
   usage: USAGE,
   defaultHoldSeconds: 60,
   options: {
@@ -225,7 +280,8 @@ runExperiment({
       cancellations: intOption(ctx.values, 'cancellations', 20),
     });
     const outlierMs = intOption(ctx.values, 'outlier-ms', 10_000);
-    const waitExtraMs = intOption(ctx.values, 'wait-extra', ctx.target.name === 'local' ? 120 : 420) * 1000;
+    const waitExtraMs =
+      intOption(ctx.values, 'wait-extra', ctx.target.name === 'local' ? 120 : 420) * 1000;
     const seed = intOption(ctx.values, 'seed', 1);
     const keep = ctx.values.keep === true;
     const targetP95Ms = 120_000;
@@ -245,43 +301,84 @@ runExperiment({
     const outcomes: WorkshopOutcome[] = [];
     for (let run = 1; run <= ctx.options.runs; run += 1) {
       ctx.beginRun(run);
-      ctx.log(`run ${run}: ${layout.workshops} workshops × ${layout.seats} seats, ${layout.offers} offers left to expire (hold ${ctx.options.holdSeconds} s)`);
+      ctx.log(
+        `run ${run}: ${layout.workshops} workshops × ${layout.seats} seats, ${layout.offers} offers left to expire (hold ${ctx.options.holdSeconds} s)`,
+      );
       const results = await Promise.all(
         Array.from({ length: layout.workshops }, async (_, index) => {
           await sleep(index * 300); // stagger the registration bursts a little
-          return workshopFlow(ctx, run, index, org.id, organiser, accounts, layout, waitExtraMs, seed, keep, samples);
+          return workshopFlow(
+            ctx,
+            run,
+            index,
+            org.id,
+            organiser,
+            accounts,
+            layout,
+            waitExtraMs,
+            seed,
+            keep,
+            samples,
+          );
         }),
       );
       outcomes.push(...results);
     }
-    const metrics = await metricsForRun(ctx, baseline, ['SweepLateExpiries', 'BackfillLatency', 'OffersExpired']);
+    const metrics = await metricsForRun(ctx, baseline, [
+      'SweepLateExpiries',
+      'BackfillLatency',
+      'OffersExpired',
+    ]);
     const sweepLate = metricSum(metrics, 'SweepLateExpiries');
     if (sweepLate !== undefined) {
-      ctx.check({ scenario: 'metrics', step: 'SweepLateExpiries in the window', ok: sweepLate === 0, expected: '0', actual: String(sweepLate), detail: metrics.detail });
+      ctx.check({
+        scenario: 'metrics',
+        step: 'SweepLateExpiries in the window',
+        ok: sweepLate === 0,
+        expected: '0',
+        actual: String(sweepLate),
+        detail: metrics.detail,
+      });
     } else {
       ctx.skip('metrics', 'SweepLateExpiries', metrics.detail);
     }
 
-    const expired = samples.filter((sample) => sample.cause === 'EXPIRED' && sample.latencyMs !== undefined);
-    const unrelayedExpired = samples.filter((sample) => sample.cause === 'EXPIRED' && sample.latencyMs === undefined);
-    const cancelled = samples.filter((sample) => sample.cause.startsWith('CANCELLED') && sample.latencyMs !== undefined);
+    const expired = samples.filter(
+      (sample) => sample.cause === 'EXPIRED' && sample.latencyMs !== undefined,
+    );
+    const unrelayedExpired = samples.filter(
+      (sample) => sample.cause === 'EXPIRED' && sample.latencyMs === undefined,
+    );
+    const cancelled = samples.filter(
+      (sample) => sample.cause.startsWith('CANCELLED') && sample.latencyMs !== undefined,
+    );
     const expiredStats = summarize(expired.map((sample) => sample.latencyMs as number));
     const cancelStats = summarize(cancelled.map((sample) => sample.latencyMs as number));
-    const mismatched = samples.filter((sample) => sample.latencyMs !== undefined && sample.recomputedMs !== sample.latencyMs);
+    const mismatched = samples.filter(
+      (sample) => sample.latencyMs !== undefined && sample.recomputedMs !== sample.latencyMs,
+    );
     const slow = outliers(expired, (sample) => sample.latencyMs as number, outlierMs);
     const expectedTotal = layout.offers * ctx.options.runs;
     ctx.check({
-      scenario: 'latency', step: `expiry-driven backfill p95 ≤ ${targetP95Ms / 1000} s`,
-      ok: expired.length > 0 && expiredStats.p95 <= targetP95Ms, expected: `p95 ≤ ${targetP95Ms} ms`,
+      scenario: 'latency',
+      step: `expiry-driven backfill p95 ≤ ${targetP95Ms / 1000} s`,
+      ok: expired.length > 0 && expiredStats.p95 <= targetP95Ms,
+      expected: `p95 ≤ ${targetP95Ms} ms`,
       actual: `p95 ${formatNumber(expiredStats.p95)} ms over ${expired.length} samples (max ${formatNumber(expiredStats.max)} ms)`,
     });
     ctx.check({
-      scenario: 'latency', step: 'every expired offer relayed (sample count)',
-      ok: expired.length >= expectedTotal, expected: `≥ ${expectedTotal}`, actual: String(expired.length),
+      scenario: 'latency',
+      step: 'every expired offer relayed (sample count)',
+      ok: expired.length >= expectedTotal,
+      expected: `≥ ${expectedTotal}`,
+      actual: String(expired.length),
     });
     ctx.check({
-      scenario: 'latency', step: 'latencyMs = reallocatedAt − releasedAt on every record',
-      ok: mismatched.length === 0, expected: '0 mismatches', actual: String(mismatched.length),
+      scenario: 'latency',
+      step: 'latencyMs = reallocatedAt − releasedAt on every record',
+      ok: mismatched.length === 0,
+      expected: '0 mismatches',
+      actual: String(mismatched.length),
     });
 
     const fmtS = (ms: number) => (Number.isNaN(ms) ? 'n/a' : `${(ms / 1000).toFixed(2)} s`);
@@ -308,19 +405,52 @@ runExperiment({
         ? `None above max(${outlierMs} ms, p95 = ${formatNumber(expiredStats.p95)} ms).`
         : markdownTable(
             ['run', 'workshop', 'session', 'releasedAt (expiresAt)', 'reallocatedAt', 'latency ms'],
-            [...slow].sort((a, b) => (b.latencyMs ?? 0) - (a.latencyMs ?? 0)).map((sample) => [sample.run, sample.workshopId, sample.session, sample.releasedAt, sample.reallocatedAt, sample.latencyMs ?? '']),
+            [...slow]
+              .sort((a, b) => (b.latencyMs ?? 0) - (a.latencyMs ?? 0))
+              .map((sample) => [
+                sample.run,
+                sample.workshopId,
+                sample.session,
+                sample.releasedAt,
+                sample.reallocatedAt,
+                sample.latencyMs ?? '',
+              ]),
           ),
       '',
       '## Workshops',
       '',
       markdownTable(
-        ['run', 'workshop', 'registered', 'expiries expected', 'relayed', 'cancellations', 'waited s', 'verify', 'error'],
-        outcomes.map((outcome) => [outcome.run, outcome.ws.wsId, outcome.registered, outcome.expectedExpiries, outcome.expiredReallocated, outcome.cancellations, outcome.waitedSeconds, outcome.verifyOk ? 'ok' : 'FAIL', outcome.error ?? '']),
+        [
+          'run',
+          'workshop',
+          'registered',
+          'expiries expected',
+          'relayed',
+          'cancellations',
+          'waited s',
+          'verify',
+          'error',
+        ],
+        outcomes.map((outcome) => [
+          outcome.run,
+          outcome.ws.wsId,
+          outcome.registered,
+          outcome.expectedExpiries,
+          outcome.expiredReallocated,
+          outcome.cancellations,
+          outcome.waitedSeconds,
+          outcome.verifyOk ? 'ok' : 'FAIL',
+          outcome.error ?? '',
+        ]),
       ),
       '',
       '## Metrics',
       '',
-      ...metricsSection(metrics, { SweepLateExpiries: 'expected 0', BackfillLatency: 'worker-side ms (sum / samples)', OffersExpired: 'offers expired by tick-first' }),
+      ...metricsSection(metrics, {
+        SweepLateExpiries: 'expected 0',
+        BackfillLatency: 'worker-side ms (sum / samples)',
+        OffersExpired: 'offers expired by tick-first',
+      }),
       '',
       '`raw.csv` holds one row per backfill record (cause, releasedAt, reallocatedAt, latencyMs); plot with',
       '`python3 tools/experiments/analysis/plot_results.py <this dir> --value latencyMs --group cause`.',

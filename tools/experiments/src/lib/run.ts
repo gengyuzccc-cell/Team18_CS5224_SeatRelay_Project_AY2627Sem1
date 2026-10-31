@@ -245,13 +245,25 @@ export class ExperimentContext {
   /** Records a thrown error as a failed check. */
   fail(scenario: string, step: string, error: unknown, run?: number): false {
     const message = error instanceof Error ? error.message : String(error);
-    this.check({ scenario, step, ok: false, detail: message, ...(run === undefined ? {} : { run }) });
+    this.check({
+      scenario,
+      step,
+      ok: false,
+      detail: message,
+      ...(run === undefined ? {} : { run }),
+    });
     return false;
   }
 
   /** Records a step that cannot run on this target: listed in summary.md / meta.json, not a check. */
   skip(scenario: string, step: string, reason: string, run?: number): void {
-    this.skipped.push({ run: run ?? this.run, scenario, step, ok: true, detail: `skipped: ${reason}` });
+    this.skipped.push({
+      run: run ?? this.run,
+      scenario,
+      step,
+      ok: true,
+      detail: `skipped: ${reason}`,
+    });
     this.log(`SKIP ${scenario} / ${step} — ${reason}`);
   }
 
@@ -269,7 +281,10 @@ function usageOf<O extends CliOptions>(spec: ExperimentSpec<O>): string {
   return `${spec.usage.trim()}\n${COMMON_USAGE}`;
 }
 
-function defaultOrganiser(target: TargetConfig, naming: Pick<AccountNaming, 'prefix' | 'domain'>): string {
+function defaultOrganiser(
+  target: TargetConfig,
+  naming: Pick<AccountNaming, 'prefix' | 'domain'>,
+): string {
   return target.name === 'local'
     ? 'organiser@example.com'
     : `${naming.prefix}-organiser@${naming.domain}`;
@@ -306,7 +321,9 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       argv[0] === '--' ? argv.slice(1) : argv,
     );
     if (positionals.length > 0) {
-      throw new CliError(`unexpected argument(s): ${positionals.join(' ')}`, { hint: usageOf(spec) });
+      throw new CliError(`unexpected argument(s): ${positionals.join(' ')}`, {
+        hint: usageOf(spec),
+      });
     }
     const target = await resolveTarget({
       target: parseTarget(stringOption(values, 'target')),
@@ -322,8 +339,16 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       organiserEmail: '',
       outsiderEmail: '',
     };
-    naming.organiserEmail = stringOption(values, 'organiser', defaultOrganiser(target, naming)) as string;
-    naming.outsiderEmail = stringOption(values, 'outsider', `${naming.prefix}-outsider@${naming.domain}`) as string;
+    naming.organiserEmail = stringOption(
+      values,
+      'organiser',
+      defaultOrganiser(target, naming),
+    ) as string;
+    naming.outsiderEmail = stringOption(
+      values,
+      'outsider',
+      `${naming.prefix}-outsider@${naming.domain}`,
+    ) as string;
 
     const holdSeconds = intOption(values, 'hold', spec.defaultHoldSeconds ?? 60);
     if (holdSeconds < 30) {
@@ -345,9 +370,14 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       cacheFile: tokenCachePath(target.name, stringOption(values, 'cache')),
       create: values['no-create'] !== true,
       faults: faultsFlag === 'on' || (faultsFlag === 'auto' && ops.faultFlagsExpected()),
-      settleTimeoutMs: intOption(values, 'settle-timeout', target.name === 'local' ? 60_000 : 300_000),
+      settleTimeoutMs: intOption(
+        values,
+        'settle-timeout',
+        target.name === 'local' ? 60_000 : 300_000,
+      ),
       metricsWaitMs: intOption(values, 'metrics-wait', target.name === 'local' ? 0 : 90) * 1000,
-      redeliveryWaitMs: intOption(values, 'redelivery-wait', target.name === 'local' ? 10 : 150) * 1000,
+      redeliveryWaitMs:
+        intOption(values, 'redelivery-wait', target.name === 'local' ? 10 : 150) * 1000,
       label: stringOption(values, 'label'),
     };
     const accounts = new AccountPool({
@@ -403,13 +433,23 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       startedAt: ctx.startedAt.toISOString(),
       finishedAt: finishedAt.toISOString(),
       durationMs: finishedAt.getTime() - ctx.startedAt.getTime(),
-      target: { name: target.name, stage: target.stage, apiBase: target.apiBase, apiSource: target.apiSource },
+      target: {
+        name: target.name,
+        stage: target.stage,
+        apiBase: target.apiBase,
+        apiSource: target.apiSource,
+      },
       commit: ctx.commit ?? null,
       runs,
       holdSeconds,
       faults: options.faults,
       label: options.label ?? null,
-      accounts: { prefix: naming.prefix, domain: naming.domain, organiser: naming.organiserEmail, ...accounts.stats },
+      accounts: {
+        prefix: naming.prefix,
+        domain: naming.domain,
+        organiser: naming.organiserEmail,
+        ...accounts.stats,
+      },
       params: ctx.params,
       checks: {
         total: ctx.checks.length,
@@ -419,9 +459,18 @@ export function runExperiment<O extends CliOptions>(spec: ExperimentSpec<O>): vo
       },
       ...(ctx.skipped.length === 0
         ? {}
-        : { skipped: ctx.skipped.map((row) => ({ run: row.run, scenario: row.scenario, step: row.step, reason: row.detail })) }),
+        : {
+            skipped: ctx.skipped.map((row) => ({
+              run: row.run,
+              scenario: row.scenario,
+              step: row.step,
+              reason: row.detail,
+            })),
+          }),
       ok,
-      ...(error === undefined ? {} : { error: error instanceof Error ? error.message : String(error) }),
+      ...(error === undefined
+        ? {}
+        : { error: error instanceof Error ? error.message : String(error) }),
       ...(result?.extra ?? {}),
     });
     process.stdout.write(`${summary}\n`);
@@ -455,7 +504,10 @@ function renderSummary<O extends CliOptions>(
     '',
   ];
   if (error !== undefined) {
-    lines.push(`**The run aborted with an error:** ${error instanceof Error ? error.message : String(error)}`, '');
+    lines.push(
+      `**The run aborted with an error:** ${error instanceof Error ? error.message : String(error)}`,
+      '',
+    );
   }
   if (result !== undefined) {
     lines.push(result.summary.trim(), '');
@@ -478,7 +530,14 @@ function renderSummary<O extends CliOptions>(
     lines.push(
       markdownTable(
         ['run', 'scenario', 'step', 'expected', 'actual', 'detail'],
-        failed.map((row) => [row.run, row.scenario, row.step, row.expected, row.actual, row.detail]),
+        failed.map((row) => [
+          row.run,
+          row.scenario,
+          row.step,
+          row.expected,
+          row.actual,
+          row.detail,
+        ]),
       ),
     );
   }

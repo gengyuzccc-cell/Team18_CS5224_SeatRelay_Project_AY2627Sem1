@@ -29,26 +29,39 @@ try {
     const poster = document.querySelector('.poster');
     const problems = [];
     for (const el of poster.querySelectorAll('*')) {
-      if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflow !== 'visible') problems.push(el.className);
+      if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).overflow !== 'visible')
+        problems.push(el.className);
     }
     const r = poster.getBoundingClientRect();
-    if (poster.scrollHeight > poster.clientHeight + 1) problems.push(`poster content ${poster.scrollHeight}px > ${poster.clientHeight}px`);
+    if (poster.scrollHeight > poster.clientHeight + 1)
+      problems.push(`poster content ${poster.scrollHeight}px > ${poster.clientHeight}px`);
     // nothing in the three columns may reach into the footer, and no SVG may be squeezed below its set width
     const footerTop = poster.querySelector('footer').getBoundingClientRect().top;
     for (const el of poster.querySelectorAll('.cols *')) {
-      if (el.getBoundingClientRect().bottom > footerTop + 0.5) problems.push(`${el.tagName.toLowerCase()}.${el.className?.baseVal ?? el.className} overlaps the footer`);
+      if (el.getBoundingClientRect().bottom > footerTop + 0.5)
+        problems.push(
+          `${el.tagName.toLowerCase()}.${el.className?.baseVal ?? el.className} overlaps the footer`,
+        );
     }
     for (const svg of poster.querySelectorAll('svg[width$="mm"]')) {
-      const want = parseFloat(svg.getAttribute('width')) * 96 / 25.4;
+      const want = (parseFloat(svg.getAttribute('width')) * 96) / 25.4;
       const got = svg.getBoundingClientRect().width;
-      if (Math.abs(got - want) > 2) problems.push(`svg.${svg.getAttribute('class')} drawn ${got.toFixed(0)}px wide, set ${want.toFixed(0)}px`);
+      if (Math.abs(got - want) > 2)
+        problems.push(
+          `svg.${svg.getAttribute('class')} drawn ${got.toFixed(0)}px wide, set ${want.toFixed(0)}px`,
+        );
     }
     // each column must end inside the grid (above the footer's margin); report the space left in each
-    const mm = (px) => px * 25.4 / 96;
+    const mm = (px) => (px * 25.4) / 96;
     const colsBottom = poster.querySelector('.cols').getBoundingClientRect().bottom;
     const free = [...poster.querySelectorAll('.cols > .col')].map((col, i) => {
-      const bottom = Math.max(...[...col.querySelectorAll('*')].map((el) => el.getBoundingClientRect().bottom));
-      if (bottom > colsBottom + 0.5) problems.push(`column ${i + 1} runs ${mm(bottom - colsBottom).toFixed(1)} mm past the grid`);
+      const bottom = Math.max(
+        ...[...col.querySelectorAll('*')].map((el) => el.getBoundingClientRect().bottom),
+      );
+      if (bottom > colsBottom + 0.5)
+        problems.push(
+          `column ${i + 1} runs ${mm(bottom - colsBottom).toFixed(1)} mm past the grid`,
+        );
       return mm(colsBottom - bottom).toFixed(1);
     });
     return { problems, size: [r.width, r.height], free };
@@ -66,7 +79,9 @@ try {
     printBackground: true,
     pageRanges: '1',
   });
-  console.log(`rendered ${width}x${height} CSS px at ${DPI} dpi -> seatrelay-steps-poster.png, seatrelay-steps-poster.pdf`);
+  console.log(
+    `rendered ${width}x${height} CSS px at ${DPI} dpi -> seatrelay-steps-poster.png, seatrelay-steps-poster.pdf`,
+  );
 } finally {
   await browser.close();
 }

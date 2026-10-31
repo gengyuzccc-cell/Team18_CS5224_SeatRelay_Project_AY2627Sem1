@@ -31,7 +31,13 @@ import {
   type SettledCommand,
 } from '@seatrelay/scripts';
 import type { Account } from './lib/accounts';
-import { getMetricData, metricId, seatRelayQueries, type MetricQuery, type MetricsResult } from './lib/cloudwatch';
+import {
+  getMetricData,
+  metricId,
+  seatRelayQueries,
+  type MetricQuery,
+  type MetricsResult,
+} from './lib/cloudwatch';
 import type { DeadLetterReport } from './lib/ops';
 import {
   SUMMARY_HEADERS,
@@ -109,7 +115,8 @@ credentials (e-mail suppressed) and cached in tools/loadtest/.token-cache.<targe
 
 const ORG_NAME = 'Staged rehearsal (synthetic accounts)';
 const WORKSHOP_TITLE = 'Staged rehearsal — Intro to AWS (2 sessions)';
-const BANNER = 'Staged rehearsal with synthetic accounts — operational evidence only, not user evidence (Prelim §5)';
+const BANNER =
+  'Staged rehearsal with synthetic accounts — operational evidence only, not user evidence (Prelim §5)';
 const DEFAULT_ORGANISER = 'rehearsal-organiser@example.com';
 /** Table 3 backfill target (expiry-driven): p95 ≤ 120 s. */
 const BACKFILL_TARGET_MS = 120_000;
@@ -315,7 +322,9 @@ export function parseCsv(text: string): Record<string, string>[] {
   if (header === undefined) {
     return [];
   }
-  return rest.map((values) => Object.fromEntries(header.map((name, index) => [name, values[index] ?? ''])));
+  return rest.map((values) =>
+    Object.fromEntries(header.map((name, index) => [name, values[index] ?? ''])),
+  );
 }
 
 function countBy<T>(items: readonly T[], key: (item: T) => string): Record<string, number> {
@@ -329,7 +338,10 @@ function countBy<T>(items: readonly T[], key: (item: T) => string): Record<strin
 
 async function awsSide(ctx: ExperimentContext): Promise<AwsSide> {
   if (ctx.ops.kind !== 'aws') {
-    return { available: false, reason: 'local target: no DynamoDB table / CloudWatch alarms to read' };
+    return {
+      available: false,
+      reason: 'local target: no DynamoDB table / CloudWatch alarms to read',
+    };
   }
   const region = awsRegion();
   try {
@@ -338,7 +350,10 @@ async function awsSide(ctx: ExperimentContext): Promise<AwsSide> {
     const outputs = await getStackOutputs(STACKS.app(ctx.target.stage));
     const tableName = outputs.TableName;
     if (tableName === undefined) {
-      return { available: false, reason: `${STACKS.app(ctx.target.stage)} has no TableName output` };
+      return {
+        available: false,
+        reason: `${STACKS.app(ctx.target.stage)} has no TableName output`,
+      };
     }
     return {
       available: true,
@@ -372,7 +387,12 @@ async function alarmStates(cw: CloudWatchClient, prefix: string): Promise<AlarmS
   return states.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-async function alarmTransitions(cw: CloudWatchClient, prefix: string, start: Date, end: Date): Promise<AlarmTransition[]> {
+async function alarmTransitions(
+  cw: CloudWatchClient,
+  prefix: string,
+  start: Date,
+  end: Date,
+): Promise<AlarmTransition[]> {
   const transitions: AlarmTransition[] = [];
   let nextToken: string | undefined;
   do {
@@ -388,7 +408,10 @@ async function alarmTransitions(cw: CloudWatchClient, prefix: string, start: Dat
     for (const item of output.AlarmHistoryItems ?? []) {
       if ((item.AlarmName ?? '').startsWith(prefix)) {
         transitions.push({
-          at: item.Timestamp instanceof Date ? item.Timestamp.toISOString() : String(item.Timestamp ?? ''),
+          at:
+            item.Timestamp instanceof Date
+              ? item.Timestamp.toISOString()
+              : String(item.Timestamp ?? ''),
           name: item.AlarmName ?? '?',
           summary: item.HistorySummary ?? '',
         });
@@ -399,7 +422,11 @@ async function alarmTransitions(cw: CloudWatchClient, prefix: string, start: Dat
   return transitions.sort((a, b) => a.at.localeCompare(b.at));
 }
 
-async function storedNotifications(aws: AwsSide, userId: string, wsId: string): Promise<StoredNotification[]> {
+async function storedNotifications(
+  aws: AwsSide,
+  userId: string,
+  wsId: string,
+): Promise<StoredNotification[]> {
   const items: StoredNotification[] = [];
   let startKey: Record<string, unknown> | undefined;
   do {
@@ -433,7 +460,14 @@ async function storedNotifications(aws: AwsSide, userId: string, wsId: string): 
 /** Lambda/SQS/SeatRelay metrics of the run window (pilot functions, account concurrency, dev activity). */
 function windowQueries(stage: string): MetricQuery[] {
   const queries: MetricQuery[] = seatRelayQueries(
-    ['CommandSettledLatency', 'BackfillLatency', 'OffersCreated', 'OffersExpired', 'SweepLateExpiries', 'NotificationFailures'],
+    [
+      'CommandSettledLatency',
+      'BackfillLatency',
+      'OffersCreated',
+      'OffersExpired',
+      'SweepLateExpiries',
+      'NotificationFailures',
+    ],
     ['Sum', 'SampleCount', 'Maximum'],
     // The deployed functions emit `service` + `stage`; `service` alone is a different, empty series.
     { stage },
@@ -447,7 +481,12 @@ function windowQueries(stage: string): MetricQuery[] {
   });
   for (const fn of ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier']) {
     const name = `seatrelay-${stage}-${fn}`;
-    for (const [metric, stat] of [['Invocations', 'Sum'], ['Errors', 'Sum'], ['Throttles', 'Sum'], ['ConcurrentExecutions', 'Maximum']] as const) {
+    for (const [metric, stat] of [
+      ['Invocations', 'Sum'],
+      ['Errors', 'Sum'],
+      ['Throttles', 'Sum'],
+      ['ConcurrentExecutions', 'Maximum'],
+    ] as const) {
       queries.push({
         id: metricId('fn', fn, metric, stat),
         namespace: 'AWS/Lambda',
@@ -492,7 +531,13 @@ function seriesMax(result: MetricsResult, id: string): number | undefined {
 class Rehearsal {
   readonly rows: ActionRow[] = [];
   readonly invariants: InvariantRow[] = [];
-  readonly phases: { phase: string; startedAt: string; finishedAt: string; actions: number; error: string }[] = [];
+  readonly phases: {
+    phase: string;
+    startedAt: string;
+    finishedAt: string;
+    actions: number;
+    error: string;
+  }[] = [];
   readonly offers = new Map<string, OfferSeen>();
   readonly byUser = new Map<string, Participant>();
   readonly label: (sessionId: string | undefined) => string;
@@ -543,7 +588,13 @@ class Rehearsal {
     this.rows.push(this.baseRow(phase, 'event', actor, action, { outcome, ok: true }));
   }
 
-  private baseRow(phase: string, kind: ActionRow['kind'], actor: string, action: string, extra: Partial<ActionRow>): ActionRow {
+  private baseRow(
+    phase: string,
+    kind: ActionRow['kind'],
+    actor: string,
+    action: string,
+    extra: Partial<ActionRow>,
+  ): ActionRow {
     return {
       n: this.nextN(),
       phase,
@@ -573,24 +624,42 @@ class Rehearsal {
   }
 
   /** Sends a command as the browser does (POST 202 + polling), records latency and asserts the outcome. */
-  async command(phase: string, actor: Actor, action: string, input: CommandInput, expect: Expectation): Promise<SettledCommand | undefined> {
+  async command(
+    phase: string,
+    actor: Actor,
+    action: string,
+    input: CommandInput,
+    expect: Expectation,
+  ): Promise<SettledCommand | undefined> {
     const row = this.baseRow(phase, 'command', actor.label, action, { type: input.type });
     const expectedText = [
       expect.status + (expect.reason === undefined ? '' : `(${expect.reason})`),
-      expect.registrationText ?? (typeof expect.registration === 'string' ? expect.registration : undefined),
+      expect.registrationText ??
+        (typeof expect.registration === 'string' ? expect.registration : undefined),
       expect.offersCreated === undefined ? undefined : `offersCreated=${expect.offersCreated}`,
     ]
       .filter((part) => part !== undefined)
       .join(' ');
     row.expected = expectedText;
     const step = `${String(row.n).padStart(3, '0')} ${actor.label} ${action}`;
-    const outcome = await trySend(actor.account, this.wsId, input, this.ctx.options.settleTimeoutMs);
+    const outcome = await trySend(
+      actor.account,
+      this.wsId,
+      input,
+      this.ctx.options.settleTimeoutMs,
+    );
     this.lastActionAt = Date.now();
     if (!outcome.ok) {
       row.ok = false;
       row.error = errorText(outcome.error);
       this.rows.push(row);
-      this.ctx.check({ scenario: phase, step, ok: false, expected: expectedText, actual: row.error });
+      this.ctx.check({
+        scenario: phase,
+        step,
+        ok: false,
+        expected: expectedText,
+        actual: row.error,
+      });
       return undefined;
     }
     const { settled } = outcome;
@@ -598,7 +667,9 @@ class Rehearsal {
     const registration = describeRegistration(record.result?.registration, this.label);
     const registrationOk =
       expect.registration === undefined ||
-      (typeof expect.registration === 'string' ? registration === expect.registration : expect.registration(registration));
+      (typeof expect.registration === 'string'
+        ? registration === expect.registration
+        : expect.registration(registration));
     const ok =
       record.status === expect.status &&
       (expect.reason === undefined || record.reason === expect.reason) &&
@@ -631,17 +702,35 @@ class Rehearsal {
   }
 
   /** An organiser HTTP call that is not a command (attendance, export), timed. */
-  async http(phase: string, action: string, method: string, route: string, body?: unknown): Promise<{ status: number; text: string; contentType: string; ms: number } | undefined> {
-    const row = this.baseRow(phase, 'http', this.organiser.label, action, { type: `${method} ${route.replace(/\/[0-9a-f-]{20,}/g, '/:id')}` });
+  async http(
+    phase: string,
+    action: string,
+    method: string,
+    route: string,
+    body?: unknown,
+  ): Promise<{ status: number; text: string; contentType: string; ms: number } | undefined> {
+    const row = this.baseRow(phase, 'http', this.organiser.label, action, {
+      type: `${method} ${route.replace(/\/[0-9a-f-]{20,}/g, '/:id')}`,
+    });
     const started = Date.now();
     try {
       const response = await this.organiser.account.client.raw(method, route, body);
       const text = await response.text();
       const ms = Date.now() - started;
       this.lastActionAt = Date.now();
-      Object.assign(row, { httpStatus: response.status, httpMs: ms, ok: response.ok, status: String(response.status) });
+      Object.assign(row, {
+        httpStatus: response.status,
+        httpMs: ms,
+        ok: response.ok,
+        status: String(response.status),
+      });
       this.rows.push(row);
-      return { status: response.status, text, contentType: response.headers.get('content-type') ?? '', ms };
+      return {
+        status: response.status,
+        text,
+        contentType: response.headers.get('content-type') ?? '',
+        ms,
+      };
     } catch (error) {
       Object.assign(row, { ok: false, error: errorText(error), httpMs: Date.now() - started });
       this.rows.push(row);
@@ -655,8 +744,12 @@ class Rehearsal {
       const snapshot = await invariantSnapshot(this.organiser.account, this.orgId, this.wsId);
       const { dashboard } = snapshot;
       const cell = (index: number): string => {
-        const session = dashboard.sessions.find((candidate) => candidate.id === this.ws.sessionIds[index]);
-        return session === undefined ? '-' : `${session.confirmed}+${session.held}/${session.capacity} q${session.queueLength}`;
+        const session = dashboard.sessions.find(
+          (candidate) => candidate.id === this.ws.sessionIds[index],
+        );
+        return session === undefined
+          ? '-'
+          : `${session.confirmed}+${session.held}/${session.capacity} q${session.queueLength}`;
       };
       const violations = snapshot.verify.violations.map((violation) => violation.code).join(' ');
       this.invariants.push({
@@ -695,13 +788,27 @@ class Rehearsal {
     // Behaviour slots: the 2nd, 5th, 8th … offer answered is meant to be left unanswered, the
     // 3rd, 6th, 9th … declined; a slot whose participant does not fit carries over to the next.
     const due = (offset: number, budget: number): number =>
-      Math.min(budget, Array.from({ length: budget }, (_, k) => 3 * k + offset).filter((slot) => slot <= index).length);
+      Math.min(
+        budget,
+        Array.from({ length: budget }, (_, k) => 3 * k + offset).filter((slot) => slot <= index)
+          .length,
+      );
     const silentDue = due(1, this.budget.silent) - this.used.silent;
     const declineDue = due(2, this.budget.decline) - this.used.decline;
-    if (silentDue > 0 && participant.prefs.length === 1 && !participant.silent && !participant.declined) {
+    if (
+      silentDue > 0 &&
+      participant.prefs.length === 1 &&
+      !participant.silent &&
+      !participant.declined
+    ) {
       return 'silent';
     }
-    if (declineDue > 0 && participant.prefs.length >= 2 && !participant.declined && !participant.silent) {
+    if (
+      declineDue > 0 &&
+      participant.prefs.length >= 2 &&
+      !participant.declined &&
+      !participant.silent
+    ) {
       return 'decline';
     }
     return 'accept';
@@ -734,7 +841,12 @@ class Rehearsal {
           phase,
           response: 'silent',
         });
-        this.ctx.check({ scenario: phase, step: `offer ${entry.offer.id.slice(0, 8)} belongs to a rehearsal account`, ok: false, actual: entry.userId });
+        this.ctx.check({
+          scenario: phase,
+          step: `offer ${entry.offer.id.slice(0, 8)} belongs to a rehearsal account`,
+          ok: false,
+          actual: entry.userId,
+        });
         continue;
       }
       const response = scripted ? this.respondPolicy(participant) : 'accept';
@@ -750,7 +862,12 @@ class Rehearsal {
         this.used.silent += 1;
         participant.silent = true;
         participant.history.push(`left ${session} unanswered`);
-        this.event(phase, participant.label, `does not answer the offer for ${session}`, `offer expires ${entry.offer.expiresAt}`);
+        this.event(
+          phase,
+          participant.label,
+          `does not answer the offer for ${session}`,
+          `offer expires ${entry.offer.expiresAt}`,
+        );
         continue;
       }
       await this.pace();
@@ -758,7 +875,9 @@ class Rehearsal {
         this.used.decline += 1;
         participant.declined = true;
         participant.history.push(`declined ${session}`);
-        const remaining = participant.prefs.filter((id) => id !== entry.offer.sessionId).map((id) => this.label(id));
+        const remaining = participant.prefs
+          .filter((id) => id !== entry.offer.sessionId)
+          .map((id) => this.label(id));
         await this.command(
           phase,
           participant,
@@ -769,8 +888,12 @@ class Rehearsal {
             registration: (actual) =>
               remaining.length === 0
                 ? actual === 'ENDED(NO_ACCEPTABLE_SESSION)'
-                : /^QUEUED#\d+$/.test(actual) || remaining.some((label) => actual === `OFFERED@${label}`),
-            registrationText: remaining.length === 0 ? 'ENDED(NO_ACCEPTABLE_SESSION)' : `QUEUED or OFFERED@${remaining.join('/')}`,
+                : /^QUEUED#\d+$/.test(actual) ||
+                  remaining.some((label) => actual === `OFFERED@${label}`),
+            registrationText:
+              remaining.length === 0
+                ? 'ENDED(NO_ACCEPTABLE_SESSION)'
+                : `QUEUED or OFFERED@${remaining.join('/')}`,
           },
         );
       } else {
@@ -784,7 +907,12 @@ class Rehearsal {
         );
       }
     }
-    this.ctx.check({ scenario: phase, step: 'offer loop terminated', ok: false, detail: 'more than 200 offers answered in one phase' });
+    this.ctx.check({
+      scenario: phase,
+      step: 'offer loop terminated',
+      ok: false,
+      detail: 'more than 200 offers answered in one phase',
+    });
   }
 }
 
@@ -808,7 +936,12 @@ interface RunState {
   inAppStates: { participant: string; expected: string; actual: string; ok: boolean }[];
 }
 
-async function setupParticipants(ctx: ExperimentContext, count: number, mailbox: Mailbox, state: RunState): Promise<{ email: string; name: string; account: Account }[]> {
+async function setupParticipants(
+  ctx: ExperimentContext,
+  count: number,
+  mailbox: Mailbox,
+  state: RunState,
+): Promise<{ email: string; name: string; account: Account }[]> {
   const nameFor = (no: number): string => `Rehearsal participant ${pad2(no)} (synthetic)`;
   const accounts: { email: string; name: string; account: Account }[] = [];
   let mode = mailbox;
@@ -827,7 +960,11 @@ async function setupParticipants(ctx: ExperimentContext, count: number, mailbox:
   }
   for (let no = 2; no <= count; no += 1) {
     const email = emailFor(mode, no);
-    accounts.push({ email, name: nameFor(no), account: await ctx.accounts.get(email, nameFor(no)) });
+    accounts.push({
+      email,
+      name: nameFor(no),
+      account: await ctx.accounts.get(email, nameFor(no)),
+    });
   }
   state.mailbox = mode;
   // meta.json `accounts` is written from the pool's naming: record the addresses actually used.
@@ -874,13 +1011,20 @@ async function phase(rehearsal: Rehearsal, name: string, body: () => Promise<voi
     error = errorText(caught);
     rehearsal.ctx.fail(name, 'phase aborted', caught);
   }
-  rehearsal.phases.push({ phase: name, startedAt, finishedAt: new Date().toISOString(), actions: rehearsal.rows.length - before, error });
+  rehearsal.phases.push({
+    phase: name,
+    startedAt,
+    finishedAt: new Date().toISOString(),
+    actions: rehearsal.rows.length - before,
+    error,
+  });
   await rehearsal.verifyPhase(name);
 }
 
 runExperiment({
   name: 'pilot-rehearsal',
-  tableRow: 'Staged pilot rehearsal on the pilot stack (Prelim §5, logged separately from the live pilot)',
+  tableRow:
+    'Staged pilot rehearsal on the pilot stack (Prelim §5, logged separately from the live pilot)',
   criterion:
     'every scripted command settles with the expected outcome; verify ok, 0 over-capacity and 0 double holds after every phase; every released seat (decline, timer-driven expiry, capacity increase, cancellation) relayed while someone acceptable was queued; every notification leaves PENDING (SES simulator: SENT) and the in-app status matches the registration (C6); DLQs unchanged; no alarm entered ALARM',
   banner: BANNER,
@@ -913,25 +1057,48 @@ runExperiment({
     if (mailboxFlag !== 'simulator' && mailboxFlag !== 'example') {
       throw new CliError(`--mailbox must be simulator|example (got ${mailboxFlag})`);
     }
-    const paceMs = parseRange(stringOption(ctx.values, 'pace-ms', '1000-3000') as string, '--pace-ms');
+    const paceMs = parseRange(
+      stringOption(ctx.values, 'pace-ms', '1000-3000') as string,
+      '--pace-ms',
+    );
     const expiryWaitS = intOption(ctx.values, 'expiry-wait', 420);
     const notifyWaitS = intOption(ctx.values, 'notify-wait', 240);
     const organiserEmail = stringOption(ctx.values, 'organiser', DEFAULT_ORGANISER) as string;
     if (count < 4) {
       throw new CliError('--participants must be at least 4');
     }
-    for (const [key, value] of Object.entries({ participants: count, capacities, seed, declines, expiries, cancellations, capacityUp, attendance: attendanceCount, mailbox: mailboxFlag, paceMs, expiryWaitS, notifyWaitS, organiser: organiserEmail, holdSeconds: ctx.options.holdSeconds })) {
+    for (const [key, value] of Object.entries({
+      participants: count,
+      capacities,
+      seed,
+      declines,
+      expiries,
+      cancellations,
+      capacityUp,
+      attendance: attendanceCount,
+      mailbox: mailboxFlag,
+      paceMs,
+      expiryWaitS,
+      notifyWaitS,
+      organiser: organiserEmail,
+      holdSeconds: ctx.options.holdSeconds,
+    })) {
       ctx.param(key, value);
     }
     if (ctx.target.name !== 'pilot') {
-      ctx.log(`note: target ${ctx.target.name}; the rehearsal is meant for the pilot stack (--target pilot)`);
+      ctx.log(
+        `note: target ${ctx.target.name}; the rehearsal is meant for the pilot stack (--target pilot)`,
+      );
     }
     const random = seededRandom(seed);
     const state: RunState = { mailbox: mailboxFlag, notifications: [], inAppStates: [] };
 
     // ---------- setup: accounts, organisation, workshop, baselines
     ctx.accounts.naming.organiserEmail = organiserEmail;
-    const organiserAccount = await ctx.accounts.get(organiserEmail, 'Rehearsal organiser (synthetic)');
+    const organiserAccount = await ctx.accounts.get(
+      organiserEmail,
+      'Rehearsal organiser (synthetic)',
+    );
     const organiser: Actor = { label: 'organiser', account: organiserAccount };
     const accounts = await setupParticipants(ctx, count, mailboxFlag, state);
     ctx.param('mailboxUsed', state.mailbox);
@@ -940,7 +1107,9 @@ runExperiment({
     if (first !== undefined) {
       const claims = decodeJwtPayload(await first.account.token());
       const me = await first.account.client.me();
-      state.cognitoAccepted = String(claims.email).toLowerCase() === first.email.toLowerCase() && me.email.toLowerCase() === first.email.toLowerCase();
+      state.cognitoAccepted =
+        String(claims.email).toLowerCase() === first.email.toLowerCase() &&
+        me.email.toLowerCase() === first.email.toLowerCase();
       ctx.check({
         scenario: 'setup',
         step: `${state.mailbox === 'simulator' ? 'SES mailbox-simulator' : 'example.com'} address accepted as Cognito username and seen by the API`,
@@ -950,7 +1119,13 @@ runExperiment({
       });
     }
     if (state.mailboxFallback !== undefined) {
-      ctx.check({ scenario: 'setup', step: 'participants use the SES mailbox simulator', ok: false, expected: 'simulator addresses', actual: state.mailboxFallback });
+      ctx.check({
+        scenario: 'setup',
+        step: 'participants use the SES mailbox simulator',
+        ok: false,
+        expected: 'simulator addresses',
+        actual: state.mailboxFallback,
+      });
     }
 
     const aws = await awsSide(ctx);
@@ -980,8 +1155,16 @@ runExperiment({
       mode: 'UNIFIED',
       holdSeconds: ctx.options.holdSeconds,
       sessions: [
-        { title: 'Intro to AWS — session 1 (staged)', startsAt: new Date(now + 2 * DAY_MS).toISOString(), capacity: capacities[0] },
-        { title: 'Intro to AWS — session 2 (staged)', startsAt: new Date(now + 3 * DAY_MS).toISOString(), capacity: capacities[1] },
+        {
+          title: 'Intro to AWS — session 1 (staged)',
+          startsAt: new Date(now + 2 * DAY_MS).toISOString(),
+          capacity: capacities[0],
+        },
+        {
+          title: 'Intro to AWS — session 2 (staged)',
+          startsAt: new Date(now + 3 * DAY_MS).toISOString(),
+          capacity: capacities[1],
+        },
       ],
     };
     const view = await organiserAccount.client.createWorkshop(org.id, input);
@@ -999,11 +1182,24 @@ runExperiment({
       throw new Error('workshop has fewer than two sessions');
     }
     ctx.param('workshopId', ws.wsId);
-    ctx.param('sessions', sessions.map((session, index) => ({ label: `S${index + 1}`, id: session.id, title: session.title, startsAt: session.startsAt, cutoffAt: session.cutoffAt, capacity: session.capacity })));
+    ctx.param(
+      'sessions',
+      sessions.map((session, index) => ({
+        label: `S${index + 1}`,
+        id: session.id,
+        title: session.title,
+        startsAt: session.startsAt,
+        cutoffAt: session.cutoffAt,
+        capacity: session.capacity,
+      })),
+    );
     ctx.check({
       scenario: 'setup',
       step: 'workshop created (UNIFIED, 2 sessions)',
-      ok: view.workshop.mode === 'UNIFIED' && view.workshop.holdSeconds === ctx.options.holdSeconds && sessions.length === 2,
+      ok:
+        view.workshop.mode === 'UNIFIED' &&
+        view.workshop.holdSeconds === ctx.options.holdSeconds &&
+        sessions.length === 2,
       expected: `UNIFIED, hold ${ctx.options.holdSeconds}, capacities ${capacities.join('/')}`,
       actual: `${view.workshop.mode}, hold ${view.workshop.holdSeconds}, capacities ${sessions.map((session) => session.capacity).join('/')}`,
       detail: `workshop ${ws.wsId}`,
@@ -1026,7 +1222,10 @@ runExperiment({
         cancelled: false,
       };
     });
-    const rehearsal = new Rehearsal(ctx, organiser, org.id, ws, participants, random, paceMs, { silent: expiries, decline: declines });
+    const rehearsal = new Rehearsal(ctx, organiser, org.id, ws, participants, random, paceMs, {
+      silent: expiries,
+      decline: declines,
+    });
     state.rehearsal = rehearsal;
     const label = rehearsal.label;
 
@@ -1036,7 +1235,9 @@ runExperiment({
       let queued = 0;
       for (const participant of participants) {
         await rehearsal.pace();
-        const target = participant.prefs.findIndex((id) => (free[ws.sessionIds.indexOf(id)] ?? 0) > 0);
+        const target = participant.prefs.findIndex(
+          (id) => (free[ws.sessionIds.indexOf(id)] ?? 0) > 0,
+        );
         let expected: string;
         if (target === -1) {
           queued += 1;
@@ -1046,8 +1247,16 @@ runExperiment({
           free[index] = (free[index] ?? 0) - 1;
           expected = `OFFERED@S${index + 1}`;
         }
-        participant.history.push(`registered ${participant.prefs.map((id) => label(id)).join('>')}`);
-        await rehearsal.command('1 register', participant, `REGISTER ${participant.prefs.map((id) => label(id)).join('>')}`, { type: 'REGISTER', acceptable: participant.prefs }, { status: 'APPLIED', registration: expected });
+        participant.history.push(
+          `registered ${participant.prefs.map((id) => label(id)).join('>')}`,
+        );
+        await rehearsal.command(
+          '1 register',
+          participant,
+          `REGISTER ${participant.prefs.map((id) => label(id)).join('>')}`,
+          { type: 'REGISTER', acceptable: participant.prefs },
+          { status: 'APPLIED', registration: expected },
+        );
       }
     });
 
@@ -1073,10 +1282,17 @@ runExperiment({
       const lastExpiry = Math.max(...silent.map((offer) => Date.parse(offer.expiresAt)));
       const deadline = lastExpiry + expiryWaitS * 1000;
       const waitStarted = Date.now();
-      ctx.log(`waiting for ${silent.length} unanswered offer(s) to expire (last at ${new Date(lastExpiry).toISOString()}) and be relayed`);
+      ctx.log(
+        `waiting for ${silent.length} unanswered offer(s) to expire (last at ${new Date(lastExpiry).toISOString()}) and be relayed`,
+      );
       const relayed = (dash: DashboardView): boolean =>
         silent.every((offer) => {
-          const record = dash.backfills.find((candidate) => candidate.cause === 'EXPIRED' && candidate.releasedAt === offer.expiresAt && label(candidate.sessionId) === offer.session);
+          const record = dash.backfills.find(
+            (candidate) =>
+              candidate.cause === 'EXPIRED' &&
+              candidate.releasedAt === offer.expiresAt &&
+              label(candidate.sessionId) === offer.session,
+          );
           if (record === undefined) {
             return false;
           }
@@ -1084,7 +1300,9 @@ runExperiment({
             return true;
           }
           // Released with nobody acceptable queued: nothing to relay (verify's NO_STARVATION covers it).
-          return !dash.queue.some((entry) => entry.acceptable.some((id) => label(id) === offer.session));
+          return !dash.queue.some((entry) =>
+            entry.acceptable.some((id) => label(id) === offer.session),
+          );
         });
       let dash = await rehearsal.dashboard();
       while (!relayed(dash) && Date.now() < deadline) {
@@ -1098,10 +1316,23 @@ runExperiment({
         step: 'every unanswered offer expired and its seat was relayed',
         ok: relayed(dash),
         expected: `${silent.length} EXPIRED backfill records, reallocated`,
-        actual: records.map((record) => `${label(record.sessionId)} ${record.reallocatedAt === undefined ? 'pending' : `${record.latencyMs} ms`}`).join(', ') || 'none',
+        actual:
+          records
+            .map(
+              (record) =>
+                `${label(record.sessionId)} ${record.reallocatedAt === undefined ? 'pending' : `${record.latencyMs} ms`}`,
+            )
+            .join(', ') || 'none',
         detail: `waited ${state.expiryWaitS} s`,
       });
-      rehearsal.event('3 expiry', 'system', `${silent.length} hold(s) expired; timer-driven backfill observed`, records.map((record) => `${label(record.sessionId)} latencyMs ${record.latencyMs ?? 'pending'}`).join('; '));
+      rehearsal.event(
+        '3 expiry',
+        'system',
+        `${silent.length} hold(s) expired; timer-driven backfill observed`,
+        records
+          .map((record) => `${label(record.sessionId)} latencyMs ${record.latencyMs ?? 'pending'}`)
+          .join('; '),
+      );
       for (const offer of silent) {
         const participant = participants.find((candidate) => candidate.label === offer.participant);
         if (participant === undefined) {
@@ -1110,7 +1341,12 @@ runExperiment({
         const mine = await participant.account.client.myRegistrations();
         const entry = mine.registrations.find((candidate) => candidate.workshop.id === ws.wsId);
         const actual = describeRegistration(entry?.registration, label);
-        ctx.expectEqual('3 expiry', `${participant.label} sees the expiry in "my registrations"`, 'ENDED(NO_ACCEPTABLE_SESSION)', actual);
+        ctx.expectEqual(
+          '3 expiry',
+          `${participant.label} sees the expiry in "my registrations"`,
+          'ENDED(NO_ACCEPTABLE_SESSION)',
+          actual,
+        );
       }
       await rehearsal.respond('3 expiry', false);
     });
@@ -1140,12 +1376,22 @@ runExperiment({
         const dash = await rehearsal.dashboard();
         const confirmed = dash.confirmed
           .map((entry) => ({ entry, participant: rehearsal.byUser.get(entry.userId) }))
-          .filter((item): item is { entry: (typeof dash.confirmed)[number]; participant: Participant } => item.participant !== undefined && !item.participant.cancelled);
-        const relaying = confirmed.filter((item) => dash.queue.some((queued) => queued.acceptable.includes(item.entry.sessionId)));
+          .filter(
+            (item): item is { entry: (typeof dash.confirmed)[number]; participant: Participant } =>
+              item.participant !== undefined && !item.participant.cancelled,
+          );
+        const relaying = confirmed.filter((item) =>
+          dash.queue.some((queued) => queued.acceptable.includes(item.entry.sessionId)),
+        );
         const pool = relaying.length > 0 ? relaying : confirmed;
         const chosen = pool[Math.floor(random() * pool.length)];
         if (chosen === undefined) {
-          ctx.check({ scenario: '5 cancel', step: `cancellation ${i + 1}`, ok: false, detail: 'no confirmed participant left to cancel' });
+          ctx.check({
+            scenario: '5 cancel',
+            step: `cancellation ${i + 1}`,
+            ok: false,
+            detail: 'no confirmed participant left to cancel',
+          });
           return;
         }
         const session = label(chosen.entry.sessionId);
@@ -1157,7 +1403,11 @@ runExperiment({
           chosen.participant,
           `CANCEL_REGISTRATION (confirmed ${session})`,
           { type: 'CANCEL_REGISTRATION' },
-          { status: 'APPLIED', registration: 'CANCELLED', offersCreated: relaying.includes(chosen) ? 1 : 0 },
+          {
+            status: 'APPLIED',
+            registration: 'CANCELLED',
+            offersCreated: relaying.includes(chosen) ? 1 : 0,
+          },
         );
         await rehearsal.respond('5 cancel', false);
       }
@@ -1189,20 +1439,39 @@ runExperiment({
           step: `PUT attendance ${participant?.label ?? entry.userId}`,
           ok: response?.status === 200 && attended === true,
           expected: '200 attended=true',
-          actual: response === undefined ? 'request failed' : `${response.status} ${response.text.slice(0, 80)}`,
+          actual:
+            response === undefined
+              ? 'request failed'
+              : `${response.status} ${response.text.slice(0, 80)}`,
           ...(response === undefined ? {} : { ms: response.ms }),
         });
       }
       const after = await rehearsal.dashboard();
-      ctx.expectEqual('6 attendance', 'dashboard counts.attended', Math.min(attendanceCount, dash.confirmed.length), after.counts.attended);
+      ctx.expectEqual(
+        '6 attendance',
+        'dashboard counts.attended',
+        Math.min(attendanceCount, dash.confirmed.length),
+        after.counts.attended,
+      );
     });
 
     // ---------- 7. CSV export
     await phase(rehearsal, '7 export', async () => {
       await rehearsal.pace();
-      const response = await rehearsal.http('7 export', 'export registrations CSV', 'GET', `/orgs/${encodeURIComponent(org.id)}/workshops/${encodeURIComponent(ws.wsId)}/export.csv`);
+      const response = await rehearsal.http(
+        '7 export',
+        'export registrations CSV',
+        'GET',
+        `/orgs/${encodeURIComponent(org.id)}/workshops/${encodeURIComponent(ws.wsId)}/export.csv`,
+      );
       if (response === undefined || response.status !== 200) {
-        ctx.check({ scenario: '7 export', step: 'GET export.csv', ok: false, expected: '200 text/csv', actual: response === undefined ? 'request failed' : String(response.status) });
+        ctx.check({
+          scenario: '7 export',
+          step: 'GET export.csv',
+          ok: false,
+          expected: '200 text/csv',
+          actual: response === undefined ? 'request failed' : String(response.status),
+        });
         return;
       }
       fs.writeFileSync(path.join(ctx.dir, 'export.csv'), response.text);
@@ -1211,12 +1480,38 @@ runExperiment({
       const dash = await rehearsal.dashboard();
       const confirmedRows = rows.filter((row) => row.status === 'CONFIRMED').length;
       const attendedRows = rows.filter((row) => row.attended === 'yes').length;
-      const ours = rows.filter((row) => participants.some((participant) => participant.email.toLowerCase() === (row.email ?? '').toLowerCase())).length;
-      ctx.check({ scenario: '7 export', step: 'GET export.csv', ok: response.contentType.includes('text/csv'), expected: 'text/csv', actual: response.contentType, ms: response.ms });
-      ctx.expectEqual('7 export', 'one row per registration (every participant registered once)', count, rows.length);
+      const ours = rows.filter((row) =>
+        participants.some(
+          (participant) => participant.email.toLowerCase() === (row.email ?? '').toLowerCase(),
+        ),
+      ).length;
+      ctx.check({
+        scenario: '7 export',
+        step: 'GET export.csv',
+        ok: response.contentType.includes('text/csv'),
+        expected: 'text/csv',
+        actual: response.contentType,
+        ms: response.ms,
+      });
+      ctx.expectEqual(
+        '7 export',
+        'one row per registration (every participant registered once)',
+        count,
+        rows.length,
+      );
       ctx.expectEqual('7 export', 'every row is a rehearsal account', rows.length, ours);
-      ctx.expectEqual('7 export', 'CONFIRMED rows = dashboard confirmed', dash.counts.confirmed, confirmedRows);
-      ctx.expectEqual('7 export', 'attended rows = dashboard attended', dash.counts.attended, attendedRows);
+      ctx.expectEqual(
+        '7 export',
+        'CONFIRMED rows = dashboard confirmed',
+        dash.counts.confirmed,
+        confirmedRows,
+      );
+      ctx.expectEqual(
+        '7 export',
+        'attended rows = dashboard attended',
+        dash.counts.attended,
+        attendedRows,
+      );
     });
 
     // ---------- 8. final state, notifications, operations
@@ -1225,53 +1520,91 @@ runExperiment({
       state.finalDash = dash;
       // In-app status of every participant ("my registrations") = the organiser's view (C6).
       for (const participant of participants) {
-        const confirmed = dash.confirmed.find((entry) => entry.userId === participant.account.userId);
+        const confirmed = dash.confirmed.find(
+          (entry) => entry.userId === participant.account.userId,
+        );
         const offered = dash.offered.find((entry) => entry.userId === participant.account.userId);
         const queued = dash.queue.find((entry) => entry.userId === participant.account.userId);
-        const expected = confirmed !== undefined
-          ? `CONFIRMED@${label(confirmed.sessionId)}`
-          : offered !== undefined
-            ? `OFFERED@${label(offered.offer.sessionId)}`
-            : queued !== undefined
-              ? `QUEUED#${queued.queuePosition}`
-              : participant.cancelled
-                ? 'CANCELLED'
-                : 'ENDED(NO_ACCEPTABLE_SESSION)';
+        const expected =
+          confirmed !== undefined
+            ? `CONFIRMED@${label(confirmed.sessionId)}`
+            : offered !== undefined
+              ? `OFFERED@${label(offered.offer.sessionId)}`
+              : queued !== undefined
+                ? `QUEUED#${queued.queuePosition}`
+                : participant.cancelled
+                  ? 'CANCELLED'
+                  : 'ENDED(NO_ACCEPTABLE_SESSION)';
         const mine = await participant.account.client.myRegistrations();
         const entry = mine.registrations.find((candidate) => candidate.workshop.id === ws.wsId);
         const actual = describeRegistration(entry?.registration, label);
-        state.inAppStates.push({ participant: participant.label, expected, actual, ok: expected === actual });
+        state.inAppStates.push({
+          participant: participant.label,
+          expected,
+          actual,
+          ok: expected === actual,
+        });
       }
       const mismatched = state.inAppStates.filter((item) => !item.ok);
       ctx.check({
         scenario: '8 final',
-        step: 'every participant\'s in-app registration status matches the organiser dashboard (C6)',
+        step: "every participant's in-app registration status matches the organiser dashboard (C6)",
         ok: mismatched.length === 0,
         expected: `${participants.length} matches`,
-        actual: mismatched.length === 0 ? `${participants.length} matches` : mismatched.map((item) => `${item.participant}: ${item.actual} vs ${item.expected}`).join('; '),
+        actual:
+          mismatched.length === 0
+            ? `${participants.length} matches`
+            : mismatched
+                .map((item) => `${item.participant}: ${item.actual} vs ${item.expected}`)
+                .join('; '),
       });
 
       // Backfills: counts by cause, same-settlement relays, Table 3 expiry target.
       const byCause = countBy(dash.backfills, (record) => record.cause);
-      const made = rehearsal.rows.filter((row) => row.kind === 'command' && row.status === 'APPLIED');
+      const made = rehearsal.rows.filter(
+        (row) => row.kind === 'command' && row.status === 'APPLIED',
+      );
       const declinesApplied = made.filter((row) => row.type === 'DECLINE_OFFER').length;
       const cancelsApplied = made.filter((row) => row.type === 'CANCEL_REGISTRATION').length;
-      ctx.expectEqual('8 final', 'DECLINED backfill records = declines applied', declinesApplied, byCause.DECLINED ?? 0);
-      ctx.expectEqual('8 final', 'EXPIRED backfill records = unanswered offers', rehearsal.used.silent, byCause.EXPIRED ?? 0);
-      ctx.expectEqual('8 final', 'CANCELLED_CONFIRMED backfill records = cancellations applied', cancelsApplied, byCause.CANCELLED_CONFIRMED ?? 0);
-      const sameSettlement = dash.backfills.filter((record) => record.cause !== 'EXPIRED' && record.reallocatedAt !== undefined);
+      ctx.expectEqual(
+        '8 final',
+        'DECLINED backfill records = declines applied',
+        declinesApplied,
+        byCause.DECLINED ?? 0,
+      );
+      ctx.expectEqual(
+        '8 final',
+        'EXPIRED backfill records = unanswered offers',
+        rehearsal.used.silent,
+        byCause.EXPIRED ?? 0,
+      );
+      ctx.expectEqual(
+        '8 final',
+        'CANCELLED_CONFIRMED backfill records = cancellations applied',
+        cancelsApplied,
+        byCause.CANCELLED_CONFIRMED ?? 0,
+      );
+      const sameSettlement = dash.backfills.filter(
+        (record) => record.cause !== 'EXPIRED' && record.reallocatedAt !== undefined,
+      );
       ctx.check({
         scenario: '8 final',
         step: 'decline / cancellation / capacity backfills relayed in the same settlement (latencyMs 0)',
         ok: sameSettlement.every((record) => record.latencyMs === 0),
         expected: 'latencyMs 0',
-        actual: sameSettlement.map((record) => `${record.cause} ${record.latencyMs}`).join(', ') || 'none relayed',
+        actual:
+          sameSettlement.map((record) => `${record.cause} ${record.latencyMs}`).join(', ') ||
+          'none relayed',
       });
-      const expired = dash.backfills.filter((record) => record.cause === 'EXPIRED' && record.latencyMs !== undefined);
+      const expired = dash.backfills.filter(
+        (record) => record.cause === 'EXPIRED' && record.latencyMs !== undefined,
+      );
       ctx.check({
         scenario: '8 final',
         step: 'expiry-driven backfill within the Table 3 target (≤ 120 s)',
-        ok: expired.length > 0 && expired.every((record) => (record.latencyMs ?? Infinity) <= BACKFILL_TARGET_MS),
+        ok:
+          expired.length > 0 &&
+          expired.every((record) => (record.latencyMs ?? Infinity) <= BACKFILL_TARGET_MS),
         expected: '≤ 120000 ms each',
         actual: expired.map((record) => `${record.latencyMs} ms`).join(', ') || 'no relayed expiry',
       });
@@ -1279,9 +1612,14 @@ runExperiment({
       ctx.check({
         scenario: '8 final',
         step: 'no released seat left unrelayed while someone acceptable is queued',
-        ok: unrelayed.every((record) => !dash.queue.some((entry) => entry.acceptable.includes(record.sessionId))),
+        ok: unrelayed.every(
+          (record) => !dash.queue.some((entry) => entry.acceptable.includes(record.sessionId)),
+        ),
         expected: 'pending backfills only where nobody acceptable is queued',
-        actual: unrelayed.length === 0 ? 'none pending' : unrelayed.map((record) => `${record.cause}@${label(record.sessionId)}`).join(', '),
+        actual:
+          unrelayed.length === 0
+            ? 'none pending'
+            : unrelayed.map((record) => `${record.cause}@${label(record.sessionId)}`).join(', '),
       });
       ctx.check({
         scenario: '8 final',
@@ -1303,7 +1641,10 @@ runExperiment({
         }
         return pending;
       };
-      const inApp = new Map<string, Awaited<ReturnType<Account['client']['myNotifications']>>['notifications']>();
+      const inApp = new Map<
+        string,
+        Awaited<ReturnType<Account['client']['myNotifications']>>['notifications']
+      >();
       const readInApp = async (): Promise<number> => {
         let pending = 0;
         for (const participant of participants) {
@@ -1326,7 +1667,10 @@ runExperiment({
       for (const participant of participants) {
         const appList = inApp.get(participant.label) ?? [];
         const dbList = stored.get(participant.label);
-        const ids = new Set([...appList.map((item) => item.id), ...(dbList ?? []).map((item) => item.id)]);
+        const ids = new Set([
+          ...appList.map((item) => item.id),
+          ...(dbList ?? []).map((item) => item.id),
+        ]);
         for (const id of ids) {
           const app = appList.find((item) => item.id === id);
           const db = dbList?.find((item) => item.id === id);
@@ -1343,16 +1687,29 @@ runExperiment({
           });
         }
       }
-      state.notifications.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.participant.localeCompare(b.participant));
-      const statusOf = (row: NotificationRow): string => (aws.available ? row.storedStatus : row.inAppStatus);
+      state.notifications.sort(
+        (a, b) =>
+          a.createdAt.localeCompare(b.createdAt) || a.participant.localeCompare(b.participant),
+      );
+      const statusOf = (row: NotificationRow): string =>
+        aws.available ? row.storedStatus : row.inAppStatus;
       const kinds = countBy(state.notifications, (row) => row.kind);
       const accepted = made.filter((row) => row.type === 'ACCEPT_OFFER').length;
       ctx.check({
         scenario: '8 final',
         step: 'notifications by kind match the events (OFFER = offers made, CONFIRMED = accepts, DECLINED = declines, EXPIRED = expiries)',
-        ok: (kinds.OFFER ?? 0) === rehearsal.offers.size && (kinds.CONFIRMED ?? 0) === accepted && (kinds.DECLINED ?? 0) === declinesApplied && (kinds.EXPIRED ?? 0) === rehearsal.used.silent && Object.keys(kinds).every((kind) => ['OFFER', 'CONFIRMED', 'DECLINED', 'EXPIRED'].includes(kind)),
+        ok:
+          (kinds.OFFER ?? 0) === rehearsal.offers.size &&
+          (kinds.CONFIRMED ?? 0) === accepted &&
+          (kinds.DECLINED ?? 0) === declinesApplied &&
+          (kinds.EXPIRED ?? 0) === rehearsal.used.silent &&
+          Object.keys(kinds).every((kind) =>
+            ['OFFER', 'CONFIRMED', 'DECLINED', 'EXPIRED'].includes(kind),
+          ),
         expected: `OFFER ${rehearsal.offers.size}, CONFIRMED ${accepted}, DECLINED ${declinesApplied}, EXPIRED ${rehearsal.used.silent}`,
-        actual: Object.entries(kinds).map(([kind, n]) => `${kind} ${n}`).join(', '),
+        actual: Object.entries(kinds)
+          .map(([kind, n]) => `${kind} ${n}`)
+          .join(', '),
       });
       const stillPending = state.notifications.filter((row) => statusOf(row) === 'PENDING').length;
       ctx.check({
@@ -1370,15 +1727,22 @@ runExperiment({
             step: 'SES accepted every e-mail to the mailbox simulator (SENT)',
             ok: (statuses.SENT ?? 0) === state.notifications.length,
             expected: `SENT ${state.notifications.length}`,
-            actual: Object.entries(statuses).map(([status, n]) => `${status} ${n}`).join(', '),
+            actual: Object.entries(statuses)
+              .map(([status, n]) => `${status} ${n}`)
+              .join(', '),
           });
         } else {
           ctx.check({
             scenario: '8 final',
             step: 'e-mails rejected by the SES sandbox are recorded FAILED, none PENDING (C6)',
-            ok: (statuses.PENDING ?? 0) === 0 && ((statuses.FAILED ?? 0) + (statuses.SENT ?? 0) + (statuses.SKIPPED ?? 0)) === state.notifications.length,
+            ok:
+              (statuses.PENDING ?? 0) === 0 &&
+              (statuses.FAILED ?? 0) + (statuses.SENT ?? 0) + (statuses.SKIPPED ?? 0) ===
+                state.notifications.length,
             expected: 'FAILED (or SENT/SKIPPED), never PENDING',
-            actual: Object.entries(statuses).map(([status, n]) => `${status} ${n}`).join(', '),
+            actual: Object.entries(statuses)
+              .map(([status, n]) => `${status} ${n}`)
+              .join(', '),
           });
         }
       }
@@ -1389,7 +1753,16 @@ runExperiment({
           step: 'in-app notification list (GET /me/notifications) = stored Notification items, same status (C6 readable)',
           ok: mismatch.length === 0,
           expected: `${state.notifications.length} identical`,
-          actual: mismatch.length === 0 ? `${state.notifications.length} identical` : mismatch.slice(0, 5).map((row) => `${row.participant} ${row.kind} app=${row.inAppStatus} db=${row.storedStatus}`).join('; '),
+          actual:
+            mismatch.length === 0
+              ? `${state.notifications.length} identical`
+              : mismatch
+                  .slice(0, 5)
+                  .map(
+                    (row) =>
+                      `${row.participant} ${row.kind} app=${row.inAppStatus} db=${row.storedStatus}`,
+                  )
+                  .join('; '),
         });
       }
 
@@ -1407,7 +1780,12 @@ runExperiment({
       if (aws.available && aws.cw !== undefined) {
         try {
           state.alarmsAfter = await alarmStates(aws.cw, alarmPrefix);
-          state.transitions = await alarmTransitions(aws.cw, alarmPrefix, ctx.startedAt, new Date());
+          state.transitions = await alarmTransitions(
+            aws.cw,
+            alarmPrefix,
+            ctx.startedAt,
+            new Date(),
+          );
           const alarming = state.alarmsAfter.filter((alarm) => alarm.state === 'ALARM');
           const toAlarm = state.transitions.filter((item) => /to ALARM/.test(item.summary));
           ctx.check({
@@ -1422,7 +1800,9 @@ runExperiment({
         }
         const waitMs = ctx.options.metricsWaitMs - (Date.now() - rehearsal.lastActionAt);
         if (waitMs > 0) {
-          ctx.log(`waiting ${Math.round(waitMs / 1000)} s for CloudWatch to ingest the run's metrics`);
+          ctx.log(
+            `waiting ${Math.round(waitMs / 1000)} s for CloudWatch to ingest the run's metrics`,
+          );
           await sleep(waitMs);
         }
         state.metrics = await getMetricData(windowQueries(ctx.target.stage), {
@@ -1432,24 +1812,41 @@ runExperiment({
         });
         if (state.metrics.available) {
           const metricsRead = state.metrics;
-          const total = (name: string, stat: string): number => seriesTotal(metricsRead, metricId(name, stat)) ?? 0;
+          const total = (name: string, stat: string): number =>
+            seriesTotal(metricsRead, metricId(name, stat)) ?? 0;
           // The custom series must hold this run's commands; an empty series means the query
           // addresses the wrong dimensions, and then "0 late expiries" would prove nothing.
-          const relayedBackfills = dash.backfills.filter((record) => record.latencyMs !== undefined).length;
-          const settledCommands = made.length + rehearsal.rows.filter((row) => row.kind === 'command' && row.status === 'REJECTED').length;
+          const relayedBackfills = dash.backfills.filter(
+            (record) => record.latencyMs !== undefined,
+          ).length;
+          const settledCommands =
+            made.length +
+            rehearsal.rows.filter((row) => row.kind === 'command' && row.status === 'REJECTED')
+              .length;
           const observed = {
             CommandSettledLatency: total('CommandSettledLatency', 'SampleCount'),
             OffersCreated: total('OffersCreated', 'Sum'),
             OffersExpired: total('OffersExpired', 'Sum'),
             BackfillLatency: total('BackfillLatency', 'SampleCount'),
           };
-          const wanted = { CommandSettledLatency: settledCommands, OffersCreated: rehearsal.offers.size, OffersExpired: rehearsal.used.silent, BackfillLatency: relayedBackfills };
+          const wanted = {
+            CommandSettledLatency: settledCommands,
+            OffersCreated: rehearsal.offers.size,
+            OffersExpired: rehearsal.used.silent,
+            BackfillLatency: relayedBackfills,
+          };
           ctx.check({
             scenario: '8 final',
             step: `CloudWatch custom metrics (service + stage=${ctx.target.stage}) agree with the API record of the run`,
-            ok: (Object.keys(wanted) as (keyof typeof wanted)[]).every((key) => observed[key] === wanted[key]),
-            expected: Object.entries(wanted).map(([key, value]) => `${key} ${value}`).join(', '),
-            actual: Object.entries(observed).map(([key, value]) => `${key} ${value}`).join(', '),
+            ok: (Object.keys(wanted) as (keyof typeof wanted)[]).every(
+              (key) => observed[key] === wanted[key],
+            ),
+            expected: Object.entries(wanted)
+              .map(([key, value]) => `${key} ${value}`)
+              .join(', '),
+            actual: Object.entries(observed)
+              .map(([key, value]) => `${key} ${value}`)
+              .join(', '),
           });
           const sweepLate = total('SweepLateExpiries', 'Sum');
           ctx.check({
@@ -1459,16 +1856,45 @@ runExperiment({
             expected: '0 (with CommandSettledLatency samples > 0)',
             actual: `${sweepLate} (CommandSettledLatency samples ${observed.CommandSettledLatency})`,
           });
-          const throttles = ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier'].reduce((acc, fn) => acc + (seriesTotal(state.metrics as MetricsResult, metricId('fn', fn, 'Throttles', 'Sum')) ?? 0), 0);
-          const errors = ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier'].reduce((acc, fn) => acc + (seriesTotal(state.metrics as MetricsResult, metricId('fn', fn, 'Errors', 'Sum')) ?? 0), 0);
-          ctx.check({ scenario: '8 final', step: `no Lambda errors or throttles on seatrelay-${ctx.target.stage}-*`, ok: throttles === 0 && errors === 0, expected: '0 errors, 0 throttles', actual: `${errors} errors, ${throttles} throttles` });
+          const throttles = ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier'].reduce(
+            (acc, fn) =>
+              acc +
+              (seriesTotal(
+                state.metrics as MetricsResult,
+                metricId('fn', fn, 'Throttles', 'Sum'),
+              ) ?? 0),
+            0,
+          );
+          const errors = ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier'].reduce(
+            (acc, fn) =>
+              acc +
+              (seriesTotal(state.metrics as MetricsResult, metricId('fn', fn, 'Errors', 'Sum')) ??
+                0),
+            0,
+          );
+          ctx.check({
+            scenario: '8 final',
+            step: `no Lambda errors or throttles on seatrelay-${ctx.target.stage}-*`,
+            ok: throttles === 0 && errors === 0,
+            expected: '0 errors, 0 throttles',
+            actual: `${errors} errors, ${throttles} throttles`,
+          });
         } else {
           ctx.skip('8 final', 'CloudWatch metrics of the window', state.metrics.reason);
         }
       }
     });
 
-    return buildResult(ctx, state, { count, capacities, capacityUp, declines, expiries, cancellations, attendanceCount, notifyWaitS });
+    return buildResult(ctx, state, {
+      count,
+      capacities,
+      capacityUp,
+      declines,
+      expiries,
+      cancellations,
+      attendanceCount,
+      notifyWaitS,
+    });
   },
 });
 
@@ -1484,13 +1910,18 @@ interface Settings {
 }
 
 function latencyStats(values: readonly (number | undefined)[]) {
-  return summarize(values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value)));
+  return summarize(
+    values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value)),
+  );
 }
 
 function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings) {
   const rehearsal = state.rehearsal;
   if (rehearsal === undefined) {
-    return { summary: 'The rehearsal did not start (setup failed).', extra: { mailbox: state.mailbox } };
+    return {
+      summary: 'The rehearsal did not start (setup failed).',
+      extra: { mailbox: state.mailbox },
+    };
   }
   const label = rehearsal.label;
   const commands = rehearsal.rows.filter((row) => row.kind === 'command');
@@ -1502,7 +1933,14 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
   const perType = Object.fromEntries(
     types.map((type) => {
       const rows = settled.filter((row) => row.type === type);
-      return [type, { n: rows.length, client: latencyStats(rows.map((row) => row.settleMs)), server: latencyStats(rows.map((row) => row.serverSettleMs)) }];
+      return [
+        type,
+        {
+          n: rows.length,
+          client: latencyStats(rows.map((row) => row.settleMs)),
+          server: latencyStats(rows.map((row) => row.serverSettleMs)),
+        },
+      ];
     }),
   );
   const dash = state.finalDash;
@@ -1516,8 +1954,14 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
       releasedAt: record.releasedAt,
       reallocatedAt: record.reallocatedAt ?? '',
       latencyMs: record.latencyMs,
-      recomputedMs: record.reallocatedAt === undefined ? undefined : Date.parse(record.reallocatedAt) - Date.parse(record.releasedAt),
-      newParticipant: record.newUserId === undefined ? '' : rehearsal.byUser.get(record.newUserId)?.label ?? record.newUserId,
+      recomputedMs:
+        record.reallocatedAt === undefined
+          ? undefined
+          : Date.parse(record.reallocatedAt) - Date.parse(record.releasedAt),
+      newParticipant:
+        record.newUserId === undefined
+          ? ''
+          : (rehearsal.byUser.get(record.newUserId)?.label ?? record.newUserId),
       backfillId: record.id,
     }));
   const causes = [...new Set(backfills.map((record) => record.cause))].sort();
@@ -1526,35 +1970,70 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
       const records = backfills.filter((record) => record.cause === cause);
       const relayed = records.filter((record) => record.latencyMs !== undefined);
       const latencies = relayed.map((record) => record.latencyMs as number);
-      return [cause, { n: records.length, relayed: relayed.length, latencyMs: latencies, stats: summarize(latencies) }];
+      return [
+        cause,
+        {
+          n: records.length,
+          relayed: relayed.length,
+          latencyMs: latencies,
+          stats: summarize(latencies),
+        },
+      ];
     }),
   );
-  const statusOf = (row: NotificationRow): string => (state.aws?.available ? row.storedStatus : row.inAppStatus);
+  const statusOf = (row: NotificationRow): string =>
+    state.aws?.available ? row.storedStatus : row.inAppStatus;
   const notificationMatrix: Record<string, Record<string, number>> = {};
   for (const row of state.notifications) {
     const kindCounts = (notificationMatrix[row.kind] ??= {});
     kindCounts[statusOf(row)] = (kindCounts[statusOf(row)] ?? 0) + 1;
   }
   const notificationTotals = countBy(state.notifications, statusOf);
-  const failedErrors = [...new Set(state.notifications.filter((row) => row.lastError.length > 0).map((row) => row.lastError.replace(/[\w.+-]+@[\w.-]+/g, '<address>')))];
-  const invariantOk = rehearsal.invariants.length > 0 && rehearsal.invariants.every((row) => row.verifyOk && row.overCapacity === 0 && row.doubleHolds === 0);
+  const failedErrors = [
+    ...new Set(
+      state.notifications
+        .filter((row) => row.lastError.length > 0)
+        .map((row) => row.lastError.replace(/[\w.+-]+@[\w.-]+/g, '<address>')),
+    ),
+  ];
+  const invariantOk =
+    rehearsal.invariants.length > 0 &&
+    rehearsal.invariants.every(
+      (row) => row.verifyOk && row.overCapacity === 0 && row.doubleHolds === 0,
+    );
   const metrics = state.metrics;
-  const concurrencyMax = metrics === undefined ? undefined : seriesMax(metrics, 'lambda_account_concurrent_max');
+  const concurrencyMax =
+    metrics === undefined ? undefined : seriesMax(metrics, 'lambda_account_concurrent_max');
   const fnStats = ['api', 'worker', 'expiry-forwarder', 'sweep', 'notifier'].map((fn) => ({
     fn,
-    invocations: metrics === undefined ? undefined : seriesTotal(metrics, metricId('fn', fn, 'Invocations', 'Sum')),
-    errors: metrics === undefined ? undefined : seriesTotal(metrics, metricId('fn', fn, 'Errors', 'Sum')),
-    throttles: metrics === undefined ? undefined : seriesTotal(metrics, metricId('fn', fn, 'Throttles', 'Sum')),
-    concurrentMax: metrics === undefined ? undefined : seriesMax(metrics, metricId('fn', fn, 'ConcurrentExecutions', 'Maximum')),
+    invocations:
+      metrics === undefined
+        ? undefined
+        : seriesTotal(metrics, metricId('fn', fn, 'Invocations', 'Sum')),
+    errors:
+      metrics === undefined ? undefined : seriesTotal(metrics, metricId('fn', fn, 'Errors', 'Sum')),
+    throttles:
+      metrics === undefined
+        ? undefined
+        : seriesTotal(metrics, metricId('fn', fn, 'Throttles', 'Sum')),
+    concurrentMax:
+      metrics === undefined
+        ? undefined
+        : seriesMax(metrics, metricId('fn', fn, 'ConcurrentExecutions', 'Maximum')),
   }));
   const otherStage = ctx.target.stage === 'dev' ? 'pilot' : 'dev';
-  const otherInvocations = metrics === undefined
-    ? undefined
-    : (seriesTotal(metrics, metricId('other', otherStage, 'worker', 'invocations')) ?? 0) + (seriesTotal(metrics, metricId('other', otherStage, 'api', 'invocations')) ?? 0);
-  const custom = (name: string, stat: string): number | undefined => (metrics === undefined ? undefined : seriesTotal(metrics, metricId(name, stat)));
-  const customMax = (name: string): number | undefined => (metrics === undefined ? undefined : seriesMax(metrics, metricId(name, 'Maximum')));
+  const otherInvocations =
+    metrics === undefined
+      ? undefined
+      : (seriesTotal(metrics, metricId('other', otherStage, 'worker', 'invocations')) ?? 0) +
+        (seriesTotal(metrics, metricId('other', otherStage, 'api', 'invocations')) ?? 0);
+  const custom = (name: string, stat: string): number | undefined =>
+    metrics === undefined ? undefined : seriesTotal(metrics, metricId(name, stat));
+  const customMax = (name: string): number | undefined =>
+    metrics === undefined ? undefined : seriesMax(metrics, metricId(name, 'Maximum'));
 
-  const n = (value: number | undefined, digits = 0): string => (value === undefined ? 'n/a' : formatNumber(value, digits));
+  const n = (value: number | undefined, digits = 0): string =>
+    value === undefined ? 'n/a' : formatNumber(value, digits);
   const participants = [...rehearsal.byUser.values()].sort((a, b) => a.no - b.no);
   const groupCounts = countBy(participants, (p) => p.group);
   const lines: string[] = [];
@@ -1562,8 +2041,12 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
     '## What was staged',
     '',
     `- Organisation **${ORG_NAME}**, workshop **${WORKSHOP_TITLE}** (\`${rehearsal.wsId}\`), mode UNIFIED, holdSeconds ${ctx.options.holdSeconds}; sessions ${rehearsal.ws.sessions.map((session, index) => `S${index + 1} "${session.title}" starts ${session.startsAt} capacity ${session.capacity}`).join('; ')}.`,
-    `- ${participants.length} synthetic participants (${Object.entries(groupCounts).map(([group, k]) => `${k} ${group}`).join(', ')}), registering in the order P01 … P${pad2(participants.length)}; every action sequential with a random ${(ctx.params.paceMs as number[] | undefined)?.join('–') ?? '1000–3000'} ms pause before it; organiser \`${(ctx.params.organiser as string) ?? DEFAULT_ORGANISER}\`.`,
-    `- Participant addresses: ${state.mailbox === 'simulator' ? '`success+rehearsal-NN@simulator.amazonses.com` (SES mailbox simulator: the pilot\'s real SES path, delivery simulated, no real inbox)' : '`rehearsal-NN@example.com` (rejected by the SES sandbox: notifications end FAILED)'}${state.mailboxFallback === undefined ? '' : `; **fallback**: ${state.mailboxFallback}`}. The identity provider (Cognito on AWS) accepted the address as username and the API saw it as the account e-mail: ${state.cognitoAccepted === undefined ? 'n/a' : state.cognitoAccepted ? 'yes' : 'NO'}.`,
+    `- ${participants.length} synthetic participants (${Object.entries(groupCounts)
+      .map(([group, k]) => `${k} ${group}`)
+      .join(
+        ', ',
+      )}), registering in the order P01 … P${pad2(participants.length)}; every action sequential with a random ${(ctx.params.paceMs as number[] | undefined)?.join('–') ?? '1000–3000'} ms pause before it; organiser \`${(ctx.params.organiser as string) ?? DEFAULT_ORGANISER}\`.`,
+    `- Participant addresses: ${state.mailbox === 'simulator' ? "`success+rehearsal-NN@simulator.amazonses.com` (SES mailbox simulator: the pilot's real SES path, delivery simulated, no real inbox)" : '`rehearsal-NN@example.com` (rejected by the SES sandbox: notifications end FAILED)'}${state.mailboxFallback === undefined ? '' : `; **fallback**: ${state.mailboxFallback}`}. The identity provider (Cognito on AWS) accepted the address as username and the API saw it as the account e-mail: ${state.cognitoAccepted === undefined ? 'n/a' : state.cognitoAccepted ? 'yes' : 'NO'}.`,
     `- Scripted behaviour: ${rehearsal.used.decline}/${settings.declines} declines, ${rehearsal.used.silent}/${settings.expiries} offers left to expire, ${commands.filter((row) => row.type === 'CANCEL_REGISTRATION').length}/${settings.cancellations} cancellations after confirming, capacity +${settings.capacityUp} on S2, attendance marked for ${rehearsal.rows.filter((row) => row.kind === 'http' && row.action.startsWith('mark ')).length}/${settings.attendanceCount} confirmed participants, CSV export (\`export.csv\`).`,
     '- Every account and every action is synthetic and scripted. Nothing here is user evidence; the live pilot (independent participants) is logged separately.',
     '',
@@ -1573,7 +2056,18 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
       ['phase', 'started', 'finished', 'actions', 'invariants after', 'error'],
       rehearsal.phases.map((item) => {
         const inv = rehearsal.invariants.find((row) => row.phase === item.phase);
-        return [item.phase, item.startedAt, item.finishedAt, item.actions, inv === undefined ? 'n/a' : inv.verifyOk && inv.overCapacity === 0 && inv.doubleHolds === 0 ? 'ok' : 'VIOLATED', item.error];
+        return [
+          item.phase,
+          item.startedAt,
+          item.finishedAt,
+          item.actions,
+          inv === undefined
+            ? 'n/a'
+            : inv.verifyOk && inv.overCapacity === 0 && inv.doubleHolds === 0
+              ? 'ok'
+              : 'VIOLATED',
+          item.error,
+        ];
       }),
     ),
     '',
@@ -1587,19 +2081,38 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
       summaryRow('202 response (POST)', acceptAll),
       summaryRow('settle, client-observed', clientAll),
       summaryRow('settle, server-side', serverAll),
-      ...types.flatMap((type) => [summaryRow(`${type} client (n=${perType[type]?.n})`, perType[type]!.client), summaryRow(`${type} server`, perType[type]!.server)]),
+      ...types.flatMap((type) => [
+        summaryRow(`${type} client (n=${perType[type]?.n})`, perType[type]!.client),
+        summaryRow(`${type} server`, perType[type]!.server),
+      ]),
     ]),
     '',
     '## Backfills',
     '',
     markdownTable(
       ['cause', 'records', 'relayed', 'latency ms (each)', 'p50 ms', 'max ms'],
-      causes.map((cause) => [cause, byCause[cause]!.n, byCause[cause]!.relayed, byCause[cause]!.latencyMs.join(', '), n(byCause[cause]!.stats.p50), n(byCause[cause]!.stats.max)]),
+      causes.map((cause) => [
+        cause,
+        byCause[cause]!.n,
+        byCause[cause]!.relayed,
+        byCause[cause]!.latencyMs.join(', '),
+        n(byCause[cause]!.stats.p50),
+        n(byCause[cause]!.stats.max),
+      ]),
     ),
     '',
     markdownTable(
       ['released', 'cause', 'session', 'reallocated', 'latency ms', 'to'],
-      backfillRows.map((row) => [row.releasedAt, row.cause, row.session, row.reallocatedAt, row.latencyMs, row.newParticipant].map((cell) => cell ?? '')),
+      backfillRows.map((row) =>
+        [
+          row.releasedAt,
+          row.cause,
+          row.session,
+          row.reallocatedAt,
+          row.latencyMs,
+          row.newParticipant,
+        ].map((cell) => cell ?? ''),
+      ),
     ),
     '',
     'EXPIRED latency = `reallocatedAt − expiresAt` (timer-driven; Table 3 target ≤ 120 s). DECLINED / CANCELLED_CONFIRMED / CAPACITY_UP are relayed inside the same settlement (0 ms by construction).',
@@ -1607,8 +2120,34 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
     '## Invariants after each phase',
     '',
     markdownTable(
-      ['phase', 'verify', 'over-capacity', 'double holds', 'violations', 'S1 conf+held/cap', 'S2 conf+held/cap', 'queued', 'offered', 'confirmed', 'backfills', 'distinct served'],
-      rehearsal.invariants.map((row) => [row.phase, row.verifyOk ? 'ok' : 'FAILED', row.overCapacity, row.doubleHolds, row.violations || '—', row.S1, row.S2, row.queued, row.offered, row.confirmed, row.backfills, row.distinctServed]),
+      [
+        'phase',
+        'verify',
+        'over-capacity',
+        'double holds',
+        'violations',
+        'S1 conf+held/cap',
+        'S2 conf+held/cap',
+        'queued',
+        'offered',
+        'confirmed',
+        'backfills',
+        'distinct served',
+      ],
+      rehearsal.invariants.map((row) => [
+        row.phase,
+        row.verifyOk ? 'ok' : 'FAILED',
+        row.overCapacity,
+        row.doubleHolds,
+        row.violations || '—',
+        row.S1,
+        row.S2,
+        row.queued,
+        row.offered,
+        row.confirmed,
+        row.backfills,
+        row.distinctServed,
+      ]),
     ),
     '',
     `Invariant result over all phases: **${invariantOk ? 'held' : 'VIOLATED'}**.`,
@@ -1620,7 +2159,14 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
       '',
       markdownTable(
         ['session', 'capacity', 'confirmed', 'held', 'free', 'queue (acceptable)'],
-        dash.sessions.map((session) => [label(session.id), session.capacity, session.confirmed, session.held, session.free, session.queueLength]),
+        dash.sessions.map((session) => [
+          label(session.id),
+          session.capacity,
+          session.confirmed,
+          session.held,
+          session.free,
+          session.queueLength,
+        ]),
       ),
       '',
       `- Counts: queued ${dash.counts.queued}, offered ${dash.counts.offered}, confirmed ${dash.counts.confirmed}, backfills ${dash.counts.backfills} (${dash.counts.backfillsReallocated} reallocated), attended ${dash.counts.attended}.`,
@@ -1632,25 +2178,61 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
   lines.push(
     '## Notifications',
     '',
-    `Source: ${state.aws?.available ? `Notification items in DynamoDB (\`${state.aws.tableName}\`, status, attempts, last error) compared with every participant's in-app list (\`GET /me/notifications\`)` : 'every participant\'s in-app list (`GET /me/notifications`)'}; waited up to ${settings.notifyWaitS} s for PENDING to clear.`,
+    `Source: ${state.aws?.available ? `Notification items in DynamoDB (\`${state.aws.tableName}\`, status, attempts, last error) compared with every participant's in-app list (\`GET /me/notifications\`)` : "every participant's in-app list (`GET /me/notifications`)"}; waited up to ${settings.notifyWaitS} s for PENDING to clear.`,
     '',
     markdownTable(
       ['kind', ...NOTIFICATION_STATUSES, 'total'],
-      [...NOTIFICATION_KINDS.filter((kind) => notificationMatrix[kind] !== undefined).map((kind) => [kind, ...NOTIFICATION_STATUSES.map((status) => notificationMatrix[kind]?.[status] ?? 0), Object.values(notificationMatrix[kind] ?? {}).reduce((acc, k) => acc + k, 0)]),
-        ['total', ...NOTIFICATION_STATUSES.map((status) => notificationTotals[status] ?? 0), state.notifications.length]],
+      [
+        ...NOTIFICATION_KINDS.filter((kind) => notificationMatrix[kind] !== undefined).map(
+          (kind) => [
+            kind,
+            ...NOTIFICATION_STATUSES.map((status) => notificationMatrix[kind]?.[status] ?? 0),
+            Object.values(notificationMatrix[kind] ?? {}).reduce((acc, k) => acc + k, 0),
+          ],
+        ),
+        [
+          'total',
+          ...NOTIFICATION_STATUSES.map((status) => notificationTotals[status] ?? 0),
+          state.notifications.length,
+        ],
+      ],
     ),
     '',
-    failedErrors.length === 0 ? 'No delivery error recorded.' : `Delivery errors recorded (addresses redacted): ${failedErrors.map((error) => `\`${error.slice(0, 200)}\``).join('; ')}`,
+    failedErrors.length === 0
+      ? 'No delivery error recorded.'
+      : `Delivery errors recorded (addresses redacted): ${failedErrors.map((error) => `\`${error.slice(0, 200)}\``).join('; ')}`,
     '',
     `In-app status (C6): ${state.inAppStates.filter((item) => item.ok).length}/${state.inAppStates.length} participants' "my registrations" status equals the organiser dashboard.`,
     '',
     '## Operations',
     '',
     `- Dead-letter queues: before ${state.deadBefore?.available ? `${state.deadBefore.total} ${JSON.stringify(state.deadBefore.counts)}` : `not read (${state.deadBefore?.detail ?? 'n/a'})`}; after ${state.deadAfter?.available ? `${state.deadAfter.total} ${JSON.stringify(state.deadAfter.counts)}` : `not read (${state.deadAfter?.detail ?? 'n/a'})`}.`,
-    `- Alarms (\`seatrelay-${ctx.target.stage}-*\`): before ${state.alarmsBefore === undefined ? 'n/a' : Object.entries(countBy(state.alarmsBefore, (alarm) => alarm.state)).map(([s, k]) => `${k} ${s}`).join(', ')}; after ${state.alarmsAfter === undefined ? 'n/a' : Object.entries(countBy(state.alarmsAfter, (alarm) => alarm.state)).map(([s, k]) => `${k} ${s}`).join(', ')}; state changes during the run: ${state.transitions === undefined ? 'n/a' : state.transitions.length === 0 ? 'none' : state.transitions.map((item) => `${item.at} ${item.name}: ${item.summary}`).join('; ')}.`,
+    `- Alarms (\`seatrelay-${ctx.target.stage}-*\`): before ${
+      state.alarmsBefore === undefined
+        ? 'n/a'
+        : Object.entries(countBy(state.alarmsBefore, (alarm) => alarm.state))
+            .map(([s, k]) => `${k} ${s}`)
+            .join(', ')
+    }; after ${
+      state.alarmsAfter === undefined
+        ? 'n/a'
+        : Object.entries(countBy(state.alarmsAfter, (alarm) => alarm.state))
+            .map(([s, k]) => `${k} ${s}`)
+            .join(', ')
+    }; state changes during the run: ${state.transitions === undefined ? 'n/a' : state.transitions.length === 0 ? 'none' : state.transitions.map((item) => `${item.at} ${item.name}: ${item.summary}`).join('; ')}.`,
   );
   if (state.alarmsAfter !== undefined) {
-    lines.push('', markdownTable(['alarm', 'before', 'after'], state.alarmsAfter.map((alarm) => [alarm.name, state.alarmsBefore?.find((item) => item.name === alarm.name)?.state ?? 'n/a', alarm.state])));
+    lines.push(
+      '',
+      markdownTable(
+        ['alarm', 'before', 'after'],
+        state.alarmsAfter.map((alarm) => [
+          alarm.name,
+          state.alarmsBefore?.find((item) => item.name === alarm.name)?.state ?? 'n/a',
+          alarm.state,
+        ]),
+      ),
+    );
   }
   if (metrics !== undefined) {
     if (metrics.available) {
@@ -1661,11 +2243,32 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
         `- Account Lambda ConcurrentExecutions, max of 1-min maxima: **${n(concurrencyMax)}** (account quota 10).`,
         `- SeatRelay custom metrics are read with dimensions \`service\` + \`stage=${ctx.target.stage}\` (what the deployed functions emit), so ${otherStage} activity is excluded; ${otherStage} api + worker invocations in the window: ${n(otherInvocations)}. Other ${ctx.target.stage} traffic in the window would be included (the check "CloudWatch custom metrics agree with the API record" shows whether there was any).`,
         '',
-        markdownTable(['function', 'invocations', 'errors', 'throttles', 'concurrent max'], fnStats.map((row) => [`seatrelay-${ctx.target.stage}-${row.fn}`, n(row.invocations), n(row.errors), n(row.throttles), n(row.concurrentMax)])),
+        markdownTable(
+          ['function', 'invocations', 'errors', 'throttles', 'concurrent max'],
+          fnStats.map((row) => [
+            `seatrelay-${ctx.target.stage}-${row.fn}`,
+            n(row.invocations),
+            n(row.errors),
+            n(row.throttles),
+            n(row.concurrentMax),
+          ]),
+        ),
         '',
         markdownTable(
           ['SeatRelay metric', 'sum', 'samples', 'max'],
-          ['CommandSettledLatency', 'BackfillLatency', 'OffersCreated', 'OffersExpired', 'SweepLateExpiries', 'NotificationFailures'].map((name) => [name, n(custom(name, 'Sum')), n(custom(name, 'SampleCount')), n(customMax(name))]),
+          [
+            'CommandSettledLatency',
+            'BackfillLatency',
+            'OffersCreated',
+            'OffersExpired',
+            'SweepLateExpiries',
+            'NotificationFailures',
+          ].map((name) => [
+            name,
+            n(custom(name, 'Sum')),
+            n(custom(name, 'SampleCount')),
+            n(customMax(name)),
+          ]),
         ),
       );
     } else {
@@ -1678,7 +2281,12 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
     '',
     markdownTable(
       ['participant', 'preferences', 'what they did', 'in-app status at the end'],
-      participants.map((p) => [p.label, p.prefs.map((id) => label(id)).join('>'), p.history.join('; '), state.inAppStates.find((item) => item.participant === p.label)?.actual ?? 'n/a']),
+      participants.map((p) => [
+        p.label,
+        p.prefs.map((id) => label(id)).join('>'),
+        p.history.join('; '),
+        state.inAppStates.find((item) => item.participant === p.label)?.actual ?? 'n/a',
+      ]),
     ),
     '',
     '## Caveats',
@@ -1695,32 +2303,101 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
     orgId: rehearsal.orgId,
     mailbox: state.mailbox,
     mailboxFallback: state.mailboxFallback ?? null,
-    cognitoAcceptedSimulatorAddress: state.mailbox === 'simulator' ? state.cognitoAccepted ?? null : false,
+    cognitoAcceptedSimulatorAddress:
+      state.mailbox === 'simulator' ? (state.cognitoAccepted ?? null) : false,
     participants: participants.length,
     groups: groupCounts,
-    commands: { sent: commands.length, settled: settled.length, applied: settled.filter((row) => row.status === 'APPLIED').length, rejected: settled.filter((row) => row.status === 'REJECTED').length, byType: countBy(settled, (row) => row.type) },
+    commands: {
+      sent: commands.length,
+      settled: settled.length,
+      applied: settled.filter((row) => row.status === 'APPLIED').length,
+      rejected: settled.filter((row) => row.status === 'REJECTED').length,
+      byType: countBy(settled, (row) => row.type),
+    },
     httpActions: rehearsal.rows.filter((row) => row.kind === 'http').length,
     acceptMs: acceptAll,
     settleMs: clientAll,
     serverSettleMs: serverAll,
     settleByType: perType,
-    scripted: { declines: rehearsal.used.decline, expiries: rehearsal.used.silent, cancellations: commands.filter((row) => row.type === 'CANCEL_REGISTRATION' && row.status === 'APPLIED').length, capacityUp: settings.capacityUp, attendanceMarked: rehearsal.rows.filter((row) => row.kind === 'http' && row.action.startsWith('mark ') && row.ok).length },
+    scripted: {
+      declines: rehearsal.used.decline,
+      expiries: rehearsal.used.silent,
+      cancellations: commands.filter(
+        (row) => row.type === 'CANCEL_REGISTRATION' && row.status === 'APPLIED',
+      ).length,
+      capacityUp: settings.capacityUp,
+      attendanceMarked: rehearsal.rows.filter(
+        (row) => row.kind === 'http' && row.action.startsWith('mark ') && row.ok,
+      ).length,
+    },
     offers: rehearsal.offers.size,
     expiryWaitSeconds: state.expiryWaitS ?? null,
     backfills: byCause,
-    invariants: { ok: invariantOk, phases: rehearsal.invariants.length, verifyFailures: rehearsal.invariants.filter((row) => !row.verifyOk).length, overCapacity: rehearsal.invariants.reduce((acc, row) => acc + row.overCapacity, 0), doubleHolds: rehearsal.invariants.reduce((acc, row) => acc + row.doubleHolds, 0) },
-    final: dash === undefined ? null : {
-      counts: dash.counts,
-      distinctParticipantsServed: dash.distinctParticipantsServed,
-      sessions: dash.sessions.map((session) => ({ label: label(session.id), capacity: session.capacity, confirmed: session.confirmed, held: session.held, free: session.free, queueLength: session.queueLength })),
+    invariants: {
+      ok: invariantOk,
+      phases: rehearsal.invariants.length,
+      verifyFailures: rehearsal.invariants.filter((row) => !row.verifyOk).length,
+      overCapacity: rehearsal.invariants.reduce((acc, row) => acc + row.overCapacity, 0),
+      doubleHolds: rehearsal.invariants.reduce((acc, row) => acc + row.doubleHolds, 0),
     },
+    final:
+      dash === undefined
+        ? null
+        : {
+            counts: dash.counts,
+            distinctParticipantsServed: dash.distinctParticipantsServed,
+            sessions: dash.sessions.map((session) => ({
+              label: label(session.id),
+              capacity: session.capacity,
+              confirmed: session.confirmed,
+              held: session.held,
+              free: session.free,
+              queueLength: session.queueLength,
+            })),
+          },
     exportRows: state.exportRows?.length ?? null,
-    notifications: { source: state.aws?.available ? 'dynamodb+in-app' : 'in-app', total: state.notifications.length, byStatus: notificationTotals, byKind: notificationMatrix, errors: failedErrors },
+    notifications: {
+      source: state.aws?.available ? 'dynamodb+in-app' : 'in-app',
+      total: state.notifications.length,
+      byStatus: notificationTotals,
+      byKind: notificationMatrix,
+      errors: failedErrors,
+    },
     inAppStatusMatches: state.inAppStates.filter((item) => item.ok).length,
     deadLetters: { before: state.deadBefore ?? null, after: state.deadAfter ?? null },
-    alarms: { before: state.alarmsBefore ?? null, after: state.alarmsAfter ?? null, transitions: state.transitions ?? null },
-    lambda: metrics === undefined || !metrics.available ? null : { accountConcurrentMax: concurrencyMax, functions: fnStats, otherStageInvocations: otherInvocations },
-    customMetrics: metrics === undefined || !metrics.available ? null : Object.fromEntries(['CommandSettledLatency', 'BackfillLatency', 'OffersCreated', 'OffersExpired', 'SweepLateExpiries', 'NotificationFailures'].map((name) => [name, { sum: custom(name, 'Sum'), samples: custom(name, 'SampleCount'), max: customMax(name) }])),
+    alarms: {
+      before: state.alarmsBefore ?? null,
+      after: state.alarmsAfter ?? null,
+      transitions: state.transitions ?? null,
+    },
+    lambda:
+      metrics === undefined || !metrics.available
+        ? null
+        : {
+            accountConcurrentMax: concurrencyMax,
+            functions: fnStats,
+            otherStageInvocations: otherInvocations,
+          },
+    customMetrics:
+      metrics === undefined || !metrics.available
+        ? null
+        : Object.fromEntries(
+            [
+              'CommandSettledLatency',
+              'BackfillLatency',
+              'OffersCreated',
+              'OffersExpired',
+              'SweepLateExpiries',
+              'NotificationFailures',
+            ].map((name) => [
+              name,
+              {
+                sum: custom(name, 'Sum'),
+                samples: custom(name, 'SampleCount'),
+                max: customMax(name),
+              },
+            ]),
+          ),
   };
   return {
     summary: lines.join('\n'),

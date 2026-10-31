@@ -67,7 +67,9 @@ async function runCase(
   samples: LatencySample[],
 ): Promise<CaseOutcome> {
   const scenario = c.id;
-  const fullSessions = c.fills.flatMap((fill, i) => (fill >= (c.capacities[i] ?? 0) ? [i + 1] : []));
+  const fullSessions = c.fills.flatMap((fill, i) =>
+    fill >= (c.capacities[i] ?? 0) ? [i + 1] : [],
+  );
   const outcome: CaseOutcome = {
     run,
     case: c.id,
@@ -105,14 +107,21 @@ async function runCase(
       if (!fillerOf.has(session)) {
         fillerOf.set(session, filler);
       }
-      return trySend(filler, ws.wsId, { type: 'REGISTER', acceptable: [sessionId(session)] }, timeout);
+      return trySend(
+        filler,
+        ws.wsId,
+        { type: 'REGISTER', acceptable: [sessionId(session)] },
+        timeout,
+      );
     }),
   );
   const fillersOk = filled.every(
     (result) => result.ok && result.settled.record.result?.registration?.status === 'OFFERED',
   );
   const dash = await organiser.client.dashboard(orgId, ws.wsId);
-  const freeNow = ws.sessionIds.map((id) => dash.sessions.find((session) => session.id === id)?.free ?? -1);
+  const freeNow = ws.sessionIds.map(
+    (id) => dash.sessions.find((session) => session.id === id)?.free ?? -1,
+  );
   const freeExpected = c.capacities.map((capacity, i) => capacity - (c.fills[i] ?? 0));
   ctx.check({
     run,
@@ -125,7 +134,12 @@ async function runCase(
 
   // 2. the participant registers
   const prefs = c.prefs.map(sessionId);
-  const registered = await trySend(participant, ws.wsId, { type: 'REGISTER', acceptable: prefs }, timeout);
+  const registered = await trySend(
+    participant,
+    ws.wsId,
+    { type: 'REGISTER', acceptable: prefs },
+    timeout,
+  );
   if (!registered.ok) {
     ctx.fail(scenario, 'participant REGISTER', registered.error, run);
     return outcome;
@@ -189,14 +203,20 @@ async function runCase(
     expected: 'verify ok, overCapacity 0, doubleHolds 0',
     actual: `verify ${inv.verify.ok ? 'ok' : `FAILED ${inv.verify.violations.map((v) => v.code).join(',')}`}, overCapacity ${inv.overCapacity}, doubleHolds ${inv.doubleHolds}`,
   });
-  outcome.ok = fillersOk && outcome.actual === outcome.expected && afterOk && inv.ok && !outcome.offeredNonAcceptable;
+  outcome.ok =
+    fillersOk &&
+    outcome.actual === outcome.expected &&
+    afterOk &&
+    inv.ok &&
+    !outcome.offeredNonAcceptable;
   return outcome;
 }
 
 runExperiment({
   name: 'preference-order',
   tableRow: 'Preference, order (plan §4, Table 3) — deployment replay of 20 fixed cases',
-  criterion: 'the allocated session is always the first acceptable session with a free seat; a non-acceptable session is never offered; verify ok',
+  criterion:
+    'the allocated session is always the first acceptable session with a free seat; a non-acceptable session is never offered; verify ok',
   usage: USAGE,
   defaultHoldSeconds: 900,
   options: { parallel: { type: 'string' } },
@@ -213,7 +233,10 @@ runExperiment({
     ctx.param('orgId', org.id);
     ctx.param('parallel', parallel);
     ctx.param('participant', participant.email);
-    ctx.param('fillers', fillers.map((account) => account.email));
+    ctx.param(
+      'fillers',
+      fillers.map((account) => account.email),
+    );
 
     const outcomes: CaseOutcome[] = [];
     const samples: LatencySample[] = [];
@@ -243,7 +266,18 @@ runExperiment({
       '## Cases',
       '',
       markdownTable(
-        ['run', 'case', 'preferences', 'full before', 'expected', 'actual', 'release', 'expected after', 'actual after', 'verdict'],
+        [
+          'run',
+          'case',
+          'preferences',
+          'full before',
+          'expected',
+          'actual',
+          'release',
+          'expected after',
+          'actual after',
+          'verdict',
+        ],
         outcomes.map((outcome) => [
           outcome.run,
           `${outcome.case}: ${PREFERENCE_CASES.find((c) => c.id === outcome.case)?.note ?? ''}`,
@@ -267,7 +301,12 @@ runExperiment({
       rows: outcomes,
       extraFiles: { 'latency.csv': samples },
       ok: passed === PREFERENCE_CASES.length * ctx.options.runs && nonAcceptable === 0,
-      extra: { cases: outcomes.length, passed, offeredNonAcceptable: nonAcceptable, settleMs: settle },
+      extra: {
+        cases: outcomes.length,
+        passed,
+        offeredNonAcceptable: nonAcceptable,
+        settleMs: settle,
+      },
     };
   },
 });

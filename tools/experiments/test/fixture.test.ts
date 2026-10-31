@@ -5,8 +5,17 @@ import { ApiClient, type TargetConfig } from '@seatrelay/scripts';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AccountPool } from '../src/lib/accounts';
 import { statusOf, tamperToken } from '../src/lib/httpProbe';
-import { createWorkshop, ensureOrganisation, invariantSnapshot, myRegistration } from '../src/lib/scenario';
-import { startMemoryServer, writeFixtureTokenCache, type MemoryServer } from './helpers/memoryServer';
+import {
+  createWorkshop,
+  ensureOrganisation,
+  invariantSnapshot,
+  myRegistration,
+} from '../src/lib/scenario';
+import {
+  startMemoryServer,
+  writeFixtureTokenCache,
+  type MemoryServer,
+} from './helpers/memoryServer';
 
 /**
  * The experiment client stack over real HTTP: the in-memory fixture (the service route table and
@@ -23,10 +32,20 @@ beforeAll(async () => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seatrelay-fixture-'));
   const cacheFile = path.join(dir, 'tokens.json');
   writeFixtureTokenCache(cacheFile, server, { count: 3 });
-  const target: TargetConfig = { name: 'local', stage: 'local', apiBase: server.url, apiSource: 'flag' };
+  const target: TargetConfig = {
+    name: 'local',
+    stage: 'local',
+    apiBase: server.url,
+    apiSource: 'flag',
+  };
   pool = new AccountPool({
     target,
-    naming: { prefix: 'loaduser', domain: 'example.com', organiserEmail: 'organiser@example.com', outsiderEmail: 'loaduser-outsider@example.com' },
+    naming: {
+      prefix: 'loaduser',
+      domain: 'example.com',
+      organiserEmail: 'organiser@example.com',
+      outsiderEmail: 'loaduser-outsider@example.com',
+    },
     password: 'unused',
     cacheFile,
     create: false,
@@ -46,10 +65,17 @@ describe('experiment client against the HTTP fixture', () => {
     const org = await ensureOrganisation(organiser, 'Fixture org');
     const again = await ensureOrganisation(organiser, 'Fixture org');
     expect(again.id).toBe(org.id);
-    const ws = await createWorkshop(organiser, org.id, { title: 'Fixture', holdSeconds: 60, sessions: [{ capacity: 1 }, { capacity: 1 }] });
+    const ws = await createWorkshop(organiser, org.id, {
+      title: 'Fixture',
+      holdSeconds: 60,
+      sessions: [{ capacity: 1 }, { capacity: 1 }],
+    });
     const [s1, s2] = ws.sessionIds as [string, string];
 
-    const registered = await alice!.client.sendCommand(ws.wsId, { type: 'REGISTER', acceptable: [s2, s1] });
+    const registered = await alice!.client.sendCommand(ws.wsId, {
+      type: 'REGISTER',
+      acceptable: [s2, s1],
+    });
     expect(registered.record.status).toBe('APPLIED');
     expect(registered.record.result?.registration?.currentOffer?.sessionId).toBe(s2);
     expect(registered.polls).toBeGreaterThanOrEqual(1);
@@ -70,8 +96,16 @@ describe('experiment client against the HTTP fixture', () => {
     const organiser = await pool.organiser();
     const [, , carol] = await pool.participants(3);
     const org = await ensureOrganisation(organiser, 'Fixture org');
-    const ws = await createWorkshop(organiser, org.id, { title: 'Fault', holdSeconds: 60, sessions: [{ capacity: 2 }, { capacity: 1 }] });
-    const settled = await carol!.client.sendCommand(ws.wsId, { type: 'REGISTER', acceptable: [ws.sessionIds[0] as string], _fault: 'BEFORE_COMMIT' });
+    const ws = await createWorkshop(organiser, org.id, {
+      title: 'Fault',
+      holdSeconds: 60,
+      sessions: [{ capacity: 2 }, { capacity: 1 }],
+    });
+    const settled = await carol!.client.sendCommand(ws.wsId, {
+      type: 'REGISTER',
+      acceptable: [ws.sessionIds[0] as string],
+      _fault: 'BEFORE_COMMIT',
+    });
     expect(settled.record.status).toBe('APPLIED');
     expect(server.deliveries.get(settled.commandId)).toBe(2);
     expect(settled.serverSettleMs).toBeGreaterThanOrEqual(200);
@@ -82,9 +116,14 @@ describe('experiment client against the HTTP fixture', () => {
 
   it('answers 401 to a tampered token and to no token', async () => {
     const [alice] = await pool.participants(1);
-    const tampered = new ApiClient({ baseUrl: server.url, token: tamperToken(await alice!.token()) });
+    const tampered = new ApiClient({
+      baseUrl: server.url,
+      token: tamperToken(await alice!.token()),
+    });
     expect(await statusOf(tampered, 'GET', '/me')).toBe('401 UNAUTHORIZED');
-    expect(await statusOf(new ApiClient({ baseUrl: server.url }), 'GET', '/me')).toBe('401 UNAUTHORIZED');
+    expect(await statusOf(new ApiClient({ baseUrl: server.url }), 'GET', '/me')).toBe(
+      '401 UNAUTHORIZED',
+    );
     expect(await statusOf(alice!.client, 'GET', '/me')).toBe('200');
   });
 });

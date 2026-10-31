@@ -112,7 +112,8 @@ export function execFailure(error: unknown): string {
   if (failure.code === 'ENOENT') {
     return 'docker CLI not found';
   }
-  const stderr = typeof failure.stderr === 'string' ? failure.stderr.trim().split('\n')[0] : undefined;
+  const stderr =
+    typeof failure.stderr === 'string' ? failure.stderr.trim().split('\n')[0] : undefined;
   if (stderr !== undefined && stderr.length > 0) {
     return stderr.slice(0, 200);
   }
@@ -139,7 +140,20 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
     try {
       const { stdout } = await execFileAsync(
         'docker',
-        ['exec', container, 'psql', '-U', 'seatrelay', '-d', 'seatrelay', '-tA', '-F', separator, '-c', sql],
+        [
+          'exec',
+          container,
+          'psql',
+          '-U',
+          'seatrelay',
+          '-d',
+          'seatrelay',
+          '-tA',
+          '-F',
+          separator,
+          '-c',
+          sql,
+        ],
         { timeout: 20_000 },
       );
       return { ok: true, out: stdout.trim() };
@@ -163,9 +177,16 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
   return {
     kind: 'local',
     async deadLetters() {
-      const result = await psql(`SELECT status, count(*) FROM commands WHERE status = 'FAILED' GROUP BY status`);
+      const result = await psql(
+        `SELECT status, count(*) FROM commands WHERE status = 'FAILED' GROUP BY status`,
+      );
       if (!result.ok) {
-        return { available: false, detail: `commands table not readable (${result.reason})`, counts: {}, total: 0 };
+        return {
+          available: false,
+          detail: `commands table not readable (${result.reason})`,
+          counts: {},
+          total: 0,
+        };
       }
       const counts: Record<string, number> = { 'commands.FAILED': 0 };
       for (const line of result.out.split('\n')) {
@@ -175,7 +196,12 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
         }
       }
       const total = Object.values(counts).reduce((acc, value) => acc + value, 0);
-      return { available: true, detail: `commands rows with status FAILED: ${total}`, counts, total };
+      return {
+        available: true,
+        detail: `commands rows with status FAILED: ${total}`,
+        counts,
+        total,
+      };
     },
     async injectLateTick(tick) {
       const payload = JSON.stringify(tick).replace(/'/g, "''");
@@ -184,7 +210,11 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
         `INSERT INTO commands (workshop_id, payload, dedup_id) VALUES ('${tick.workshopId}', '${payload}'::jsonb, '${dedup}')`,
       );
       return result.ok
-        ? { available: true, detail: `TICK inserted into the commands table (dedup ${dedup})`, dedupId: dedup }
+        ? {
+            available: true,
+            detail: `TICK inserted into the commands table (dedup ${dedup})`,
+            dedupId: dedup,
+          }
         : { available: false, detail: `could not insert the TICK (${result.reason})` };
     },
     async commandTrace(dedupId) {
@@ -197,19 +227,28 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
         '\t',
       );
       if (!result.ok) {
-        return { available: false, detail: `commands table not readable (${result.reason})`, events: [] };
+        return {
+          available: false,
+          detail: `commands table not readable (${result.reason})`,
+          events: [],
+        };
       }
       const line = result.out.split('\n').find((candidate) => candidate.length > 0);
       if (line === undefined) {
         return { available: true, detail: `no commands row with dedup_id ${dedupId}`, events: [] };
       }
-      const [status = '', attempts = '0', lastError = '', createdAt = '', doneAt = ''] = line.split('\t');
+      const [status = '', attempts = '0', lastError = '', createdAt = '', doneAt = ''] =
+        line.split('\t');
       const trace: CommandTrace = {
         available: true,
         detail: `commands row: status ${status}, ${attempts} deliveries`,
         deliveries: Number(attempts),
         status,
-        events: [`queued ${createdAt}`, ...(doneAt.length > 0 ? [`done ${doneAt}`] : []), ...(lastError.length > 0 ? [`last error: ${lastError}`] : [])],
+        events: [
+          `queued ${createdAt}`,
+          ...(doneAt.length > 0 ? [`done ${doneAt}`] : []),
+          ...(lastError.length > 0 ? [`last error: ${lastError}`] : []),
+        ],
       };
       if (lastError.length > 0) {
         trace.lastError = lastError;
@@ -235,12 +274,17 @@ export function createLocalOps(options: LocalOpsOptions): TargetOps {
         const before = baseline.local?.[name] ?? { sum: 0, count: 0 };
         values[name] = { sum: now.sum - before.sum, count: now.count - before.count };
       }
-      return { available: true, detail: `GET /metrics deltas since ${baseline.at.toISOString()}`, values };
+      return {
+        available: true,
+        detail: `GET /metrics deltas since ${baseline.at.toISOString()}`,
+        values,
+      };
     },
     async pauseNotifier() {
       return {
         available: false,
-        detail: 'the local notifier is an in-process loop of the server; it cannot be paused from outside (plan §4: documented and skipped)',
+        detail:
+          'the local notifier is an in-process loop of the server; it cannot be paused from outside (plan §4: documented and skipped)',
       };
     },
     async resumeNotifier() {
@@ -298,8 +342,12 @@ export function commandTraceQuery(commandId: string): string {
  * Lambda request id of the invocations that logged the command (BatchSize 1: one message per
  * invocation). Undefined when there is nothing to look up.
  */
-export function messageTraceQuery(messageIds: readonly string[], requestIds: readonly string[]): string | undefined {
-  const list = (values: readonly string[]) => values.map((value) => `"${sanitiseId(value)}"`).join(', ');
+export function messageTraceQuery(
+  messageIds: readonly string[],
+  requestIds: readonly string[],
+): string | undefined {
+  const list = (values: readonly string[]) =>
+    values.map((value) => `"${sanitiseId(value)}"`).join(', ');
   const clauses = [
     ...(messageIds.length === 0 ? [] : [`messageId in [${list(messageIds)}]`]),
     ...(requestIds.length === 0 ? [] : [`function_request_id in [${list(requestIds)}]`]),
@@ -322,7 +370,9 @@ const INJECTED_FAULT = /^injected fault/;
 const SETTLED_LINE = /^command settled|acknowledging redelivery/;
 
 function nonEmpty(values: readonly (string | undefined)[]): string[] {
-  return [...new Set(values.filter((value): value is string => value !== undefined && value.length > 0))];
+  return [
+    ...new Set(values.filter((value): value is string => value !== undefined && value.length > 0)),
+  ];
 }
 
 /**
@@ -359,13 +409,18 @@ export function analyseWorkerTrace(
     }
   }
   const attempts = rows
-    .filter((row) => (row.messageId !== undefined && messageIds.has(row.messageId)) || (row.commandId ?? '').length > 0)
+    .filter(
+      (row) =>
+        (row.messageId !== undefined && messageIds.has(row.messageId)) ||
+        (row.commandId ?? '').length > 0,
+    )
     .map((row) => Number(row.deliveryAttempt))
     .filter((value) => Number.isFinite(value) && value > 0);
   const faultIndex = rows.findIndex((row) => INJECTED_FAULT.test(row.message ?? ''));
   const faultInjected = faultIndex !== -1;
   const acknowledged = commandRows.some((row) => ACK_REDELIVERY.test(row.message ?? ''));
-  const settledAfterFault = faultInjected && rows.slice(faultIndex + 1).some((row) => SETTLED_LINE.test(row.message ?? ''));
+  const settledAfterFault =
+    faultInjected && rows.slice(faultIndex + 1).some((row) => SETTLED_LINE.test(row.message ?? ''));
   const lowerBound = acknowledged || settledAfterFault ? 2 : 0;
   const observed = attempts.length === 0 ? 0 : Math.max(...attempts);
   const deliveries = Math.max(observed, lowerBound);
@@ -388,7 +443,8 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
   const sqs = () => options.sqs ?? new SQSClient({ region });
   const lambda = () => options.lambda ?? new LambdaClient({ region });
   const logs = () => options.logs ?? new CloudWatchLogsClient({ region });
-  const pause = options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  const pause =
+    options.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
 
   async function outputs(): Promise<Record<string, string>> {
     outputsPromise ??= (async () => {
@@ -424,7 +480,10 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
           const attributes = await sqs().send(
             new GetQueueAttributesCommand({
               QueueUrl: url,
-              AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible'],
+              AttributeNames: [
+                'ApproximateNumberOfMessages',
+                'ApproximateNumberOfMessagesNotVisible',
+              ],
             }),
           );
           counts[name] =
@@ -432,7 +491,12 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
             Number(attributes.Attributes?.ApproximateNumberOfMessagesNotVisible ?? '0');
         }
         const total = Object.values(counts).reduce((acc, value) => acc + value, 0);
-        return { available: true, detail: `DLQ depths of ${stackName}: ${JSON.stringify(counts)}`, counts, total };
+        return {
+          available: true,
+          detail: `DLQ depths of ${stackName}: ${JSON.stringify(counts)}`,
+          counts,
+          total,
+        };
       } catch (error) {
         return { ...unavailable(error), counts: {}, total: 0 };
       }
@@ -471,7 +535,9 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
         const logGroupName = workerLogGroup(options.stage);
         const end = Date.now() + 60_000;
         const start = (sinceMs ?? Date.now() - 3_600_000) - 60_000;
-        const query = async (queryString: string): Promise<{ ok: true; rows: LogRow[] } | { ok: false; detail: string }> => {
+        const query = async (
+          queryString: string,
+        ): Promise<{ ok: true; rows: LogRow[] } | { ok: false; detail: string }> => {
           const started = await client.send(
             new StartQueryCommand({
               logGroupName,
@@ -513,7 +579,8 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
           nonEmpty(first.rows.map((row) => row.messageId)),
           nonEmpty(first.rows.map((row) => row.function_request_id)),
         );
-        const second = messageQuery === undefined ? { ok: true as const, rows: [] } : await query(messageQuery);
+        const second =
+          messageQuery === undefined ? { ok: true as const, rows: [] } : await query(messageQuery);
         if (!second.ok) {
           return { available: false, detail: `message lines: ${second.detail}`, events: [] };
         }
@@ -555,7 +622,9 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
       const values: Record<string, { sum: number; count: number }> = {};
       for (const name of names) {
         const sum = result.series.find((series) => series.id === `${name.toLowerCase()}_sum`);
-        const count = result.series.find((series) => series.id === `${name.toLowerCase()}_samplecount`);
+        const count = result.series.find(
+          (series) => series.id === `${name.toLowerCase()}_samplecount`,
+        );
         values[name] = { sum: sum?.total ?? 0, count: count?.total ?? 0 };
       }
       return {
@@ -568,7 +637,12 @@ export function createAwsOps(options: AwsOpsOptions): TargetOps {
       try {
         const out = await outputs();
         const name = out.NotifierFunctionName ?? `seatrelay-${options.stage}-notifier`;
-        await lambda().send(new PutFunctionConcurrencyCommand({ FunctionName: name, ReservedConcurrentExecutions: 0 }));
+        await lambda().send(
+          new PutFunctionConcurrencyCommand({
+            FunctionName: name,
+            ReservedConcurrentExecutions: 0,
+          }),
+        );
         return { available: true, detail: `PutFunctionConcurrency(${name}, 0)` };
       } catch (error) {
         return unavailable(error);

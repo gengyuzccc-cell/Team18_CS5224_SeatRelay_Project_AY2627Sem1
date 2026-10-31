@@ -161,12 +161,25 @@ describe('matrix', () => {
 
   it('counts a round in which nothing settled as +Infinity in the settle medians, not as 0', () => {
     const rows = [
-      row({ vus: 50, round: 1, settleP95: 0, settleP50: 0, settleTimeouts: 63, serverSettleP95: undefined }),
+      row({
+        vus: 50,
+        round: 1,
+        settleP95: 0,
+        settleP50: 0,
+        settleTimeouts: 63,
+        serverSettleP95: undefined,
+      }),
       row({ vus: 50, round: 2, settleP95: 29943, serverSettleP95: 29335, settleTimeouts: 60 }),
       row({ vus: 50, round: 3, settleP95: 28644, serverSettleP95: 28242, settleTimeouts: 76 }),
     ];
     const [level] = aggregateByLevel(rows);
-    expect(level).toMatchObject({ vus: 50, unsettledRounds: 1, settleP95: 29943, serverSettleP95: 29335, pass: false });
+    expect(level).toMatchObject({
+      vus: 50,
+      unsettledRounds: 1,
+      settleP95: 29943,
+      serverSettleP95: 29335,
+      pass: false,
+    });
     const md = renderSummaryMarkdown({
       version: 1,
       date: '2026-10-17',

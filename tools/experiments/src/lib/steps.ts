@@ -1,9 +1,10 @@
-import type {
-  NotificationView,
-  RegistrationSummary,
-  RejectReason,
-} from '@seatrelay/contracts';
-import { ApiHttpError, CommandTimeoutError, type CommandInput, type SettledCommand } from '@seatrelay/scripts';
+import type { NotificationView, RegistrationSummary, RejectReason } from '@seatrelay/contracts';
+import {
+  ApiHttpError,
+  CommandTimeoutError,
+  type CommandInput,
+  type SettledCommand,
+} from '@seatrelay/scripts';
 import type { Account } from './accounts';
 import type { ExperimentContext } from './run';
 import {
@@ -36,7 +37,13 @@ export interface InvariantTotals {
 }
 
 export function emptyTotals(): InvariantTotals {
-  return { verifications: 0, verifyFailures: 0, overCapacity: 0, doubleHolds: 0, violationCodes: {} };
+  return {
+    verifications: 0,
+    verifyFailures: 0,
+    overCapacity: 0,
+    doubleHolds: 0,
+    violationCodes: {},
+  };
 }
 
 export function addInvariants(totals: InvariantTotals, snapshot: InvariantSnapshot): void {
@@ -52,7 +59,9 @@ export function addInvariants(totals: InvariantTotals, snapshot: InvariantSnapsh
 }
 
 /** `S1`, `S2`, … by creation order (the label used in every summary). */
-export function sessionLabeller(ws: Pick<CreatedWorkshop, 'sessionIds'>): (sessionId: string | undefined) => string {
+export function sessionLabeller(
+  ws: Pick<CreatedWorkshop, 'sessionIds'>,
+): (sessionId: string | undefined) => string {
   return (sessionId) => {
     if (sessionId === undefined) {
       return '-';
@@ -176,7 +185,11 @@ export class ScenarioRun {
       return undefined;
     }
     const { settled } = outcome;
-    this.samples.push(latencySample(this.ctx.currentRun, `${this.scenario}: ${title}`, settled, { scenario: this.scenario }));
+    this.samples.push(
+      latencySample(this.ctx.currentRun, `${this.scenario}: ${title}`, settled, {
+        scenario: this.scenario,
+      }),
+    );
     const ok =
       settled.record.status === expected.status &&
       (expected.reason === undefined || settled.record.reason === expected.reason);
@@ -194,11 +207,21 @@ export class ScenarioRun {
   /** Asserts the registration a settled command reports (`result.registration`). */
   expectResult(title: string, settled: SettledCommand | undefined, expected: string): boolean {
     const actual = describeRegistration(settled?.record.result?.registration, this.label);
-    return this.ctx.check({ scenario: this.scenario, step: this.nextStep(title), ok: actual === expected, expected, actual });
+    return this.ctx.check({
+      scenario: this.scenario,
+      step: this.nextStep(title),
+      ok: actual === expected,
+      expected,
+      actual,
+    });
   }
 
   /** Asserts the caller's live registration as seen by `GET /workshops/{id}` (`me`). */
-  async expectState(title: string, who: Account, expected: string): Promise<RegistrationSummary | undefined> {
+  async expectState(
+    title: string,
+    who: Account,
+    expected: string,
+  ): Promise<RegistrationSummary | undefined> {
     const step = this.nextStep(title);
     try {
       const me = await myRegistration(who, this.wsId);
@@ -213,7 +236,13 @@ export class ScenarioRun {
 
   /** A free-form assertion. */
   expect(title: string, ok: boolean, expected: string, actual: string): boolean {
-    return this.ctx.check({ scenario: this.scenario, step: this.nextStep(title), ok, expected, actual });
+    return this.ctx.check({
+      scenario: this.scenario,
+      step: this.nextStep(title),
+      ok,
+      expected,
+      actual,
+    });
   }
 
   /** `verify` + over-capacity / double-hold counters after a step; one check row. */

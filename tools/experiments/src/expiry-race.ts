@@ -1,7 +1,12 @@
 #!/usr/bin/env tsx
 import { intOption, type CommandInput } from '@seatrelay/scripts';
 import type { Account } from './lib/accounts';
-import { classifyEarly, consistentWithServerTime, relayOrder, type EarlyVerdict } from './lib/expiryRace';
+import {
+  classifyEarly,
+  consistentWithServerTime,
+  relayOrder,
+  type EarlyVerdict,
+} from './lib/expiryRace';
 import { markdownTable, summarize, type CsvRow } from './lib/results';
 import { runExperiment, type ExperimentContext } from './lib/run';
 import {
@@ -15,7 +20,13 @@ import {
   waitFor,
   type ClockOffset,
 } from './lib/scenario';
-import { describeRegistration, errorText, sessionLabeller, trySend, type SendOutcome } from './lib/steps';
+import {
+  describeRegistration,
+  errorText,
+  sessionLabeller,
+  trySend,
+  type SendOutcome,
+} from './lib/steps';
 
 /**
  * Table 3 "Expiry race" (plan §4, §1.2 tick-first semantics). With holdSeconds = 60:
@@ -91,7 +102,9 @@ interface LateTickRow extends CsvRow {
 }
 
 const statusOf = (outcome: SendOutcome): string =>
-  outcome.ok ? `${outcome.settled.record.status}${outcome.settled.record.reason === undefined ? '' : `(${outcome.settled.record.reason})`}` : `ERROR ${errorText(outcome.error)}`;
+  outcome.ok
+    ? `${outcome.settled.record.status}${outcome.settled.record.reason === undefined ? '' : `(${outcome.settled.record.reason})`}`
+    : `ERROR ${errorText(outcome.error)}`;
 
 /** How long before the send instant the connection is re-used once, so the timed request does not pay a handshake. */
 const CONNECTION_WARMUP_LEAD_MS = 1500;
@@ -148,22 +161,37 @@ function trialRow(
     acceptedAt: record?.acceptedAt ?? '',
     settledAt: record?.settledAt ?? '',
     arrivalOffsetMs: record === undefined ? undefined : Date.parse(record.acceptedAt) - expiresAtMs,
-    settleOffsetMs: record?.settledAt === undefined ? undefined : Date.parse(record.settledAt) - expiresAtMs,
-    pickupMs: record?.settledAt === undefined ? undefined : Date.parse(record.settledAt) - Date.parse(record.acceptedAt),
+    settleOffsetMs:
+      record?.settledAt === undefined ? undefined : Date.parse(record.settledAt) - expiresAtMs,
+    pickupMs:
+      record?.settledAt === undefined
+        ? undefined
+        : Date.parse(record.settledAt) - Date.parse(record.acceptedAt),
     status: record?.status ?? 'ERROR',
     reason: record?.reason ?? (sent.outcome.ok ? '' : errorText(sent.outcome.error)),
     order,
-    consistent: sent.outcome.ok && consistentWithServerTime(sent.outcome.settled.record, expiresAtMs),
+    consistent:
+      sent.outcome.ok && consistentWithServerTime(sent.outcome.settled.record, expiresAtMs),
     verdict,
     ok: verdict === 'PASS',
   };
 }
 
-async function verifyCheck(ctx: ExperimentContext, run: number, organiser: Account, orgId: string, wsId: string, scenario: string): Promise<void> {
+async function verifyCheck(
+  ctx: ExperimentContext,
+  run: number,
+  organiser: Account,
+  orgId: string,
+  wsId: string,
+  scenario: string,
+): Promise<void> {
   const inv = await invariantSnapshot(organiser, orgId, wsId);
   ctx.check({
-    run, scenario, step: 'verify',
-    ok: inv.ok, expected: 'verify ok',
+    run,
+    scenario,
+    step: 'verify',
+    ok: inv.ok,
+    expected: 'verify ok',
     actual: `verify ${inv.verify.ok ? 'ok' : `FAILED ${inv.verify.violations.map((v) => v.code).join(',')}`}, overCapacity ${inv.overCapacity}, doubleHolds ${inv.doubleHolds}`,
   });
 }
@@ -194,32 +222,57 @@ async function earlyTrials(
     });
     ctx.param(`run${run}.early${attempt}.workshopId`, ws.wsId);
     const [e1] = ws.sessionIds as [string];
-    const reg = await A.client.sendCommand(ws.wsId, { type: 'REGISTER', acceptable: [e1] }, { timeoutMs: timeout });
+    const reg = await A.client.sendCommand(
+      ws.wsId,
+      { type: 'REGISTER', acceptable: [e1] },
+      { timeoutMs: timeout },
+    );
     const offer = reg.record.result?.registration?.currentOffer;
     if (offer === undefined) {
-      throw new Error(`early setup failed: A ${reg.record.status}${reg.record.reason ? `(${reg.record.reason})` : ''}`);
+      throw new Error(
+        `early setup failed: A ${reg.record.status}${reg.record.reason ? `(${reg.record.reason})` : ''}`,
+      );
     }
     const expiresAtMs = Date.parse(offer.expiresAt);
     ctx.log(
       `run ${run} early attempt ${attempt}: offer expires at ${offer.expiresAt}; ACCEPT due at expiresAt − ${marginMs} ms` +
-        (correctionMs > 0 ? ` (send ${correctionMs} ms earlier, learnt from the previous attempt)` : ''),
+        (correctionMs > 0
+          ? ` (send ${correctionMs} ms earlier, learnt from the previous attempt)`
+          : ''),
     );
     ctx.param(`run${run}.early${attempt}.sendCorrectionMs`, correctionMs);
-    const sent = await sendAt(A, ws.wsId, { type: 'ACCEPT_OFFER', offerId: offer.id }, expiresAtMs - marginMs, clock, timeout, correctionMs);
-    const verdict = classifyEarly(sent.outcome.ok ? sent.outcome.settled.record : undefined, expiresAtMs);
+    const sent = await sendAt(
+      A,
+      ws.wsId,
+      { type: 'ACCEPT_OFFER', offerId: offer.id },
+      expiresAtMs - marginMs,
+      clock,
+      timeout,
+      correctionMs,
+    );
+    const verdict = classifyEarly(
+      sent.outcome.ok ? sent.outcome.settled.record : undefined,
+      expiresAtMs,
+    );
     const row = trialRow(run, 'early', attempt, ws.wsId, offer, marginMs, sent, 'n/a', verdict);
     rows.push(row);
     const timing = `arrived ${row.arrivalOffsetMs ?? '?'} ms, settled ${row.settleOffsetMs ?? '?'} ms relative to expiresAt (worker pickup ${row.pickupMs ?? '?'} ms)`;
     ctx.check({
-      run, scenario: 'early', step: `attempt ${attempt}: outcome consistent with the server clock`,
-      ok: row.consistent, expected: 'APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt',
+      run,
+      scenario: 'early',
+      step: `attempt ${attempt}: outcome consistent with the server clock`,
+      ok: row.consistent,
+      expected: 'APPLIED ⇒ acceptedAt < expiresAt; OFFER_EXPIRED ⇒ settledAt ≥ expiresAt',
       actual: `${row.status}${row.reason ? `(${row.reason})` : ''} acceptedAt ${row.acceptedAt} settledAt ${row.settledAt}`,
     });
     await verifyCheck(ctx, run, organiser, orgId, ws.wsId, 'early');
     if (verdict !== 'INCONCLUSIVE') {
       ctx.check({
-        run, scenario: 'early', step: `ACCEPT at expiresAt − ${marginMs} ms succeeds`,
-        ok: verdict === 'PASS', expected: 'APPLIED',
+        run,
+        scenario: 'early',
+        step: `ACCEPT at expiresAt − ${marginMs} ms succeeds`,
+        ok: verdict === 'PASS',
+        expected: 'APPLIED',
         actual: `${statusOf(sent.outcome)}; ${timing}${attempt > 1 ? `; attempt ${attempt} (${attempt - 1} inconclusive before)` : ''}`,
       });
       return rows;
@@ -238,8 +291,11 @@ async function earlyTrials(
     );
   }
   ctx.check({
-    run, scenario: 'early', step: `ACCEPT at expiresAt − ${marginMs} ms succeeds (a conclusive trial within ${maxAttempts} attempts)`,
-    ok: false, expected: 'APPLIED in one of the attempts',
+    run,
+    scenario: 'early',
+    step: `ACCEPT at expiresAt − ${marginMs} ms succeeds (a conclusive trial within ${maxAttempts} attempts)`,
+    ok: false,
+    expected: 'APPLIED in one of the attempts',
     actual: `all ${maxAttempts} attempts processed after expiresAt (arrival ${rows.map((row) => row.arrivalOffsetMs ?? '?').join(' / ')} ms, worker pickup ${rows.map((row) => row.pickupMs ?? '?').join(' / ')} ms, relative to expiresAt; margin ${marginMs} ms)`,
   });
   return rows;
@@ -265,20 +321,39 @@ async function lateTrial(
   });
   ctx.param(`run${run}.late.workshopId`, wsL.wsId);
   const [l1] = wsL.sessionIds as [string];
-  const bReg = await B.client.sendCommand(wsL.wsId, { type: 'REGISTER', acceptable: [l1] }, { timeoutMs: timeout });
-  const cReg = await C.client.sendCommand(wsL.wsId, { type: 'REGISTER', acceptable: [l1] }, { timeoutMs: timeout });
+  const bReg = await B.client.sendCommand(
+    wsL.wsId,
+    { type: 'REGISTER', acceptable: [l1] },
+    { timeoutMs: timeout },
+  );
+  const cReg = await C.client.sendCommand(
+    wsL.wsId,
+    { type: 'REGISTER', acceptable: [l1] },
+    { timeoutMs: timeout },
+  );
   const offerB = bReg.record.result?.registration?.currentOffer;
   const cState = cReg.record.result?.registration?.status;
   if (offerB === undefined || cState !== 'QUEUED') {
     throw new Error(`late setup failed: B ${bReg.record.status}, C ${cState}`);
   }
   const expiresB = Date.parse(offerB.expiresAt);
-  ctx.log(`run ${run} late: offer expires at ${offerB.expiresAt}; waiting ~${Math.round((expiresB - Date.now() - clock.offsetMs) / 1000)} s`);
-  const late = await sendAt(B, wsL.wsId, { type: 'ACCEPT_OFFER', offerId: offerB.id }, expiresB + marginMs, clock, timeout);
+  ctx.log(
+    `run ${run} late: offer expires at ${offerB.expiresAt}; waiting ~${Math.round((expiresB - Date.now() - clock.offsetMs) / 1000)} s`,
+  );
+  const late = await sendAt(
+    B,
+    wsL.wsId,
+    { type: 'ACCEPT_OFFER', offerId: offerB.id },
+    expiresB + marginMs,
+    clock,
+    timeout,
+  );
 
   // late: must be rejected OFFER_EXPIRED, whatever reached the worker first
   const lateExpired =
-    late.outcome.ok && late.outcome.settled.record.status === 'REJECTED' && late.outcome.settled.record.reason === 'OFFER_EXPIRED';
+    late.outcome.ok &&
+    late.outcome.settled.record.status === 'REJECTED' &&
+    late.outcome.settled.record.reason === 'OFFER_EXPIRED';
   let order = 'unknown';
   let newerOffer: { id: string; expiresAt: string } | undefined;
   try {
@@ -292,7 +367,9 @@ async function lateTrial(
     );
     newerOffer = cMe.currentOffer;
     const dash = await organiser.client.dashboard(orgId, wsL.wsId);
-    const expired = dash.backfills.find((record) => record.cause === 'EXPIRED' && record.reallocatedAt !== undefined);
+    const expired = dash.backfills.find(
+      (record) => record.cause === 'EXPIRED' && record.reallocatedAt !== undefined,
+    );
     if (expired?.reallocatedAt !== undefined && late.outcome.ok) {
       const { record } = late.outcome.settled;
       order = relayOrder(
@@ -302,7 +379,9 @@ async function lateTrial(
       );
     }
     ctx.check({
-      run, scenario: 'late', step: 'the expired seat is relayed to the next in queue',
+      run,
+      scenario: 'late',
+      step: 'the expired seat is relayed to the next in queue',
       ok: newerOffer !== undefined && expired !== undefined,
       expected: 'C OFFERED, EXPIRED backfill record relayed',
       actual: `C ${describeRegistration(cMe, sessionLabeller(wsL))}; EXPIRED record latency ${expired?.latencyMs ?? 'n/a'} ms`,
@@ -310,15 +389,31 @@ async function lateTrial(
   } catch (error) {
     ctx.fail('late', 'the expired seat is relayed to the next in queue', error, run);
   }
-  const lateRow = trialRow(run, 'late', 1, wsL.wsId, offerB, marginMs, late, order, lateExpired ? 'PASS' : 'FAIL');
+  const lateRow = trialRow(
+    run,
+    'late',
+    1,
+    wsL.wsId,
+    offerB,
+    marginMs,
+    late,
+    order,
+    lateExpired ? 'PASS' : 'FAIL',
+  );
   ctx.check({
-    run, scenario: 'late', step: `ACCEPT at expiresAt + ${marginMs} ms rejected OFFER_EXPIRED`,
-    ok: lateExpired, expected: 'REJECTED(OFFER_EXPIRED)',
+    run,
+    scenario: 'late',
+    step: `ACCEPT at expiresAt + ${marginMs} ms rejected OFFER_EXPIRED`,
+    ok: lateExpired,
+    expected: 'REJECTED(OFFER_EXPIRED)',
     actual: `${statusOf(late.outcome)}; arrived ${lateRow.arrivalOffsetMs ?? '?'} ms after expiresAt; ${order}`,
   });
   ctx.check({
-    run, scenario: 'late', step: 'outcome consistent with the server clock',
-    ok: lateRow.consistent, expected: 'OFFER_EXPIRED ⇒ settledAt ≥ expiresAt',
+    run,
+    scenario: 'late',
+    step: 'outcome consistent with the server clock',
+    ok: lateRow.consistent,
+    expected: 'OFFER_EXPIRED ⇒ settledAt ≥ expiresAt',
     actual: `${lateRow.status}${lateRow.reason ? `(${lateRow.reason})` : ''} settledAt ${lateRow.settledAt}`,
   });
 
@@ -358,11 +453,22 @@ async function lateTrial(
       const after = await organiser.client.dashboard(orgId, wsL.wsId);
       const cNow = await myRegistration(C, wsL.wsId);
       const unchanged =
-        cNow?.status === 'OFFERED' && cNow.currentOffer?.id === newerOffer.id && cNow.currentOffer.expiresAt === newerOffer.expiresAt;
+        cNow?.status === 'OFFERED' &&
+        cNow.currentOffer?.id === newerOffer.id &&
+        cNow.currentOffer.expiresAt === newerOffer.expiresAt;
       const backfillsUnchanged = after.backfills.length === before.backfills.length;
-      const accepted = await trySend(C, wsL.wsId, { type: 'ACCEPT_OFFER', offerId: newerOffer.id }, timeout);
+      const accepted = await trySend(
+        C,
+        wsL.wsId,
+        { type: 'ACCEPT_OFFER', offerId: newerOffer.id },
+        timeout,
+      );
       const acceptedOk = accepted.ok && accepted.settled.record.status === 'APPLIED';
-      const ok = unchanged && backfillsUnchanged && after.workshop.version === before.workshop.version && acceptedOk;
+      const ok =
+        unchanged &&
+        backfillsUnchanged &&
+        after.workshop.version === before.workshop.version &&
+        acceptedOk;
       lateTick = {
         run,
         workshopId: wsL.wsId,
@@ -376,14 +482,21 @@ async function lateTrial(
         ok,
       };
       ctx.check({
-        run, scenario: 'late tick', step: 'stale TICK has no effect on the newer offer',
+        run,
+        scenario: 'late tick',
+        step: 'stale TICK has no effect on the newer offer',
         ok: unchanged && backfillsUnchanged && after.workshop.version === before.workshop.version,
-        expected: 'newer offer unchanged, no new backfill record, workshop version unchanged (no commit)',
+        expected:
+          'newer offer unchanged, no new backfill record, workshop version unchanged (no commit)',
         actual: `offer ${unchanged ? 'unchanged' : `changed (${describeRegistration(cNow, sessionLabeller(wsL))})`}, backfills ${before.backfills.length}→${after.backfills.length}, version ${before.workshop.version}→${after.workshop.version}; ${processed}; ${injected.detail}`,
       });
       ctx.check({
-        run, scenario: 'late tick', step: 'the newer offer can still be accepted',
-        ok: acceptedOk, expected: 'APPLIED', actual: statusOf(accepted),
+        run,
+        scenario: 'late tick',
+        step: 'the newer offer can still be accepted',
+        ok: acceptedOk,
+        expected: 'APPLIED',
+        actual: statusOf(accepted),
       });
     }
   }
@@ -404,10 +517,12 @@ async function trial(
   earlyAttempts: number,
 ): Promise<{ rows: TrialRow[]; lateTick?: LateTickRow }> {
   const [early, late] = await Promise.all([
-    earlyTrials(ctx, run, orgId, organiser, people.A, clock, marginMs, earlyAttempts).catch((error: unknown) => {
-      ctx.fail('early', 'trial aborted', error, run);
-      return [] as TrialRow[];
-    }),
+    earlyTrials(ctx, run, orgId, organiser, people.A, clock, marginMs, earlyAttempts).catch(
+      (error: unknown) => {
+        ctx.fail('early', 'trial aborted', error, run);
+        return [] as TrialRow[];
+      },
+    ),
     lateTrial(ctx, run, orgId, organiser, people, clock, marginMs, tickWaitMs).catch(
       (error: unknown): { rows: TrialRow[]; lateTick?: LateTickRow } => {
         ctx.fail('late', 'trial aborted', error, run);
@@ -415,16 +530,24 @@ async function trial(
       },
     ),
   ]);
-  return { rows: [...early, ...late.rows], ...(late.lateTick === undefined ? {} : { lateTick: late.lateTick }) };
+  return {
+    rows: [...early, ...late.rows],
+    ...(late.lateTick === undefined ? {} : { lateTick: late.lateTick }),
+  };
 }
 
 runExperiment({
   name: 'expiry-race',
   tableRow: 'Expiry race (plan §4, Table 3; tick-first, §1.2)',
-  criterion: 'ACCEPT at expiresAt − 200 ms succeeds (a trial whose queue latency exceeds the margin is inconclusive under tick-first and repeated); ACCEPT at expiresAt + 200 ms is REJECTED(OFFER_EXPIRED) regardless of timer arrival; a late TICK has no effect on a newer offer',
+  criterion:
+    'ACCEPT at expiresAt − 200 ms succeeds (a trial whose queue latency exceeds the margin is inconclusive under tick-first and repeated); ACCEPT at expiresAt + 200 ms is REJECTED(OFFER_EXPIRED) regardless of timer arrival; a late TICK has no effect on a newer offer',
   usage: USAGE,
   defaultHoldSeconds: 60,
-  options: { 'margin-ms': { type: 'string' }, 'tick-wait': { type: 'string' }, 'early-attempts': { type: 'string' } },
+  options: {
+    'margin-ms': { type: 'string' },
+    'tick-wait': { type: 'string' },
+    'early-attempts': { type: 'string' },
+  },
   async run(ctx) {
     const marginMs = intOption(ctx.values, 'margin-ms', 200);
     const tickWaitMs = intOption(ctx.values, 'tick-wait', 20) * 1000;
@@ -447,7 +570,17 @@ runExperiment({
         const run = i + 1;
         await sleep(i * 2000);
         try {
-          return await trial(ctx, run, org.id, organiser, { A, B, C }, clock, marginMs, tickWaitMs, earlyAttempts);
+          return await trial(
+            ctx,
+            run,
+            org.id,
+            organiser,
+            { A, B, C },
+            clock,
+            marginMs,
+            tickWaitMs,
+            earlyAttempts,
+          );
         } catch (error) {
           ctx.fail('expiry-race', 'trial aborted', error, run);
           return { rows: [] as TrialRow[] };
@@ -455,15 +588,28 @@ runExperiment({
       }),
     );
     const rows = results.flatMap((result) => result.rows);
-    const lateTicks = results.flatMap((result) => (result.lateTick === undefined ? [] : [result.lateTick]));
+    const lateTicks = results.flatMap((result) =>
+      result.lateTick === undefined ? [] : [result.lateTick],
+    );
     const early = rows.filter((row) => row.variant === 'early');
     const late = rows.filter((row) => row.variant === 'late');
-    const runsWithEarlyPass = new Set(early.filter((row) => row.verdict === 'PASS').map((row) => row.run)).size;
+    const runsWithEarlyPass = new Set(
+      early.filter((row) => row.verdict === 'PASS').map((row) => row.run),
+    ).size;
     const inconclusive = early.filter((row) => row.verdict === 'INCONCLUSIVE');
-    const pickup = summarize(rows.flatMap((row) => (row.pickupMs === undefined ? [] : [row.pickupMs])));
-    const orders = late.reduce<Record<string, number>>((acc, row) => ({ ...acc, [row.order]: (acc[row.order] ?? 0) + 1 }), {});
+    const pickup = summarize(
+      rows.flatMap((row) => (row.pickupMs === undefined ? [] : [row.pickupMs])),
+    );
+    const orders = late.reduce<Record<string, number>>(
+      (acc, row) => ({ ...acc, [row.order]: (acc[row.order] ?? 0) + 1 }),
+      {},
+    );
     const arrivalError = summarize(
-      rows.flatMap((row) => (row.arrivalOffsetMs === undefined ? [] : [Math.abs(Math.abs(row.arrivalOffsetMs) - marginMs)])),
+      rows.flatMap((row) =>
+        row.arrivalOffsetMs === undefined
+          ? []
+          : [Math.abs(Math.abs(row.arrivalOffsetMs) - marginMs)],
+      ),
     );
     const lines = [
       '## Result',
@@ -472,7 +618,11 @@ runExperiment({
       `- Inconclusive early attempts (REJECTED(OFFER_EXPIRED) although accepted before expiresAt, because the worker processed them after it: queue latency > ${marginMs} ms margin, correct under tick-first; repeated with a fresh workshop): ${inconclusive.length === 0 ? 'none' : inconclusive.map((row) => `run ${row.run} attempt ${row.attempt} (pickup ${row.pickupMs ?? '?'} ms)`).join(', ')}`,
       `- Worker pickup latency of the ACCEPTs (settledAt − acceptedAt): p50 ${Number.isNaN(pickup.p50) ? 'n/a' : Math.round(pickup.p50)} ms, max ${Number.isNaN(pickup.max) ? 'n/a' : Math.round(pickup.max)} ms${ctx.target.name === 'local' ? `; the local worker polls the commands table every 200 ms (WORKER_POLL_MS), so a pickup of up to ~200 ms is normal there and an early attempt is inconclusive whenever it exceeds the ${marginMs} ms margin` : ''}`,
       `- Late ACCEPT (expiresAt + ${marginMs} ms) rejected OFFER_EXPIRED: **${late.filter((row) => row.ok).length}/${late.length}**`,
-      `- Which reached the worker first in the late trials: ${Object.entries(orders).map(([order, n]) => `${order}: ${n}`).join('; ') || 'n/a'}`,
+      `- Which reached the worker first in the late trials: ${
+        Object.entries(orders)
+          .map(([order, n]) => `${order}: ${n}`)
+          .join('; ') || 'n/a'
+      }`,
       `- Outcomes consistent with the server clock: ${rows.filter((row) => row.consistent).length}/${rows.length}`,
       `- Stale TICK injected: ${lateTicks.length === 0 ? 'not on this target (see skipped)' : `${lateTicks.filter((row) => row.ok).length}/${lateTicks.length} without effect on the newer offer`}`,
       `- Send timing: server clock offset ${Math.round(clock.offsetMs)} ms (rtt ${clock.rttMs} ms); |arrival − planned| p50 ${Math.round(arrivalError.p50)} ms, max ${Math.round(arrivalError.max)} ms`,
@@ -483,10 +633,29 @@ runExperiment({
       '## Trials',
       '',
       markdownTable(
-        ['run', 'variant', 'attempt', 'arrival − expiresAt (ms)', 'settled − expiresAt (ms)', 'pickup (ms)', 'outcome', 'which first', 'consistent', 'verdict'],
+        [
+          'run',
+          'variant',
+          'attempt',
+          'arrival − expiresAt (ms)',
+          'settled − expiresAt (ms)',
+          'pickup (ms)',
+          'outcome',
+          'which first',
+          'consistent',
+          'verdict',
+        ],
         rows.map((row) => [
-          row.run, row.variant, row.attempt, row.arrivalOffsetMs ?? '', row.settleOffsetMs ?? '', row.pickupMs ?? '', `${row.status}${row.reason ? `(${row.reason})` : ''}`,
-          row.order, row.consistent, row.verdict,
+          row.run,
+          row.variant,
+          row.attempt,
+          row.arrivalOffsetMs ?? '',
+          row.settleOffsetMs ?? '',
+          row.pickupMs ?? '',
+          `${row.status}${row.reason ? `(${row.reason})` : ''}`,
+          row.order,
+          row.consistent,
+          row.verdict,
         ]),
       ),
       '',
@@ -495,14 +664,31 @@ runExperiment({
       lateTicks.length === 0
         ? 'Not injected on this target.'
         : markdownTable(
-            ['run', 'processed', 'version before → after', 'newer offer unchanged', 'backfills unchanged', 'newer offer ACCEPT', 'verdict'],
-            lateTicks.map((row) => [row.run, row.processed, `${row.versionBefore} → ${row.versionAfter}`, row.newerOfferUnchanged, row.backfillsUnchanged, row.newerOfferAccepted, row.ok ? 'PASS' : 'FAIL']),
+            [
+              'run',
+              'processed',
+              'version before → after',
+              'newer offer unchanged',
+              'backfills unchanged',
+              'newer offer ACCEPT',
+              'verdict',
+            ],
+            lateTicks.map((row) => [
+              row.run,
+              row.processed,
+              `${row.versionBefore} → ${row.versionAfter}`,
+              row.newerOfferUnchanged,
+              row.backfillsUnchanged,
+              row.newerOfferAccepted,
+              row.ok ? 'PASS' : 'FAIL',
+            ]),
           ),
     ];
     return {
       summary: lines.join('\n'),
       rows,
-      extraFiles: lateTicks.length === 0 ? {} : ({ 'late-tick.csv': lateTicks } as Record<string, CsvRow[]>),
+      extraFiles:
+        lateTicks.length === 0 ? {} : ({ 'late-tick.csv': lateTicks } as Record<string, CsvRow[]>),
       // Inconclusive early attempts are not failures; every run needs an applied early attempt.
       ok:
         late.length === ctx.options.runs &&

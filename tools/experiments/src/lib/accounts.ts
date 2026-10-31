@@ -43,7 +43,10 @@ export interface AccountNaming {
   outsiderEmail: string;
 }
 
-export function participantEmail(naming: Pick<AccountNaming, 'prefix' | 'domain'>, index: number): string {
+export function participantEmail(
+  naming: Pick<AccountNaming, 'prefix' | 'domain'>,
+  index: number,
+): string {
   return `${naming.prefix}-${index}@${naming.domain}`;
 }
 
@@ -138,7 +141,11 @@ export class AccountPool {
     const displayName = name ?? displayNameOf(email);
     let userId: string | undefined;
     if (this.options.create) {
-      const ensured = await provider.ensureUser({ email, password: this.options.password, name: displayName });
+      const ensured = await provider.ensureUser({
+        email,
+        password: this.options.password,
+        name: displayName,
+      });
       userId = ensured.userId;
       if (ensured.created) {
         this.created += 1;
@@ -153,9 +160,18 @@ export class AccountPool {
       userId: userId ?? minted.userId,
       name: minted.name ?? displayName,
     };
-    this.cache = mergeTokenCache(this.cache, [entry], { target: this.options.target.name, issuer: provider.issuer }, this.now());
+    this.cache = mergeTokenCache(
+      this.cache,
+      [entry],
+      { target: this.options.target.name, issuer: provider.issuer },
+      this.now(),
+    );
     this.persist();
-    this.options.log?.('token minted', { email, created: this.options.create, expiresAt: entry.expiresAt });
+    this.options.log?.('token minted', {
+      email,
+      created: this.options.create,
+      expiresAt: entry.expiresAt,
+    });
     return entry;
   }
 

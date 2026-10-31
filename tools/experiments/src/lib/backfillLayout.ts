@@ -19,13 +19,22 @@ export interface BackfillLayout {
 }
 
 /** Derives the per-workshop layout from the CLI parameters (unit-tested). */
-export function backfillLayout(params: { offers: number; workshops: number; sessions: number; rounds: number; cancellations: number }): BackfillLayout {
+export function backfillLayout(params: {
+  offers: number;
+  workshops: number;
+  sessions: number;
+  rounds: number;
+  cancellations: number;
+}): BackfillLayout {
   const workshops = Math.max(1, params.workshops);
   const sessions = Math.min(5, Math.max(2, params.sessions));
   const rounds = Math.max(1, params.rounds);
   const capacity = Math.max(1, Math.ceil(params.offers / (workshops * sessions * rounds)));
   const seats = sessions * capacity;
-  const extraPerWorkshop = Math.min(seats, Math.ceil(Math.max(0, params.cancellations) / workshops));
+  const extraPerWorkshop = Math.min(
+    seats,
+    Math.ceil(Math.max(0, params.cancellations) / workshops),
+  );
   return {
     workshops,
     sessions,

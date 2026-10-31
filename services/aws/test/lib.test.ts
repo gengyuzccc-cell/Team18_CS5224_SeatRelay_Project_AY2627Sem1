@@ -37,7 +37,11 @@ describe('auth: JWT authorizer claims → AuthUser', () => {
   });
 
   test('an e-mail that is not verified is anonymous (the claim arrives as a string or a boolean)', () => {
-    const claims = (email_verified: unknown) => ({ sub: 'u1', email: 'u1@example.com', email_verified });
+    const claims = (email_verified: unknown) => ({
+      sub: 'u1',
+      email: 'u1@example.com',
+      email_verified,
+    });
     expect(userFromEvent(apiEvent({ path: '/me', claims: claims('true') }))).toMatchObject({
       userId: 'u1',
     });

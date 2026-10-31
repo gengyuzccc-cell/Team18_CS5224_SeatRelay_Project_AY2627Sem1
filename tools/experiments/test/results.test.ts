@@ -136,16 +136,25 @@ describe('CSV writer', () => {
   it('writes JSON and Markdown with a trailing newline', () => {
     writeJson(path.join(tmp, 'meta.json'), { runId: 'r', ok: true });
     writeMarkdown(path.join(tmp, 'summary.md'), '# Title');
-    expect(JSON.parse(fs.readFileSync(path.join(tmp, 'meta.json'), 'utf8'))).toEqual({ runId: 'r', ok: true });
+    expect(JSON.parse(fs.readFileSync(path.join(tmp, 'meta.json'), 'utf8'))).toEqual({
+      runId: 'r',
+      ok: true,
+    });
     expect(fs.readFileSync(path.join(tmp, 'summary.md'), 'utf8')).toBe('# Title\n');
   });
 });
 
 describe('Markdown helpers', () => {
   it('renders a table, escaping pipes and newlines', () => {
-    expect(markdownTable(['a', 'b'], [['x|y', 'line1\nline2'], [1, undefined]])).toBe(
-      '| a | b |\n|---|---|\n| x\\|y | line1 line2 |\n| 1 |  |',
-    );
+    expect(
+      markdownTable(
+        ['a', 'b'],
+        [
+          ['x|y', 'line1\nline2'],
+          [1, undefined],
+        ],
+      ),
+    ).toBe('| a | b |\n|---|---|\n| x\\|y | line1 line2 |\n| 1 |  |');
   });
 
   it('formats numbers and n/a', () => {

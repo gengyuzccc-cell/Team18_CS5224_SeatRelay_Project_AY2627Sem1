@@ -70,11 +70,27 @@ interface RaceOutcome {
   ok: boolean;
 }
 
-function rowOf(run: number, phase: string, account: number, type: string, outcome: SendOutcome): CommandRow {
+function rowOf(
+  run: number,
+  phase: string,
+  account: number,
+  type: string,
+  outcome: SendOutcome,
+): CommandRow {
   if (!outcome.ok) {
     return {
-      run, phase, account, type, status: 'ERROR', reason: '', acceptMs: undefined, settleMs: undefined,
-      serverSettleMs: undefined, polls: undefined, settledAt: '', error: errorText(outcome.error),
+      run,
+      phase,
+      account,
+      type,
+      status: 'ERROR',
+      reason: '',
+      acceptMs: undefined,
+      settleMs: undefined,
+      serverSettleMs: undefined,
+      polls: undefined,
+      settledAt: '',
+      error: errorText(outcome.error),
     };
   }
   const { settled } = outcome;
@@ -151,33 +167,64 @@ async function runOnce(
   const prefs = accounts.map(() => randomPreferences(ws.sessionIds, random));
   ctx.log(`phase 1: ${accounts.length} concurrent REGISTERs`);
   const registered = await Promise.all(
-    accounts.map((account, i) => trySend(account, ws.wsId, { type: 'REGISTER', acceptable: prefs[i] as string[] }, timeout)),
+    accounts.map((account, i) =>
+      trySend(account, ws.wsId, { type: 'REGISTER', acceptable: prefs[i] as string[] }, timeout),
+    ),
   );
   registered.forEach((outcome, i) => record('1 register race', i + 1, 'REGISTER', outcome));
-  const registerApplied = registered.filter((outcome) => outcome.ok && outcome.settled.record.status === 'APPLIED').length;
+  const registerApplied = registered.filter(
+    (outcome) => outcome.ok && outcome.settled.record.status === 'APPLIED',
+  ).length;
   ctx.check({
-    run, scenario: '1 register race', step: 'every REGISTER settled APPLIED',
-    ok: registerApplied === accounts.length, expected: String(accounts.length), actual: String(registerApplied),
-    detail: registered.filter((outcome) => !outcome.ok || outcome.settled.record.status !== 'APPLIED').map(statusText).slice(0, 5).join('; ') || undefined,
+    run,
+    scenario: '1 register race',
+    step: 'every REGISTER settled APPLIED',
+    ok: registerApplied === accounts.length,
+    expected: String(accounts.length),
+    actual: String(registerApplied),
+    detail:
+      registered
+        .filter((outcome) => !outcome.ok || outcome.settled.record.status !== 'APPLIED')
+        .map(statusText)
+        .slice(0, 5)
+        .join('; ') || undefined,
   });
   const inv1 = await checkPhase(ctx, run, '1 register race', organiser, orgId, ws);
-  const seqs = [...inv1.dashboard.queue.map((entry) => entry.seq), ...inv1.dashboard.offered.map((entry) => entry.seq)].sort((a, b) => a - b);
+  const seqs = [
+    ...inv1.dashboard.queue.map((entry) => entry.seq),
+    ...inv1.dashboard.offered.map((entry) => entry.seq),
+  ].sort((a, b) => a - b);
   const seqsOk = seqs.length === registerApplied && seqs.every((seq, i) => seq === i + 1);
   ctx.check({
-    run, scenario: '1 register race', step: 'seq unique and gap-free (R2)',
-    ok: seqsOk, expected: `1..${registerApplied}`, actual: seqs.length <= 12 ? seqs.join(',') : `${seqs.length} seqs, ${seqs[0]}..${seqs[seqs.length - 1]}`,
+    run,
+    scenario: '1 register race',
+    step: 'seq unique and gap-free (R2)',
+    ok: seqsOk,
+    expected: `1..${registerApplied}`,
+    actual:
+      seqs.length <= 12
+        ? seqs.join(',')
+        : `${seqs.length} seqs, ${seqs[0]}..${seqs[seqs.length - 1]}`,
   });
   const positions = inv1.dashboard.queue.map((entry) => entry.queuePosition);
   ctx.check({
-    run, scenario: '1 register race', step: 'queue positions contiguous',
-    ok: positions.every((position, i) => position === i + 1), expected: `1..${positions.length}`,
+    run,
+    scenario: '1 register race',
+    step: 'queue positions contiguous',
+    ok: positions.every((position, i) => position === i + 1),
+    expected: `1..${positions.length}`,
     actual: positions.length <= 12 ? positions.join(',') : `${positions.length} entries`,
   });
   const offered = inv1.dashboard.offered;
   const capacityTotal = params.capacities.reduce((sum, capacity) => sum + capacity, 0);
-  ctx.log(`phase 1 done: ${offered.length} offered, ${inv1.dashboard.queue.length} queued (capacity ${capacityTotal})`, {
-    perSession: inv1.dashboard.sessions.map((session) => `${label(session.id)} held ${session.held}/${session.capacity}`).join(', '),
-  });
+  ctx.log(
+    `phase 1 done: ${offered.length} offered, ${inv1.dashboard.queue.length} queued (capacity ${capacityTotal})`,
+    {
+      perSession: inv1.dashboard.sessions
+        .map((session) => `${label(session.id)} held ${session.held}/${session.capacity}`)
+        .join(', '),
+    },
+  );
 
   // Phase 2: each offer holder fires ACCEPT, DECLINE and CANCEL concurrently.
   ctx.log(`phase 2: ${offered.length} accounts × ACCEPT/DECLINE/CANCEL concurrently`);
@@ -202,7 +249,13 @@ async function runOnce(
         pending[i] = trySend(account, ws.wsId, (inputs[i] as [string, CommandInput])[1], timeout);
       }
       const outcomes = await Promise.all(pending);
-      return { account, entry, inputs, outcomes, issueOrder: issueOrder.map((i) => inputs[i]?.[0] ?? '?').join('>') };
+      return {
+        account,
+        entry,
+        inputs,
+        outcomes,
+        issueOrder: issueOrder.map((i) => inputs[i]?.[0] ?? '?').join('>'),
+      };
     }),
   );
   for (const result of raceResults) {
@@ -210,25 +263,45 @@ async function runOnce(
       continue;
     }
     const index = indexOf.get(result.account.userId) ?? 0;
-    result.outcomes.forEach((outcome, i) => record('2 same-account race', index, result.inputs[i]?.[0] ?? '?', outcome));
+    result.outcomes.forEach((outcome, i) =>
+      record('2 same-account race', index, result.inputs[i]?.[0] ?? '?', outcome),
+    );
     const [accept, decline, cancel] = result.outcomes as [SendOutcome, SendOutcome, SendOutcome];
-    const applied = (outcome: SendOutcome): boolean => outcome.ok && outcome.settled.record.status === 'APPLIED';
+    const applied = (outcome: SendOutcome): boolean =>
+      outcome.ok && outcome.settled.record.status === 'APPLIED';
     const reasonOk = (outcome: SendOutcome): boolean =>
       outcome.ok &&
       (outcome.settled.record.status === 'APPLIED' ||
         ['OFFER_NOT_ACTIVE', 'NOT_REGISTERED'].includes(outcome.settled.record.reason ?? ''));
-    const first: RaceOutcome['first'] = applied(accept) ? 'ACCEPT' : applied(decline) ? 'DECLINE' : applied(cancel) ? 'CANCEL' : 'unknown';
+    const first: RaceOutcome['first'] = applied(accept)
+      ? 'ACCEPT'
+      : applied(decline)
+        ? 'DECLINE'
+        : applied(cancel)
+          ? 'CANCEL'
+          : 'unknown';
     const me = (await result.account.client.getWorkshop(ws.wsId)).me;
     const ok =
       !(applied(accept) && applied(decline)) &&
       [accept, decline, cancel].every(reasonOk) &&
       first !== 'unknown' &&
       me === undefined;
-    races.push({ account: index, issueOrder: result.issueOrder, first, accept: statusText(accept), decline: statusText(decline), cancel: statusText(cancel), ok });
-    ctx.check({
-      run, scenario: '2 same-account race', step: `account ${index}: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left`,
+    races.push({
+      account: index,
+      issueOrder: result.issueOrder,
+      first,
+      accept: statusText(accept),
+      decline: statusText(decline),
+      cancel: statusText(cancel),
       ok,
-      expected: 'never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration',
+    });
+    ctx.check({
+      run,
+      scenario: '2 same-account race',
+      step: `account ${index}: exactly one of ACCEPT/DECLINE/CANCEL took effect first, no live registration left`,
+      ok,
+      expected:
+        'never ACCEPT and DECLINE both applied; rejections OFFER_NOT_ACTIVE/NOT_REGISTERED; no live registration',
       actual: `first ${first}; ACCEPT ${statusText(accept)}, DECLINE ${statusText(decline)}, CANCEL ${statusText(cancel)}; live ${me === undefined ? 'none' : me.status}`,
     });
   }
@@ -242,7 +315,15 @@ async function runOnce(
       const account = byUser.get(entry.userId);
       return account === undefined
         ? undefined
-        : { index: indexOf.get(entry.userId) ?? 0, outcome: await trySend(account, ws.wsId, { type: 'ACCEPT_OFFER', offerId: entry.offer.id }, timeout) };
+        : {
+            index: indexOf.get(entry.userId) ?? 0,
+            outcome: await trySend(
+              account,
+              ws.wsId,
+              { type: 'ACCEPT_OFFER', offerId: entry.offer.id },
+              timeout,
+            ),
+          };
     }),
   );
   let acceptedOk = 0;
@@ -255,16 +336,26 @@ async function runOnce(
     }
   }
   ctx.check({
-    run, scenario: '3 accept storm', step: 'every ACCEPT of a live offer applied',
-    ok: acceptedOk === newlyOffered.length, expected: String(newlyOffered.length), actual: String(acceptedOk),
+    run,
+    scenario: '3 accept storm',
+    step: 'every ACCEPT of a live offer applied',
+    ok: acceptedOk === newlyOffered.length,
+    expected: String(newlyOffered.length),
+    actual: String(acceptedOk),
   });
   const inv3 = await checkPhase(ctx, run, '3 accept storm', organiser, orgId, ws);
-  const confirmedOk = inv3.dashboard.sessions.every((session) => session.confirmed <= session.capacity);
+  const confirmedOk = inv3.dashboard.sessions.every(
+    (session) => session.confirmed <= session.capacity,
+  );
   ctx.check({
-    run, scenario: '3 accept storm', step: 'confirmed ≤ capacity in every session',
+    run,
+    scenario: '3 accept storm',
+    step: 'confirmed ≤ capacity in every session',
     ok: confirmedOk && inv3.dashboard.counts.confirmed === acceptedOk,
     expected: `confirmed = ${acceptedOk}, ≤ capacity per session (${params.capacities.join('/')})`,
-    actual: inv3.dashboard.sessions.map((session) => `${label(session.id)} ${session.confirmed}/${session.capacity}`).join(', '),
+    actual: inv3.dashboard.sessions
+      .map((session) => `${label(session.id)} ${session.confirmed}/${session.capacity}`)
+      .join(', '),
   });
   return {
     offeredAfterRace: offered.length,
@@ -278,7 +369,8 @@ async function runOnce(
 runExperiment({
   name: 'concurrency',
   tableRow: 'Concurrency (plan §4, Table 3)',
-  criterion: 'final state satisfies every invariant (verify ok, 0 over-capacity, 0 double holds) after each concurrent phase; META conflict retries recorded (expected 0)',
+  criterion:
+    'final state satisfies every invariant (verify ok, 0 over-capacity, 0 double holds) after each concurrent phase; META conflict retries recorded (expected 0)',
   usage: USAGE,
   defaultHoldSeconds: 900,
   options: {
@@ -314,39 +406,80 @@ runExperiment({
     for (let run = 1; run <= ctx.options.runs; run += 1) {
       ctx.beginRun(run);
       try {
-        perRun.push(await runOnce(ctx, run, org.id, organiser, accounts, params, rows, samples, races));
+        perRun.push(
+          await runOnce(ctx, run, org.id, organiser, accounts, params, rows, samples, races),
+        );
       } catch (error) {
         ctx.fail('concurrency', 'run aborted', error);
       }
     }
-    const metrics = await metricsForRun(ctx, baseline, ['MetaConflictRetries', 'CommandSettledLatency', 'OffersCreated']);
+    const metrics = await metricsForRun(ctx, baseline, [
+      'MetaConflictRetries',
+      'CommandSettledLatency',
+      'OffersCreated',
+    ]);
     const conflicts = metricSum(metrics, 'MetaConflictRetries');
 
     const phases = ['1 register race', '2 same-account race', '3 accept storm'];
     const latencyRows = phases.flatMap((phase) => {
       const inPhase = samples.filter((sample) => sample.step === phase);
       return [
-        summaryRow(`${phase}: client-observed`, summarize(inPhase.map((sample) => sample.settleMs))),
-        summaryRow(`${phase}: server-side`, summarize(inPhase.flatMap((sample) => (sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs])))),
+        summaryRow(
+          `${phase}: client-observed`,
+          summarize(inPhase.map((sample) => sample.settleMs)),
+        ),
+        summaryRow(
+          `${phase}: server-side`,
+          summarize(
+            inPhase.flatMap((sample) =>
+              sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs],
+            ),
+          ),
+        ),
       ];
     });
     const allClient = summarize(samples.map((sample) => sample.settleMs));
-    const allServer = summarize(samples.flatMap((sample) => (sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs])));
-    const firstCounts = races.reduce<Record<string, number>>((acc, race) => ({ ...acc, [race.first]: (acc[race.first] ?? 0) + 1 }), {});
+    const allServer = summarize(
+      samples.flatMap((sample) =>
+        sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs],
+      ),
+    );
+    const firstCounts = races.reduce<Record<string, number>>(
+      (acc, race) => ({ ...acc, [race.first]: (acc[race.first] ?? 0) + 1 }),
+      {},
+    );
     const errors = rows.filter((row) => row.status === 'ERROR').length;
     const lines = [
       '## Result',
       '',
       `- Setup: ${count} concurrent accounts race for ${params.capacities.length} sessions with ${capacityTotal} seats in total (capacities ${params.capacities.join('/')}; ${(count / capacityTotal).toFixed(1)} accounts per seat)`,
       `- Commands: ${rows.length} (${errors} transport errors / settle timeouts)`,
-      `- Same-account races: ${races.filter((race) => race.ok).length}/${races.length} consistent; first effective command: ${Object.entries(firstCounts).map(([first, n]) => `${first} ${n}`).join(', ') || 'none'}`,
+      `- Same-account races: ${races.filter((race) => race.ok).length}/${races.length} consistent; first effective command: ${
+        Object.entries(firstCounts)
+          .map(([first, n]) => `${first} ${n}`)
+          .join(', ') || 'none'
+      }`,
       `- META conflict retries in the window: **${conflicts === undefined ? 'not available' : conflicts}** (expected 0: FIFO, one consumer per workshop)`,
       '',
       '## Per run',
       '',
       markdownTable(
-        ['run', 'offered after race', 'queued after race', 'relayed after same-account race', 'confirmed at end', 'backfill records'],
-        perRun.map((values, i) => [i + 1, values.offeredAfterRace ?? '', values.queuedAfterRace ?? '', values.relayedAfterSameAccountRace ?? '', values.confirmedAtEnd ?? '', values.backfills ?? '']),
+        [
+          'run',
+          'offered after race',
+          'queued after race',
+          'relayed after same-account race',
+          'confirmed at end',
+          'backfill records',
+        ],
+        perRun.map((values, i) => [
+          i + 1,
+          values.offeredAfterRace ?? '',
+          values.queuedAfterRace ?? '',
+          values.relayedAfterSameAccountRace ?? '',
+          values.confirmedAtEnd ?? '',
+          values.backfills ?? '',
+        ]),
       ),
       '',
       '## Settle latencies',
@@ -361,18 +494,36 @@ runExperiment({
       '',
       markdownTable(
         ['account', 'POST order', 'first effective', 'ACCEPT', 'DECLINE', 'CANCEL', 'verdict'],
-        races.map((race) => [race.account, race.issueOrder, race.first, race.accept, race.decline, race.cancel, race.ok ? 'PASS' : 'FAIL']),
+        races.map((race) => [
+          race.account,
+          race.issueOrder,
+          race.first,
+          race.accept,
+          race.decline,
+          race.cancel,
+          race.ok ? 'PASS' : 'FAIL',
+        ]),
       ),
       '',
       '## Metrics',
       '',
-      ...metricsSection(metrics, { MetaConflictRetries: 'expected 0', CommandSettledLatency: 'server-side settle ms (sum / samples)' }),
+      ...metricsSection(metrics, {
+        MetaConflictRetries: 'expected 0',
+        CommandSettledLatency: 'server-side settle ms (sum / samples)',
+      }),
     ];
     return {
       summary: lines.join('\n'),
       rows,
       ok: errors === 0,
-      extra: { capacities: params.capacities, settleMs: allClient, serverSettleMs: allServer, metaConflictRetries: conflicts ?? null, raceFirst: firstCounts, perRun },
+      extra: {
+        capacities: params.capacities,
+        settleMs: allClient,
+        serverSettleMs: allServer,
+        metaConflictRetries: conflicts ?? null,
+        raceFirst: firstCounts,
+        perRun,
+      },
     };
   },
 });

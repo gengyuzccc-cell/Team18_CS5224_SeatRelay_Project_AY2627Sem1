@@ -51,7 +51,11 @@ const RESERVED_TLDS = ['example', 'test', 'invalid', 'localhost'];
 export function isReservedAddress(email: string): boolean {
   const at = email.lastIndexOf('@');
   if (at < 0) return true;
-  const domain = email.slice(at + 1).trim().toLowerCase().replace(/\.$/, '');
+  const domain = email
+    .slice(at + 1)
+    .trim()
+    .toLowerCase()
+    .replace(/\.$/, '');
   if (RESERVED_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`))) return true;
   const tld = domain.slice(domain.lastIndexOf('.') + 1);
   return RESERVED_TLDS.includes(tld);
@@ -141,7 +145,12 @@ export function createNotifierHandler(deps: NotifierDeps): NotifierHandler {
             continue;
           }
           if (deps.undeliverable?.(notification.email) === true) {
-            await deps.store.markStatus(notification, 'SKIPPED', notification.attempts, 'reserved domain');
+            await deps.store.markStatus(
+              notification,
+              'SKIPPED',
+              notification.attempts,
+              'reserved domain',
+            );
             summary.skipped += 1;
             deps.logger.info('notification skipped (reserved test domain)', fields);
             continue;

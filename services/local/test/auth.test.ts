@@ -21,9 +21,17 @@ describe('auth claims mapping', () => {
 
   test('falls back to given/family name and preferred_username', () => {
     expect(
-      toAuthUser({ sub: 'u1', preferred_username: 'bob@example.com', given_name: 'Bob', family_name: 'P' }),
+      toAuthUser({
+        sub: 'u1',
+        preferred_username: 'bob@example.com',
+        given_name: 'Bob',
+        family_name: 'P',
+      }),
     ).toEqual({ userId: 'u1', email: 'bob@example.com', name: 'Bob P' });
-    expect(toAuthUser({ sub: 'u2', email: 'c@example.com' })).toEqual({ userId: 'u2', email: 'c@example.com' });
+    expect(toAuthUser({ sub: 'u2', email: 'c@example.com' })).toEqual({
+      userId: 'u2',
+      email: 'c@example.com',
+    });
   });
 
   test('rejects tokens without subject or email', () => {
@@ -34,14 +42,16 @@ describe('auth claims mapping', () => {
 
   test('a username that is not an e-mail address is refused (401), not turned into an unprocessable command', () => {
     // A Keycloak user created without an e-mail: preferred_username is a plain username.
-    expect(() => toAuthUser({ sub: 'u4', preferred_username: 'loaduser-7' })).toThrow(/no valid email/);
-    expect(() => toAuthUser({ sub: 'u4', email: 'not-an-address', preferred_username: 'loaduser-7' })).toThrow(
-      AuthError,
+    expect(() => toAuthUser({ sub: 'u4', preferred_username: 'loaduser-7' })).toThrow(
+      /no valid email/,
     );
+    expect(() =>
+      toAuthUser({ sub: 'u4', email: 'not-an-address', preferred_username: 'loaduser-7' }),
+    ).toThrow(AuthError);
     // An invalid email claim falls back to a preferred_username that is an address.
-    expect(toAuthUser({ sub: 'u5', email: 'nope', preferred_username: 'dave@example.com' }).email).toBe(
-      'dave@example.com',
-    );
+    expect(
+      toAuthUser({ sub: 'u5', email: 'nope', preferred_username: 'dave@example.com' }).email,
+    ).toBe('dave@example.com');
     expect(toAuthUser({ sub: 'u6', email: '  erin@example.com ' }).email).toBe('erin@example.com');
   });
 
@@ -56,7 +66,11 @@ describe('auth claims mapping', () => {
 
   test('every identity toAuthUser accepts yields a command the worker can parse', () => {
     const users = [
-      toAuthUser({ sub: '4c9461ff-59d8-4f3b-826e-fd81eba4d6e6', email: 'alice@example.com', name: 'Alice' }),
+      toAuthUser({
+        sub: '4c9461ff-59d8-4f3b-826e-fd81eba4d6e6',
+        email: 'alice@example.com',
+        name: 'Alice',
+      }),
       toAuthUser({ sub: 'u9', preferred_username: 'bob@example.com', given_name: 'B'.repeat(200) }),
       toAuthUser({ sub: 'u10', email: 'carol@example.com', name: ' ' }),
     ];
@@ -110,11 +124,16 @@ describe('configuration', () => {
       OIDC_ISSUER: 'http://localhost:8080/realms/seatrelay',
       OIDC_JWKS_URL: 'http://localhost:8080/realms/seatrelay/protocol/openid-connect/certs',
     };
-    expect(loadConfig(base)).toMatchObject({ notifierMaxAttempts: 10, notifierRetryBackoffMs: 2000 });
+    expect(loadConfig(base)).toMatchObject({
+      notifierMaxAttempts: 10,
+      notifierRetryBackoffMs: 2000,
+    });
     expect(
       loadConfig({ ...base, NOTIFIER_MAX_ATTEMPTS: '3', NOTIFIER_RETRY_BACKOFF_MS: '0' }),
     ).toMatchObject({ notifierMaxAttempts: 3, notifierRetryBackoffMs: 0 });
-    expect(() => loadConfig({ ...base, NOTIFIER_RETRY_BACKOFF_MS: '-1' })).toThrow(/NOTIFIER_RETRY_BACKOFF_MS/);
+    expect(() => loadConfig({ ...base, NOTIFIER_RETRY_BACKOFF_MS: '-1' })).toThrow(
+      /NOTIFIER_RETRY_BACKOFF_MS/,
+    );
   });
 
   test('reports missing variables', () => {

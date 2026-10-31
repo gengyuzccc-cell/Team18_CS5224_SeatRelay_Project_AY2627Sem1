@@ -32,7 +32,11 @@ carol roles).
 
 const ORG_NAME = 'SeatRelay experiments';
 
-async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: LatencySample[]): Promise<void> {
+async function smokeOnce(
+  ctx: ExperimentContext,
+  orgId: string,
+  samples: LatencySample[],
+): Promise<void> {
   const run = ctx.currentRun;
   const scenario = 'smoke';
   const organiser = await ctx.accounts.organiser();
@@ -60,7 +64,10 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
   });
 
   // 2. alice registers → OFFERED S1
-  const aliceReg = await alice.client.sendCommand(ws.wsId, { type: 'REGISTER', acceptable: [s1, s2] });
+  const aliceReg = await alice.client.sendCommand(ws.wsId, {
+    type: 'REGISTER',
+    acceptable: [s1, s2],
+  });
   samples.push(latencySample(run, '2 alice REGISTER', aliceReg));
   const aliceState = requireRegistration(aliceReg, 'alice REGISTER');
   ctx.check({
@@ -74,7 +81,10 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
   const aliceOffer = aliceState.currentOffer?.id ?? '';
 
   // 3. alice accepts; bob queues
-  const aliceAccept = await alice.client.sendCommand(ws.wsId, { type: 'ACCEPT_OFFER', offerId: aliceOffer });
+  const aliceAccept = await alice.client.sendCommand(ws.wsId, {
+    type: 'ACCEPT_OFFER',
+    offerId: aliceOffer,
+  });
   samples.push(latencySample(run, '3 alice ACCEPT_OFFER', aliceAccept));
   const confirmed = aliceAccept.record.result?.registration;
   ctx.check({
@@ -118,13 +128,20 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
   });
   const bobOffer = bobMe?.currentOffer;
   const dash4 = await organiser.client.dashboard(orgId, ws.wsId);
-  const cancelBackfills = dash4.backfills.filter((record) => record.cause === 'CANCELLED_CONFIRMED');
+  const cancelBackfills = dash4.backfills.filter(
+    (record) => record.cause === 'CANCELLED_CONFIRMED',
+  );
   ctx.check({
     scenario,
     step: '4 backfill CANCELLED_CONFIRMED latency 0',
-    ok: dash4.backfills.length === 1 && cancelBackfills[0]?.latencyMs === 0 && cancelBackfills[0].newUserId === bob.userId,
+    ok:
+      dash4.backfills.length === 1 &&
+      cancelBackfills[0]?.latencyMs === 0 &&
+      cancelBackfills[0].newUserId === bob.userId,
     expected: '1 record, latencyMs 0, newUserId bob',
-    actual: JSON.stringify(dash4.backfills.map((record) => ({ cause: record.cause, latencyMs: record.latencyMs }))),
+    actual: JSON.stringify(
+      dash4.backfills.map((record) => ({ cause: record.cause, latencyMs: record.latencyMs })),
+    ),
   });
 
   // 5. carol queues; bob's offer expires; carol gets the seat through the timer path
@@ -138,8 +155,11 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
     actual: describeSettled(carolReg),
     ms: carolReg.settleMs,
   });
-  const expiresAt = bobOffer === undefined ? Date.now() + hold * 1000 : Date.parse(bobOffer.expiresAt);
-  ctx.log(`waiting for bob's offer to expire at ${new Date(expiresAt).toISOString()} (~${Math.max(0, Math.round((expiresAt - Date.now()) / 1000))} s)`);
+  const expiresAt =
+    bobOffer === undefined ? Date.now() + hold * 1000 : Date.parse(bobOffer.expiresAt);
+  ctx.log(
+    `waiting for bob's offer to expire at ${new Date(expiresAt).toISOString()} (~${Math.max(0, Math.round((expiresAt - Date.now()) / 1000))} s)`,
+  );
   let observedAt = '';
   try {
     const carolMe = await waitFor(
@@ -170,13 +190,21 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
     step: '5 backfill EXPIRED relayed within 15 s',
     ok: expired.length === 1 && expiryLatency !== undefined && expiryLatency < 15_000,
     expected: '1 EXPIRED record, latencyMs < 15000',
-    actual: JSON.stringify(expired.map((record) => ({ latencyMs: record.latencyMs, reallocatedAt: record.reallocatedAt }))),
+    actual: JSON.stringify(
+      expired.map((record) => ({
+        latencyMs: record.latencyMs,
+        reallocatedAt: record.reallocatedAt,
+      })),
+    ),
     ...(expiryLatency === undefined ? {} : { ms: expiryLatency }),
   });
   ctx.param(`run${run}.expiryBackfillLatencyMs`, expiryLatency ?? null);
 
   // 6. bob's late accept
-  const bobAccept = await bob.client.sendCommand(ws.wsId, { type: 'ACCEPT_OFFER', offerId: bobOffer?.id ?? 'missing' });
+  const bobAccept = await bob.client.sendCommand(ws.wsId, {
+    type: 'ACCEPT_OFFER',
+    offerId: bobOffer?.id ?? 'missing',
+  });
   samples.push(latencySample(run, '6 bob ACCEPT_OFFER (late)', bobAccept));
   ctx.check({
     scenario,
@@ -198,11 +226,25 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
   });
   const dead = await ctx.ops.deadLetters();
   if (dead.available) {
-    ctx.check({ scenario, step: '7 dead letters empty', ok: dead.total === 0, expected: '0', actual: String(dead.total), detail: dead.detail });
+    ctx.check({
+      scenario,
+      step: '7 dead letters empty',
+      ok: dead.total === 0,
+      expected: '0',
+      actual: String(dead.total),
+      detail: dead.detail,
+    });
   } else if (ctx.ops.kind === 'aws') {
     // RUNBOOK §3 step 7 / plan §3 step 12 ("DLQ 为 0") is an acceptance criterion of the cloud
     // deployment: without reading the DLQs the smoke cannot pass there.
-    ctx.check({ scenario, step: '7 dead letters empty', ok: false, expected: '0 (DLQ depths readable)', actual: 'DLQs not readable', detail: dead.detail });
+    ctx.check({
+      scenario,
+      step: '7 dead letters empty',
+      ok: false,
+      expected: '0 (DLQ depths readable)',
+      actual: 'DLQs not readable',
+      detail: dead.detail,
+    });
   } else {
     ctx.skip(scenario, '7 dead letters empty (commands rows with status FAILED)', dead.detail);
   }
@@ -212,7 +254,8 @@ async function smokeOnce(ctx: ExperimentContext, orgId: string, samples: Latency
 runExperiment({
   name: 'smoke',
   tableRow: 'Acceptance smoke test (RUNBOOK §3, plan §3 step 12; both deployments)',
-  criterion: 'every step asserts; cancellation backfill in the same settlement (0 ms); expiry relayed by the timer path within 15 s; late ACCEPT → OFFER_EXPIRED; verify ok; DLQ / FAILED rows empty',
+  criterion:
+    'every step asserts; cancellation backfill in the same settlement (0 ms); expiry relayed by the timer path within 15 s; late ACCEPT → OFFER_EXPIRED; verify ok; DLQ / FAILED rows empty',
   usage: USAGE,
   async run(ctx) {
     const organiser = await ctx.accounts.organiser();
@@ -228,16 +271,29 @@ runExperiment({
       }
     }
     const settle = summarize(samples.map((sample) => sample.settleMs));
-    const server = summarize(samples.flatMap((sample) => (sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs])));
+    const server = summarize(
+      samples.flatMap((sample) =>
+        sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs],
+      ),
+    );
     const expiryLatencies = Object.entries(ctx.params)
-      .filter(([key, value]) => key.endsWith('expiryBackfillLatencyMs') && typeof value === 'number')
+      .filter(
+        ([key, value]) => key.endsWith('expiryBackfillLatencyMs') && typeof value === 'number',
+      )
       .map(([, value]) => value as number);
     const lines = [
       '## Steps',
       '',
       markdownTable(
         ['run', 'step', 'result', 'expected', 'actual', 'ms'],
-        ctx.checks.map((row) => [row.run, row.step, row.ok ? 'PASS' : 'FAIL', row.expected, row.actual, row.ms === undefined ? '' : Math.round(row.ms)]),
+        ctx.checks.map((row) => [
+          row.run,
+          row.step,
+          row.ok ? 'PASS' : 'FAIL',
+          row.expected,
+          row.actual,
+          row.ms === undefined ? '' : Math.round(row.ms),
+        ]),
       ),
       '',
       '## Latencies',
@@ -245,10 +301,13 @@ runExperiment({
       markdownTable(SUMMARY_HEADERS, [
         summaryRow('command settle, client-observed (POST → terminal poll)', settle),
         summaryRow('command settle, server-side (settledAt − acceptedAt)', server),
-        summaryRow('expiry-driven backfill (reallocatedAt − expiresAt)', summarize(expiryLatencies)),
+        summaryRow(
+          'expiry-driven backfill (reallocatedAt − expiresAt)',
+          summarize(expiryLatencies),
+        ),
       ]),
       '',
-      'Cancellation-driven backfills happen inside the cancelling command\'s own settlement (latencyMs 0 by construction; asserted in step 4).',
+      "Cancellation-driven backfills happen inside the cancelling command's own settlement (latencyMs 0 by construction; asserted in step 4).",
     ];
     return {
       summary: lines.join('\n'),

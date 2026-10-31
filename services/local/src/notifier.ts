@@ -51,7 +51,12 @@ export function smtpMailer(smtpUrl: string, from: string): Mailer {
   const transport: Transporter = nodemailer.createTransport(withSmtpTimeouts(smtpUrl));
   return {
     async send(message) {
-      await transport.sendMail({ from, to: message.to, subject: message.subject, text: message.text });
+      await transport.sendMail({
+        from,
+        to: message.to,
+        subject: message.subject,
+        text: message.text,
+      });
     },
   };
 }

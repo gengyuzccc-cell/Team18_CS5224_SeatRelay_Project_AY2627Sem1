@@ -130,7 +130,8 @@ function gitCommit(): string | undefined {
       execFileSync('git', args, { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
     const head = run(['rev-parse', '--short', 'HEAD']);
     const dirty =
-      run(['status', '--porcelain', '--untracked-files=no', '--', '.', ':(exclude)results']).length > 0;
+      run(['status', '--porcelain', '--untracked-files=no', '--', '.', ':(exclude)results'])
+        .length > 0;
     return dirty ? `${head}-dirty` : head;
   } catch {
     return undefined;

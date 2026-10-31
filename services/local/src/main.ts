@@ -81,7 +81,11 @@ async function main(): Promise<void> {
         faultInjection: config.allowFaultFlags,
       },
     }),
-    createTimerLoop({ pool, logger: logger.child({ component: 'timers' }), pollMs: config.timerPollMs }),
+    createTimerLoop({
+      pool,
+      logger: logger.child({ component: 'timers' }),
+      pollMs: config.timerPollMs,
+    }),
     createSweepLoop({
       store,
       queue,
@@ -98,7 +102,11 @@ async function main(): Promise<void> {
       retryBackoffMs: config.notifierRetryBackoffMs,
       ...(mailer === undefined ? {} : { mailer }),
     }),
-    createJanitor({ pool, logger: logger.child({ component: 'janitor' }), intervalMs: config.janitorIntervalMs }),
+    createJanitor({
+      pool,
+      logger: logger.child({ component: 'janitor' }),
+      intervalMs: config.janitorIntervalMs,
+    }),
   ];
 
   await server.listen({ port: config.port, host: config.host });

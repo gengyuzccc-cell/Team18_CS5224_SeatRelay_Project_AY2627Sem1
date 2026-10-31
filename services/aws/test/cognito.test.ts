@@ -7,7 +7,10 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { CognitoUserDirectory } from '../src/adapters/cognito';
 
 const cognito = mockClient(CognitoIdentityProviderClient);
-const directory = new CognitoUserDirectory(new CognitoIdentityProviderClient({}), 'ap-southeast-1_test');
+const directory = new CognitoUserDirectory(
+  new CognitoIdentityProviderClient({}),
+  'ap-southeast-1_test',
+);
 
 describe('CognitoUserDirectory: e-mail → userId through ListUsers', () => {
   beforeEach(() => cognito.reset());
@@ -38,7 +41,9 @@ describe('CognitoUserDirectory: e-mail → userId through ListUsers', () => {
     cognito.on(ListUsersCommand).resolves({ Users: [] });
     await expect(directory.findUserIdByEmail('nobody@example.com')).resolves.toBeUndefined();
     cognito.on(ListUsersCommand).resolves({
-      Users: [{ Username: 'x', Enabled: false, Attributes: [{ Name: 'sub', Value: 'u-disabled' }] }],
+      Users: [
+        { Username: 'x', Enabled: false, Attributes: [{ Name: 'sub', Value: 'u-disabled' }] },
+      ],
     });
     await expect(directory.findUserIdByEmail('off@example.com')).resolves.toBeUndefined();
     cognito.on(ListUsersCommand).resolves({ Users: [{ Username: 'x', Enabled: true }] });

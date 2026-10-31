@@ -56,7 +56,9 @@ export function workshopInput(spec: WorkshopSpec, now: number = Date.now()): Cre
     holdSeconds: spec.holdSeconds,
     sessions: spec.sessions.map((session, index) => ({
       title: session.title ?? `S${index + 1}`,
-      startsAt: new Date(now + (session.startsInMs ?? 24 * HOUR_MS + index * 2 * HOUR_MS)).toISOString(),
+      startsAt: new Date(
+        now + (session.startsInMs ?? 24 * HOUR_MS + index * 2 * HOUR_MS),
+      ).toISOString(),
       capacity: session.capacity,
     })),
   };
@@ -68,7 +70,9 @@ export async function createWorkshop(
   spec: WorkshopSpec,
 ): Promise<CreatedWorkshop> {
   const view = await organiser.client.createWorkshop(orgId, workshopInput(spec));
-  const sessions = [...view.sessions].sort((a, b) => a.startsAt.localeCompare(b.startsAt) || (a.id < b.id ? -1 : 1));
+  const sessions = [...view.sessions].sort(
+    (a, b) => a.startsAt.localeCompare(b.startsAt) || (a.id < b.id ? -1 : 1),
+  );
   return {
     orgId,
     wsId: view.workshop.id,

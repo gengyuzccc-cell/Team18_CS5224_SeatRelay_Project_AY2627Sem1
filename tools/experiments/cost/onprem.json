@@ -41,10 +41,7 @@
         "notes": "Review quotes about US$200 online for the 16 GB/512 GB unit; shows how much of the SG price is import margin."
       }
     ],
-    "amortisation_years": [
-      3,
-      4
-    ],
+    "amortisation_years": [3, 4],
     "amortisation_method": "straight-line, zero residual value",
     "capacity_registrations_per_month": 1000000,
     "capacity_note": "assumption: one N100-class machine running Postgres + the Node server handles up to ~1M registrations/month (~2.5M commands/month, <1 command/s average, ~40/s at 50x peak); beyond that the model adds a second identical machine (ceil(load/capacity)). Refine with the services/local k6 + docker stats measurements (plan §2.7)."

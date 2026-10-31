@@ -73,15 +73,34 @@ describe('preference cases (plan §4 "Preference, order")', () => {
   });
 
   it('validateCase catches broken tables', () => {
-    expect(validateCase({ id: 'X', note: '', capacities: [1, 1, 1, 1, 1], fills: [2, 0, 0, 0, 0], prefs: [1, 1] })).toEqual([
-      'S1: fills 2 > capacity 1',
-      'prefs must be non-empty and distinct',
-    ]);
-    expect(validateCase({ id: 'Y', note: '', capacities: [1, 1, 1, 1, 1], fills: [0, 0, 0, 0, 0], prefs: [6], release: 2 })).toEqual([
-      'prefs out of range',
-      'release S2 has no filler to cancel',
-    ]);
-    expect(fillerSeats({ id: 'Z', note: '', capacities: [2, 1, 1, 1, 1], fills: [2, 0, 1, 0, 0], prefs: [1] })).toEqual([
+    expect(
+      validateCase({
+        id: 'X',
+        note: '',
+        capacities: [1, 1, 1, 1, 1],
+        fills: [2, 0, 0, 0, 0],
+        prefs: [1, 1],
+      }),
+    ).toEqual(['S1: fills 2 > capacity 1', 'prefs must be non-empty and distinct']);
+    expect(
+      validateCase({
+        id: 'Y',
+        note: '',
+        capacities: [1, 1, 1, 1, 1],
+        fills: [0, 0, 0, 0, 0],
+        prefs: [6],
+        release: 2,
+      }),
+    ).toEqual(['prefs out of range', 'release S2 has no filler to cancel']);
+    expect(
+      fillerSeats({
+        id: 'Z',
+        note: '',
+        capacities: [2, 1, 1, 1, 1],
+        fills: [2, 0, 1, 0, 0],
+        prefs: [1],
+      }),
+    ).toEqual([
       [1, 0],
       [1, 1],
       [3, 0],
@@ -91,7 +110,9 @@ describe('preference cases (plan §4 "Preference, order")', () => {
 
 describe('backfillLayout', () => {
   it('default: 10 workshops × 2 sessions × capacity 5 = 100 offers, 22 registrations each', () => {
-    expect(backfillLayout({ offers: 100, workshops: 10, sessions: 2, rounds: 1, cancellations: 20 })).toEqual({
+    expect(
+      backfillLayout({ offers: 100, workshops: 10, sessions: 2, rounds: 1, cancellations: 20 }),
+    ).toEqual({
       workshops: 10,
       sessions: 2,
       capacity: 5,
@@ -104,7 +125,13 @@ describe('backfillLayout', () => {
   });
 
   it('rounds the offer count up and spreads rounds and cancellations', () => {
-    const layout = backfillLayout({ offers: 50, workshops: 3, sessions: 3, rounds: 2, cancellations: 4 });
+    const layout = backfillLayout({
+      offers: 50,
+      workshops: 3,
+      sessions: 3,
+      rounds: 2,
+      cancellations: 4,
+    });
     expect(layout.capacity).toBe(3); // ceil(50 / 18)
     expect(layout.offers).toBe(3 * 9 * 2);
     expect(layout.extraPerWorkshop).toBe(2);
@@ -112,7 +139,13 @@ describe('backfillLayout', () => {
   });
 
   it('clamps sessions to 2..5 and cancellations to the seats of a workshop', () => {
-    const layout = backfillLayout({ offers: 1, workshops: 1, sessions: 9, rounds: 0, cancellations: 100 });
+    const layout = backfillLayout({
+      offers: 1,
+      workshops: 1,
+      sessions: 9,
+      rounds: 0,
+      cancellations: 100,
+    });
     expect(layout.sessions).toBe(5);
     expect(layout.rounds).toBe(1);
     expect(layout.extraPerWorkshop).toBe(layout.seats);
@@ -139,7 +172,10 @@ describe('access-control probes', () => {
   it('statusOf reports the status and, for errors, the body code', async () => {
     const fetch: FetchLike = async (input) => {
       if (input.endsWith('/forbidden')) {
-        return new Response(JSON.stringify({ code: 'FORBIDDEN', message: 'no' }), { status: 403, headers: { 'content-type': 'application/json' } });
+        return new Response(JSON.stringify({ code: 'FORBIDDEN', message: 'no' }), {
+          status: 403,
+          headers: { 'content-type': 'application/json' },
+        });
       }
       if (input.endsWith('/gateway')) {
         return new Response(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
@@ -159,20 +195,48 @@ describe('access-control probes', () => {
 
 function session(id: string, capacity: number, confirmed: number, held: number): SessionView {
   return {
-    id, workshopId: 'w', title: id, startsAt: '2026-11-04T02:00:00.000Z', cutoffAt: '2026-11-04T01:30:00.000Z',
-    capacity, confirmed, held, status: 'OPEN', free: Math.max(0, capacity - confirmed - held), queueLength: 0,
+    id,
+    workshopId: 'w',
+    title: id,
+    startsAt: '2026-11-04T02:00:00.000Z',
+    cutoffAt: '2026-11-04T01:30:00.000Z',
+    capacity,
+    confirmed,
+    held,
+    status: 'OPEN',
+    free: Math.max(0, capacity - confirmed - held),
+    queueLength: 0,
   };
 }
 
 describe('scenario helpers', () => {
   it('overCapacity counts sessions with confirmed + held > capacity (C1)', () => {
-    expect(overCapacity([session('a', 2, 1, 1), session('b', 1, 1, 1), session('c', 3, 0, 0)])).toBe(1);
+    expect(
+      overCapacity([session('a', 2, 1, 1), session('b', 1, 1, 1), session('c', 3, 0, 0)]),
+    ).toBe(1);
   });
 
   it('doubleHolds counts users with more than one OFFERED/CONFIRMED seat (C2)', () => {
-    const offer = (userId: string) => ({ seq: 1, userId, email: `${userId}@x.io`, acceptable: ['a'], status: 'OFFERED' as const, offer: { id: `o-${userId}`, sessionId: 'a', expiresAt: '2026-11-04T00:00:00.000Z' } });
-    const confirmed = (userId: string) => ({ seq: 2, userId, email: `${userId}@x.io`, status: 'CONFIRMED' as const, sessionId: 'b', confirmedAt: '2026-11-03T00:00:00.000Z' });
-    const dashboard = { offered: [offer('u1'), offer('u2')], confirmed: [confirmed('u1'), confirmed('u3')] } as unknown as DashboardView;
+    const offer = (userId: string) => ({
+      seq: 1,
+      userId,
+      email: `${userId}@x.io`,
+      acceptable: ['a'],
+      status: 'OFFERED' as const,
+      offer: { id: `o-${userId}`, sessionId: 'a', expiresAt: '2026-11-04T00:00:00.000Z' },
+    });
+    const confirmed = (userId: string) => ({
+      seq: 2,
+      userId,
+      email: `${userId}@x.io`,
+      status: 'CONFIRMED' as const,
+      sessionId: 'b',
+      confirmedAt: '2026-11-03T00:00:00.000Z',
+    });
+    const dashboard = {
+      offered: [offer('u1'), offer('u2')],
+      confirmed: [confirmed('u1'), confirmed('u3')],
+    } as unknown as DashboardView;
     expect(doubleHolds(dashboard)).toBe(1);
   });
 
@@ -193,7 +257,10 @@ describe('scenario helpers', () => {
 
   it('workshopInput spaces sessions 2 h apart from +24 h by default', () => {
     const now = Date.parse('2026-11-01T00:00:00.000Z');
-    const input = workshopInput({ title: 'T', holdSeconds: 60, sessions: [{ capacity: 1 }, { capacity: 2, title: 'Late' }] }, now);
+    const input = workshopInput(
+      { title: 'T', holdSeconds: 60, sessions: [{ capacity: 1 }, { capacity: 2, title: 'Late' }] },
+      now,
+    );
     expect(input.sessions.map((s) => [s.title, s.startsAt, s.capacity])).toEqual([
       ['S1', '2026-11-02T00:00:00.000Z', 1],
       ['Late', '2026-11-02T02:00:00.000Z', 2],
@@ -202,18 +269,45 @@ describe('scenario helpers', () => {
 
   it('waitFor returns the first defined value and times out otherwise', async () => {
     let t = 0;
-    const opts = { timeoutMs: 1000, intervalMs: 100, now: () => t, sleep: async (ms: number) => void (t += ms) };
+    const opts = {
+      timeoutMs: 1000,
+      intervalMs: 100,
+      now: () => t,
+      sleep: async (ms: number) => void (t += ms),
+    };
     let calls = 0;
     expect(await waitFor('x', async () => (++calls >= 3 ? 'done' : undefined), opts)).toBe('done');
-    await expect(waitFor('never', async () => undefined, opts)).rejects.toThrow(/timed out after 1000 ms waiting for never/);
+    await expect(waitFor('never', async () => undefined, opts)).rejects.toThrow(
+      /timed out after 1000 ms waiting for never/,
+    );
   });
 
   it('describeRegistration renders the summary notation used in every check', () => {
     const label = sessionLabeller({ sessionIds: ['a', 'b'] });
     expect(describeRegistration(undefined, label)).toBe('none');
-    expect(describeRegistration({ status: 'OFFERED', seq: 1, acceptable: ['b'], currentOffer: { id: 'o', sessionId: 'b', expiresAt: '2026-11-04T00:00:00.000Z' } }, label)).toBe('OFFERED@S2');
-    expect(describeRegistration({ status: 'QUEUED', seq: 3, acceptable: ['a'], queuePosition: 2 }, label)).toBe('QUEUED#2');
-    expect(describeRegistration({ status: 'ENDED', seq: 3, acceptable: [], endReason: 'NO_ACCEPTABLE_SESSION' }, label)).toBe('ENDED(NO_ACCEPTABLE_SESSION)');
+    expect(
+      describeRegistration(
+        {
+          status: 'OFFERED',
+          seq: 1,
+          acceptable: ['b'],
+          currentOffer: { id: 'o', sessionId: 'b', expiresAt: '2026-11-04T00:00:00.000Z' },
+        },
+        label,
+      ),
+    ).toBe('OFFERED@S2');
+    expect(
+      describeRegistration(
+        { status: 'QUEUED', seq: 3, acceptable: ['a'], queuePosition: 2 },
+        label,
+      ),
+    ).toBe('QUEUED#2');
+    expect(
+      describeRegistration(
+        { status: 'ENDED', seq: 3, acceptable: [], endReason: 'NO_ACCEPTABLE_SESSION' },
+        label,
+      ),
+    ).toBe('ENDED(NO_ACCEPTABLE_SESSION)');
     expect(label('zzzzzzzz-unknown')).toBe('?zzzzzzzz');
   });
 });
@@ -236,7 +330,15 @@ describe('CloudWatch fetcher', () => {
     expect(lambdaQueries(['seatrelay-dev-notifier'])).toHaveLength(3);
     expect(toMetricDataQuery(queries[0]!, 60)).toMatchObject({
       Id: 'sweeplateexpiries_sum',
-      MetricStat: { Metric: { Namespace: 'SeatRelay', MetricName: 'SweepLateExpiries', Dimensions: [{ Name: 'service', Value: 'worker' }] }, Period: 60, Stat: 'Sum' },
+      MetricStat: {
+        Metric: {
+          Namespace: 'SeatRelay',
+          MetricName: 'SweepLateExpiries',
+          Dimensions: [{ Name: 'service', Value: 'worker' }],
+        },
+        Period: 60,
+        Stat: 'Sum',
+      },
     });
   });
 
@@ -252,27 +354,60 @@ describe('CloudWatch fetcher', () => {
       async send(command: GetMetricDataCommand) {
         sent.push(command);
         return sent.length === 1
-          ? { MetricDataResults: [{ Id: 'sweeplateexpiries_sum', Timestamps: [new Date('2026-11-03T06:00:00Z')], Values: [0] }], NextToken: 'next' }
-          : { MetricDataResults: [{ Id: 'sweeplateexpiries_sum', Timestamps: [new Date('2026-11-03T06:01:00Z')], Values: [2] }] };
+          ? {
+              MetricDataResults: [
+                {
+                  Id: 'sweeplateexpiries_sum',
+                  Timestamps: [new Date('2026-11-03T06:00:00Z')],
+                  Values: [0],
+                },
+              ],
+              NextToken: 'next',
+            }
+          : {
+              MetricDataResults: [
+                {
+                  Id: 'sweeplateexpiries_sum',
+                  Timestamps: [new Date('2026-11-03T06:01:00Z')],
+                  Values: [2],
+                },
+              ],
+            };
       },
     };
-    const window = { start: new Date('2026-11-03T06:00:00Z'), end: new Date('2026-11-03T06:10:00Z') };
-    const result = await getMetricData(seatRelayQueries(['SweepLateExpiries']), window, { client, region: 'ap-southeast-1', skipCredentialsCheck: true });
+    const window = {
+      start: new Date('2026-11-03T06:00:00Z'),
+      end: new Date('2026-11-03T06:10:00Z'),
+    };
+    const result = await getMetricData(seatRelayQueries(['SweepLateExpiries']), window, {
+      client,
+      region: 'ap-southeast-1',
+      skipCredentialsCheck: true,
+    });
     expect(sent).toHaveLength(2);
     expect(sent[1]?.input.NextToken).toBe('next');
     expect(result.available).toBe(true);
     expect(seatRelayMetricSum(result, 'SweepLateExpiries')).toBe(2);
-    const count = result.available ? result.series.find((s) => s.id === 'sweeplateexpiries_samplecount') : undefined;
+    const count = result.available
+      ? result.series.find((s) => s.id === 'sweeplateexpiries_samplecount')
+      : undefined;
     expect(count?.empty).toBe(true);
     expect(describeMetrics(result).join('\n')).toContain('| SweepLateExpiries Sum | 2 | 2 | 2 |');
   });
 
   it('degrades gracefully without credentials or on API errors', async () => {
     const window = { start: new Date(0), end: new Date(60_000) };
-    const noCredentials = await getMetricData(seatRelayQueries(['OffersCreated']), window, { client: { config: {}, send: async () => ({}) } });
+    const noCredentials = await getMetricData(seatRelayQueries(['OffersCreated']), window, {
+      client: { config: {}, send: async () => ({}) },
+    });
     expect(noCredentials.available).toBe(false);
     const failing = await getMetricData(seatRelayQueries(['OffersCreated']), window, {
-      client: { config: {}, send: async () => { throw new Error('AccessDenied'); } },
+      client: {
+        config: {},
+        send: async () => {
+          throw new Error('AccessDenied');
+        },
+      },
       skipCredentialsCheck: true,
     });
     expect(failing).toEqual({ available: false, reason: 'AccessDenied' });
@@ -281,10 +416,19 @@ describe('CloudWatch fetcher', () => {
   });
 
   it('metricsSection / metricSum report unavailable sources instead of zeros', () => {
-    expect(metricSum({ available: false, detail: 'no creds', values: {} }, 'SweepLateExpiries')).toBeUndefined();
+    expect(
+      metricSum({ available: false, detail: 'no creds', values: {} }, 'SweepLateExpiries'),
+    ).toBeUndefined();
     expect(metricSum({ available: true, detail: 'ok', values: {} }, 'SweepLateExpiries')).toBe(0);
-    expect(metricsSection({ available: false, detail: 'no creds', values: {} })).toEqual(['Metrics not read: no creds']);
-    expect(metricsSection({ available: true, detail: 'src', values: { A: { sum: 3, count: 2 } } }, { A: 'note' }).join('\n')).toContain('| A | 3 | 2 | note |');
+    expect(metricsSection({ available: false, detail: 'no creds', values: {} })).toEqual([
+      'Metrics not read: no creds',
+    ]);
+    expect(
+      metricsSection(
+        { available: true, detail: 'src', values: { A: { sum: 3, count: 2 } } },
+        { A: 'note' },
+      ).join('\n'),
+    ).toContain('| A | 3 | 2 | note |');
   });
 });
 
@@ -302,7 +446,10 @@ describe('AWS side channels (mocked SDK clients)', () => {
       inputs,
       client: {
         config: {},
-        send: async (command: { constructor: { name: string }; input: Record<string, unknown> }) => {
+        send: async (command: {
+          constructor: { name: string };
+          input: Record<string, unknown>;
+        }) => {
           inputs.push({ name: command.constructor.name, input: command.input });
           return reply(command.input);
         },
@@ -312,50 +459,111 @@ describe('AWS side channels (mocked SDK clients)', () => {
 
   it('injects a late TICK into the FIFO with group = workshopId and a manual dedup id', async () => {
     const sqs = recorder();
-    const ops = createAwsOps({ stage: 'dev', region: 'ap-southeast-1', outputs, sqs: sqs.client as never });
-    const injected = await ops.injectLateTick({ type: 'TICK', workshopId: 'ws-9', source: 'TIMER', offerId: 'o-1', expiresAt: '2026-11-03T06:00:00.000Z' });
+    const ops = createAwsOps({
+      stage: 'dev',
+      region: 'ap-southeast-1',
+      outputs,
+      sqs: sqs.client as never,
+    });
+    const injected = await ops.injectLateTick({
+      type: 'TICK',
+      workshopId: 'ws-9',
+      source: 'TIMER',
+      offerId: 'o-1',
+      expiresAt: '2026-11-03T06:00:00.000Z',
+    });
     expect(injected.available).toBe(true);
     expect(sqs.inputs[0]?.name).toBe('SendMessageCommand');
-    expect(sqs.inputs[0]?.input).toMatchObject({ QueueUrl: outputs.CommandsQueueUrl, MessageGroupId: 'ws-9' });
+    expect(sqs.inputs[0]?.input).toMatchObject({
+      QueueUrl: outputs.CommandsQueueUrl,
+      MessageGroupId: 'ws-9',
+    });
     expect(String(sqs.inputs[0]?.input.MessageDeduplicationId)).toMatch(/^manual#o-1#/);
-    expect(JSON.parse(String(sqs.inputs[0]?.input.MessageBody))).toMatchObject({ type: 'TICK', offerId: 'o-1' });
+    expect(JSON.parse(String(sqs.inputs[0]?.input.MessageBody))).toMatchObject({
+      type: 'TICK',
+      offerId: 'o-1',
+    });
   });
 
   it('sums visible + in-flight messages of every DLQ', async () => {
     const sqs = recorder((input) => ({
-      Attributes: input.QueueUrl === outputs.CommandsDlqUrl ? { ApproximateNumberOfMessages: '2', ApproximateNumberOfMessagesNotVisible: '1' } : { ApproximateNumberOfMessages: '0' },
+      Attributes:
+        input.QueueUrl === outputs.CommandsDlqUrl
+          ? { ApproximateNumberOfMessages: '2', ApproximateNumberOfMessagesNotVisible: '1' }
+          : { ApproximateNumberOfMessages: '0' },
     }));
-    const ops = createAwsOps({ stage: 'dev', region: 'ap-southeast-1', outputs, sqs: sqs.client as never });
+    const ops = createAwsOps({
+      stage: 'dev',
+      region: 'ap-southeast-1',
+      outputs,
+      sqs: sqs.client as never,
+    });
     const dead = await ops.deadLetters();
-    expect(dead).toMatchObject({ available: true, total: 3, counts: { 'commands-dlq': 3, 'notify-dlq': 0 } });
+    expect(dead).toMatchObject({
+      available: true,
+      total: 3,
+      counts: { 'commands-dlq': 3, 'notify-dlq': 0 },
+    });
   });
 
   it('pauses the notifier with reserved concurrency 0 and restores it by deleting the setting', async () => {
     const lambda = recorder();
-    const ops = createAwsOps({ stage: 'dev', region: 'ap-southeast-1', outputs, lambda: lambda.client as never });
+    const ops = createAwsOps({
+      stage: 'dev',
+      region: 'ap-southeast-1',
+      outputs,
+      lambda: lambda.client as never,
+    });
     expect((await ops.pauseNotifier()).available).toBe(true);
     expect((await ops.resumeNotifier()).available).toBe(true);
     expect(lambda.inputs).toEqual([
-      { name: 'PutFunctionConcurrencyCommand', input: { FunctionName: 'seatrelay-dev-notifier', ReservedConcurrentExecutions: 0 } },
-      { name: 'DeleteFunctionConcurrencyCommand', input: { FunctionName: 'seatrelay-dev-notifier' } },
+      {
+        name: 'PutFunctionConcurrencyCommand',
+        input: { FunctionName: 'seatrelay-dev-notifier', ReservedConcurrentExecutions: 0 },
+      },
+      {
+        name: 'DeleteFunctionConcurrencyCommand',
+        input: { FunctionName: 'seatrelay-dev-notifier' },
+      },
     ]);
     expect(ops.faultFlagsExpected()).toBe(true);
     expect(createAwsOps({ stage: 'pilot', outputs }).faultFlagsExpected()).toBe(false);
   });
 
   it('reports a failing call as unavailable instead of throwing', async () => {
-    const sqs = { config: {}, send: async () => { throw new Error('ExpiredToken'); } };
-    const ops = createAwsOps({ stage: 'dev', region: 'ap-southeast-1', outputs, sqs: sqs as never });
-    expect(await ops.injectLateTick({ type: 'TICK', workshopId: 'w' })).toEqual({ available: false, detail: 'ExpiredToken' });
+    const sqs = {
+      config: {},
+      send: async () => {
+        throw new Error('ExpiredToken');
+      },
+    };
+    const ops = createAwsOps({
+      stage: 'dev',
+      region: 'ap-southeast-1',
+      outputs,
+      sqs: sqs as never,
+    });
+    expect(await ops.injectLateTick({ type: 'TICK', workshopId: 'w' })).toEqual({
+      available: false,
+      detail: 'ExpiredToken',
+    });
   });
 
   it('builds the worker log group and a sanitised Logs Insights query', () => {
     expect(workerLogGroup('dev')).toBe('/aws/lambda/seatrelay-dev-worker');
-    expect(commandTraceQuery("abc' or 1=1")).toContain("filter commandId = 'abcor11' or error like /abcor11/");
-    expect(messageTraceQuery(['m-1'], ['r"1'])).toContain('filter messageId in ["m-1"] or function_request_id in ["r1"]');
+    expect(commandTraceQuery("abc' or 1=1")).toContain(
+      "filter commandId = 'abcor11' or error like /abcor11/",
+    );
+    expect(messageTraceQuery(['m-1'], ['r"1'])).toContain(
+      'filter messageId in ["m-1"] or function_request_id in ["r1"]',
+    );
     expect(messageTraceQuery([], [])).toBeUndefined();
-    expect(execFailure(Object.assign(new Error('spawn docker ENOENT'), { code: 'ENOENT' }))).toBe('docker CLI not found');
-    expect(execFailure({ stderr: 'Error: No such container: x\nmore' })).toBe('Error: No such container: x');
+    expect(execFailure(Object.assign(new Error('spawn docker ENOENT'), { code: 'ENOENT' }))).toBe(
+      'docker CLI not found',
+    );
+    expect(execFailure({ stderr: 'Error: No such container: x\nmore' })).toBe(
+      'Error: No such container: x',
+    );
   });
 });
 
@@ -367,37 +575,107 @@ describe('AWS side channels (mocked SDK clients)', () => {
  */
 type WorkerLine = Record<string, string | number | boolean>;
 
-function workerLines(commandId: string, fault: 'BEFORE_COMMIT' | 'AFTER_COMMIT' | 'none', options: { secondDelivery?: boolean } = {}): WorkerLine[] {
+function workerLines(
+  commandId: string,
+  fault: 'BEFORE_COMMIT' | 'AFTER_COMMIT' | 'none',
+  options: { secondDelivery?: boolean } = {},
+): WorkerLine[] {
   const base = { service: 'worker', workshopId: 'ws-1', type: 'REGISTER' };
   const messageId = `msg-${commandId}`;
   const lines: WorkerLine[] = [];
   if (fault === 'none') {
     lines.push(
-      { ...base, '@timestamp': '2026-10-17 07:00:01.000', level: 'INFO', message: 'command settled', function_request_id: `r1-${commandId}`, commandId, status: 'APPLIED', attempt: 1 },
-      { ...base, '@timestamp': '2026-10-17 07:00:01.010', level: 'INFO', message: 'message processed', function_request_id: `r1-${commandId}`, messageId, outcome: 'APPLIED', attempts: 1, deliveryAttempt: 1 },
+      {
+        ...base,
+        '@timestamp': '2026-10-17 07:00:01.000',
+        level: 'INFO',
+        message: 'command settled',
+        function_request_id: `r1-${commandId}`,
+        commandId,
+        status: 'APPLIED',
+        attempt: 1,
+      },
+      {
+        ...base,
+        '@timestamp': '2026-10-17 07:00:01.010',
+        level: 'INFO',
+        message: 'message processed',
+        function_request_id: `r1-${commandId}`,
+        messageId,
+        outcome: 'APPLIED',
+        attempts: 1,
+        deliveryAttempt: 1,
+      },
     );
     return lines;
   }
   lines.push({
-    ...base, '@timestamp': '2026-10-17 07:00:01.000', level: 'WARN', message: 'injected fault; message will be redelivered',
-    function_request_id: `r1-${commandId}`, messageId, deliveryAttempt: 1, failedFromIndex: 0,
-    error: `injected fault ${fault} on command ${commandId}`, errorName: 'FaultInjectedError',
+    ...base,
+    '@timestamp': '2026-10-17 07:00:01.000',
+    level: 'WARN',
+    message: 'injected fault; message will be redelivered',
+    function_request_id: `r1-${commandId}`,
+    messageId,
+    deliveryAttempt: 1,
+    failedFromIndex: 0,
+    error: `injected fault ${fault} on command ${commandId}`,
+    errorName: 'FaultInjectedError',
   });
   if (options.secondDelivery === false) {
     return lines;
   }
   if (fault === 'BEFORE_COMMIT') {
-    lines.push({ ...base, '@timestamp': '2026-10-17 07:02:01.000', level: 'INFO', message: 'command settled', function_request_id: `r2-${commandId}`, commandId, status: 'APPLIED', attempt: 1 });
+    lines.push({
+      ...base,
+      '@timestamp': '2026-10-17 07:02:01.000',
+      level: 'INFO',
+      message: 'command settled',
+      function_request_id: `r2-${commandId}`,
+      commandId,
+      status: 'APPLIED',
+      attempt: 1,
+    });
   } else {
     lines.push(
-      { ...base, '@timestamp': '2026-10-17 07:02:01.000', level: 'INFO', message: 'command already settled; acknowledging redelivery', function_request_id: `r2-${commandId}`, commandId },
-      { service: 'worker', '@timestamp': '2026-10-17 07:02:01.005', level: 'INFO', message: 'internal command had nothing to do', function_request_id: `r2-${commandId}`, type: 'TICK', workshopId: 'ws-1' },
-      { ...base, '@timestamp': '2026-10-17 07:02:01.008', level: 'INFO', message: 'convergence pass after a settled redelivery', function_request_id: `r2-${commandId}`, commandId, outcome: 'NOOP', continuation: false },
+      {
+        ...base,
+        '@timestamp': '2026-10-17 07:02:01.000',
+        level: 'INFO',
+        message: 'command already settled; acknowledging redelivery',
+        function_request_id: `r2-${commandId}`,
+        commandId,
+      },
+      {
+        service: 'worker',
+        '@timestamp': '2026-10-17 07:02:01.005',
+        level: 'INFO',
+        message: 'internal command had nothing to do',
+        function_request_id: `r2-${commandId}`,
+        type: 'TICK',
+        workshopId: 'ws-1',
+      },
+      {
+        ...base,
+        '@timestamp': '2026-10-17 07:02:01.008',
+        level: 'INFO',
+        message: 'convergence pass after a settled redelivery',
+        function_request_id: `r2-${commandId}`,
+        commandId,
+        outcome: 'NOOP',
+        continuation: false,
+      },
     );
   }
   lines.push({
-    ...base, '@timestamp': '2026-10-17 07:02:01.010', level: 'INFO', message: 'message processed', function_request_id: `r2-${commandId}`,
-    messageId, outcome: fault === 'AFTER_COMMIT' ? 'ALREADY_SETTLED' : 'APPLIED', attempts: fault === 'AFTER_COMMIT' ? 0 : 1, deliveryAttempt: 2,
+    ...base,
+    '@timestamp': '2026-10-17 07:02:01.010',
+    level: 'INFO',
+    message: 'message processed',
+    function_request_id: `r2-${commandId}`,
+    messageId,
+    outcome: fault === 'AFTER_COMMIT' ? 'ALREADY_SETTLED' : 'APPLIED',
+    attempts: fault === 'AFTER_COMMIT' ? 0 : 1,
+    deliveryAttempt: 2,
   });
   return lines;
 }
@@ -429,7 +707,11 @@ function logsInsights(lines: readonly WorkerLine[]) {
         const clauses = filter.split(' or ');
         const rows = lines
           .filter((line) => clauses.some((clause) => matches(clause, line)))
-          .map((line) => fields.filter((f) => line[f] !== undefined).map((f) => ({ field: f, value: String(line[f]) })));
+          .map((line) =>
+            fields
+              .filter((f) => line[f] !== undefined)
+              .map((f) => ({ field: f, value: String(line[f]) })),
+          );
         const id = `q${queries.length}`;
         results.set(id, rows);
         return { queryId: id };
@@ -444,11 +726,20 @@ describe('AWS command trace over worker-shaped log lines', () => {
   const noise = [...workerLines('other-1', 'none'), ...workerLines('other-2', 'AFTER_COMMIT')];
   const trace = async (lines: WorkerLine[], commandId: string) => {
     const insights = logsInsights([...noise, ...lines]);
-    const ops = createAwsOps({ stage: 'dev', region: 'ap-southeast-1', outputs: {}, logs: insights.client as never, sleep: async () => undefined });
-    return { result: await ops.commandTrace(commandId, Date.parse('2026-10-17T07:00:00.000Z')), queries: insights.queries };
+    const ops = createAwsOps({
+      stage: 'dev',
+      region: 'ap-southeast-1',
+      outputs: {},
+      logs: insights.client as never,
+      sleep: async () => undefined,
+    });
+    return {
+      result: await ops.commandTrace(commandId, Date.parse('2026-10-17T07:00:00.000Z')),
+      queries: insights.queries,
+    };
   };
 
-  it('BEFORE_COMMIT: finds the redelivery through the fault line\'s messageId (2 deliveries)', async () => {
+  it("BEFORE_COMMIT: finds the redelivery through the fault line's messageId (2 deliveries)", async () => {
     const { result, queries } = await trace(workerLines('cmd-b', 'BEFORE_COMMIT'), 'cmd-b');
     expect(result).toMatchObject({ available: true, deliveries: 2, faultInjected: true });
     expect(queries).toHaveLength(2);
@@ -467,14 +758,24 @@ describe('AWS command trace over worker-shaped log lines', () => {
   it('a fault that never fired (flag stripped) shows ONE delivery, so the case fails', async () => {
     const { result } = await trace(workerLines('cmd-n', 'none'), 'cmd-n');
     expect(result).toMatchObject({ available: true, deliveries: 1, faultInjected: false });
-    const outcome: RedeliveryOutcome = { how: 'trace', deliveries: result.deliveries as number, detail: result.detail, events: result.events };
+    const outcome: RedeliveryOutcome = {
+      how: 'trace',
+      deliveries: result.deliveries as number,
+      detail: result.detail,
+      events: result.events,
+    };
     expect(redeliveryOk('aws', outcome)).toBe(false);
-    expect(redeliveryOk('aws', { how: 'waited', detail: 'no credentials', events: [] })).toBe(false);
+    expect(redeliveryOk('aws', { how: 'waited', detail: 'no credentials', events: [] })).toBe(
+      false,
+    );
     expect(redeliveryOk('local', { how: 'waited', detail: 'no psql', events: [] })).toBe(true);
   });
 
   it('only the crashed delivery ingested so far: 1 delivery (the caller polls again)', async () => {
-    const { result } = await trace(workerLines('cmd-p', 'BEFORE_COMMIT', { secondDelivery: false }), 'cmd-p');
+    const { result } = await trace(
+      workerLines('cmd-p', 'BEFORE_COMMIT', { secondDelivery: false }),
+      'cmd-p',
+    );
     expect(result).toMatchObject({ deliveries: 1, faultInjected: true });
   });
 
@@ -493,28 +794,63 @@ describe('expiry-race verdicts (tick-first: expiry judged when the worker proces
   const at = (offsetMs: number) => new Date(expiresAt + offsetMs).toISOString();
 
   it('early ACCEPT: applied = PASS; arrived in time but processed after expiry = INCONCLUSIVE', () => {
-    expect(classifyEarly({ status: 'APPLIED', acceptedAt: at(-178), settledAt: at(-167) }, expiresAt)).toBe('PASS');
+    expect(
+      classifyEarly({ status: 'APPLIED', acceptedAt: at(-178), settledAt: at(-167) }, expiresAt),
+    ).toBe('PASS');
     // the local repro: arrived 177 ms early, worker pickup 190 ms (200 ms poll) → settled 13 ms late
-    expect(classifyEarly({ status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(-177), settledAt: at(13) }, expiresAt)).toBe('INCONCLUSIVE');
+    expect(
+      classifyEarly(
+        { status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(-177), settledAt: at(13) },
+        expiresAt,
+      ),
+    ).toBe('INCONCLUSIVE');
     // the send timing missed (dev run 2026-10-17: cold start, arrived 362 ms after expiresAt): the
     // rejection is correct and says nothing about the early case, so the trial is repeated
-    expect(classifyEarly({ status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(362), settledAt: at(411) }, expiresAt)).toBe('INCONCLUSIVE');
+    expect(
+      classifyEarly(
+        { status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(362), settledAt: at(411) },
+        expiresAt,
+      ),
+    ).toBe('INCONCLUSIVE');
   });
 
   it('early ACCEPT: anything the server clock contradicts, or another outcome, is a FAIL', () => {
     expect(classifyEarly(undefined, expiresAt)).toBe('FAIL');
     // rejected as expired although processed before expiresAt
-    expect(classifyEarly({ status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(-177), settledAt: at(-20) }, expiresAt)).toBe('FAIL');
-    expect(classifyEarly({ status: 'APPLIED', acceptedAt: at(5), settledAt: at(40) }, expiresAt)).toBe('FAIL');
-    expect(classifyEarly({ status: 'REJECTED', reason: 'OFFER_NOT_ACTIVE', acceptedAt: at(-177), settledAt: at(13) }, expiresAt)).toBe('FAIL');
-    expect(consistentWithServerTime({ status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(200), settledAt: at(262) }, expiresAt)).toBe(true);
+    expect(
+      classifyEarly(
+        { status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(-177), settledAt: at(-20) },
+        expiresAt,
+      ),
+    ).toBe('FAIL');
+    expect(
+      classifyEarly({ status: 'APPLIED', acceptedAt: at(5), settledAt: at(40) }, expiresAt),
+    ).toBe('FAIL');
+    expect(
+      classifyEarly(
+        { status: 'REJECTED', reason: 'OFFER_NOT_ACTIVE', acceptedAt: at(-177), settledAt: at(13) },
+        expiresAt,
+      ),
+    ).toBe('FAIL');
+    expect(
+      consistentWithServerTime(
+        { status: 'REJECTED', reason: 'OFFER_EXPIRED', acceptedAt: at(200), settledAt: at(262) },
+        expiresAt,
+      ),
+    ).toBe(true);
   });
 
   it('labels which pass relayed the expired seat in the late trial', () => {
     const accepted = expiresAt + 200;
-    expect(relayOrder(expiresAt + 88, accepted, accepted + 60)).toBe('timer tick processed before the ACCEPT arrived');
-    expect(relayOrder(accepted + 61, accepted, accepted + 62)).toContain("the ACCEPT's own tick-first pass");
-    expect(relayOrder(accepted + 20, accepted, accepted + 400)).toBe('timer tick processed while the ACCEPT was queued');
+    expect(relayOrder(expiresAt + 88, accepted, accepted + 60)).toBe(
+      'timer tick processed before the ACCEPT arrived',
+    );
+    expect(relayOrder(accepted + 61, accepted, accepted + 62)).toContain(
+      "the ACCEPT's own tick-first pass",
+    );
+    expect(relayOrder(accepted + 20, accepted, accepted + 400)).toBe(
+      'timer tick processed while the ACCEPT was queued',
+    );
   });
 });
 

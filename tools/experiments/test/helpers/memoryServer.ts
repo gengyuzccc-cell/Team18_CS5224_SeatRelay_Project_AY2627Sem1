@@ -1,7 +1,12 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { isUserCommand, type AuthUser, type Command, type Notification } from '@seatrelay/contracts';
+import {
+  isUserCommand,
+  type AuthUser,
+  type Command,
+  type Notification,
+} from '@seatrelay/contracts';
 import {
   createInMemoryPorts,
   processCommand,
@@ -76,7 +81,10 @@ export function verifyJwt(token: string, secret: string, nowMs = Date.now()): Au
   }
   let claims: Record<string, unknown>;
   try {
-    claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<string, unknown>;
+    claims = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Record<
+      string,
+      unknown
+    >;
   } catch {
     return undefined;
   }
@@ -123,7 +131,10 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
           deliveries.set(command.commandId, deliveryAttempt);
         }
         try {
-          await processCommand(ports, command, { faultInjection: allowFaultFlags, deliveryAttempt });
+          await processCommand(ports, command, {
+            faultInjection: allowFaultFlags,
+            deliveryAttempt,
+          });
         } catch {
           if (deliveryAttempt >= (options.maxReceiveCount ?? 3)) {
             deadLetters.push(command);
@@ -184,7 +195,11 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
             entry.count += 1;
             entry.sum += sample.value;
           }
-          send(200, { 'content-type': 'application/json' }, JSON.stringify({ since: 'fixture start', metrics }));
+          send(
+            200,
+            { 'content-type': 'application/json' },
+            JSON.stringify({ since: 'fixture start', metrics }),
+          );
           return;
         }
         let user: AuthUser | undefined;
@@ -192,7 +207,11 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
         if (auth !== undefined) {
           user = auth.startsWith('Bearer ') ? verifyJwt(auth.slice(7), secret) : undefined;
           if (user === undefined) {
-            send(401, { 'content-type': 'application/json' }, JSON.stringify({ code: 'UNAUTHORIZED', message: 'Invalid token' }));
+            send(
+              401,
+              { 'content-type': 'application/json' },
+              JSON.stringify({ code: 'UNAUTHORIZED', message: 'Invalid token' }),
+            );
             return;
           }
         }
@@ -201,7 +220,11 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
         try {
           body = text.length > 0 ? (JSON.parse(text) as unknown) : undefined;
         } catch {
-          send(400, { 'content-type': 'application/json' }, JSON.stringify({ code: 'VALIDATION_ERROR', message: 'Invalid JSON' }));
+          send(
+            400,
+            { 'content-type': 'application/json' },
+            JSON.stringify({ code: 'VALIDATION_ERROR', message: 'Invalid JSON' }),
+          );
           return;
         }
         const headers: Record<string, string> = {};
@@ -222,7 +245,12 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
         send(wire.status, wire.headers, wire.body);
       })().catch((error: unknown) => {
         res.writeHead(500, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ code: 'INTERNAL', message: error instanceof Error ? error.message : String(error) }));
+        res.end(
+          JSON.stringify({
+            code: 'INTERNAL',
+            message: error instanceof Error ? error.message : String(error),
+          }),
+        );
       });
     });
   });
@@ -253,7 +281,9 @@ export async function startMemoryServer(options: MemoryServerOptions = {}): Prom
       for (const timeout of timeouts) {
         clearTimeout(timeout);
       }
-      await new Promise<void>((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
     },
   };
 }
@@ -270,7 +300,13 @@ export function fixtureUserId(email: string): string {
 export function writeFixtureTokenCache(
   file: string,
   server: Pick<MemoryServer, 'signToken'>,
-  options: { count: number; prefix?: string; domain?: string; organiser?: string; extra?: string[] },
+  options: {
+    count: number;
+    prefix?: string;
+    domain?: string;
+    organiser?: string;
+    extra?: string[];
+  },
 ): TokenCache {
   const prefix = options.prefix ?? 'loaduser';
   const domain = options.domain ?? 'example.com';
@@ -289,7 +325,13 @@ export function writeFixtureTokenCache(
     users: emails.map((email) => {
       const userId = fixtureUserId(email);
       const name = email.split('@')[0] ?? email;
-      return { email, userId, name, expiresAt, idToken: server.signToken({ userId, email, name }, ttlSeconds) };
+      return {
+        email,
+        userId,
+        name,
+        expiresAt,
+        idToken: server.signToken({ userId, email, name }, ttlSeconds),
+      };
     }),
   };
   writeTokenCache(file, cache);

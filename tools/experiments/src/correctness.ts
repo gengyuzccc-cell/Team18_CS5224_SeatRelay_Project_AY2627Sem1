@@ -5,7 +5,12 @@ import { CliError, stringOption } from '@seatrelay/scripts';
 import type { Account } from './lib/accounts';
 import { SUMMARY_HEADERS, markdownTable, summarize, summaryRow } from './lib/results';
 import { runExperiment, type ExperimentContext } from './lib/run';
-import { createWorkshop, ensureOrganisation, type LatencySample, type SessionSpec } from './lib/scenario';
+import {
+  createWorkshop,
+  ensureOrganisation,
+  type LatencySample,
+  type SessionSpec,
+} from './lib/scenario';
 import {
   ScenarioRun,
   describeRegistration,
@@ -57,35 +62,87 @@ async function dashboard(sr: ScenarioRun): Promise<DashboardView> {
 }
 
 /** Asserts that the latest backfill record of `cause` was relayed to `who` within the same settlement. */
-async function expectSameSettlementBackfill(sr: ScenarioRun, cause: BackfillCause, who: Account, count = 1): Promise<void> {
+async function expectSameSettlementBackfill(
+  sr: ScenarioRun,
+  cause: BackfillCause,
+  who: Account,
+  count = 1,
+): Promise<void> {
   const dash = await dashboard(sr);
   const records = dash.backfills.filter((record) => record.cause === cause);
   const relayed = records.filter((record) => record.newUserId === who.userId);
   sr.expect(
     `backfill ${cause} relayed in the same settlement`,
-    records.length === count && relayed.length >= 1 && records.every((record) => record.latencyMs === 0),
+    records.length === count &&
+      relayed.length >= 1 &&
+      records.every((record) => record.latencyMs === 0),
     `${count} × ${cause}, latencyMs 0, one to ${who.email}`,
-    JSON.stringify(records.map((record) => ({ session: sr.label(record.sessionId), latencyMs: record.latencyMs, toCaller: record.newUserId === who.userId }))),
+    JSON.stringify(
+      records.map((record) => ({
+        session: sr.label(record.sessionId),
+        latencyMs: record.latencyMs,
+        toCaller: record.newUserId === who.userId,
+      })),
+    ),
   );
 }
 
 const SCENARIOS: ScenarioDef[] = [
   {
     name: 'register-confirm',
-    description: 'REGISTER → OFFERED on the first preference with a free seat → ACCEPT → CONFIRMED; R1 duplicate rejected; queueing when full',
+    description:
+      'REGISTER → OFFERED on the first preference with a free seat → ACCEPT → CONFIRMED; R1 duplicate rejected; queueing when full',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B, C }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
-      const a = await sr.step('A REGISTER [S1,S2]', A, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      await sr.step('A REGISTER again (R1)', A, { type: 'REGISTER', acceptable: [s2] }, rejected('ALREADY_REGISTERED'));
-      const b = await sr.step('B REGISTER [S2,S1]', B, { type: 'REGISTER', acceptable: [s2, s1] }, APPLIED, 'OFFERED@S2');
-      await sr.step('C REGISTER [S1] (full)', C, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      await sr.step('B ACCEPT_OFFER', B, { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) }, APPLIED, 'CONFIRMED@S2');
+      const a = await sr.step(
+        'A REGISTER [S1,S2]',
+        A,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      await sr.step(
+        'A REGISTER again (R1)',
+        A,
+        { type: 'REGISTER', acceptable: [s2] },
+        rejected('ALREADY_REGISTERED'),
+      );
+      const b = await sr.step(
+        'B REGISTER [S2,S1]',
+        B,
+        { type: 'REGISTER', acceptable: [s2, s1] },
+        APPLIED,
+        'OFFERED@S2',
+      );
+      await sr.step(
+        'C REGISTER [S1] (full)',
+        C,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'B ACCEPT_OFFER',
+        B,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) },
+        APPLIED,
+        'CONFIRMED@S2',
+      );
       const dash = await dashboard(sr);
       sr.expect(
         'dashboard counts',
-        dash.counts.confirmed === 2 && dash.distinctParticipantsServed === 2 && dash.counts.queued === 1 && dash.counts.offered === 0,
+        dash.counts.confirmed === 2 &&
+          dash.distinctParticipantsServed === 2 &&
+          dash.counts.queued === 1 &&
+          dash.counts.offered === 0,
         'confirmed 2, distinct served 2, queued 1, offered 0',
         `confirmed ${dash.counts.confirmed}, distinct served ${dash.distinctParticipantsServed}, queued ${dash.counts.queued}, offered ${dash.counts.offered}`,
       );
@@ -93,79 +150,253 @@ const SCENARIOS: ScenarioDef[] = [
   },
   {
     name: 'rejections',
-    description: 'deterministic rejections leave no trace: duplicate/unknown preferences, unknown offer, cancel without registration',
+    description:
+      'deterministic rejections leave no trace: duplicate/unknown preferences, unknown offer, cancel without registration',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A }) {
       const [s1] = [sr.s(1)];
-      await sr.step('A REGISTER [S1,S1]', A, { type: 'REGISTER', acceptable: [s1, s1] }, rejected('DUPLICATE_SESSION_IN_PREFERENCES'));
-      await sr.step('A REGISTER [unknown]', A, { type: 'REGISTER', acceptable: [randomUUID()] }, rejected('UNKNOWN_SESSION_IN_PREFERENCES'));
-      await sr.step('A ACCEPT_OFFER unknown offer', A, { type: 'ACCEPT_OFFER', offerId: randomUUID() }, rejected('OFFER_NOT_FOUND'));
-      await sr.step('A DECLINE_OFFER unknown offer', A, { type: 'DECLINE_OFFER', offerId: randomUUID() }, rejected('OFFER_NOT_FOUND'));
-      await sr.step('A CANCEL_REGISTRATION (not registered)', A, { type: 'CANCEL_REGISTRATION' }, rejected('NOT_REGISTERED'));
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
+      await sr.step(
+        'A REGISTER [S1,S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1, s1] },
+        rejected('DUPLICATE_SESSION_IN_PREFERENCES'),
+      );
+      await sr.step(
+        'A REGISTER [unknown]',
+        A,
+        { type: 'REGISTER', acceptable: [randomUUID()] },
+        rejected('UNKNOWN_SESSION_IN_PREFERENCES'),
+      );
+      await sr.step(
+        'A ACCEPT_OFFER unknown offer',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: randomUUID() },
+        rejected('OFFER_NOT_FOUND'),
+      );
+      await sr.step(
+        'A DECLINE_OFFER unknown offer',
+        A,
+        { type: 'DECLINE_OFFER', offerId: randomUUID() },
+        rejected('OFFER_NOT_FOUND'),
+      );
+      await sr.step(
+        'A CANCEL_REGISTRATION (not registered)',
+        A,
+        { type: 'CANCEL_REGISTRATION' },
+        rejected('NOT_REGISTERED'),
+      );
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
       const seq = a?.record.result?.registration?.seq;
       sr.expect('rejected commands consumed no seq', seq === 1, 'seq 1', `seq ${seq}`);
     },
   },
   {
     name: 'decline',
-    description: 'DECLINE drops the session (R5): next preference offered and the declined seat relayed, both in the same settlement; last preference declined → ENDED',
+    description:
+      'DECLINE drops the session (R5): next preference offered and the declined seat relayed, both in the same settlement; last preference declined → ENDED',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
-      const a = await sr.step('A REGISTER [S1,S2]', A, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'OFFERED@S1');
-      await sr.step('B REGISTER [S1]', B, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      const declined = await sr.step('A DECLINE_OFFER S1', A, { type: 'DECLINE_OFFER', offerId: offerIdOf(a) }, APPLIED, 'OFFERED@S2');
+      const a = await sr.step(
+        'A REGISTER [S1,S2]',
+        A,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'B REGISTER [S1]',
+        B,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      const declined = await sr.step(
+        'A DECLINE_OFFER S1',
+        A,
+        { type: 'DECLINE_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'OFFERED@S2',
+      );
       await sr.expectState('B gets the declined S1 seat', B, 'OFFERED@S1');
       await expectSameSettlementBackfill(sr, 'DECLINED', B);
-      await sr.step('A DECLINE_OFFER S2 (last preference)', A, { type: 'DECLINE_OFFER', offerId: offerIdOf(declined) }, APPLIED, 'ENDED(NO_ACCEPTABLE_SESSION)');
+      await sr.step(
+        'A DECLINE_OFFER S2 (last preference)',
+        A,
+        { type: 'DECLINE_OFFER', offerId: offerIdOf(declined) },
+        APPLIED,
+        'ENDED(NO_ACCEPTABLE_SESSION)',
+      );
       await sr.expectState('A has no live registration', A, 'none');
-      await sr.step('A DECLINE_OFFER S1 again', A, { type: 'DECLINE_OFFER', offerId: offerIdOf(a) }, rejected('OFFER_NOT_ACTIVE'));
+      await sr.step(
+        'A DECLINE_OFFER S1 again',
+        A,
+        { type: 'DECLINE_OFFER', offerId: offerIdOf(a) },
+        rejected('OFFER_NOT_ACTIVE'),
+      );
       const b = await sr.expectState('B still OFFERED S1', B, 'OFFERED@S1');
-      await sr.step('B ACCEPT_OFFER', B, { type: 'ACCEPT_OFFER', offerId: b?.currentOffer?.id ?? '' }, APPLIED, 'CONFIRMED@S1');
+      await sr.step(
+        'B ACCEPT_OFFER',
+        B,
+        { type: 'ACCEPT_OFFER', offerId: b?.currentOffer?.id ?? '' },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
     },
   },
   {
     name: 'cancel',
-    description: 'CANCEL from CONFIRMED / OFFERED / QUEUED (R6): released seats relayed in the same settlement; re-registration gets a new seq at the tail',
+    description:
+      'CANCEL from CONFIRMED / OFFERED / QUEUED (R6): released seats relayed in the same settlement; re-registration gets a new seq at the tail',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B, C, D }) {
       const [s1] = [sr.s(1)];
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      await sr.step('B REGISTER [S1]', B, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      await sr.step('C REGISTER [S1]', C, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#2');
-      await sr.step('A CANCEL_REGISTRATION (confirmed)', A, { type: 'CANCEL_REGISTRATION' }, APPLIED, 'CANCELLED');
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      await sr.step(
+        'B REGISTER [S1]',
+        B,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'C REGISTER [S1]',
+        C,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#2',
+      );
+      await sr.step(
+        'A CANCEL_REGISTRATION (confirmed)',
+        A,
+        { type: 'CANCEL_REGISTRATION' },
+        APPLIED,
+        'CANCELLED',
+      );
       await sr.expectState('B gets the seat', B, 'OFFERED@S1');
       await sr.expectState('C moves up', C, 'QUEUED#1');
       await expectSameSettlementBackfill(sr, 'CANCELLED_CONFIRMED', B);
-      await sr.step('B CANCEL_REGISTRATION (offered)', B, { type: 'CANCEL_REGISTRATION' }, APPLIED, 'CANCELLED');
+      await sr.step(
+        'B CANCEL_REGISTRATION (offered)',
+        B,
+        { type: 'CANCEL_REGISTRATION' },
+        APPLIED,
+        'CANCELLED',
+      );
       await sr.expectState('C gets the seat', C, 'OFFERED@S1');
       await expectSameSettlementBackfill(sr, 'CANCELLED_OFFER', C);
-      const d = await sr.step('D REGISTER [S1]', D, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      await sr.step('D CANCEL_REGISTRATION (queued)', D, { type: 'CANCEL_REGISTRATION' }, APPLIED, 'CANCELLED');
+      const d = await sr.step(
+        'D REGISTER [S1]',
+        D,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'D CANCEL_REGISTRATION (queued)',
+        D,
+        { type: 'CANCEL_REGISTRATION' },
+        APPLIED,
+        'CANCELLED',
+      );
       await sr.expectState('D has no live registration', D, 'none');
-      await sr.step('D CANCEL_REGISTRATION again', D, { type: 'CANCEL_REGISTRATION' }, rejected('NOT_REGISTERED'));
-      const again = await sr.step('A REGISTER [S1] again', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
+      await sr.step(
+        'D CANCEL_REGISTRATION again',
+        D,
+        { type: 'CANCEL_REGISTRATION' },
+        rejected('NOT_REGISTERED'),
+      );
+      const again = await sr.step(
+        'A REGISTER [S1] again',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
       const before = d?.record.result?.registration?.seq ?? 0;
       const after = again?.record.result?.registration?.seq ?? 0;
-      sr.expect('re-registration gets a new seq at the tail (R6)', after > before && before > 0, `seq > ${before}`, `seq ${after}`);
+      sr.expect(
+        're-registration gets a new seq at the tail (R6)',
+        after > before && before > 0,
+        `seq > ${before}`,
+        `seq ${after}`,
+      );
     },
   },
   {
     name: 'capacity-up',
-    description: 'SET_CAPACITY up relays the new seats to the queue in the same settlement (CAPACITY_UP backfills)',
+    description:
+      'SET_CAPACITY up relays the new seats to the queue in the same settlement (CAPACITY_UP backfills)',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B, C, D }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
       const organiser = sr.organiser;
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      await sr.step('B REGISTER [S1]', B, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      await sr.step('C REGISTER [S1]', C, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#2');
-      await sr.step('D REGISTER [S2,S1]', D, { type: 'REGISTER', acceptable: [s2, s1] }, APPLIED, 'OFFERED@S2');
-      const up = await sr.step('SET_CAPACITY S1 1 → 3', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 3 }, APPLIED);
-      sr.expect('two offers created by the capacity increase', up?.record.result?.offersCreated === 2, 'offersCreated 2', `offersCreated ${up?.record.result?.offersCreated}`);
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      await sr.step(
+        'B REGISTER [S1]',
+        B,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'C REGISTER [S1]',
+        C,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#2',
+      );
+      await sr.step(
+        'D REGISTER [S2,S1]',
+        D,
+        { type: 'REGISTER', acceptable: [s2, s1] },
+        APPLIED,
+        'OFFERED@S2',
+      );
+      const up = await sr.step(
+        'SET_CAPACITY S1 1 → 3',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 3 },
+        APPLIED,
+      );
+      sr.expect(
+        'two offers created by the capacity increase',
+        up?.record.result?.offersCreated === 2,
+        'offersCreated 2',
+        `offersCreated ${up?.record.result?.offersCreated}`,
+      );
       await sr.expectState('B offered', B, 'OFFERED@S1');
       await sr.expectState('C offered', C, 'OFFERED@S1');
       await sr.expectState('D keeps S2', D, 'OFFERED@S2');
@@ -174,49 +405,159 @@ const SCENARIOS: ScenarioDef[] = [
       const capacityUp = dash.backfills.filter((record) => record.cause === 'CAPACITY_UP');
       sr.expect(
         'S1 3 seats, 0 free; 2 CAPACITY_UP backfills at 0 ms',
-        s1View?.capacity === 3 && s1View.free === 0 && capacityUp.length === 2 && capacityUp.every((record) => record.latencyMs === 0),
+        s1View?.capacity === 3 &&
+          s1View.free === 0 &&
+          capacityUp.length === 2 &&
+          capacityUp.every((record) => record.latencyMs === 0),
         'capacity 3, free 0, 2 × CAPACITY_UP latency 0',
         `capacity ${s1View?.capacity}, free ${s1View?.free}, ${JSON.stringify(capacityUp.map((record) => record.latencyMs))}`,
       );
-      const more = await sr.step('SET_CAPACITY S1 3 → 4 (nobody waiting)', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 4 }, APPLIED);
-      sr.expect('no offer without demand', more?.record.result?.offersCreated === 0, 'offersCreated 0', `offersCreated ${more?.record.result?.offersCreated}`);
+      const more = await sr.step(
+        'SET_CAPACITY S1 3 → 4 (nobody waiting)',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 4 },
+        APPLIED,
+      );
+      sr.expect(
+        'no offer without demand',
+        more?.record.result?.offersCreated === 0,
+        'offersCreated 0',
+        `offersCreated ${more?.record.result?.offersCreated}`,
+      );
     },
   },
   {
     name: 'capacity-down',
-    description: 'SET_CAPACITY below confirmed + held is rejected (R7), to exactly the usage is applied; invalid values rejected',
+    description:
+      'SET_CAPACITY below confirmed + held is rejected (R7), to exactly the usage is applied; invalid values rejected',
     sessions: [{ capacity: 3 }, { capacity: 1 }],
     async run(sr, { A, B, C }) {
       const [s1] = [sr.s(1)];
       const organiser = sr.organiser;
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      await sr.step('B REGISTER [S1]', B, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
-      await sr.step('SET_CAPACITY S1 3 → 1 (below usage 2)', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 1 }, rejected('CAPACITY_BELOW_USAGE'));
-      await sr.step('SET_CAPACITY S1 → 0', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 0 }, rejected('INVALID_CAPACITY'));
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      await sr.step(
+        'B REGISTER [S1]',
+        B,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'SET_CAPACITY S1 3 → 1 (below usage 2)',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 1 },
+        rejected('CAPACITY_BELOW_USAGE'),
+      );
+      await sr.step(
+        'SET_CAPACITY S1 → 0',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 0 },
+        rejected('INVALID_CAPACITY'),
+      );
       let s1View = (await dashboard(sr)).sessions.find((session) => session.id === s1);
-      sr.expect('capacity unchanged after rejections', s1View?.capacity === 3, 'capacity 3', `capacity ${s1View?.capacity}`);
-      await sr.step('SET_CAPACITY S1 3 → 2 (= usage)', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 2 }, APPLIED);
+      sr.expect(
+        'capacity unchanged after rejections',
+        s1View?.capacity === 3,
+        'capacity 3',
+        `capacity ${s1View?.capacity}`,
+      );
+      await sr.step(
+        'SET_CAPACITY S1 3 → 2 (= usage)',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 2 },
+        APPLIED,
+      );
       s1View = (await dashboard(sr)).sessions.find((session) => session.id === s1);
-      sr.expect('S1 capacity 2, free 0', s1View?.capacity === 2 && s1View.free === 0, 'capacity 2, free 0', `capacity ${s1View?.capacity}, free ${s1View?.free}`);
-      await sr.step('C REGISTER [S1] (now full)', C, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'QUEUED#1');
-      await sr.step('SET_CAPACITY unknown session', organiser, { type: 'SET_CAPACITY', sessionId: randomUUID(), capacity: 5 }, rejected('SESSION_NOT_FOUND'));
+      sr.expect(
+        'S1 capacity 2, free 0',
+        s1View?.capacity === 2 && s1View.free === 0,
+        'capacity 2, free 0',
+        `capacity ${s1View?.capacity}, free ${s1View?.free}`,
+      );
+      await sr.step(
+        'C REGISTER [S1] (now full)',
+        C,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'SET_CAPACITY unknown session',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: randomUUID(), capacity: 5 },
+        rejected('SESSION_NOT_FOUND'),
+      );
     },
   },
   {
     name: 'cancel-session',
-    description: 'CANCEL_SESSION revokes held seats, releases confirmed ones and drops the session from every preference list; owners queue for their other sessions',
+    description:
+      'CANCEL_SESSION revokes held seats, releases confirmed ones and drops the session from every preference list; owners queue for their other sessions',
     sessions: [{ capacity: 2 }, { capacity: 1 }],
     async run(sr, { A, B, C, D, E }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
       const organiser = sr.organiser;
-      const a = await sr.step('A REGISTER [S1,S2]', A, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      const b = await sr.step('B REGISTER [S1,S2]', B, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'OFFERED@S1');
-      const c = await sr.step('C REGISTER [S2]', C, { type: 'REGISTER', acceptable: [s2] }, APPLIED, 'OFFERED@S2');
-      await sr.step('C ACCEPT_OFFER', C, { type: 'ACCEPT_OFFER', offerId: offerIdOf(c) }, APPLIED, 'CONFIRMED@S2');
-      await sr.step('D REGISTER [S1,S2] (both full)', D, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'QUEUED#1');
-      await sr.step('CANCEL_SESSION S1', organiser, { type: 'CANCEL_SESSION', sessionId: s1 }, APPLIED);
+      const a = await sr.step(
+        'A REGISTER [S1,S2]',
+        A,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      const b = await sr.step(
+        'B REGISTER [S1,S2]',
+        B,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      const c = await sr.step(
+        'C REGISTER [S2]',
+        C,
+        { type: 'REGISTER', acceptable: [s2] },
+        APPLIED,
+        'OFFERED@S2',
+      );
+      await sr.step(
+        'C ACCEPT_OFFER',
+        C,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(c) },
+        APPLIED,
+        'CONFIRMED@S2',
+      );
+      await sr.step(
+        'D REGISTER [S1,S2] (both full)',
+        D,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'QUEUED#1',
+      );
+      await sr.step(
+        'CANCEL_SESSION S1',
+        organiser,
+        { type: 'CANCEL_SESSION', sessionId: s1 },
+        APPLIED,
+      );
       const s1View = (await dashboard(sr)).sessions.find((session) => session.id === s1);
       sr.expect(
         'S1 CANCELLED with no seats in use',
@@ -228,10 +569,31 @@ const SCENARIOS: ScenarioDef[] = [
       await sr.expectState('B (offer revoked) queues for S2', B, 'QUEUED#2');
       await sr.expectState('D queues for S2', D, 'QUEUED#3');
       await sr.expectState('C keeps S2', C, 'CONFIRMED@S2');
-      await sr.step('B ACCEPT_OFFER revoked offer', B, { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) }, rejected('OFFER_NOT_ACTIVE'));
-      await sr.step('E REGISTER [S1] (cancelled)', E, { type: 'REGISTER', acceptable: [s1] }, rejected('NO_ACCEPTABLE_SESSION'));
-      await sr.step('SET_CAPACITY S1 (cancelled)', organiser, { type: 'SET_CAPACITY', sessionId: s1, capacity: 5 }, rejected('SESSION_CANCELLED'));
-      await sr.step('C CANCEL_REGISTRATION', C, { type: 'CANCEL_REGISTRATION' }, APPLIED, 'CANCELLED');
+      await sr.step(
+        'B ACCEPT_OFFER revoked offer',
+        B,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) },
+        rejected('OFFER_NOT_ACTIVE'),
+      );
+      await sr.step(
+        'E REGISTER [S1] (cancelled)',
+        E,
+        { type: 'REGISTER', acceptable: [s1] },
+        rejected('NO_ACCEPTABLE_SESSION'),
+      );
+      await sr.step(
+        'SET_CAPACITY S1 (cancelled)',
+        organiser,
+        { type: 'SET_CAPACITY', sessionId: s1, capacity: 5 },
+        rejected('SESSION_CANCELLED'),
+      );
+      await sr.step(
+        'C CANCEL_REGISTRATION',
+        C,
+        { type: 'CANCEL_REGISTRATION' },
+        APPLIED,
+        'CANCELLED',
+      );
       await sr.expectState('A (lowest seq) gets S2', A, 'OFFERED@S2');
       await sr.expectState('B moves up', B, 'QUEUED#1');
       await sr.expectState('D moves up', D, 'QUEUED#2');
@@ -239,50 +601,133 @@ const SCENARIOS: ScenarioDef[] = [
   },
   {
     name: 'cancel-workshop',
-    description: 'CANCEL_WORKSHOP ends every registration (WORKSHOP_CANCELLED), releases every seat and rejects later commands',
+    description:
+      'CANCEL_WORKSHOP ends every registration (WORKSHOP_CANCELLED), releases every seat and rejects later commands',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B, C, D }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
       const organiser = sr.organiser;
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
-      await sr.step('A ACCEPT_OFFER', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      const b = await sr.step('B REGISTER [S2]', B, { type: 'REGISTER', acceptable: [s2] }, APPLIED, 'OFFERED@S2');
-      await sr.step('C REGISTER [S1,S2]', C, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'QUEUED#1');
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
+      await sr.step(
+        'A ACCEPT_OFFER',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      const b = await sr.step(
+        'B REGISTER [S2]',
+        B,
+        { type: 'REGISTER', acceptable: [s2] },
+        APPLIED,
+        'OFFERED@S2',
+      );
+      await sr.step(
+        'C REGISTER [S1,S2]',
+        C,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'QUEUED#1',
+      );
       await sr.step('CANCEL_WORKSHOP', organiser, { type: 'CANCEL_WORKSHOP' }, APPLIED);
       const dash = await dashboard(sr);
       sr.expect(
         'workshop and sessions CANCELLED, nothing live',
         dash.workshop.status === 'CANCELLED' &&
-          dash.sessions.every((session) => session.status === 'CANCELLED' && session.confirmed === 0 && session.held === 0) &&
+          dash.sessions.every(
+            (session) =>
+              session.status === 'CANCELLED' && session.confirmed === 0 && session.held === 0,
+          ) &&
           dash.counts.queued + dash.counts.offered + dash.counts.confirmed === 0,
         'CANCELLED; sessions CANCELLED with 0 seats in use; 0 live registrations',
         `${dash.workshop.status}; sessions ${dash.sessions.map((session) => `${session.status}/${session.confirmed}/${session.held}`).join(' ')}; live ${dash.counts.queued + dash.counts.offered + dash.counts.confirmed}`,
       );
-      for (const [name, who] of [['A', A], ['B', B], ['C', C]] as const) {
+      for (const [name, who] of [
+        ['A', A],
+        ['B', B],
+        ['C', C],
+      ] as const) {
         await sr.expectState(`${name} has no live registration`, who, 'none');
       }
-      const mine = (await A.client.myRegistrations()).registrations.find((entry) => entry.workshop.id === sr.wsId);
+      const mine = (await A.client.myRegistrations()).registrations.find(
+        (entry) => entry.workshop.id === sr.wsId,
+      );
       const archived = describeRegistration(mine?.registration, sr.label);
-      sr.expect('A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations', archived === 'ENDED(WORKSHOP_CANCELLED)', 'ENDED(WORKSHOP_CANCELLED)', archived);
-      await sr.step('D REGISTER after cancel', D, { type: 'REGISTER', acceptable: [s1] }, rejected('WORKSHOP_CANCELLED'));
-      await sr.step('B ACCEPT_OFFER after cancel', B, { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) }, rejected('WORKSHOP_CANCELLED'));
-      await sr.step('CANCEL_WORKSHOP again', organiser, { type: 'CANCEL_WORKSHOP' }, rejected('WORKSHOP_CANCELLED'));
+      sr.expect(
+        'A sees ENDED(WORKSHOP_CANCELLED) in /me/registrations',
+        archived === 'ENDED(WORKSHOP_CANCELLED)',
+        'ENDED(WORKSHOP_CANCELLED)',
+        archived,
+      );
+      await sr.step(
+        'D REGISTER after cancel',
+        D,
+        { type: 'REGISTER', acceptable: [s1] },
+        rejected('WORKSHOP_CANCELLED'),
+      );
+      await sr.step(
+        'B ACCEPT_OFFER after cancel',
+        B,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(b) },
+        rejected('WORKSHOP_CANCELLED'),
+      );
+      await sr.step(
+        'CANCEL_WORKSHOP again',
+        organiser,
+        { type: 'CANCEL_WORKSHOP' },
+        rejected('WORKSHOP_CANCELLED'),
+      );
     },
   },
   {
     name: 'close-open',
-    description: 'CLOSE_REGISTRATION blocks new registrations but keeps offers acceptable; OPEN_REGISTRATION reopens',
+    description:
+      'CLOSE_REGISTRATION blocks new registrations but keeps offers acceptable; OPEN_REGISTRATION reopens',
     sessions: [{ capacity: 1 }, { capacity: 1 }],
     async run(sr, { A, B }) {
       const [s1, s2] = [sr.s(1), sr.s(2)];
       const organiser = sr.organiser;
-      const a = await sr.step('A REGISTER [S1]', A, { type: 'REGISTER', acceptable: [s1] }, APPLIED, 'OFFERED@S1');
+      const a = await sr.step(
+        'A REGISTER [S1]',
+        A,
+        { type: 'REGISTER', acceptable: [s1] },
+        APPLIED,
+        'OFFERED@S1',
+      );
       await sr.step('CLOSE_REGISTRATION', organiser, { type: 'CLOSE_REGISTRATION' }, APPLIED);
-      await sr.step('B REGISTER while closed', B, { type: 'REGISTER', acceptable: [s1, s2] }, rejected('WORKSHOP_NOT_OPEN'));
-      await sr.step('A ACCEPT_OFFER while closed', A, { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) }, APPLIED, 'CONFIRMED@S1');
-      await sr.step('CLOSE_REGISTRATION again', organiser, { type: 'CLOSE_REGISTRATION' }, rejected('INVALID_STATE'));
+      await sr.step(
+        'B REGISTER while closed',
+        B,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        rejected('WORKSHOP_NOT_OPEN'),
+      );
+      await sr.step(
+        'A ACCEPT_OFFER while closed',
+        A,
+        { type: 'ACCEPT_OFFER', offerId: offerIdOf(a) },
+        APPLIED,
+        'CONFIRMED@S1',
+      );
+      await sr.step(
+        'CLOSE_REGISTRATION again',
+        organiser,
+        { type: 'CLOSE_REGISTRATION' },
+        rejected('INVALID_STATE'),
+      );
       await sr.step('OPEN_REGISTRATION', organiser, { type: 'OPEN_REGISTRATION' }, APPLIED);
-      await sr.step('B REGISTER after reopening', B, { type: 'REGISTER', acceptable: [s1, s2] }, APPLIED, 'OFFERED@S2');
+      await sr.step(
+        'B REGISTER after reopening',
+        B,
+        { type: 'REGISTER', acceptable: [s1, s2] },
+        APPLIED,
+        'OFFERED@S2',
+      );
     },
   },
 ];
@@ -304,10 +749,15 @@ function selectedScenarios(ctx: ExperimentContext): ScenarioDef[] {
   if (raw === undefined) {
     return SCENARIOS;
   }
-  const wanted = raw.split(',').map((name) => name.trim()).filter((name) => name.length > 0);
+  const wanted = raw
+    .split(',')
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
   const unknown = wanted.filter((name) => !SCENARIO_NAMES.includes(name));
   if (unknown.length > 0) {
-    throw new CliError(`unknown scenario(s) ${unknown.join(', ')} (known: ${SCENARIO_NAMES.join(', ')})`);
+    throw new CliError(
+      `unknown scenario(s) ${unknown.join(', ')} (known: ${SCENARIO_NAMES.join(', ')})`,
+    );
   }
   return SCENARIOS.filter((scenario) => wanted.includes(scenario.name));
 }
@@ -315,7 +765,8 @@ function selectedScenarios(ctx: ExperimentContext): ScenarioDef[] {
 runExperiment({
   name: 'correctness',
   tableRow: 'Core correctness (plan §4, Table 3)',
-  criterion: 'every scripted step as expected; verify ok after every step; 0 over-capacity; 0 double holds',
+  criterion:
+    'every scripted step as expected; verify ok after every step; 0 over-capacity; 0 double holds',
   usage: USAGE.replace('Scenarios: ', `Scenarios: ${SCENARIO_NAMES.join(', ')}`),
   defaultHoldSeconds: 900,
   options: { scenarios: { type: 'string' } },
@@ -323,14 +774,26 @@ runExperiment({
     const scenarios = selectedScenarios(ctx);
     const organiser = await ctx.accounts.organiser();
     const [A, B, C, D, E] = await ctx.accounts.participants(5);
-    if (A === undefined || B === undefined || C === undefined || D === undefined || E === undefined) {
+    if (
+      A === undefined ||
+      B === undefined ||
+      C === undefined ||
+      D === undefined ||
+      E === undefined
+    ) {
       throw new Error('five participant accounts are required');
     }
     const people: People = { A, B, C, D, E };
     const org = await ensureOrganisation(organiser, ORG_NAME);
     ctx.param('orgId', org.id);
-    ctx.param('scenarios', scenarios.map((scenario) => scenario.name));
-    ctx.param('participants', [A, B, C, D, E].map((account) => account.email));
+    ctx.param(
+      'scenarios',
+      scenarios.map((scenario) => scenario.name),
+    );
+    ctx.param(
+      'participants',
+      [A, B, C, D, E].map((account) => account.email),
+    );
 
     const samples: LatencySample[] = [];
     const results: ScenarioResult[] = [];
@@ -378,7 +841,11 @@ runExperiment({
     }
 
     const settle = summarize(samples.map((sample) => sample.settleMs));
-    const server = summarize(samples.flatMap((sample) => (sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs])));
+    const server = summarize(
+      samples.flatMap((sample) =>
+        sample.serverSettleMs === undefined ? [] : [sample.serverSettleMs],
+      ),
+    );
     const allPassed = results.every((result) => result.failed === 0);
     const lines = [
       '## Result',
@@ -386,12 +853,27 @@ runExperiment({
       `- Scenarios: ${results.filter((result) => result.failed === 0).length}/${results.length} passed`,
       `- Over-capacity observations: **${grand.overCapacity}** (target 0) over ${grand.verifications} post-step reads`,
       `- Double holds: **${grand.doubleHolds}** (target 0)`,
-      `- verify failures: ${grand.verifyFailures}${Object.keys(grand.violationCodes).length === 0 ? '' : ` (${Object.entries(grand.violationCodes).map(([code, count]) => `${code} × ${count}`).join(', ')})`}`,
+      `- verify failures: ${grand.verifyFailures}${
+        Object.keys(grand.violationCodes).length === 0
+          ? ''
+          : ` (${Object.entries(grand.violationCodes)
+              .map(([code, count]) => `${code} × ${count}`)
+              .join(', ')})`
+      }`,
       '',
       '## Scenarios',
       '',
       markdownTable(
-        ['run', 'scenario', 'what it exercises', 'checks', 'failed', 'over-capacity', 'double holds', 'verdict'],
+        [
+          'run',
+          'scenario',
+          'what it exercises',
+          'checks',
+          'failed',
+          'over-capacity',
+          'double holds',
+          'verdict',
+        ],
         results.map((result) => [
           result.run,
           result.name,
@@ -400,7 +882,9 @@ runExperiment({
           result.failed,
           result.totals.overCapacity,
           result.totals.doubleHolds,
-          result.failed === 0 ? 'PASS' : `FAIL${result.error === undefined ? '' : ` (${result.error})`}`,
+          result.failed === 0
+            ? 'PASS'
+            : `FAIL${result.error === undefined ? '' : ` (${result.error})`}`,
         ]),
       ),
       '',
@@ -416,9 +900,19 @@ runExperiment({
     return {
       summary: lines.join('\n'),
       extraFiles: { 'latency.csv': samples },
-      ok: allPassed && grand.overCapacity === 0 && grand.doubleHolds === 0 && grand.verifyFailures === 0,
+      ok:
+        allPassed &&
+        grand.overCapacity === 0 &&
+        grand.doubleHolds === 0 &&
+        grand.verifyFailures === 0,
       extra: {
-        scenarios: results.map((result) => ({ run: result.run, name: result.name, workshopId: result.workshopId, checks: result.checks, failed: result.failed })),
+        scenarios: results.map((result) => ({
+          run: result.run,
+          name: result.name,
+          workshopId: result.workshopId,
+          checks: result.checks,
+          failed: result.failed,
+        })),
         overCapacity: grand.overCapacity,
         doubleHolds: grand.doubleHolds,
         verifications: grand.verifications,

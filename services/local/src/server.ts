@@ -79,7 +79,10 @@ export async function createServer(deps: ServerDeps): Promise<FastifyInstance> {
   });
 
   app.setNotFoundHandler((request, reply) => {
-    const body: ErrorBody = { code: 'NOT_FOUND', message: `No route for ${request.method} ${request.url}` };
+    const body: ErrorBody = {
+      code: 'NOT_FOUND',
+      message: `No route for ${request.method} ${request.url}`,
+    };
     void reply.code(404).send(body);
   });
 
@@ -117,7 +120,11 @@ export async function createServer(deps: ServerDeps): Promise<FastifyInstance> {
           apiRequest.user = await verifier.verify(token);
         } catch (error) {
           const message = error instanceof AuthError ? error.message : 'invalid token';
-          logger.info('request rejected: unauthorized', { method: request.method, path, reason: message });
+          logger.info('request rejected: unauthorized', {
+            method: request.method,
+            path,
+            reason: message,
+          });
           const body: ErrorBody = { code: 'UNAUTHORIZED', message };
           return reply.code(401).send(body);
         }

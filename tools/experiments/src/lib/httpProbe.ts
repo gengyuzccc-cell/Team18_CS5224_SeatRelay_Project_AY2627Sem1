@@ -7,7 +7,12 @@ import { errorText } from './steps';
  */
 
 /** `401`, `403 FORBIDDEN`, `200`, … of a raw request. */
-export async function statusOf(client: ApiClient, method: string, path: string, body?: unknown): Promise<string> {
+export async function statusOf(
+  client: ApiClient,
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<string> {
   try {
     const response = await client.raw(method, path, body);
     const text = await response.text();
@@ -37,6 +42,9 @@ export function answerMatches(expected: string, actual: string): boolean {
 export function tamperToken(token: string): string {
   const parts = token.split('.');
   const signature = parts[2] ?? '';
-  const flipped = signature.length === 0 ? 'AAAA' : `${signature.slice(0, -4)}${signature.slice(-4) === 'AAAA' ? 'BBBB' : 'AAAA'}`;
+  const flipped =
+    signature.length === 0
+      ? 'AAAA'
+      : `${signature.slice(0, -4)}${signature.slice(-4) === 'AAAA' ? 'BBBB' : 'AAAA'}`;
   return [parts[0] ?? '', parts[1] ?? '', flipped].join('.');
 }

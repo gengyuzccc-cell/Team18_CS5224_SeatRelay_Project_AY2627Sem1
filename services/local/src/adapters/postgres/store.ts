@@ -150,10 +150,9 @@ export class PostgresWorkshopStore implements WorkshopStore {
   }
 
   async getWorkshop(wsId: string): Promise<Workshop | undefined> {
-    const result = await this.executor.query<WorkshopRow>(
-      `SELECT * FROM workshops WHERE id = $1`,
-      [wsId],
-    );
+    const result = await this.executor.query<WorkshopRow>(`SELECT * FROM workshops WHERE id = $1`, [
+      wsId,
+    ]);
     const row = result.rows[0];
     return row === undefined ? undefined : toWorkshop(row);
   }
@@ -443,10 +442,7 @@ const WRITE_ORDER: Readonly<Record<Change['kind'], number>> = Object.freeze({
 function orderWrites(writes: readonly Change[]): Change[] {
   return writes
     .map((change, index) => ({ change, index }))
-    .sort(
-      (a, b) =>
-        WRITE_ORDER[a.change.kind] - WRITE_ORDER[b.change.kind] || a.index - b.index,
-    )
+    .sort((a, b) => WRITE_ORDER[a.change.kind] - WRITE_ORDER[b.change.kind] || a.index - b.index)
     .map((entry) => entry.change);
 }
 
@@ -615,7 +611,11 @@ async function archiveOffer(client: Queryable, offer: Offer): Promise<void> {
   );
 }
 
-async function putBackfill(client: Queryable, record: BackfillRecord, pending: boolean): Promise<void> {
+async function putBackfill(
+  client: Queryable,
+  record: BackfillRecord,
+  pending: boolean,
+): Promise<void> {
   await client.query(
     `INSERT INTO backfill_records
        (id, workshop_id, session_id, released_at, cause, reallocated_at, new_offer_id, new_user_id, latency_ms, pending)

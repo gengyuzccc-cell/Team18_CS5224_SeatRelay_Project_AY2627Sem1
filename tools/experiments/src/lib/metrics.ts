@@ -24,13 +24,19 @@ export async function metricsForRun(
   names: readonly string[],
 ): Promise<MetricsDelta> {
   if (ctx.ops.kind === 'aws' && ctx.options.metricsWaitMs > 0) {
-    ctx.log(`waiting ${Math.round(ctx.options.metricsWaitMs / 1000)} s for CloudWatch to ingest the run's metrics`);
+    ctx.log(
+      `waiting ${Math.round(ctx.options.metricsWaitMs / 1000)} s for CloudWatch to ingest the run's metrics`,
+    );
     await sleep(ctx.options.metricsWaitMs);
   }
   try {
     return await ctx.ops.metricsSince(baseline, names);
   } catch (error) {
-    return { available: false, detail: error instanceof Error ? error.message : String(error), values: {} };
+    return {
+      available: false,
+      detail: error instanceof Error ? error.message : String(error),
+      values: {},
+    };
   }
 }
 
@@ -52,7 +58,12 @@ export function metricsSection(delta: MetricsDelta, notes: Record<string, string
     '',
     markdownTable(
       ['metric', 'sum', 'samples', 'note'],
-      names.map((name) => [name, delta.values[name]?.sum ?? 0, delta.values[name]?.count ?? 0, notes[name] ?? '']),
+      names.map((name) => [
+        name,
+        delta.values[name]?.sum ?? 0,
+        delta.values[name]?.count ?? 0,
+        notes[name] ?? '',
+      ]),
     ),
   ];
 }

@@ -63,7 +63,10 @@ function allocatableAfter(session: Session | undefined, now: string): boolean {
 describe('audit: holds spanning the cut-off (R4)', () => {
   it('an offer created just before the cut-off expires exactly at it; ACCEPT 1 ms before wins, at it loses', () => {
     // A starts at +35 min, so its cut-off is at +5 min.
-    const s0 = makeSnapshot({ holdSeconds: 600, sessions: [{ id: 'A', startsInMinutes: 35 }, { id: 'B' }] });
+    const s0 = makeSnapshot({
+      holdSeconds: 600,
+      sessions: [{ id: 'A', startsInMinutes: 35 }, { id: 'B' }],
+    });
     const cutoff = at(5);
     const s1 = run(s0, cmd.register(1, ['A']), addMs(cutoff, -1)).snapshot;
     const offer = offerOf(s1, 1)!;
@@ -85,14 +88,20 @@ describe('audit: holds spanning the cut-off (R4)', () => {
     const early = run(s1, cmd.accept(1, offer.id), addMs(cutoff, -1));
     expect(early.decision.status).toBe('APPLIED');
     const after = run(early.snapshot, cmd.tick('SWEEP'), at(60));
-    expect(regOf(after.snapshot, 1)).toMatchObject({ status: 'CONFIRMED', confirmedSessionId: 'A' });
+    expect(regOf(after.snapshot, 1)).toMatchObject({
+      status: 'CONFIRMED',
+      confirmedSessionId: 'A',
+    });
     expect(after.decision.writes).toEqual([]);
   });
 
   it('after every cut-off: REGISTER, ACCEPT, DECLINE are rejected; a confirmed participant may still leave and the seat is never relayed', () => {
     const s0 = makeSnapshot({
       holdSeconds: 60,
-      sessions: [{ id: 'A', startsInMinutes: 35, capacity: 1 }, { id: 'B', startsInMinutes: 35, capacity: 1 }],
+      sessions: [
+        { id: 'A', startsInMinutes: 35, capacity: 1 },
+        { id: 'B', startsInMinutes: 35, capacity: 1 },
+      ],
     });
     let s = registerMany(s0, [1, 2, 3], ['A', 'B'], at(0)); // 1→A, 2→B, 3 queued
     s = run(s, cmd.accept(1, offerOf(s, 1)!.id), at(0)).snapshot;
@@ -105,8 +114,12 @@ describe('audit: holds spanning the cut-off (R4)', () => {
     const past = at(6); // every cut-off passed
     const r = run(s, cmd.tick('SWEEP'), past);
     // 3's hold on B expired at +2; 3 then listed only A (full) → stays QUEUED until the cut-off → ENDED(CUTOFF).
-    expect(r.snapshot.registrations.map((x) => [x.userId, x.status])).toEqual([['u1', 'CONFIRMED']]);
-    expect(run(r.snapshot, cmd.register(4, ['A', 'B']), past).decision.reason).toBe('NO_ACCEPTABLE_SESSION');
+    expect(r.snapshot.registrations.map((x) => [x.userId, x.status])).toEqual([
+      ['u1', 'CONFIRMED'],
+    ]);
+    expect(run(r.snapshot, cmd.register(4, ['A', 'B']), past).decision.reason).toBe(
+      'NO_ACCEPTABLE_SESSION',
+    );
     expect(run(r.snapshot, cmd.accept(2, offer2.id), past).decision.reason).toBe('OFFER_EXPIRED');
     expect(run(r.snapshot, cmd.decline(2, offer2.id), past).decision.reason).toBe('OFFER_EXPIRED');
     // R6 after the cut-off: the confirmed participant can leave; the seat is released but nobody can take it.
@@ -129,7 +142,12 @@ describe('audit: holds spanning the cut-off (R4)', () => {
 
 describe('audit: capacity changes (R7, C1)', () => {
   it('capacity lowered to exactly confirmed + held is applied; below it is rejected; a later release then fills only the free seats', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 3 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 3 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     let s = registerMany(s0, [1, 2, 3, 4, 5], ['A'], at(0)); // 1,2,3 hold A; 4,5 queued
     s = run(s, cmd.accept(1, offerOf(s, 1)!.id), at(0)).snapshot;
     expect(sessionOf(s, 'A')).toMatchObject({ confirmed: 1, held: 2 });
@@ -146,8 +164,18 @@ describe('audit: capacity changes (R7, C1)', () => {
   });
 
   it('a continuation carrying capacity-up seats never over-allocates after the capacity was lowered again (C1)', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 1 }, { id: 'B', capacity: 1 }] });
-    let s = registerMany(s0, Array.from({ length: 20 }, (_, i) => i + 1), ['A'], at(0));
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 1 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
+    let s = registerMany(
+      s0,
+      Array.from({ length: 20 }, (_, i) => i + 1),
+      ['A'],
+      at(0),
+    );
     s = run(s, cmd.accept(1, offerOf(s, 1)!.id), at(0)).snapshot;
     s = run(s, cmd.cancel(2), at(0)).snapshot; // 2 held B? no: B is not in the list; 2 was queued
     // Raise A to 20: 12 offers at most in the first decision, the rest in a continuation.
@@ -172,7 +200,13 @@ describe('audit: capacity changes (R7, C1)', () => {
   });
 
   it('R7: no automatic command ever moves a CONFIRMED participant (ticks, capacity down/up, other users leaving)', () => {
-    const s0 = makeSnapshot({ holdSeconds: 60, sessions: [{ id: 'A', capacity: 2 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      holdSeconds: 60,
+      sessions: [
+        { id: 'A', capacity: 2 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     let s = registerMany(s0, [1, 2, 3, 4], ['A', 'B'], at(0));
     s = run(s, cmd.accept(1, offerOf(s, 1)!.id), at(0)).snapshot;
     const before = regOf(s, 1)!;
@@ -199,7 +233,12 @@ describe('audit: capacity changes (R7, C1)', () => {
 
 describe('audit: session cancelled with offers outstanding', () => {
   it('revokes the holds, re-queues the holders ahead of everyone (same seq), ends those with nothing left, and answers the stale ACCEPT deterministically', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 2 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 2 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     // 1: A only; 2: A then B; 3: B only; 4: A then B (queued: A full after 1,2); 5: B only (queued).
     let s = registerMany(s0, [1], ['A'], at(0));
     s = registerMany(s, [2], ['A', 'B'], at(0));
@@ -238,8 +277,18 @@ describe('audit: session cancelled with offers outstanding', () => {
   });
 
   it('an ACCEPT that arrives while the session drain is still pending is rejected with SESSION_CANCELLED and the seat is still released', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 30 }, { id: 'B', capacity: 1 }] });
-    const s = registerMany(s0, Array.from({ length: 30 }, (_, i) => i + 1), ['A'], at(0));
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 30 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
+    const s = registerMany(
+      s0,
+      Array.from({ length: 30 }, (_, i) => i + 1),
+      ['A'],
+      at(0),
+    );
     expect(s.offers).toHaveLength(30);
     // A tiny budget leaves the drain pending after the CANCEL_SESSION decision.
     const limits = { maxItemsPerDecision: 20 };
@@ -247,13 +296,22 @@ describe('audit: session cancelled with offers outstanding', () => {
     expect(first.decision.continuation).toBeDefined();
     expect(sessionOf(first.snapshot, 'A').status).toBe('CANCELLING');
     const stillLive = first.snapshot.offers[0]!;
-    const accept = step(first.snapshot, cmd.accept(stillLive.userId.slice(1), stillLive.id), at(1), limits);
+    const accept = step(
+      first.snapshot,
+      cmd.accept(stillLive.userId.slice(1), stillLive.id),
+      at(1),
+      limits,
+    );
     expect(accept.decision.status).toBe('REJECTED');
     expect(accept.decision.reason).toBe('SESSION_CANCELLED');
     expectHardInvariants(accept.snapshot, at(1));
     // Let the chain finish: everything referencing A is gone and every holder was told once.
     const done = run(accept.snapshot, cmd.reallocate(), at(1), limits);
-    expect(sessionOf(done.snapshot, 'A')).toMatchObject({ status: 'CANCELLED', held: 0, confirmed: 0 });
+    expect(sessionOf(done.snapshot, 'A')).toMatchObject({
+      status: 'CANCELLED',
+      held: 0,
+      confirmed: 0,
+    });
     expect(done.snapshot.registrations).toEqual([]);
     expect(done.snapshot.offers).toEqual([]);
   });
@@ -261,7 +319,12 @@ describe('audit: session cancelled with offers outstanding', () => {
 
 describe('audit: re-registration (R6) and decline (R5)', () => {
   it('a participant whose last session was declined may register again and joins the back of the queue for the very session declined', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 1 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 1 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     let s = registerMany(s0, [1, 2, 3], ['A'], at(0)); // 1 holds A; 2, 3 queued
     const declined = run(s, cmd.decline(1, offerOf(s, 1)!.id), at(1));
     expect(declined.decision.resultForCommand?.registration).toMatchObject({
@@ -297,7 +360,13 @@ describe('audit: re-registration (R6) and decline (R5)', () => {
 
 describe('audit: the action budget overflow path with duplicates', () => {
   it('a mass expiry (100 holds, 60 waiting) hit by duplicate ticks and an interleaved command converges, relays every seat once and stays in budget', () => {
-    const s0 = makeSnapshot({ holdSeconds: 60, sessions: [{ id: 'A', capacity: 100 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      holdSeconds: 60,
+      sessions: [
+        { id: 'A', capacity: 100 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     const holders = Array.from({ length: 100 }, (_, i) => i + 1);
     const waiting = Array.from({ length: 60 }, (_, i) => 101 + i);
     let s = registerMany(s0, holders, ['A'], at(0));
@@ -340,7 +409,12 @@ describe('audit: the action budget overflow path with duplicates', () => {
   });
 
   it('a cancelled workshop hit by duplicate continuations and late user commands ends with no live items and one notice per user', () => {
-    const s0 = makeSnapshot({ sessions: [{ id: 'A', capacity: 20 }, { id: 'B', capacity: 20 }] });
+    const s0 = makeSnapshot({
+      sessions: [
+        { id: 'A', capacity: 20 },
+        { id: 'B', capacity: 20 },
+      ],
+    });
     const users = Array.from({ length: 50 }, (_, i) => i + 1);
     let s = registerMany(s0, users, ['A', 'B'], at(0));
     const now = at(1);
@@ -359,14 +433,21 @@ describe('audit: the action budget overflow path with duplicates', () => {
       s = r.snapshot;
       expectHardInvariants(s, now);
       if (r.decision.continuation !== undefined) {
-        queue.push(r.decision.continuation, r.decision.continuation, cmd.register(99, ['A']), cmd.accept(1, 'id-x'));
+        queue.push(
+          r.decision.continuation,
+          r.decision.continuation,
+          cmd.register(99, ['A']),
+          cmd.accept(1, 'id-x'),
+        );
       }
       expect(++guard).toBeLessThan(100);
     }
     expect(s.workshop.status).toBe('CANCELLED');
     expect(s.registrations).toEqual([]);
     expect(s.offers).toEqual([]);
-    expect(s.sessions.every((x) => x.status === 'CANCELLED' && x.held === 0 && x.confirmed === 0)).toBe(true);
+    expect(
+      s.sessions.every((x) => x.status === 'CANCELLED' && x.held === 0 && x.confirmed === 0),
+    ).toBe(true);
     expect(s.workshop.nextDueAt).toBeUndefined();
     expect([...notified.values()].every((count) => count === 1)).toBe(true);
     expect(notified.size).toBe(50);
@@ -377,7 +458,13 @@ describe('audit: the action budget overflow path with duplicates', () => {
 
 describe('audit: clock skew between decisions', () => {
   it('a decision whose server time is earlier than the previous one keeps every invariant and never shortens or lengthens a hold', () => {
-    const s0 = makeSnapshot({ holdSeconds: 120, sessions: [{ id: 'A', capacity: 1 }, { id: 'B', capacity: 1 }] });
+    const s0 = makeSnapshot({
+      holdSeconds: 120,
+      sessions: [
+        { id: 'A', capacity: 1 },
+        { id: 'B', capacity: 1 },
+      ],
+    });
     let s = registerMany(s0, [1, 2, 3], ['A', 'B'], at(10)); // 1→A, 2→B at +10
     // A tick from a worker whose clock is 3 minutes behind: nothing is due, no writes.
     const behind = run(s, cmd.tick('TIMER'), at(7));
@@ -390,10 +477,16 @@ describe('audit: clock skew between decisions', () => {
     expect(relayed.createdAt).toBe(at(7));
     expect(relayed.expiresAt).toBe(addSeconds(at(7), 120));
     // Back on the later clock, 1's hold (created +10) is still alive at +11 and dead at +12.
-    expect(run(declined.snapshot, cmd.accept(1, offerOf(s, 1)!.id), at(11)).decision.status).toBe('APPLIED');
-    expect(run(declined.snapshot, cmd.accept(1, offerOf(s, 1)!.id), at(12)).decision.reason).toBe('OFFER_EXPIRED');
+    expect(run(declined.snapshot, cmd.accept(1, offerOf(s, 1)!.id), at(11)).decision.status).toBe(
+      'APPLIED',
+    );
+    expect(run(declined.snapshot, cmd.accept(1, offerOf(s, 1)!.id), at(12)).decision.reason).toBe(
+      'OFFER_EXPIRED',
+    );
     for (const now of [at(7), at(11), at(12), at(5)]) {
-      expect(checkInvariants(run(declined.snapshot, cmd.tick('SWEEP'), now).snapshot, now).violations).toEqual([]);
+      expect(
+        checkInvariants(run(declined.snapshot, cmd.tick('SWEEP'), now).snapshot, now).violations,
+      ).toEqual([]);
     }
   });
 });
@@ -559,7 +652,12 @@ function comparable(snapshot: WorkshopSnapshot): unknown {
  * the session is the first of the taker's preferences that could be offered (every preferred
  * session is not allocatable after the decision: seats are only consumed by allocation).
  */
-function assertOfferOrder(decision: Decision, after: WorkshopSnapshot, now: string, what: string): void {
+function assertOfferOrder(
+  decision: Decision,
+  after: WorkshopSnapshot,
+  now: string,
+  what: string,
+): void {
   const sessionById = new Map(after.sessions.map((session) => [session.id, session]));
   for (const write of decision.writes) {
     if (write.kind !== 'PUT_OFFER') {
@@ -570,11 +668,15 @@ function assertOfferOrder(decision: Decision, after: WorkshopSnapshot, now: stri
     if (taker === undefined) {
       throw new Error(`${what}: offer ${offer.id} has no live registration`);
     }
-    expect(taker.acceptable, `${what}: offered a session the taker did not list`).toContain(offer.sessionId);
+    expect(taker.acceptable, `${what}: offered a session the taker did not list`).toContain(
+      offer.sessionId,
+    );
     const session = sessionById.get(offer.sessionId)!;
     expect(session.status, `${what}: offered a non-OPEN session`).toBe('OPEN');
     expect(nowOf(session.cutoffAt), `${what}: offered past cut-off`).toBeGreaterThan(nowOf(now));
-    expect(offer.expiresAt).toBe(minIso(addSeconds(now, after.workshop.holdSeconds), session.cutoffAt));
+    expect(offer.expiresAt).toBe(
+      minIso(addSeconds(now, after.workshop.holdSeconds), session.cutoffAt),
+    );
     const overtaken = after.registrations.find(
       (r) => r.status === 'QUEUED' && r.seq < taker.seq && r.acceptable.includes(offer.sessionId),
     );
@@ -605,7 +707,8 @@ function assertConfirmedKept(
   command: Command,
   what: string,
 ): void {
-  const workshopCancelled = after.workshop.status === 'CANCELLING' || after.workshop.status === 'CANCELLED';
+  const workshopCancelled =
+    after.workshop.status === 'CANCELLING' || after.workshop.status === 'CANCELLED';
   for (const was of before.registrations) {
     if (was.status !== 'CONFIRMED') {
       continue;
@@ -620,7 +723,9 @@ function assertConfirmedKept(
         was.acceptable[0] === command.sessionId);
     const now = after.registrations.find((r) => r.seq === was.seq);
     const kept =
-      now !== undefined && now.status === 'CONFIRMED' && now.confirmedSessionId === was.confirmedSessionId;
+      now !== undefined &&
+      now.status === 'CONFIRMED' &&
+      now.confirmedSessionId === was.confirmedSessionId;
     if (!kept && !workshopCancelled && !sessionCancelled && !ownCancel) {
       throw new Error(
         `${what}: confirmed registration ${was.seq} (${was.userId}, ${was.confirmedSessionId}) was moved by ${command.type}: ${JSON.stringify(now)}`,
@@ -629,7 +734,11 @@ function assertConfirmedKept(
   }
 }
 
-function assertDecisionShape(decision: Decision, limits: DecisionLimits, before: WorkshopSnapshot): void {
+function assertDecisionShape(
+  decision: Decision,
+  limits: DecisionLimits,
+  before: WorkshopSnapshot,
+): void {
   expect(decision.metrics.offersCreated).toBeLessThanOrEqual(limits.maxOffersPerDecision);
   expect(decision.metrics.offersExpired).toBeLessThanOrEqual(limits.maxExpiriesPerDecision);
   expect(estimateCommitItems(decision), 'commit over the item budget').toBeLessThanOrEqual(
@@ -668,7 +777,11 @@ function assertSettled(snapshot: WorkshopSnapshot, now: string): void {
   }
 }
 
-function withSettledOffers(previous: WorkshopSnapshot, next: WorkshopSnapshot, decision: Decision): WorkshopSnapshot {
+function withSettledOffers(
+  previous: WorkshopSnapshot,
+  next: WorkshopSnapshot,
+  decision: Decision,
+): WorkshopSnapshot {
   const settled = [
     ...(previous.settledOffers ?? []),
     ...decision.writes.flatMap((write) => (write.kind === 'ARCHIVE_OFFER' ? [write.offer] : [])),
@@ -736,15 +849,24 @@ describe('audit: adversarial property test (skewed clock, duplicate commands, du
             // the dedup window, or a redelivery the service failed to recognise) must be
             // observably a no-op: the same state as an internal TICK on this snapshot, and a
             // deterministic rejection unless the command is naturally idempotent (SET_CAPACITY).
-            if (decision.status === 'APPLIED' && command.type !== 'TICK' && command.type !== 'REALLOCATE') {
+            if (
+              decision.status === 'APPLIED' &&
+              command.type !== 'TICK' &&
+              command.type !== 'REALLOCATE'
+            ) {
               replays += 1;
               const replay = decide(snapshot, command, makeCtx(now, limits, idSeed + 100_000));
-              const tick = decide(snapshot, { type: 'TICK', workshopId: WS }, makeCtx(now, limits, idSeed + 100_000));
+              const tick = decide(
+                snapshot,
+                { type: 'TICK', workshopId: WS },
+                makeCtx(now, limits, idSeed + 100_000),
+              );
               const afterReplay = applyChanges(snapshot, replay.writes);
               const afterTick = applyChanges(snapshot, tick.writes);
-              expect(comparable(afterReplay), `${what}: replayed command changed the state`).toEqual(
-                comparable(afterTick),
-              );
+              expect(
+                comparable(afterReplay),
+                `${what}: replayed command changed the state`,
+              ).toEqual(comparable(afterTick));
               if (command.type !== 'SET_CAPACITY') {
                 expect(replay.status, `${what}: replay was not rejected`).toBe('REJECTED');
               }
@@ -758,7 +880,11 @@ describe('audit: adversarial property test (skewed clock, duplicate commands, du
               }
               if (step.k % 4 === 0) {
                 now = addSeconds(now, step.s % 61);
-                queue.push(command.type === 'TICK' ? command : toCommand({ ...step, kind: 'TICK' }, setup, snapshot));
+                queue.push(
+                  command.type === 'TICK'
+                    ? command
+                    : toCommand({ ...step, kind: 'TICK' }, setup, snapshot),
+                );
               }
               queue.push(decision.continuation);
             }
@@ -768,7 +894,9 @@ describe('audit: adversarial property test (skewed clock, duplicate commands, du
           }
           const report = checkInvariants(snapshot, now);
           if (!report.ok) {
-            throw new Error(`step ${index} (${step.kind}) at ${now}: ${JSON.stringify(report.violations)}`);
+            throw new Error(
+              `step ${index} (${step.kind}) at ${now}: ${JSON.stringify(report.violations)}`,
+            );
           }
           assertSettled(snapshot, now);
         }
@@ -778,7 +906,9 @@ describe('audit: adversarial property test (skewed clock, duplicate commands, du
     expect(replays).toBeGreaterThan(0);
     expect(duplicates).toBeGreaterThan(0);
     expect(backwards).toBeGreaterThan(0);
-    console.log(`audit property: ${steps} steps, ${replays} replays, ${duplicates} duplicate continuations, ${backwards} backward clock moves`);
+    console.log(
+      `audit property: ${steps} steps, ${replays} replays, ${duplicates} duplicate continuations, ${backwards} backward clock moves`,
+    );
   });
 });
 
@@ -788,7 +918,11 @@ describe('audit: PER_SESSION cancel-all with holds in several sessions', () => {
   it('releases every held and confirmed seat of the user and relays each one in the same decision', () => {
     const s0 = makeSnapshot({
       mode: 'PER_SESSION',
-      sessions: [{ id: 'A', capacity: 1 }, { id: 'B', capacity: 1 }, { id: 'C', capacity: 1 }],
+      sessions: [
+        { id: 'A', capacity: 1 },
+        { id: 'B', capacity: 1 },
+        { id: 'C', capacity: 1 },
+      ],
     });
     let s = s0;
     for (const id of ['A', 'B', 'C']) {
@@ -797,11 +931,12 @@ describe('audit: PER_SESSION cancel-all with holds in several sessions', () => {
     }
     const holdA = s.offers.find((o) => o.sessionId === 'A' && o.userId === 'u1')!;
     s = run(s, cmd.accept(1, holdA.id), at(0)).snapshot;
-    expect(s.registrations.filter((r) => r.userId === 'u1').map((r) => r.status).sort()).toEqual([
-      'CONFIRMED',
-      'OFFERED',
-      'OFFERED',
-    ]);
+    expect(
+      s.registrations
+        .filter((r) => r.userId === 'u1')
+        .map((r) => r.status)
+        .sort(),
+    ).toEqual(['CONFIRMED', 'OFFERED', 'OFFERED']);
     const r = run(s, cmd.cancel(1), at(1));
     expect(r.decision.status).toBe('APPLIED');
     expect(r.decision.backfills.map((b) => b.cause).sort()).toEqual([
@@ -821,7 +956,11 @@ describe('audit: PER_SESSION cancel-all with holds in several sessions', () => {
 describe('audit: registration lists', () => {
   it('a registration keeps only sessions it can still get; a hold is never created for a session outside the list', () => {
     const s0 = makeSnapshot({
-      sessions: [{ id: 'A', capacity: 1 }, { id: 'B', capacity: 1 }, { id: 'C', startsInMinutes: 35 }],
+      sessions: [
+        { id: 'A', capacity: 1 },
+        { id: 'B', capacity: 1 },
+        { id: 'C', startsInMinutes: 35 },
+      ],
     });
     let s = run(s0, cmd.cancelSession('B'), at(0)).snapshot;
     const r = run(s, cmd.register(1, ['C', 'B', 'A']), at(6)); // B cancelled, C past cut-off at +5

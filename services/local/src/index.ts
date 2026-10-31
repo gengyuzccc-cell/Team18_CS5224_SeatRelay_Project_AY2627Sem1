@@ -29,7 +29,13 @@ export { createLogger, errorFields, type LocalLogger, type LogLevel } from './lo
 export { createLoop, type Loop } from './loop';
 export { LocalMetrics, type MetricSummary } from './metrics';
 export { createJanitor, type JanitorReport } from './janitor';
-export { createNotifier, smtpMailer, type Mailer, type Notifier, type NotifierBatch } from './notifier';
+export {
+  createNotifier,
+  smtpMailer,
+  type Mailer,
+  type Notifier,
+  type NotifierBatch,
+} from './notifier';
 export { createServer, type ServerDeps } from './server';
 export { createSweepLoop, createTimerLoop } from './timers';
 export { createWorker, type Worker, type WorkerConfig, type WorkerStep } from './worker';

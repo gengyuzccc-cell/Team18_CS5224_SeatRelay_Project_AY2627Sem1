@@ -27,7 +27,8 @@ export const SEATRELAY_METRIC_SERVICES: Readonly<Record<string, string>> = Objec
   NotificationFailures: 'notifier',
 });
 
-export type MetricStat = 'Sum' | 'SampleCount' | 'Maximum' | 'Minimum' | 'Average' | 'p50' | 'p95' | 'p99';
+export type MetricStat =
+  'Sum' | 'SampleCount' | 'Maximum' | 'Minimum' | 'Average' | 'p50' | 'p95' | 'p99';
 
 export interface MetricQuery {
   /** Lower-case alphanumeric, starts with a letter (CloudWatch id rules). */
@@ -60,11 +61,18 @@ export interface MetricSeries {
 }
 
 export type MetricsResult =
-  | { available: true; region: string; window: { start: string; end: string }; series: MetricSeries[] }
+  | {
+      available: true;
+      region: string;
+      window: { start: string; end: string };
+      series: MetricSeries[];
+    }
   | { available: false; reason: string };
 
 export interface CloudWatchClientLike {
-  send(command: GetMetricDataCommand): Promise<{ MetricDataResults?: MetricDataResult[]; NextToken?: string }>;
+  send(
+    command: GetMetricDataCommand,
+  ): Promise<{ MetricDataResults?: MetricDataResult[]; NextToken?: string }>;
   config: { credentials?: unknown };
 }
 
@@ -76,7 +84,10 @@ export interface GetMetricDataOptions {
 }
 
 export function metricId(...parts: string[]): string {
-  const raw = parts.join('_').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+  const raw = parts
+    .join('_')
+    .toLowerCase()
+    .replace(/[^a-z0-9_]/g, '_');
   return /^[a-z]/.test(raw) ? raw : `m_${raw}`;
 }
 
@@ -166,7 +177,10 @@ export function toMetricDataQuery(query: MetricQuery, periodSeconds: number): Me
       Metric: {
         Namespace: query.namespace,
         MetricName: query.metricName,
-        Dimensions: Object.entries(query.dimensions ?? {}).map(([Name, Value]) => ({ Name, Value })),
+        Dimensions: Object.entries(query.dimensions ?? {}).map(([Name, Value]) => ({
+          Name,
+          Value,
+        })),
       },
       Period: periodSeconds,
       Stat: query.stat,
@@ -182,7 +196,12 @@ export async function getMetricData(
 ): Promise<MetricsResult> {
   const region = options.region ?? awsRegion();
   if (queries.length === 0) {
-    return { available: true, region, window: { start: window.start.toISOString(), end: window.end.toISOString() }, series: [] };
+    return {
+      available: true,
+      region,
+      window: { start: window.start.toISOString(), end: window.end.toISOString() },
+      series: [],
+    };
   }
   const client: CloudWatchClientLike = options.client ?? new CloudWatchClient({ region });
   const period = Math.max(1, Math.round(window.periodSeconds ?? 60));
@@ -192,7 +211,9 @@ export async function getMetricData(
     }
     const results = new Map<string, MetricDataResult>();
     for (let start = 0; start < queries.length; start += 500) {
-      const chunk = queries.slice(start, start + 500).map((query) => toMetricDataQuery(query, period));
+      const chunk = queries
+        .slice(start, start + 500)
+        .map((query) => toMetricDataQuery(query, period));
       let nextToken: string | undefined;
       do {
         const output = await client.send(
@@ -210,7 +231,11 @@ export async function getMetricData(
           }
           const existing = results.get(result.Id);
           if (existing === undefined) {
-            results.set(result.Id, { ...result, Timestamps: [...(result.Timestamps ?? [])], Values: [...(result.Values ?? [])] });
+            results.set(result.Id, {
+              ...result,
+              Timestamps: [...(result.Timestamps ?? [])],
+              Values: [...(result.Values ?? [])],
+            });
           } else {
             existing.Timestamps?.push(...(result.Timestamps ?? []));
             existing.Values?.push(...(result.Values ?? []));
@@ -220,7 +245,12 @@ export async function getMetricData(
       } while (nextToken !== undefined);
     }
     const series = queries.map((query) => toSeries(query, results.get(query.id)));
-    return { available: true, region, window: { start: window.start.toISOString(), end: window.end.toISOString() }, series };
+    return {
+      available: true,
+      region,
+      window: { start: window.start.toISOString(), end: window.end.toISOString() },
+      series,
+    };
   } catch (error) {
     return { available: false, reason: error instanceof Error ? error.message : String(error) };
   }
@@ -260,7 +290,10 @@ export function describeMetrics(result: MetricsResult): string[] {
   if (result.series.length === 0) {
     return ['CloudWatch metrics: no queries'];
   }
-  const lines = [`CloudWatch metrics (${result.region}, ${result.window.start} → ${result.window.end}):`, ''];
+  const lines = [
+    `CloudWatch metrics (${result.region}, ${result.window.start} → ${result.window.end}):`,
+    '',
+  ];
   lines.push('| metric | datapoints | total | max |', '|---|---|---|---|');
   for (const series of result.series) {
     lines.push(

@@ -413,19 +413,24 @@ export function redactSetupData(setupData) {
 export function makeSummaryHandler(scenarioName) {
   return function handleSummary(data) {
     const file = `${CONFIG.outDir}/${scenarioName}-${CONFIG.vus}-${CONFIG.round}.json`;
-    const enriched = Object.assign({}, data, { setup_data: redactSetupData(data.setup_data) }, {
-      seatrelay: {
-        scenario: scenarioName,
-        target,
-        vus: CONFIG.vus,
-        round: CONFIG.round,
-        warmup: CONFIG.warmup,
-        duration: CONFIG.duration,
-        pollIntervalMs: POLL_INTERVAL_S * 1000,
-        api: CONFIG.api,
-        finishedAt: new Date().toISOString(),
+    const enriched = Object.assign(
+      {},
+      data,
+      { setup_data: redactSetupData(data.setup_data) },
+      {
+        seatrelay: {
+          scenario: scenarioName,
+          target,
+          vus: CONFIG.vus,
+          round: CONFIG.round,
+          warmup: CONFIG.warmup,
+          duration: CONFIG.duration,
+          pollIntervalMs: POLL_INTERVAL_S * 1000,
+          api: CONFIG.api,
+          finishedAt: new Date().toISOString(),
+        },
       },
-    });
+    );
     const out = {};
     out[file] = JSON.stringify(enriched, null, 2);
     out.stdout = textSummary(enriched);

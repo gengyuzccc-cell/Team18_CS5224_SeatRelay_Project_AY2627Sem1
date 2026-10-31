@@ -30,7 +30,9 @@ const server = await startMemoryServer({
 if (values.cache !== undefined) {
   writeFixtureTokenCache(values.cache, server, { count: Number(values.count) });
 }
-process.stderr.write(`memory fixture listening on ${server.url}${values.cache === undefined ? '' : `; token cache ${values.cache}`}\n`);
+process.stderr.write(
+  `memory fixture listening on ${server.url}${values.cache === undefined ? '' : `; token cache ${values.cache}`}\n`,
+);
 const stop = (): void => {
   void server.close().then(() => process.exit(0));
 };

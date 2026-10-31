@@ -1,7 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { Registration } from '@seatrelay/contracts';
 import { addSeconds, decide, type Change } from '@seatrelay/core';
-import { createApiApp, noopMetrics, processCommand, silentLogger, systemClock, uuidIdGen } from '@seatrelay/service';
+import {
+  createApiApp,
+  noopMetrics,
+  processCommand,
+  silentLogger,
+  systemClock,
+  uuidIdGen,
+} from '@seatrelay/service';
 import type pg from 'pg';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { createPool, migrate, pgErrorCode } from '../src/adapters/postgres/db';
@@ -140,7 +147,13 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect(await f.store.addMember('nope', 'bob')).toBeUndefined();
 
     const workshop = await f.store.getWorkshop(f.wsId);
-    expect(workshop).toMatchObject({ id: f.wsId, status: 'OPEN', seq: 0, version: 0, holdSeconds: 60 });
+    expect(workshop).toMatchObject({
+      id: f.wsId,
+      status: 'OPEN',
+      seq: 0,
+      version: 0,
+      holdSeconds: 60,
+    });
     expect(workshop?.nextDueAt).toBeUndefined();
     expect((await f.store.listSessions(f.wsId)).map((s) => s.id)).toEqual([f.s1, f.s2]);
     expect((await f.store.listWorkshopsForOrg(f.org.id)).map((w) => w.id)).toEqual([f.wsId]);
@@ -149,8 +162,15 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
       title: 'Git 101',
       updatedAt: '2030-01-01T00:00:00.000Z',
     });
-    expect(patched).toMatchObject({ title: 'Git 101', description: '', updatedAt: '2030-01-01T00:00:00.000Z', version: 0 });
-    expect(await f.store.updateWorkshopInfo('nope', { updatedAt: systemClock.now() })).toBeUndefined();
+    expect(patched).toMatchObject({
+      title: 'Git 101',
+      description: '',
+      updatedAt: '2030-01-01T00:00:00.000Z',
+      version: 0,
+    });
+    expect(
+      await f.store.updateWorkshopInfo('nope', { updatedAt: systemClock.now() }),
+    ).toBeUndefined();
   });
 
   test('processCommand against the store: register → offer, timer row, notification, settled result', async () => {
@@ -172,7 +192,12 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     });
     expect(snapshot.offers).toHaveLength(1);
     const offer = snapshot.offers[0]!;
-    expect(offer).toMatchObject({ sessionId: f.s1, userId: 'alice', status: 'OFFERED', registrationSeq: 1 });
+    expect(offer).toMatchObject({
+      sessionId: f.s1,
+      userId: 'alice',
+      status: 'OFFERED',
+      registrationSeq: 1,
+    });
     expect(offer.expiresAt).toBe(addSeconds(offer.createdAt, 60));
     expect(snapshot.workshop.nextDueAt).toBe(offer.expiresAt);
     expect(snapshot.sessions.find((s) => s.id === f.s1)).toMatchObject({ held: 1, confirmed: 0 });
@@ -185,8 +210,20 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
       result: { offersCreated: 1, registration: { status: 'OFFERED', seq: 1 } },
     });
     expect(record?.settledAt).toBeDefined();
-    expect(await count(pool, 'timers', 'workshop_id = $1 AND offer_id = $2 AND NOT fired', [f.wsId, offer.id])).toBe(1);
-    expect(await count(pool, 'notifications', `workshop_id = $1 AND status = 'PENDING' AND kind = 'OFFER'`, [f.wsId])).toBe(1);
+    expect(
+      await count(pool, 'timers', 'workshop_id = $1 AND offer_id = $2 AND NOT fired', [
+        f.wsId,
+        offer.id,
+      ]),
+    ).toBe(1);
+    expect(
+      await count(
+        pool,
+        'notifications',
+        `workshop_id = $1 AND status = 'PENDING' AND kind = 'OFFER'`,
+        [f.wsId],
+      ),
+    ).toBe(1);
     expect((await f.store.listNotificationsForUser('alice')).map((n) => n.kind)).toContain('OFFER');
     expect(await f.store.listDueWorkshops(addSeconds(offer.expiresAt, 1))).toContainEqual(
       expect.objectContaining({ id: f.wsId }),
@@ -201,7 +238,10 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     const snapshot = await snapshotOf(f.store, f.wsId);
     const register = command('REGISTER', f.wsId, bob, { acceptable: [f.s1] });
     await accept(f.store, register);
-    const decision = decide(snapshot, register, { now: systemClock.now(), newId: () => randomUUID() });
+    const decision = decide(snapshot, register, {
+      now: systemClock.now(),
+      newId: () => randomUUID(),
+    });
     expect(decision.status).toBe('APPLIED');
 
     // A concurrent writer moved the workshop on.
@@ -264,9 +304,15 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect((await processCommand(f.ports, acceptOffer)).outcome).toBe('APPLIED');
     let snapshot = await snapshotOf(f.store, f.wsId);
     expect(snapshot.offers).toHaveLength(0);
-    expect(snapshot.registrations[0]).toMatchObject({ status: 'CONFIRMED', confirmedSessionId: f.s1 });
+    expect(snapshot.registrations[0]).toMatchObject({
+      status: 'CONFIRMED',
+      confirmedSessionId: f.s1,
+    });
     expect(snapshot.sessions.find((s) => s.id === f.s1)).toMatchObject({ held: 0, confirmed: 1 });
-    expect(await f.store.getArchivedOffer(f.wsId, offerId)).toMatchObject({ id: offerId, status: 'ACCEPTED' });
+    expect(await f.store.getArchivedOffer(f.wsId, offerId)).toMatchObject({
+      id: offerId,
+      status: 'ACCEPTED',
+    });
     expect(await f.store.getArchivedOffer(f.wsId, 'nope')).toBeUndefined();
     expect(await count(pool, 'offers', 'id = $1', [offerId])).toBe(0);
     expect(await count(pool, 'offers_history', 'id = $1', [offerId])).toBe(1);
@@ -281,16 +327,29 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
 
     snapshot = await snapshotOf(f.store, f.wsId);
     expect(snapshot.registrations.map((r) => [r.userId, r.status])).toEqual([['bob', 'OFFERED']]);
-    expect(await count(pool, 'registrations', 'workshop_id = $1 AND user_id = $2', [f.wsId, 'alice'])).toBe(0);
+    expect(
+      await count(pool, 'registrations', 'workshop_id = $1 AND user_id = $2', [f.wsId, 'alice']),
+    ).toBe(0);
     const history = await f.store.listHistory(f.wsId);
     expect(history.registrations).toHaveLength(1);
-    expect(history.registrations[0]).toMatchObject({ userId: 'alice', seq: 1, status: 'CANCELLED' });
+    expect(history.registrations[0]).toMatchObject({
+      userId: 'alice',
+      seq: 1,
+      status: 'CANCELLED',
+    });
     expect(history.offers.map((o) => o.status)).toEqual(['ACCEPTED']);
-    expect((await f.store.listArchivedOffersOfUser(f.wsId, 'alice')).map((o) => o.status)).toEqual(['ACCEPTED']);
+    expect((await f.store.listArchivedOffersOfUser(f.wsId, 'alice')).map((o) => o.status)).toEqual([
+      'ACCEPTED',
+    ]);
     expect(await f.store.listArchivedOffersOfUser(f.wsId, 'bob')).toEqual([]);
     const backfills = await f.store.listBackfills(f.wsId);
     expect(backfills).toHaveLength(1);
-    expect(backfills[0]).toMatchObject({ sessionId: f.s1, cause: 'CANCELLED_CONFIRMED', newUserId: 'bob', latencyMs: 0 });
+    expect(backfills[0]).toMatchObject({
+      sessionId: f.s1,
+      cause: 'CANCELLED_CONFIRMED',
+      newUserId: 'bob',
+      latencyMs: 0,
+    });
     expect(snapshot.pendingBackfills).toHaveLength(0);
 
     const mine = await f.store.listRegistrationsForUser('alice');
@@ -324,7 +383,12 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
       { kind: 'PUT_REGISTRATION', registration: duplicate },
     ];
     await expect(
-      f.store.commit({ wsId: f.wsId, expectedVersion: snapshot.workshop.version, writes, notifications: [] }),
+      f.store.commit({
+        wsId: f.wsId,
+        expectedVersion: snapshot.workshop.version,
+        writes,
+        notifications: [],
+      }),
     ).rejects.toSatisfy((error: unknown) => pgErrorCode(error) === '23505');
     // the failed transaction left the workshop untouched
     expect((await snapshotOf(f.store, f.wsId)).workshop.version).toBe(snapshot.workshop.version);
@@ -353,14 +417,22 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect(await count(pool, 'commands', 'dedup_id = $1', [register.commandId])).toBe(1);
 
     const expiresAt = systemClock.now();
-    const tick = { type: 'TICK' as const, workshopId: f.wsId, source: 'TIMER' as const, offerId: 'o1', expiresAt };
+    const tick = {
+      type: 'TICK' as const,
+      workshopId: f.wsId,
+      source: 'TIMER' as const,
+      offerId: 'o1',
+      expiresAt,
+    };
     await f.queue.enqueue(tick);
     await f.queue.enqueue(tick);
     expect(await count(pool, 'commands', 'dedup_id = $1', [`tick#o1#${expiresAt}`])).toBe(1);
 
     await f.queue.enqueue({ type: 'TICK', workshopId: f.wsId, source: 'SWEEP' });
     await f.queue.enqueue({ type: 'TICK', workshopId: f.wsId, source: 'SWEEP' });
-    expect(await count(pool, 'commands', `workshop_id = $1 AND payload->>'source' = 'SWEEP'`, [f.wsId])).toBe(2);
+    expect(
+      await count(pool, 'commands', `workshop_id = $1 AND payload->>'source' = 'SWEEP'`, [f.wsId]),
+    ).toBe(2);
     expect(await count(pool, 'commands', `status = 'PENDING'`)).toBe(4);
   });
 
@@ -381,7 +453,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect((await rows()).rows).toEqual([{ status: 'PENDING', dedup_id: register.commandId }]);
 
     // DONE inside the window: deduplicated.
-    await pool.query(`UPDATE commands SET status = 'DONE', done_at = now(), created_at = now() - interval '4 minutes'`);
+    await pool.query(
+      `UPDATE commands SET status = 'DONE', done_at = now(), created_at = now() - interval '4 minutes'`,
+    );
     await f.queue.enqueue(register);
     expect((await rows()).rows).toHaveLength(1);
 
@@ -394,7 +468,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     ]);
 
     // FAILED (the DLQ), even a second old: re-sending it is the redrive.
-    await pool.query(`UPDATE commands SET status = 'FAILED', done_at = now() WHERE dedup_id = $1`, [register.commandId]);
+    await pool.query(`UPDATE commands SET status = 'FAILED', done_at = now() WHERE dedup_id = $1`, [
+      register.commandId,
+    ]);
     await f.queue.enqueue(register);
     await f.queue.enqueue(register); // the revived message is PENDING again: deduplicated
     expect((await rows()).rows).toEqual([
@@ -436,12 +512,22 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
         body: { type: 'REGISTER', commandId, acceptable: [f.s1], _fault: 'BEFORE_COMMIT' },
       });
     const poll = async () =>
-      (await api.handle({ method: 'GET', path: `/commands/${commandId}`, headers: {}, query: {}, user: alice }))
-        .body as { status: string };
+      (
+        await api.handle({
+          method: 'GET',
+          path: `/commands/${commandId}`,
+          headers: {},
+          query: {},
+          user: alice,
+        })
+      ).body as { status: string };
 
     expect((await post()).status).toBe(202);
     // Every delivery fails (one attempt allowed): the message is parked in the DLQ.
-    expect(await workerWith(1).processNext()).toMatchObject({ outcome: 'FAILED', deliveryAttempt: 1 });
+    expect(await workerWith(1).processNext()).toMatchObject({
+      outcome: 'FAILED',
+      deliveryAttempt: 1,
+    });
     expect((await poll()).status).toBe('ACCEPTED');
 
     // The client re-POSTs the same command: it must be enqueued again, not deduplicated forever.
@@ -469,13 +555,18 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect(await loop.runOnce()).toBe(true);
     expect(await loop.runOnce()).toBe(false);
 
-    const commands = await pool.query<{ dedup_id: string; payload: { offerId: string; source: string } }>(
-      `SELECT dedup_id, payload FROM commands WHERE workshop_id = $1`,
-      [f.wsId],
-    );
+    const commands = await pool.query<{
+      dedup_id: string;
+      payload: { offerId: string; source: string };
+    }>(`SELECT dedup_id, payload FROM commands WHERE workshop_id = $1`, [f.wsId]);
     expect(commands.rows).toHaveLength(1);
     expect(commands.rows[0]?.dedup_id).toBe(`tick#due#${past}`);
-    expect(commands.rows[0]?.payload).toMatchObject({ type: 'TICK', source: 'TIMER', offerId: 'due', expiresAt: past });
+    expect(commands.rows[0]?.payload).toMatchObject({
+      type: 'TICK',
+      source: 'TIMER',
+      offerId: 'due',
+      expiresAt: past,
+    });
     expect(await count(pool, 'timers', `offer_id = 'due' AND fired`)).toBe(1);
     expect(await count(pool, 'timers', `offer_id = 'later' AND NOT fired`)).toBe(1);
   });
@@ -499,7 +590,11 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
       await accept(f.store, cmd);
       await f.queue.enqueue(cmd);
     }
-    expect(await worker.processNext()).toMatchObject({ type: 'REGISTER', outcome: 'APPLIED', deliveryAttempt: 1 });
+    expect(await worker.processNext()).toMatchObject({
+      type: 'REGISTER',
+      outcome: 'APPLIED',
+      deliveryAttempt: 1,
+    });
     expect(await worker.processNext()).toMatchObject({ type: 'REGISTER', outcome: 'APPLIED' });
     expect(await worker.processNext()).toBeUndefined();
     let snapshot = await snapshotOf(f.store, f.wsId);
@@ -511,8 +606,13 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
 
     // Simulate the hold elapsing: fire the timer now and process the TICK.
     const offer = snapshot.offers[0]!;
-    await pool.query(`UPDATE timers SET fire_at = now() - interval '1 second' WHERE offer_id = $1`, [offer.id]);
-    await pool.query(`UPDATE offers SET expires_at = now() - interval '1 second' WHERE id = $1`, [offer.id]);
+    await pool.query(
+      `UPDATE timers SET fire_at = now() - interval '1 second' WHERE offer_id = $1`,
+      [offer.id],
+    );
+    await pool.query(`UPDATE offers SET expires_at = now() - interval '1 second' WHERE id = $1`, [
+      offer.id,
+    ]);
     const timerLoop = createTimerLoop({ pool, logger: testLogger, pollMs: 1000 });
     expect(await timerLoop.runOnce()).toBe(true);
     expect(await worker.processNext()).toMatchObject({ type: 'TICK', outcome: 'APPLIED' });
@@ -539,7 +639,10 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
       config: { pollMs: 10, maxAttempts: 3, retryBackoffMs: 0, faultInjection: true },
     });
 
-    const before = command('REGISTER', f.wsId, alice, { acceptable: [f.s1], _fault: 'BEFORE_COMMIT' });
+    const before = command('REGISTER', f.wsId, alice, {
+      acceptable: [f.s1],
+      _fault: 'BEFORE_COMMIT',
+    });
     await accept(f.store, before);
     await f.queue.enqueue(before);
     expect(await worker.processNext()).toMatchObject({ outcome: 'RETRY', deliveryAttempt: 1 });
@@ -555,7 +658,10 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect(await worker.processNext()).toMatchObject({ outcome: 'RETRY', deliveryAttempt: 1 });
     expect((await f.store.getCommandResult(after.commandId))?.status).toBe('APPLIED');
     expect((await snapshotOf(f.store, f.wsId)).registrations).toHaveLength(2);
-    expect(await worker.processNext()).toMatchObject({ outcome: 'ALREADY_SETTLED', deliveryAttempt: 2 });
+    expect(await worker.processNext()).toMatchObject({
+      outcome: 'ALREADY_SETTLED',
+      deliveryAttempt: 2,
+    });
     expect((await snapshotOf(f.store, f.wsId)).registrations).toHaveLength(2);
     expect(await count(pool, 'commands', `status = 'DONE'`)).toBe(2);
     expect(await count(pool, 'commands', `status <> 'DONE'`)).toBe(0);
@@ -564,7 +670,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
   test('worker: an invalid payload is parked as FAILED without blocking the workshop', async () => {
     await pool.query('TRUNCATE commands, timers');
     const f = await createFixture(pool);
-    await pool.query(`INSERT INTO commands (workshop_id, payload) VALUES ($1, '{"type":"NOPE"}')`, [f.wsId]);
+    await pool.query(`INSERT INTO commands (workshop_id, payload) VALUES ($1, '{"type":"NOPE"}')`, [
+      f.wsId,
+    ]);
     const register = command('REGISTER', f.wsId, carol, { acceptable: [f.s1] });
     await accept(f.store, register);
     await f.queue.enqueue(register);
@@ -586,7 +694,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     const register = command('REGISTER', f.wsId, alice, { acceptable: [f.s1] });
     await accept(f.store, register);
     await processCommand(f.ports, register);
-    expect(await count(pool, 'notifications', `workshop_id = $1 AND status = 'PENDING'`, [f.wsId])).toBe(1);
+    expect(
+      await count(pool, 'notifications', `workshop_id = $1 AND status = 'PENDING'`, [f.wsId]),
+    ).toBe(1);
 
     const skipping = createNotifier({
       pool,
@@ -598,10 +708,15 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     });
     const skipped = await skipping.processBatch();
     expect(skipped.skipped).toBeGreaterThanOrEqual(1);
-    expect(await count(pool, 'notifications', `workshop_id = $1 AND status = 'SKIPPED'`, [f.wsId])).toBe(1);
+    expect(
+      await count(pool, 'notifications', `workshop_id = $1 AND status = 'SKIPPED'`, [f.wsId]),
+    ).toBe(1);
 
     const sent: string[] = [];
-    await pool.query(`UPDATE notifications SET status = 'PENDING', attempts = 0 WHERE workshop_id = $1`, [f.wsId]);
+    await pool.query(
+      `UPDATE notifications SET status = 'PENDING', attempts = 0 WHERE workshop_id = $1`,
+      [f.wsId],
+    );
     const sending = createNotifier({
       pool,
       logger: testLogger,
@@ -617,9 +732,19 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     });
     expect((await sending.processBatch()).sent).toBe(1);
     expect(sent).toEqual(['alice@example.com']);
-    expect(await count(pool, 'notifications', `workshop_id = $1 AND status = 'SENT' AND sent_at IS NOT NULL`, [f.wsId])).toBe(1);
+    expect(
+      await count(
+        pool,
+        'notifications',
+        `workshop_id = $1 AND status = 'SENT' AND sent_at IS NOT NULL`,
+        [f.wsId],
+      ),
+    ).toBe(1);
 
-    await pool.query(`UPDATE notifications SET status = 'PENDING', attempts = 0 WHERE workshop_id = $1`, [f.wsId]);
+    await pool.query(
+      `UPDATE notifications SET status = 'PENDING', attempts = 0 WHERE workshop_id = $1`,
+      [f.wsId],
+    );
     const failing = createNotifier({
       pool,
       logger: testLogger,
@@ -635,7 +760,14 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     });
     expect(await failing.processBatch()).toMatchObject({ retried: 1, failed: 0 });
     expect(await failing.processBatch()).toMatchObject({ retried: 0, failed: 1 });
-    expect(await count(pool, 'notifications', `workshop_id = $1 AND status = 'FAILED' AND attempts = 2`, [f.wsId])).toBe(1);
+    expect(
+      await count(
+        pool,
+        'notifications',
+        `workshop_id = $1 AND status = 'FAILED' AND attempts = 2`,
+        [f.wsId],
+      ),
+    ).toBe(1);
   });
 
   test('notifier: a failed send is retried after an exponential backoff, so an SMTP outage only delays the e-mail', async () => {
@@ -667,7 +799,12 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     });
     const row = async () =>
       (
-        await pool.query<{ status: string; attempts: number; retry_in_s: number; last_error: string | null }>(
+        await pool.query<{
+          status: string;
+          attempts: number;
+          retry_in_s: number;
+          last_error: string | null;
+        }>(
           `SELECT status, attempts, last_error,
                   extract(epoch FROM next_attempt_at - now())::float8 AS retry_in_s
              FROM notifications WHERE workshop_id = $1`,
@@ -678,7 +815,11 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     // First failure: still PENDING, next attempt in 60 s (base × 2^0).
     expect(await notifier.processBatch()).toEqual({ sent: 0, skipped: 0, failed: 0, retried: 1 });
     let state = await row();
-    expect(state).toMatchObject({ status: 'PENDING', attempts: 1, last_error: 'connect ECONNREFUSED 127.0.0.1:1025' });
+    expect(state).toMatchObject({
+      status: 'PENDING',
+      attempts: 1,
+      last_error: 'connect ECONNREFUSED 127.0.0.1:1025',
+    });
     expect(state.retry_in_s).toBeGreaterThan(55);
     expect(state.retry_in_s).toBeLessThanOrEqual(60);
 
@@ -688,7 +829,9 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
 
     // Due again, still down: the backoff doubles, and a tick that only retried reports idle,
     // so the loop sleeps pollMs instead of re-ticking at once.
-    await pool.query(`UPDATE notifications SET next_attempt_at = now() WHERE workshop_id = $1`, [f.wsId]);
+    await pool.query(`UPDATE notifications SET next_attempt_at = now() WHERE workshop_id = $1`, [
+      f.wsId,
+    ]);
     expect(await notifier.runOnce()).toBe(false);
     state = await row();
     expect(state).toMatchObject({ status: 'PENDING', attempts: 2 });
@@ -697,7 +840,10 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
 
     // The outage ends; once the retry is due the e-mail goes out.
     smtpUp = true;
-    await pool.query(`UPDATE notifications SET next_attempt_at = now() - interval '1 second' WHERE workshop_id = $1`, [f.wsId]);
+    await pool.query(
+      `UPDATE notifications SET next_attempt_at = now() - interval '1 second' WHERE workshop_id = $1`,
+      [f.wsId],
+    );
     expect(await notifier.runOnce()).toBe(true);
     expect(await row()).toMatchObject({ status: 'SENT', attempts: 3, last_error: null });
     expect(attempts).toEqual(['bob@example.com', 'bob@example.com', 'bob@example.com']);
@@ -719,14 +865,32 @@ describe.skipIf(unavailable !== undefined)('postgres adapter (real PostgreSQL)',
     expect((await f.store.getCommandResult(register.commandId))?.status).toBe('APPLIED');
 
     const [notification] = await f.store.listNotificationsForUser('alice');
-    expect(await f.store.listNotificationsOfUserSince('alice', f.wsId, notification!.createdAt)).toEqual([notification]);
-    expect(await f.store.listNotificationsOfUserSince('alice', 'other-ws', notification!.createdAt)).toEqual([]);
-    expect(await f.store.listNotificationsOfUserSince('alice', f.wsId, addSeconds(notification!.createdAt, 1))).toEqual([]);
+    expect(
+      await f.store.listNotificationsOfUserSince('alice', f.wsId, notification!.createdAt),
+    ).toEqual([notification]);
+    expect(
+      await f.store.listNotificationsOfUserSince('alice', 'other-ws', notification!.createdAt),
+    ).toEqual([]);
+    expect(
+      await f.store.listNotificationsOfUserSince(
+        'alice',
+        f.wsId,
+        addSeconds(notification!.createdAt, 1),
+      ),
+    ).toEqual([]);
     const readAt = systemClock.now();
     expect(await f.store.markNotificationRead('bob', notification!.id, readAt)).toBeUndefined();
-    expect((await f.store.markNotificationRead('alice', notification!.id, readAt))?.readAt).toBe(readAt);
+    expect((await f.store.markNotificationRead('alice', notification!.id, readAt))?.readAt).toBe(
+      readAt,
+    );
 
-    const attendance = { workshopId: f.wsId, userId: 'alice', attended: true, markedAt: readAt, markedBy: 'organiser' };
+    const attendance = {
+      workshopId: f.wsId,
+      userId: 'alice',
+      attended: true,
+      markedAt: readAt,
+      markedBy: 'organiser',
+    };
     await f.store.putAttendance(attendance);
     await f.store.putAttendance({ ...attendance, attended: false });
     expect(await f.store.listAttendance(f.wsId)).toEqual([{ ...attendance, attended: false }]);

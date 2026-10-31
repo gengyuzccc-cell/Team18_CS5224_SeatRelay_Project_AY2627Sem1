@@ -47,7 +47,11 @@ export interface CommitInfo {
 /** `git rev-parse HEAD` (+ dirty flag and branch); undefined outside a git checkout. */
 export function gitCommitInfo(cwd: string = process.cwd()): CommitInfo | undefined {
   const git = (...args: string[]): string =>
-    execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    execFileSync('git', args, {
+      cwd,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
   try {
     const hash = git('rev-parse', 'HEAD');
     const info: CommitInfo = {

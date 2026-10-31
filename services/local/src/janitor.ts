@@ -28,7 +28,9 @@ export function createJanitor(deps: JanitorDeps): Loop & { sweepOnce(): Promise<
       pool.query(`DELETE FROM command_results WHERE expires_at < now()`),
       pool.query(`DELETE FROM notifications WHERE expires_at < now()`),
       pool.query(`DELETE FROM timers WHERE fired AND fired_at < now() - interval '1 hour'`),
-      pool.query(`DELETE FROM commands WHERE status = 'DONE' AND done_at < now() - interval '24 hours'`),
+      pool.query(
+        `DELETE FROM commands WHERE status = 'DONE' AND done_at < now() - interval '24 hours'`,
+      ),
     ]);
     const report: JanitorReport = {
       commandResults: commandResults.rowCount ?? 0,

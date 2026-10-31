@@ -33,9 +33,12 @@ export function testPassword(
     });
   }
   if (target !== 'local' && password === DEFAULT_PASSWORD) {
-    throw new CliError(`the documented default password is public; it is refused for target ${target}`, {
-      hint: `choose a private password in ${TEST_PASSWORD_ENV} and reset the accounts with tools/scripts/bin/reset-test-passwords.sh`,
-    });
+    throw new CliError(
+      `the documented default password is public; it is refused for target ${target}`,
+      {
+        hint: `choose a private password in ${TEST_PASSWORD_ENV} and reset the accounts with tools/scripts/bin/reset-test-passwords.sh`,
+      },
+    );
   }
   return password;
 }

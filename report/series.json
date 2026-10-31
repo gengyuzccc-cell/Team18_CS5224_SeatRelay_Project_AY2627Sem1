@@ -12,9 +12,5 @@
     "access-control": "2026-10-17-access-control-2",
     "backfill": "2026-10-17-backfill-2"
   },
-  "regression": [
-    "2026-10-31-smoke",
-    "2026-10-31-correctness",
-    "2026-10-31-access-control"
-  ]
+  "regression": ["2026-10-31-smoke", "2026-10-31-correctness", "2026-10-31-access-control"]
 }

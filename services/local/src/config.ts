@@ -8,7 +8,9 @@ import { z } from 'zod';
 const bool = z
   .string()
   .optional()
-  .transform((value) => value !== undefined && ['1', 'true', 'yes', 'on'].includes(value.toLowerCase()));
+  .transform(
+    (value) => value !== undefined && ['1', 'true', 'yes', 'on'].includes(value.toLowerCase()),
+  );
 
 const intWithDefault = (fallback: number, min = 1) =>
   z

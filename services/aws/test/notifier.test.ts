@@ -10,7 +10,11 @@ import {
 } from '../src/adapters/dynamo/notifications';
 import { liveOfferItem, notificationItem } from '../src/adapters/dynamo/mapping';
 import type { EmailMessage, EmailSendResult, EmailSender } from '../src/adapters/ses';
-import { createNotifierHandler, isReservedAddress, notificationOfRecord } from '../src/handlers/notifier';
+import {
+  createNotifierHandler,
+  isReservedAddress,
+  notificationOfRecord,
+} from '../src/handlers/notifier';
 import { T0, notification, offer } from './fixtures';
 import { streamRecord } from './harness';
 
@@ -128,7 +132,13 @@ describe('isReservedAddress', () => {
   });
 
   test('ordinary addresses are e-mailed', () => {
-    for (const email of ['e0123456@u.nus.edu', 'someone@gmail.com', 'x@example.com.sg', 'y@notexample.com', 'z@testing.org']) {
+    for (const email of [
+      'e0123456@u.nus.edu',
+      'someone@gmail.com',
+      'x@example.com.sg',
+      'y@notexample.com',
+      'z@testing.org',
+    ]) {
       expect(isReservedAddress(email), email).toBe(false);
     }
   });
