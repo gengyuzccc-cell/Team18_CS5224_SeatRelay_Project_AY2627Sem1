@@ -129,6 +129,24 @@ pnpm --filter @seatrelay/aws validate           # sam validate --lint on the thr
 | `pnpm --filter @seatrelay/aws test:ddb-local` | Opt-in. Runs against DynamoDB Local and compares the result with the in-memory reference store (`services/aws/README.md`). |
 | `pnpm --filter @seatrelay/web test` | Polling backoff, command runner retries, settled-result cache merge, session renewal |
 
+### 4.1 Laptop setup (`.env`)
+
+There is no `.env.local`: the web app reads its runtime configuration from `apps/web/public/env.js`
+(local Keycloak defaults; deployments overwrite the file in `dist/`), and the scripts read standard
+environment variables. `.env.example` at the repository root lists every variable with its purpose;
+copy it to `.env` (git-ignored), fill in what the task needs and load it with `set -a; source .env;
+set +a` (PowerShell: see the file). Three ways to run things:
+
+- **Local stack, no AWS** (`pnpm local:up`, §6): needs Docker only; accounts and the password are in
+  `services/local/README.md`.
+- **Web app on your laptop against the dev stage**: `pnpm install && pnpm web:dev`, then point
+  `apps/web/public/env.js` at the dev values from `docs/deployment-state.md` (provider `cognito`, the
+  Cognito issuer, web client id, hosted UI domain, dev API URL; all public ids) without committing the
+  edit; `http://localhost:5173/callback` is a registered sign-in callback.
+- **Deploy, experiments, walkthrough, seeding on dev/pilot**: your own access key of the IAM user
+  `seatrelay-deployer` (`docs/aws-setup.md` §C, laptop alternative `aws configure`) and the test
+  accounts' password `SEATRELAY_TEST_PASSWORD` from the member who set it (never through chat).
+
 ## 5. Deploy (AWS)
 
 Three stacks: `seatrelay-auth` (Cognito, SES identity, budgets; deployed once, never deleted),
