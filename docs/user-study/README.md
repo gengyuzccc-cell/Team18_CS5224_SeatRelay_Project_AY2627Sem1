@@ -38,7 +38,7 @@ The control is deliberately a *well-prepared* spreadsheet (duplicate-detection f
 | Date | What | Who |
 |---|---|---|
 | by 10/27 | Control condition built (`control-condition-setup.md`), SeatRelay study accounts + seed script ready (`tasks-*.md` state tables), task cards printed, 2 pilot people and 12 participants booked | team |
-| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (the UI freeze is the commit tagged `v0.9-study`; the tag is created on the build deployed after the 30 Oct 2026 audit fixes, so until then nothing is frozen) | facilitator |
+| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (the UI freeze is the commit tagged `v0.9-study` (= commit `8ace25c`); the tag is created on the build deployed after the 30 Oct 2026 audit fixes, so until then nothing is frozen) | facilitator |
 | **10/29 (Thu)** | **Pilot, 2 people** (not counted). Fix task wording, time caps, reset checklist; record the changes in `results/user-study/study-log.md` | facilitator + note-taker |
 | **10/30 (Fri) – 11/05 (Thu)** | **12 sessions**, ~40 min each, 2 per day (suggested: 10/30 P01–P02, 10/31 P03–P04, 11/02 P05–P06, 11/03 P07–P08, 11/04 P09–P10, 11/05 P11–P12; 11/01 and evenings as buffer) | facilitator + note-taker |
 | after each session | Rows typed into `session-sheet.csv` / `sus-sheet.csv`; interview + background notes into `interview-notes.md`; both systems reset | note-taker |
