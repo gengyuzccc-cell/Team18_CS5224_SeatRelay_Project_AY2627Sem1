@@ -26,7 +26,7 @@ the slides and the poster, and ran the deployments and measurements with the tea
 second assistant (Codex) authored the interview scenarios, generated the task and SUS responses and
 wrote \S\ref{sec:study} and the companion report (\code{tools/research/}, \code{results/research/}).
 \emph{How.} Scope, rules R1--R7, constraints C1--C7 and acceptance targets are the team's. No
-interview or study was held with people and the pilot is \IfPending{\PilotWorkshops}{not run}{recorded in
+interview or study was held with people and \IfPending{\PilotWorkshops}{no pilot was run}{the pilot is recorded in
 \S\ref{sec:pilot}}: the research in \S\ref{sec:study} is simulated and says so. Every measured, simulated
 and own-count number is written by a script from a raw file in \code{results/} (external facts are
 cited); \code{report/tools/check\_numbers.py}, run by every build, regenerates them and checks each
@@ -42,5 +42,5 @@ measuring; a second stage once failed to deploy over a duplicate schedule name. 
 GENGYU} (data, local reference): running our engine on PostgreSQL showed me that a fair comparison
 needs equal load, retention and function, and that labour and the network line, not hardware, dominate a small server's cost. \textbf{LIANG ZIHAN} (user research, evaluation tooling): timing
 an expiry race at $\pm$200\,ms taught me that network delay is part of the experiment, so the harness
-calibrates send times; preparing the study, I learned to report the real sample, even when it is none. \textbf{ZHANG
+calibrates send times; preparing the study, I learned to report its real sample, whatever its size. \textbf{ZHANG
 TIANYI} (dashboard, QA, documentation): SES production access was refused while our sender was unverified and granted once we fixed that; I learned to plan approvals early, keep test accounts from sending real mail, and report failures as failures.

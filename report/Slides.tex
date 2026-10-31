@@ -169,7 +169,7 @@
     \item Scripted organisers: \SimCoordinationHours{} h baseline coordination per event; bargain price \sd\SimBargainSgd/month (assumptions, not measured savings or willingness to pay)
     \item Simulation: forms leave \hl{\ReplayDupConfirmedPerSessionMean} duplicate confirmed seats per workshop, one queue \ReplayDupConfirmedUnifiedMean
     \item Eventbrite relays a ticket, but per date; no tool ties sessions to one queue place
-    \item First users: NUS student organisations, starting with our \IfPending{\PilotWorkshops}{planned }{}pilot workshop
+    \item First users: NUS student organisations
   \end{itemize}
   \source{Competitor scan from vendor documentation (Luma, Eventbrite, Humanitix, SignUpGenius,
     Peatix, forms + spreadsheet): Final report Table 2. Simulation: \ReplaySeeds{} workshops,
@@ -264,7 +264,7 @@
   \vspace{0.16in}
   \tikz\node[fill=srPaleBlue, draw=srBlue!40, rounded corners=4pt, inner sep=9pt, text width=11.85in]
     {\textbf{Backup:} staged recording \code{docs/demo/backup-demo.mp4} (B1) and its screenshots (B2--B5):
-     the same beats with other accounts (Alice, Bob, Carol); fallback script in \code{docs/walkthrough/part-4.md}};
+     beats D1--D4 with other accounts (Alice, Bob, Carol); fallback script in \code{docs/walkthrough/part-4.md}};
   \source{Accounts: A = Demo 1, B = Demo 2. Plan A: \url{https://d2ni5e1z674t04.cloudfront.net} (dev). Plan B: local Docker stack, same
     code. Plan C: the recording. Click path and fallback: \code{docs/DEMO.md} \S5--6. Values on screen
     are demo values, not measurements.}
@@ -330,7 +330,7 @@
         On-prem, fully amortised & \CostTierOneKOnpremFullThreeYearUsd & \CostTierTenKOnpremFullThreeYearUsd & \CostTierHundredKOnpremFullThreeYearUsd\\
         \bottomrule
       \end{tabular}\par\vspace{0.30in}
-      Cloud dearer than on-prem above\\ \hl{\CostCrossoverListIncrementRegs}/month (increment only),\\ \hl{\CostCrossoverListFullRegs}/month (fully amortised)
+      Cloud list price dearer than on-prem above\\ \hl{\CostCrossoverListIncrementRegs}/month (increment only),\\ \hl{\CostCrossoverListFullRegs}/month (fully amortised)
     \end{column}
     \begin{column}{5.45in}
       \includegraphics[width=5.45in]{figures/generated/cost-crossover}
@@ -349,16 +349,16 @@
   \mute{No people recruited or observed; two conditions per profile; two pre-study scenarios excluded}\par\vspace{0.10in}
   \begin{columns}[T,onlytextwidth]
     \begin{column}{0.61\textwidth}
-      \includegraphics[width=\linewidth]{../results/research/figures/completion.pdf}
+      \includegraphics[width=\linewidth]{figures/generated/slide-completion}
       \small \SimTaskAttempts{} task attempts; \SimSusForms{} ten-item SUS forms.\par
       Prepared forms + sheet; counterbalanced order and A/B datasets.
     \end{column}
     \begin{column}{0.35\textwidth}
       \textbf{SeatRelay vs control}\par\vspace{0.10in}
-      Completion: \hl{\SimCompletionSR\,\%} vs \SimCompletionCtrl\,\%\par\vspace{0.10in}
+      Unassisted: \hl{\SimCompletionSR\,\%} vs \SimCompletionCtrl\,\%\par\vspace{0.10in}
       SUS: \hl{\SimSusSR} vs \SimSusCtrl\par\vspace{0.10in}
       Paired time reduction: \hl{\SimPairedReduction\,\%}\par\vspace{0.10in}
-      Completion and SUS miss reference targets.
+      Unassisted completion and SUS miss reference targets.
     \end{column}
   \end{columns}
   \vspace{0.08in}

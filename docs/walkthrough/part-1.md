@@ -6,7 +6,7 @@
 - **Slides:** 1 Title, 2 Problem and market, 3 Business model (`report/Slides.tex`)
 - **Hands over to:** Part 2 (mechanism and rules)
 
-## What to say (about 285 spoken words, 1:54 at 150 words a minute)
+## What to say (about 300 spoken words, 2:00 at 150 words a minute)
 
 **Slide 1, title (5 s).** Good afternoon. We are Team 18, and this is SeatRelay.
 

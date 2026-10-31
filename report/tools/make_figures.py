@@ -571,6 +571,41 @@ def chart_loadtest(run: Run, results: Path, target: str = "dev") -> None:
                  [f"{rel(date_dir)}/raw.csv: settleP95, readP95 (target {target}; same +inf rule)"])
 
 
+# ============================================================================ simulated research (slide)
+
+def chart_research_slide(run: Run, results: Path) -> None:
+    """Slide version of results/research/figures/completion.pdf (report/Slides.tex, slide 12): the same
+    simulated counts, drawn at the size shown (7.4 x 2.7 in) with 16 pt text, so nothing is scaled
+    down when projected. The axis label keeps the word "simulated" on the chart itself."""
+    import json
+    path = results / "research" / "summary.json"
+    if not path.exists():
+        run.skip("slide-completion", f"{rel(path)} not found")
+        return
+    conditions = json.loads(path.read_text(encoding="utf-8"))["conditions"]
+    sr, ctrl = conditions["SR"], conditions["CTRL"]
+    attempts = sr["attempts"]
+    with plt.rc_context(SLIDE_RC):
+        fig, ax = plt.subplots(figsize=(7.4, 2.7), constrained_layout=True)
+        starts = np.zeros(2)
+        for key, label, color, ink in (("unassisted", "without help", BLUE, "white"),
+                                       ("assisted", "with help", "#A7BBCB", INK),
+                                       ("failed", "failed", ORANGE, "white")):
+            counts = np.array([sr[key], ctrl[key]], float)
+            ax.barh([1, 0], counts, left=starts, color=color, height=0.55, label=label)
+            for y, start, n in zip([1, 0], starts, counts):
+                if n:
+                    ax.text(start + n / 2, y, f"{n:g}", ha="center", va="center", color=ink, fontweight="bold")
+            starts += counts
+        ax.set_yticks([1, 0], ["SeatRelay", "Forms + sheet"])
+        ax.set_xlim(0, attempts)
+        ax.set_xlabel(f"simulated task attempts, {attempts} per condition")
+        ax.legend(ncol=3, loc="lower left", bbox_to_anchor=(0, 1.0), frameon=False)
+        style(ax, "")
+        run.save(fig, "slide-completion", "slide 12: simulated task completion by condition (without help, with help, failed)",
+                 [f"{rel(path)}: conditions SR/CTRL unassisted, assisted, failed, attempts"])
+
+
 # ============================================================================ user study
 
 TASKS = ["T1", "T2", "T3", "T4", "T5", "O1", "O2", "O3", "O4"]
@@ -710,6 +745,7 @@ def main(argv=None) -> int:
         ("settle", lambda: chart_settle(run, runs, args.target)),
         ("loadtest", lambda: chart_loadtest(run, results, args.target)),
         ("study", lambda: chart_study(run, results)),
+        ("research", lambda: chart_research_slide(run, results)),
     )
     errors = 0
     for name, job in jobs:

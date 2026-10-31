@@ -9,9 +9,9 @@
 ## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
 **Slide 5, Fig. 2.** SeatRelay is built from three CloudFormation templates in the Singapore region: an
-auth stack with the Cognito user pool, deployed once, and a web stack and an app stack for each stage,
+auth stack with Cognito and SES, deployed once, and a web stack and an app stack for each stage,
 dev and pilot. The web stack is a private S3 bucket behind CloudFront; the app stack holds the HTTP
-API, five Lambda functions, two queues, one DynamoDB table and SES, all pay-per-request.
+API, five Lambda functions, two queues and one DynamoDB table, all pay-per-request.
 
 **Slide 6, Fig. 3a.** The TA asked how the browser learns that a 202 has settled. The browser posts a command
 with its own id. The API records it, puts it on the FIFO queue with the workshop as
@@ -43,6 +43,7 @@ Now let's see it live. Over to ZHANG TIANYI.
 | Sweep | every 5 min, sparse DUE index | `app.yaml` (`ScheduleV2`), `packages/service/src/worker/sweep.ts` |
 | Smoke test on dev, 2026-10-17 | PASS, 13/13 checks | `results/2026-10-17-smoke-2/summary.md` |
 | Settle latency in that smoke run (n = 6, one run, not a statistic) | server-side p50 57 ms, max 767 ms; client-observed p50 858 ms, max 1,765 ms | `results/2026-10-17-smoke-2/summary.md` (`\SmokeSettleServerPFiftyMs`, `\SmokeSettleServerMaxMs`, `\SmokeSettleClientPFiftyMs`, `\SmokeSettleClientMaxMs`) |
+| Settle latency in the correctness run (slide 6; n = 207 commands) | p95 server-side 54 ms, client-observed 852 ms (p50 38 / 793 ms) | `results/2026-10-17-correctness-2/summary.md` (`\CorrectnessSettleClientN`, `\CorrectnessSettleServerPNinetyFiveMs`, `\CorrectnessSettleClientPNinetyFiveMs`, `\CorrectnessSettleServerPFiftyMs`, `\CorrectnessSettleClientPFiftyMs`) |
 | Read and settle latency under load (k6, dev) | reads and 202 responses p95 at most 315 ms at every level; every target met in 6 of 6 levels, up to 50 virtual users in both scenarios (Part 5 quotes these) | `results/loadtest/2026-10-17/summary.md` (`\PerfDevCrossVUTenAcceptPNinetyFiveMs`, `\PerfDevLevelsMet`, `\PerfDevMaxVUsMet`) |
 
 ## Likely questions

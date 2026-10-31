@@ -86,7 +86,7 @@ seats. Our experiments run this same check after every step. ZHU GENGYU will sho
 |---|---|---|
 | A step has not settled after 15 s, an error banner appears, or sign-in breaks | ZHANG TIANYI | "Let me show this step from our recording." Operator jumps to the beat's chapter in B1. Do not debug live. |
 | The *Demo workshop* card shows "Still processing" between D5a and D5b | ZHANG TIANYI | "Expected: this workshop's queue is waiting for the crashed message." |
-| D5b would start less than 120 s after the D5a POST | Operator | Do D4 first, then D5b. |
+| D5b would start less than 135 s after the D5a POST | Operator | Do D4 first, then D5b. |
 | Plan B (local stack) | ZHANG TIANYI | Say once: "This is our on-premise reference deployment, same code." D5b can follow D5a directly (redelivery after about 1 s). |
 | A card does not update after the other window acted | Operator | Press F5 (the page refreshes every 10 s while queued or offered, 30 s once confirmed, and only while visible). |
 

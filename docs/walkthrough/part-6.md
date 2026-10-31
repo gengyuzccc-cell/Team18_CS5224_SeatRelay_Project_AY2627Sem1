@@ -5,7 +5,7 @@
 - **Slides:** 12 Research: simulated interviews and usability study; 13 Limitations, future work, AI use and roles; 14 Questions (`report/Slides.tex`)
 - **Hands over to:** Q&A (all members; see [../QA-prep.md](../QA-prep.md))
 
-## What to say (about 350 spoken words, 2:20 at 150 words a minute; cut to 2:00 in rehearsal)
+## What to say (about 310 spoken words, 2:04 at 150 words a minute; cut to 2:00 in rehearsal)
 
 **Slides 12–14.** Read the [generated speaking notes](../../results/research/presentation-notes.en.md)
 (about 270 words: slide 12, slide 13, close). They are regenerated with the dataset, so the spoken
@@ -13,9 +13,8 @@ figures equal the report's and the slides' (`report/generated/research.tex`). Th
 says what the study is: simulated, authored scenarios, generated responses, nobody recruited or
 observed. Never drop that sentence; the audience hears nothing else that says it.
 
-**After the slide-12 notes, add (pilot status, about 35 words):** "The live pilot has not run
-either: its 3–4 November slot lapsed before registration could open, and the pilot stage stays ready; our
-rehearsals there used synthetic accounts, so they are staged, not user evidence."
+**After the slide-13 sentence on the pilot, add (about 16 words; the generated note already says the slot
+lapsed):** "Our rehearsals on the pilot stage used synthetic accounts, so they are staged, not user evidence."
 
 **With the slide-13 notes, add (AI use and roles, about 25 words):** "Two assistants generated the
 work: Claude Code the code, tests and report text, Codex the simulated research package; scope, rules
@@ -23,7 +22,7 @@ and targets are ours."
 Point at the work lines on the slide instead of reading them; the name-to-line mapping was approved
 by the team on 2026-10-24 (`docs/ai-declaration-drafts.md`).
 
-**Slide 14.** Thank you. We are happy to take questions.
+**Slide 14.** The generated close already thanks the audience; open the Q&A.
 
 Read the full [research report](../../results/research/summary.md) and the
 [research guide](../research/README.md) before presenting.

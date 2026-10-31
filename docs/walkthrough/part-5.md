@@ -30,8 +30,8 @@ per-session forms. That part is a simulation, not live traffic.
 
 **Slide 11, cost.** At 1,000 registrations a month the modelled cloud costs US$13.30 at list price, 52
 cents after the free tier, and nothing after credits. One on-prem mini-PC costs about US$29 a month, or
-US$324 with a business line and labour. The cloud costs more than the bare machine above about 3,900
-registrations a month, and more than the fully costed one above about 57,300. The machine has no
+US$324 with a business line and labour. The cloud's list price exceeds the bare machine above about 3,900
+registrations a month, and the fully costed one above about 57,300. The machine has no
 failover.
 
 Next, LIANG ZIHAN.
@@ -46,7 +46,7 @@ aspect, key value.
 | Number | Value | Source |
 |---|---|---|
 | Experiments passing | 8 of 8 (smoke 13/13 too), on the same deployed code as the first series | `report/generated/numbers.tex` (`\SeriesPassed`, `\SeriesExperiments`); `results/RUNS.md` |
-| First series (quota 10), kept as evidence | concurrency FAIL 22/39 and backfill failed on a throttled workshop creation and lost REGISTERs; every HTTP 503 was an API Lambda throttle (76 and 63; account concurrency maximum 10) | `results/2026-10-17-throttling-evidence/summary.md` (`\ThrottleFirstConcurrencyChecksPassed`, `\ThrottleConcurrencyApiThrottles`, `\ThrottleBackfillApiThrottles`, `\ThrottleConcurrencyAccountConcurrencyMax`) |
+| First series (quota 10), kept as evidence | concurrency FAIL 22/39 and backfill failed on a throttled workshop creation and lost REGISTERs; every HTTP 503 was an API Lambda throttle (76 and 63; account concurrency maximum 10); separately, expiry race FAIL 26/27: one early probe arrived after expiresAt (client send jitter), PASS 27/27 after send-time calibration | `results/2026-10-17-throttling-evidence/summary.md` (`\ThrottleFirstConcurrencyChecksPassed`, `\ThrottleConcurrencyApiThrottles`, `\ThrottleBackfillApiThrottles`, `\ThrottleConcurrencyAccountConcurrencyMax`) |
 | Correctness: verdict, scenarios × runs, checks, over-capacity, double holds, verify calls | PASS; 9 × 3; 672/672; 0; 0; 234 calls, 0 failed | `results/2026-10-17-correctness-2/summary.md` (`\CorrectnessVerdict`, `\CorrectnessChecksPassed`, `\CorrectnessOverCapacity`, `\CorrectnessDoubleHolds`, `\CorrectnessVerifications`) |
 | Preference order: cases as predicted, unacceptable offers | PASS; 60/60 (20 × 3); 0 | `results/2026-10-17-preference-order-2/summary.md` (`\PrefOrderCasesPassed`, `\PrefOrderNonAcceptable`) |
 | Core engine: tests, property test, coverage | 156/156 tests in 16 files; 2,000 random command sequences (86,475 steps), every invariant held after every step; branch coverage 99.7 %, statements 100 % | `results/2026-10-31-core-tests/` (`\CoreTestsPassed`, `\CorePropertySequences`, `\CorePropertySteps`, `\CoreBranchCoveragePct`) |
@@ -66,7 +66,7 @@ aspect, key value.
 | k6 on the on-prem stack | every target met up to 50 VUs; peak 217 % CPU, 1,294 MiB | `results/loadtest/2026-10-17/summary.md` (`\PerfLocalLevelsMet`, `\PerfLocalCpuPeakPct`, `\PerfLocalMemPeakMiB`) |
 | Distinct participants served per workshop (replay, 1,000 seeds) | UNIFIED 58.08 [56.71, 59.43] vs PER_SESSION 54.03 [52.84, 55.22]; paired Δ −4.04 [−4.25, −3.84] | `results/replay/summary.md` |
 | Duplicate-hold events per workshop (replay) | 0.00 vs 34.57 [33.50, 35.61] | `results/replay/summary.md` |
-| Seat refill time, mean of per-run p95 (replay, n = 847) | 9.45 min [8.89, 10.02] vs 63.31 min [46.22, 82.55] | `results/replay/summary.md` |
+| Seat refill time, mean of per-run means (replay, n = 847; Final §4.3, Fig. 6c) | 4.30 min [4.07, 4.55] vs 15.72 min [12.81, 19.13]; mean of per-run p95 9.45 min [8.89, 10.02] vs 63.31 min [46.22, 82.55] | `results/replay/summary.md` |
 | Cloud cost at 1k / 10k / 100k registrations per month, list price | US$13.30 / 65.84 / 591.24 | `results/cost/model-summary.md` §1 |
 | Cloud cost after free tier / after credits, 1k per month | US$0.52 / US$0.00 | same file |
 | On-prem, increment only / fully amortised (3-year), 1k per month | US$29.32 / US$324.16 | same file |

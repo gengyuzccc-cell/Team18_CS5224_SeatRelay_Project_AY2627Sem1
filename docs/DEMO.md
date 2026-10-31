@@ -342,7 +342,8 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 
 ### D5b (4:00–4:30): exactly-once, proven (terminal + Window O)
 
-At least 120 s must have passed since D5a. If not, do D4 first and come back.
+At least 135 s must have passed since the D5a POST (the redelivery comes about 120 s after the first
+delivery, and its log line needs a few seconds more). If not, do D4 first and come back.
 
 - **Do (Plan A):**
   ```bash
@@ -398,7 +399,7 @@ At least 120 s must have passed since D5a. If not, do D4 first and come back.
 | Level | When | What |
 |---|---|---|
 | **Plan B: local stack** | Before the slot: AWS health check fails or campus Wi-Fi blocks AWS, but the laptop runs Docker. | Same script against `http://localhost:8081` / `http://localhost:3000`. Seed with `--target local`. The D5 redelivery takes about 1 s, so D5b can follow D5a directly. Mention "this is our on-prem reference deployment, same code". |
-| **Plan C: recorded video** | Before the slot: neither A nor B is ready. During the demo: a step has not settled after 15 s, or an error banner appears, or sign-in breaks. | Say "let me show you this step from our recording" and jump to the chapter of the failing beat. Do not debug live. Afterwards, return to the slides. Primary: the narrated OBS recording below. Backup if that is missing: `docs/demo/backup-demo.mp4` (section 9). |
+| **Plan C: recorded video** | Before the slot: neither A nor B is ready. During the demo: a step has not settled after 15 s, or an error banner appears, or sign-in breaks. | Say "let me show you this step from our recording" and jump to the chapter of the failing beat. Do not debug live. Afterwards, return to the slides. Play backup slide B1 (`docs/demo/backup-demo.mp4`, section 9), as slide 8 and `docs/walkthrough/part-4.md` say; if the narrated OBS recording below was made, it may be opened from the desktop instead. |
 | **Plan D: screenshots** | Video playback fails. | Backup slides B2–B5 with two screenshots per beat D1–D4. They come from the staged browser walkthrough (section 9), not from this click path: other accounts (Alice, Bob, Carol), one workshop with capacities 2/1/1 and Session 2 ranked first. Narrate them with the fallback script in `docs/walkthrough/part-4.md`, not with the lines of section 5. D5 has no screenshot, since it is a terminal step (B6 lists what the experiments recorded). |
 
 Recording the video (second rehearsal, 11/12):
@@ -412,7 +413,7 @@ Recording the video (second rehearsal, 11/12):
   recording out of git: it is large, and the repository holds the scripts that reproduce it. The
   small silent cut `docs/demo/backup-demo.mp4` (≤ 25 MB, section 9) is the one video in the
   repository.
-- Link it from a hidden backup slide right after the demo slide.
+- Open it from the desktop; do not add a slide (the notes assume main slides 1–14 and backups B1–B8).
 
 Network fallback: test a phone hotspot during setup. Cognito's hosted UI and the API both work
 over it.
@@ -480,8 +481,7 @@ Outputs, overwritten only by a passing run:
   signed-in name, "… (staged)", and the workshop is called *Cloud Computing Workshop (staged demo)*.
 - `docs/demo/backup-demo.mp4` (H.264, 1280 px wide, silent, caption bar with who acts and what
   happens, "Staged walkthrough" label, long waits sped up and marked) and
-  `docs/demo/backup-demo-chapters.txt`. This is the Plan C backup when the narrated OBS recording is
-  missing. It is labelled as a staged recording, so say so when you play it.
+  `docs/demo/backup-demo-chapters.txt`. This is the Plan C recording (backup slide B1). It is labelled as a staged recording, so say so when you play it.
 - `results/<date>-web-walkthrough-dev[-n]/summary.md`: what was checked and observed (staged, not
   user evidence).
 

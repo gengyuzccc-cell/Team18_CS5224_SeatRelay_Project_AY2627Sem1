@@ -492,7 +492,8 @@ TTL attribute `ttl` (epoch seconds).
   live items `L#BF#{releasedAt}#{id}`. They are returned as `snapshot.pendingBackfills` and archived
   to `H#BF#…` once relayed or closed.
 - **R1 marker scope.** `L#U#{userId}` in UNIFIED mode, `L#U#{userId}#{sessionId}` in PER_SESSION mode
-  (`registrationScopeKey`). It is upserted with the registration and deleted on archive.
+  (`registrationScopeKey`). It is written with every registration write on the condition that it is
+  missing or held by the same registration (or one archived in the same decision), and deleted on archive.
 - History registrations keep GSI1 `U#{userId}`, so "my registrations" lists past ones too.
   `GET /me/registrations` is one GSI1 query plus, per workshop listed, the consistent `L#` snapshot
   and, only where one of the caller's registrations there is CANCELLED/ENDED without a given-up
@@ -758,7 +759,6 @@ Build: `services/aws/scripts/build.mjs` (esbuild, ESM, `node22`, arm64 runtime `
 |---|---|---|
 | Lambda `nodejs20.x` | `nodejs22.x`, esbuild target `node22` | nodejs20.x reached end of support on 2026-04-30 (`docs/CONVENTIONS.md` §2). |
 | DUE key on the workshop META item | Separate `L#DUE` item in the same transaction | META already uses GSI1 for the per-organisation listing. |
-| R1 "conditional write on the marker item" | The engine check under the single writer and META lock enforces R1. The marker is upserted as a mirror (plus a unique index on-prem). | The workshop-level optimistic lock already makes the decision atomic. A marker condition would need the same key semantics across archive and re-register in one transaction. |
 | Workshop statuses `OPEN \| CLOSED \| CANCELLED` | Adds `CANCELLING` (workshop and session) | Organiser cancellations are drained in budget-sized commits (≤ 100 items per transaction). |
 | Offers per command ≤ 12 | Also ≤ 12 expiries and ≤ 90 storage items per decision | Keeps every commit within the DynamoDB transaction limit. |
 | Mechanism comparison "also one real replay per mode on dev" | Simulation only (`tools/replay`) | No deployed replay script exists. See `docs/EXPERIMENTS.md`. |

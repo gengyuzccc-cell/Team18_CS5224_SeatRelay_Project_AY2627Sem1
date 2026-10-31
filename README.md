@@ -228,7 +228,8 @@ SKIP_K6=1 TARGET=local tools/experiments/bin/run-table3.sh            # against 
 | Analysis | Command | Output |
 |---|---|---|
 | Latency histogram and CDF | `python3 tools/experiments/analysis/plot_results.py results/<date>-backfill --value latencyMs --group cause` | `<run>/plots/` |
-| User study (completion, paired task time with Wilcoxon, SUS) | `python3 docs/user-study/analysis.py` | `results/user-study/` |
+| Simulated research (§4.4; checks without writing) | `python3 -I tools/research/simulate.py --check --check-figures` | `results/research/`, `report/generated/research.tex` |
+| User-study analysis for a study with people (none was held) | `python3 docs/user-study/analysis.py` | `results/user-study/` |
 | Demo and study presets | `pnpm --filter @seatrelay/scripts seed-demo --target dev --hold 3600`, `seed-study --track participant --dataset A` | stdout (JSON) |
 | Report numbers and figures | `python3 -I report/tools/report_numbers.py`, `python3 -I report/tools/make_figures.py` | `report/generated/numbers.tex`, `report/figures/generated/` |
 
@@ -266,7 +267,7 @@ claim. Experiment outputs are in `results/` (section 9).
 | **Failure policy and fault injection** | `createWorkerHandler` (`services/aws/src/handlers/worker.ts`): deterministic rejections settle and never throw; `batchItemFailures` for the failed record and every later one; `activeFault()` on the first delivery only (`processCommand.ts`) | `services/aws/test/worker.test.ts`; `failure-recovery` |
 | **Notifications decoupled from state changes** | `materializeNotification()` in the same transaction; Streams `FilterCriteria` INSERT + `NOTIFICATION` (`app.yaml`); `services/aws/src/handlers/notifier.ts`; `classifySesError()` (`services/aws/src/adapters/ses.ts`) | `services/aws/test/{notifier,ses}.test.ts`; `failure-recovery` notifier outage |
 | **Budgets that ignore credits** | `MonthlyBudget` / `AnnualBudget` with `IncludeCredit: false` (`services/aws/templates/auth.yaml`) | [docs/COST.md](docs/COST.md) §2 |
-| **Scoped IAM role per function** | `Policies` of each function in `app.yaml`: api and worker CRUD on the table (SAM's table-level template, broader than the actions they use) + their queue sends; forwarder sends only (no table access); sweep `dynamodb:Query` on `GSI1` + `BatchGetItem` + FIFO send; notifier `GetItem`/`UpdateItem` + `ses:SendEmail` + notify-DLQ send | `pnpm --filter @seatrelay/aws validate`; `access-control` (API side) |
+| **Scoped IAM role per function** | `Policies` of each function in `app.yaml`: api and worker `GetItem`/`PutItem`/`UpdateItem`/`DeleteItem`/`Query`/`BatchGetItem`/`ConditionCheckItem` on the table and its indexes + their queue sends, api also `cognito-idp:ListUsers` (member lookup by e-mail); forwarder sends only (no table access); sweep `dynamodb:Query` on `GSI1` + `BatchGetItem` + FIFO send; notifier `GetItem`/`UpdateItem` + `ses:SendEmail` + notify-DLQ send | `pnpm --filter @seatrelay/aws validate`; `access-control` (API side) |
 | **PII minimisation and retention** | Only e-mail, display name and the Cognito user id (`sub`) from the verified token (`userFromEvent`, `services/aws/src/lib/auth.ts`; `buildCommand()`, `packages/contracts/src/commands.ts`); the HTTP API access log records source IP and user agent (`AccessLogSettings` in `app.yaml`); `POWERTOOLS_LOGGER_LOG_EVENT: 'false'` (`app.yaml`); TTL 30 d for command records and 90 d for notifications (`packages/contracts/src/constants.ts`, `packages/service/src/commands.ts`, `TimeToLiveSpecification` in `app.yaml`; on-prem `services/local/src/janitor.ts`); log retention 14 d (`LogRetentionDays`) | `packages/contracts/test/schemas.test.ts`; ARCHITECTURE §14 |
 | **Mechanism comparison** uses the production engine | `tools/replay/src/simulate.ts` drives `decide()` in UNIFIED and PER_SESSION mode (`perSession.ts`) with a simulated clock | `tools/replay/test/replay.test.ts`; `results/replay/summary.md` |
 
@@ -279,17 +280,18 @@ replay on dev.
 | Path | Content |
 |---|---|
 | `results/<YYYY-MM-DD>-<experiment>[-<n>]/` | One directory per harness invocation, never overwritten. `summary.md` gives the verdict, pass criterion, run id, commit and headline tables. `meta.json` holds the run metadata and headline numbers. `raw.csv` has one row per sample, probe or check. Some scripts add `checks.csv`, `latency.csv`, `late-tick.csv` or `notifier.csv`. |
-| `results/<date>-table3-<target>.{log,status}` | Console log and one status line per experiment from `run-table3.sh` |
+| `results/<date>-table3-<target>[-<HHMMSS>].status` (+ `.log`) | one status line per experiment from `run-table3.sh`, one file per invocation since `d121145`; the 17 Oct `.log` files are its saved console output |
 | `results/<date>-core-tests/` | vitest log, `coverage-summary.json`, `commit.txt` (property test and coverage; EXPERIMENTS §3.2) |
 | `results/2026-10-17-smoke-dev/` | the first manual smoke on dev (`run.log`, `meta.json`, script copy) |
-| `results/<date>-pilot-rehearsal[-<n>]/` | **staged** rehearsal on the pilot stage (`tools/experiments/src/pilot-rehearsal.ts`): synthetic accounts and scripted actions, operational evidence only, never user evidence; logged apart from the live pilot (Prelim §5). The quoted run is `results/2026-10-17-pilot-rehearsal-3/` |
+| `results/<date>-pilot-rehearsal[-<n>]/` | **staged** rehearsal on the pilot stage (`tools/experiments/src/pilot-rehearsal.ts`): synthetic accounts and scripted actions, operational evidence only, never user evidence; logged apart from the live pilot (Prelim §5). The quoted run is `results/2026-10-31-pilot-rehearsal/` (run `d29814ed`, 85/85, on the submitted build); the three 17 Oct runs are kept as history |
 | `results/<date>-web-walkthrough-<stage>/` | **staged** browser walkthrough by `tools/e2e` (synthetic accounts named "(staged)"); source of `docs/demo/screenshots/` and `docs/demo/backup-demo.mp4` |
 | `results/loadtest/<date>/` | k6 matrix: `raw.csv`, `summary.md`, `runs.json`, per-run k6 JSON and logs, `docker-stats.csv` (local) |
 | `results/replay/` | mechanism comparison, 1,000 seeds: `raw.csv`, `summary.md`, SVG charts |
 | `results/cost/` | `model-summary.md`, `crossover.png`, `unit-cost.png`, `crossover-curve.csv`; `snapshots/<date>.json` and `usage-priced.md` from measured usage |
+| `results/market/` | market counts (`<date>/counts.json`, `summary.md`, `raw/`) from `tools/market/count.py`; dated NUS/SMU/SIT page captures (`screenshots/`) |
 | `results/research/` | **Simulated**: nine authored interview profiles, generated task and SUS responses, analysis, charts and reproducibility manifests; no people took part; method in `docs/research/`. |
-| `results/user-study/`, `results/interviews/`, `results/pilot/` | study CSVs and `analysis.py` output, coded interview records and `summary.md`, pilot CSV exports. The team produces these; none exists yet. |
-| `results/RUNS.md` | run register, one line per invocation, failed runs included (EXPERIMENTS §6). It is created by the first report run. |
+| `results/user-study/`, `results/interviews/`, `results/pilot/` | study CSVs and `analysis.py` output, coded interview records and `summary.md`, pilot CSV exports. Not produced: no interview, study or live pilot with people was held before submission (Final Table 5); the simulated package is `results/research/`. |
+| `results/RUNS.md` | run register, one line per invocation, failed runs included (EXPERIMENTS §6). Maintained by hand from each run's `meta.json` (`report/tools/check_numbers.py` fails on a missing row); its last section lists the evidence that is not a harness run (throttling evidence, SES production check, Table 3 and k6 logs). |
 
 Rules (EXPERIMENTS §7–8):
 - Scripts create these directories, and nothing in them is edited by hand.
@@ -316,3 +318,4 @@ Rules (EXPERIMENTS §7–8):
 | [docs/market-sizing.md](docs/market-sizing.md) | market-size inputs with sources, competitor scan |
 | [docs/interviews/](docs/interviews/README.md), [docs/user-study/](docs/user-study/README.md) | interview and user-study packages (protocol, consent, tasks, SUS, analysis) |
 | [docs/deployment-state.md](docs/deployment-state.md), [docs/aws-setup.md](docs/aws-setup.md), [docs/ses-production-request.md](docs/ses-production-request.md) | live identifiers, account setup, SES request |
+| [docs/ai-declaration-drafts.md](docs/ai-declaration-drafts.md) | each member's statement in the Final report's AI usage declaration, with the project-record sources it was drafted from |

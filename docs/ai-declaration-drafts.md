@@ -1,8 +1,7 @@
 # AI declaration: "what I learned" statements
 
-> **Open (2026-10-31): LIANG ZIHAN to re-approve statement 5.** Its second sentence was amended on
-> 31 Oct, when the study became a simulated package ("I learned to report the real sample, even when
-> it is none"); the other five statements are unchanged.
+> **Note (2026-10-31):** statement 5 was amended on 31 Oct without the member's approval and was then
+> restored to the approved 24 Oct wording; all six printed statements are the approved ones.
 >
 > **Status (2026-10-24): approved by the team and printed in the Final report** (AI usage declaration,
 > "What we learned"). The statements were drafted by the AI coding assistant from the project record
@@ -78,7 +77,7 @@ the M1 fibre and UPS prices that differed between 2026-10-16 and 2026-10-17 (`re
 
 Timing an expiry race at ±200 ms taught me that network delay is part of the experiment: an "early"
 probe arrived late and was rightly rejected, so the harness calibrates send times. Preparing the
-study, I learned to report the real sample, even when it is none (the report's study is simulated; no people took part).
+study, I learned to report the real sample, whatever its size.
 
 *Grounded in:* the expiry-race run that failed one check because a probe meant to arrive 200 ms
 before `expiresAt` arrived after it (Final §4.2, paragraph "The first series failed, and why."; commit `00faa52` "warm connection

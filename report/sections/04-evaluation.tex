@@ -18,7 +18,7 @@ are flagged dirty only because the runner appended to its own status log under \
 After the series we downloaded the five deployed Lambda bundles: they are byte-identical to a build
 of that commit, and no stack changed during the series
 (\code{results/2026-10-17-table3-dev-q1000-provenance.md}). Later redeploys (17 October: web
-interface and read views; 24 October: notifier and web interface; 31 October, \code{\RegressionCommit}:
+interface and read views; 24 October: notifier and web interface; 31 October:
 capacity bound, one cancellation notice per user, verified-e-mail check, least-privilege roles) were
 each followed by a staged browser walkthrough, and after the 17 and 31 October ones we re-ran
 \RegressionExperiments: \RegressionChecksPassed/\RegressionChecksTotal{} checks passed on 31 October
@@ -157,7 +157,7 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
 \IfFileExists{figures/generated/backfill-latency.pdf}{%
 \begin{figure}[t]
   \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
-  \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{releasedAt} = \code{expiresAt}) on dev with
+  \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{releasedAt}, with \code{releasedAt} = \code{expiresAt}) on dev with
   \code{holdSeconds}~=~60: (a)~histogram with the p95, (b)~empirical cumulative distribution (dotted:
   95\,\%); the 120\,s target lies far off the scale (maximum \BackfillExpiredMaxS\,s). Source:
   \code{results/\BackfillDir/raw.csv} (run \code{\BackfillRunId}).}
@@ -174,13 +174,13 @@ PER\_SESSION mode, where a participant registers separately for every acceptable
 session has its own queue, and duplicates are released by hand only with some probability. One queue had
 no duplicate holds, as C2 requires; per-session queues had
 \ReplayDupHoldEventsPerSessionMean{} duplicate-hold events per workshop
-[\ReplayDupHoldEventsPerSessionLo, \ReplayDupHoldEventsPerSessionHi] (Fig.~\ref{fig:replay}). One
+[95\,\% CI \ReplayDupHoldEventsPerSessionLo, \ReplayDupHoldEventsPerSessionHi] (Fig.~\ref{fig:replay}). One
 queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop against
 \ReplayDistinctPerSessionMean{} (paired difference \ReplayDistinctDeltaMean{}
 [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; fewer under PER\_SESSION in
 \ReplayDistinctFewerSeedsPct\,\% of seeds, equal in \ReplayDistinctEqualSeedsPct\,\%), and a released
 seat reached a new participant after \ReplayRefillMeanUnifiedMean{} instead of
-\ReplayRefillMeanPerSessionMean{} minutes on average (per-mode means over all seeds with refills). Seats left empty
+\ReplayRefillMeanPerSessionMean{} minutes (per-mode means over all seeds with refills). Seats left empty
 at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
 [\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). This compares two modes of our own engine
 under an assumed behaviour model, not a field measurement or a test of the tools in
@@ -202,11 +202,11 @@ no participants were recruited or observed. The package covers
 six themes, and generates responses for \SimStudyN{} participants (seed 20261031).
 Eight perform five participant tasks and four perform four organiser tasks in both conditions,
 with counterbalanced order and equivalent data sets: \SimTaskAttempts{} attempts and \SimSusForms{}
-ten-item SUS forms~\cite{brooke1996sus} in one scripted study. Two scripted pre-study walkthroughs are
+ten-item System Usability Scale (SUS) forms~\cite{brooke1996sus} in one scripted study. Two scripted pre-study walkthroughs are
 excluded. The control has prepared forms and a sheet with duplicate detection. Failures remain in
 the data; timing is paired by participant before aggregation.
 
-The scenario misses the completion and SUS reference lines. Held-versus-confirmed confusion,
+The scenario misses the completion and SUS reference lines (Table~\ref{tab:results}). Held-versus-confirmed confusion,
 ranking and date-entry assistance motivate clearer state/deadline wording and contextual guidance.
 These are design recommendations, not changes evaluated in another study. Outcomes are generated
 from declared assumptions; no significance or population claim follows.
