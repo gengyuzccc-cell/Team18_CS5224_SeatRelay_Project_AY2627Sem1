@@ -81,6 +81,11 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
    domains never e-mailed); market lower bound 713 organisations (SIT 170); the web app redesigned
    (`cb160d2`), and the backup screenshots and video come from the 24 Oct walkthrough
    (`results/2026-10-24-web-walkthrough-dev/`). Interviews, user study and pilot: not yet run.
+   Status on 2026-10-31: the audit-fix build `8ace25c` is published on dev and pilot (capacity field
+   explains invalid values, "What we keep" notice, favicon); the app stacks still run `bcd7bd1` until the
+   team executes the change sets (`docs/SUBMISSION-CHECKLIST.md` row 2.6), so on the live API capacity is
+   bounded only by the SPA and members are added by user id. Core tests re-recorded
+   (`results/2026-10-31-core-tests/`: 156/156, branches 99.7 %); CI green since `8ace25c`.
 4. Values seen during the demo are demo values. The rehearsal values in the DEMO.md appendix are not
    report measurements.
 5. A missed target is reported as missed, with the measured value and the explanation.
