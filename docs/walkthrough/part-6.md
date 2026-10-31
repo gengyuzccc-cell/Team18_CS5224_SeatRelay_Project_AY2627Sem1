@@ -5,7 +5,7 @@
 - **Slides:** 12 Research: simulated interviews and usability study; 13 Limitations, future work, AI use and roles; 14 Questions (`report/Slides.tex`)
 - **Hands over to:** Q&A (all members; see [../QA-prep.md](../QA-prep.md))
 
-## What to say (about 340 spoken words, 2:15 at 150 words a minute; cut to 2:00 in rehearsal)
+## What to say (about 350 spoken words, 2:20 at 150 words a minute; cut to 2:00 in rehearsal)
 
 **Slides 12–14.** Read the [generated speaking notes](../../results/research/presentation-notes.en.md)
 (about 270 words: slide 12, slide 13, close). They are regenerated with the dataset, so the spoken
@@ -13,9 +13,9 @@ figures equal the report's and the slides' (`report/generated/research.tex`). Th
 says what the study is: simulated, authored scenarios, generated responses, nobody recruited or
 observed. Never drop that sentence; the audience hears nothing else that says it.
 
-**After the slide-12 notes, add (pilot status, about 30 words):** "The live pilot has not run
-either: its 3–4 November slot lapsed and is to be rebooked; our 17 October rehearsal used synthetic
-accounts, so it is staged, not user evidence."
+**After the slide-12 notes, add (pilot status, about 35 words):** "The live pilot has not run
+either: its 3–4 November slot lapsed before registration could open, and the pilot stage stays ready; our
+rehearsals there used synthetic accounts, so they are staged, not user evidence."
 
 **With the slide-13 notes, add (AI use and roles, about 25 words):** "Two assistants generated the
 work: Claude Code the code, tests and report text, Codex the simulated research package; scope, rules
@@ -43,8 +43,8 @@ of people; say "simulated" or "generated" whenever you quote one.
 | Organiser manual actions, median over four tasks | 13.5 vs 28.0 | `summary.json` (`\SimStepsSR`, `\SimStepsCtrl`) |
 | Errors / help requests, SeatRelay vs control | 15 / 8 vs 24 / 14 | `summary.json` (`\SimErrorsSR`, `\SimHelpSR`, `\SimErrorsCtrl`, `\SimHelpCtrl`) |
 | Scenario market inputs | p = 37.0 % (20 of 54 events of the 3 organiser profiles), h = 4.0 h, bargain S$8 / expensive S$15 a month | `summary.json` (`\SimMultiSessionPct`, `\SimCoordinationHours`, `\SimBargainSgd`, `\SimExpensiveSgd`) |
-| Live pilot | not run (3–4 Nov slot lapsed; to be rebooked); `results/pilot/` absent | Final §4.5, Table 5 (`\PilotWorkshops` pending) |
-| Staged pilot rehearsal (synthetic accounts, scripted; not user evidence) | 20 participants; 43/43 commands applied; 9 seats relayed (expiry relays 72–74 ms; decline, cancellation and capacity relays 0 ms); 42 notifications to the SES mailbox simulator; 85/85 checks; invariants held at all 8 checkpoints | `results/2026-10-17-pilot-rehearsal-3/summary.md` (`\Rehearsal*`) |
+| Live pilot | not run before submission (3–4 Nov slot lapsed; pilot stage stays ready); `results/pilot/` absent | Final §4.5, Table 5 (`\PilotWorkshops` pending) |
+| Staged pilot rehearsal (synthetic accounts, scripted; not user evidence), latest run 31 Oct on the submitted build | 20 participants; 43/43 commands applied; 9 seats relayed (expiry relays 86 and 113 ms; decline, cancellation and capacity relays 0 ms); 42 notifications to the SES mailbox simulator; 85/85 checks; invariants held at all 8 checkpoints; 4 of 4 runs since 17 Oct passed | `results/2026-10-31-pilot-rehearsal/summary.md` (`\Rehearsal*`) |
 | Roles (work lines of the Preliminary report) | as in the AI usage declaration; approved by the team 2026-10-24 | `docs/ai-declaration-drafts.md` |
 | SES production access | granted 2026-10-24 (50,000 per 24 h, 14/s); denied 2026-10-17 while the sender was unverified | `results/2026-10-24-ses-production-check/`, `docs/deployment-state.md` |
 | Cognito sign-up codes | default mailer, 50 per day | `results/2026-10-24-ses-production-check/summary.md` |

@@ -1,0 +1,576 @@
+{
+  "runId": "d29814ed-2f10-4dec-ab00-ba78fb3b2d21",
+  "name": "pilot-rehearsal",
+  "tableRow": "Staged pilot rehearsal on the pilot stack (Prelim §5, logged separately from the live pilot)",
+  "criterion": "every scripted command settles with the expected outcome; verify ok, 0 over-capacity and 0 double holds after every phase; every released seat (decline, timer-driven expiry, capacity increase, cancellation) relayed while someone acceptable was queued; every notification leaves PENDING (SES simulator: SENT) and the in-app status matches the registration (C6); DLQs unchanged; no alarm entered ALARM",
+  "banner": "Staged rehearsal with synthetic accounts — operational evidence only, not user evidence (Prelim §5)",
+  "startedAt": "2026-10-31T13:04:13.808Z",
+  "finishedAt": "2026-10-31T13:09:41.900Z",
+  "durationMs": 328092,
+  "target": {
+    "name": "pilot",
+    "stage": "pilot",
+    "apiBase": "https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "82b7298cedfb5a5aad761d6a4050b114d9935ba9",
+    "short": "82b7298cedfb",
+    "dirty": false,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 1,
+  "holdSeconds": 120,
+  "faults": false,
+  "label": "staged rehearsal run 4: submitted build 8ace25c on the pilot stage after the 31 Oct redeploy",
+  "accounts": {
+    "prefix": "success+rehearsal",
+    "domain": "simulator.amazonses.com",
+    "organiser": "rehearsal-organiser@example.com",
+    "cached": 0,
+    "minted": 21,
+    "created": 0
+  },
+  "params": {
+    "participants": 20,
+    "capacities": [
+      6,
+      6
+    ],
+    "seed": 1,
+    "declines": 3,
+    "expiries": 2,
+    "cancellations": 3,
+    "capacityUp": 1,
+    "attendance": 5,
+    "mailbox": "simulator",
+    "paceMs": [
+      1000,
+      3000
+    ],
+    "expiryWaitS": 420,
+    "notifyWaitS": 240,
+    "organiser": "rehearsal-organiser@example.com",
+    "holdSeconds": 120,
+    "mailboxUsed": "simulator",
+    "orgId": "1a6cb01c-598b-4789-b865-9b104d4cf8ee",
+    "workshopId": "248ad987-74b7-4352-addc-f002ce1765bb",
+    "sessions": [
+      {
+        "label": "S1",
+        "id": "8705452e-1558-4efe-ac28-5c1c759e3513",
+        "title": "Intro to AWS — session 1 (staged)",
+        "startsAt": "2026-11-02T13:04:52.365Z",
+        "cutoffAt": "2026-11-02T12:34:52.365Z",
+        "capacity": 6
+      },
+      {
+        "label": "S2",
+        "id": "35c4da2b-4710-434b-8eae-2eced7a517c6",
+        "title": "Intro to AWS — session 2 (staged)",
+        "startsAt": "2026-11-03T13:04:52.365Z",
+        "cutoffAt": "2026-11-03T12:34:52.365Z",
+        "capacity": 6
+      }
+    ]
+  },
+  "checks": {
+    "total": 85,
+    "passed": 85,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "evidence": "staged-rehearsal-synthetic-accounts",
+  "workshopId": "248ad987-74b7-4352-addc-f002ce1765bb",
+  "orgId": "1a6cb01c-598b-4789-b865-9b104d4cf8ee",
+  "mailbox": "simulator",
+  "mailboxFallback": null,
+  "cognitoAcceptedSimulatorAddress": true,
+  "participants": 20,
+  "groups": {
+    "S1 only": 8,
+    "S2 only": 6,
+    "S2>S1": 3,
+    "S1>S2": 3
+  },
+  "commands": {
+    "sent": 43,
+    "settled": 43,
+    "applied": 43,
+    "rejected": 0,
+    "byType": {
+      "REGISTER": 20,
+      "ACCEPT_OFFER": 16,
+      "DECLINE_OFFER": 3,
+      "SET_CAPACITY": 1,
+      "CANCEL_REGISTRATION": 3
+    }
+  },
+  "httpActions": 6,
+  "acceptMs": {
+    "count": 43,
+    "min": 248,
+    "max": 448,
+    "mean": 298.9767441860465,
+    "p50": 290,
+    "p95": 410,
+    "p99": 448,
+    "stdev": 52.302558242422535
+  },
+  "settleMs": {
+    "count": 43,
+    "min": 784,
+    "max": 1698,
+    "mean": 896.3720930232558,
+    "p50": 850,
+    "p95": 1079,
+    "p99": 1698,
+    "stdev": 148.1335072338014
+  },
+  "serverSettleMs": {
+    "count": 43,
+    "min": 35,
+    "max": 1090,
+    "mean": 76.93023255813954,
+    "p50": 47,
+    "p95": 99,
+    "p99": 1090,
+    "stdev": 157.2934445253317
+  },
+  "settleByType": {
+    "REGISTER": {
+      "n": 20,
+      "client": {
+        "count": 20,
+        "min": 792,
+        "max": 1698,
+        "mean": 911.75,
+        "p50": 848,
+        "p95": 1095,
+        "p99": 1698,
+        "stdev": 194.4669316362039
+      },
+      "server": {
+        "count": 20,
+        "min": 36,
+        "max": 1090,
+        "mean": 109.2,
+        "p50": 47,
+        "p95": 112,
+        "p99": 1090,
+        "stdev": 226.0306616368673
+      }
+    },
+    "ACCEPT_OFFER": {
+      "n": 16,
+      "client": {
+        "count": 16,
+        "min": 794,
+        "max": 1079,
+        "mean": 894.5,
+        "p50": 850,
+        "p95": 1079,
+        "p99": 1079,
+        "stdev": 94.20323773629015
+      },
+      "server": {
+        "count": 16,
+        "min": 35,
+        "max": 88,
+        "mean": 48.3125,
+        "p50": 44,
+        "p95": 88,
+        "p99": 88,
+        "stdev": 12.93599025007363
+      }
+    },
+    "DECLINE_OFFER": {
+      "n": 3,
+      "client": {
+        "count": 3,
+        "min": 802,
+        "max": 950,
+        "mean": 894.3333333333334,
+        "p50": 931,
+        "p95": 950,
+        "p99": 950,
+        "stdev": 65.7486797501584
+      },
+      "server": {
+        "count": 3,
+        "min": 44,
+        "max": 59,
+        "mean": 51.333333333333336,
+        "p50": 51,
+        "p95": 59,
+        "p99": 59,
+        "stdev": 6.128258770283412
+      }
+    },
+    "SET_CAPACITY": {
+      "n": 1,
+      "client": {
+        "count": 1,
+        "min": 904,
+        "max": 904,
+        "mean": 904,
+        "p50": 904,
+        "p95": 904,
+        "p99": 904,
+        "stdev": 0
+      },
+      "server": {
+        "count": 1,
+        "min": 61,
+        "max": 61,
+        "mean": 61,
+        "p50": 61,
+        "p95": 61,
+        "p99": 61,
+        "stdev": 0
+      }
+    },
+    "CANCEL_REGISTRATION": {
+      "n": 3,
+      "client": {
+        "count": 3,
+        "min": 784,
+        "max": 834,
+        "mean": 803.3333333333334,
+        "p50": 792,
+        "p95": 834,
+        "p99": 834,
+        "stdev": 21.9291789378647
+      },
+      "server": {
+        "count": 3,
+        "min": 40,
+        "max": 55,
+        "mean": 45.333333333333336,
+        "p50": 41,
+        "p95": 55,
+        "p99": 55,
+        "stdev": 6.847546194724712
+      }
+    }
+  },
+  "scripted": {
+    "declines": 3,
+    "expiries": 2,
+    "cancellations": 3,
+    "capacityUp": 1,
+    "attendanceMarked": 5
+  },
+  "offers": 21,
+  "expiryWaitSeconds": 41,
+  "backfills": {
+    "CANCELLED_CONFIRMED": {
+      "n": 3,
+      "relayed": 3,
+      "latencyMs": [
+        0,
+        0,
+        0
+      ],
+      "stats": {
+        "count": 3,
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "stdev": 0
+      }
+    },
+    "CAPACITY_UP": {
+      "n": 1,
+      "relayed": 1,
+      "latencyMs": [
+        0
+      ],
+      "stats": {
+        "count": 1,
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "stdev": 0
+      }
+    },
+    "DECLINED": {
+      "n": 3,
+      "relayed": 3,
+      "latencyMs": [
+        0,
+        0,
+        0
+      ],
+      "stats": {
+        "count": 3,
+        "min": 0,
+        "max": 0,
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0,
+        "stdev": 0
+      }
+    },
+    "EXPIRED": {
+      "n": 2,
+      "relayed": 2,
+      "latencyMs": [
+        86,
+        113
+      ],
+      "stats": {
+        "count": 2,
+        "min": 86,
+        "max": 113,
+        "mean": 99.5,
+        "p50": 86,
+        "p95": 113,
+        "p99": 113,
+        "stdev": 13.5
+      }
+    }
+  },
+  "invariants": {
+    "ok": true,
+    "phases": 8,
+    "verifyFailures": 0,
+    "overCapacity": 0,
+    "doubleHolds": 0
+  },
+  "final": {
+    "counts": {
+      "queued": 2,
+      "offered": 0,
+      "confirmed": 13,
+      "backfills": 9,
+      "backfillsReallocated": 9,
+      "attended": 5
+    },
+    "distinctParticipantsServed": 13,
+    "sessions": [
+      {
+        "label": "S1",
+        "capacity": 6,
+        "confirmed": 6,
+        "held": 0,
+        "free": 0,
+        "queueLength": 2
+      },
+      {
+        "label": "S2",
+        "capacity": 7,
+        "confirmed": 7,
+        "held": 0,
+        "free": 0,
+        "queueLength": 0
+      }
+    ]
+  },
+  "exportRows": 20,
+  "notifications": {
+    "source": "dynamodb+in-app",
+    "total": 42,
+    "byStatus": {
+      "SENT": 42
+    },
+    "byKind": {
+      "OFFER": {
+        "SENT": 21
+      },
+      "CONFIRMED": {
+        "SENT": 16
+      },
+      "DECLINED": {
+        "SENT": 3
+      },
+      "EXPIRED": {
+        "SENT": 2
+      }
+    },
+    "errors": []
+  },
+  "inAppStatusMatches": 20,
+  "deadLetters": {
+    "before": {
+      "available": true,
+      "detail": "DLQ depths of seatrelay-app-pilot: {\"commands-dlq\":0,\"expiry-delay-dlq\":0,\"notify-dlq\":0}",
+      "counts": {
+        "commands-dlq": 0,
+        "expiry-delay-dlq": 0,
+        "notify-dlq": 0
+      },
+      "total": 0
+    },
+    "after": {
+      "available": true,
+      "detail": "DLQ depths of seatrelay-app-pilot: {\"commands-dlq\":0,\"expiry-delay-dlq\":0,\"notify-dlq\":0}",
+      "counts": {
+        "commands-dlq": 0,
+        "expiry-delay-dlq": 0,
+        "notify-dlq": 0
+      },
+      "total": 0
+    }
+  },
+  "alarms": {
+    "before": [
+      {
+        "name": "seatrelay-pilot-api-5xx",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-api-errors",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-commands-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-commands-oldest-message-age",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-expiry-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-notifier-iterator-age",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-notify-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-worker-errors",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-worker-record-failures",
+        "state": "OK"
+      }
+    ],
+    "after": [
+      {
+        "name": "seatrelay-pilot-api-5xx",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-api-errors",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-commands-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-commands-oldest-message-age",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-expiry-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-notifier-iterator-age",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-notify-dlq-not-empty",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-worker-errors",
+        "state": "OK"
+      },
+      {
+        "name": "seatrelay-pilot-worker-record-failures",
+        "state": "OK"
+      }
+    ],
+    "transitions": []
+  },
+  "lambda": {
+    "accountConcurrentMax": 3,
+    "functions": [
+      {
+        "fn": "api",
+        "invocations": 196,
+        "errors": 0,
+        "throttles": 0,
+        "concurrentMax": 2
+      },
+      {
+        "fn": "worker",
+        "invocations": 60,
+        "errors": 0,
+        "throttles": 0,
+        "concurrentMax": 1
+      },
+      {
+        "fn": "expiry-forwarder",
+        "invocations": 15,
+        "errors": 0,
+        "throttles": 0,
+        "concurrentMax": 1
+      },
+      {
+        "fn": "sweep",
+        "invocations": 1,
+        "errors": 0,
+        "throttles": 0,
+        "concurrentMax": 1
+      },
+      {
+        "fn": "notifier",
+        "invocations": 41,
+        "errors": 0,
+        "throttles": 0,
+        "concurrentMax": 2
+      }
+    ],
+    "otherStageInvocations": 1
+  },
+  "customMetrics": {
+    "CommandSettledLatency": {
+      "sum": 3308,
+      "samples": 43,
+      "max": 1090
+    },
+    "BackfillLatency": {
+      "sum": 199,
+      "samples": 9,
+      "max": 113
+    },
+    "OffersCreated": {
+      "sum": 21,
+      "samples": 45,
+      "max": 1
+    },
+    "OffersExpired": {
+      "sum": 2,
+      "samples": 45,
+      "max": 1
+    },
+    "SweepLateExpiries": {
+      "sum": 0,
+      "samples": 0,
+      "max": 0
+    },
+    "NotificationFailures": {
+      "sum": 0,
+      "samples": 0,
+      "max": 0
+    }
+  }
+}

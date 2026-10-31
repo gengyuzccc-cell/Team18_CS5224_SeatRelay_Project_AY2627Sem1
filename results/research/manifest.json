@@ -80,7 +80,7 @@
     "docs/user-study/counterbalance.csv": "600649c099284c4af9ee87365913d71f3324cd204acb1a92bb5edaf03c18355f",
     "tools/research/simulate.py": "2f5baf576dcedbc58ae61335b4ee9d34fa3975ae825934a6e99264034f5071a5",
     "tools/research/study.py": "385161567bfb458ad47155ea41cfc010c8a180abac840d50d72074f481c1c2ce",
-    "tools/research/documents.py": "7dd08d5f609485853ff7e4a2453542d9d5b46c897183c9ec84a8d13c64f6389f",
+    "tools/research/documents.py": "9c380b73635af790210f49efcd9097ab68d97e8cf911357ccc20e81496bbe009",
     "tools/research/plot.py": "a8bd9b2cc6c99d2acc261e19fe94791a2037c8c968d3b46fb2b0f70b6c4ef2dc"
   },
   "counts": {
@@ -103,7 +103,7 @@
     "interviews/SIM-I08.md": "ff77f600ea9a150cf209eb783c52edd25ad0800c24c46ab7b0c28f3fec1371e0",
     "interviews/SIM-I09.md": "52d897310e02108d14382646eeb08f60a548cda43518a587feefc695e7ffd6db",
     "paired-subjects.csv": "09b9943329e47e7a29ccc180351c1bfd36fdfb11af185f997c0f8da721d7a6fc",
-    "presentation-notes.en.md": "0083028dff0c5c29bceb00d5516af0e42cd9cb7e44005ec7cb15f61a52e081f0",
+    "presentation-notes.en.md": "ebfc814596015d4261620da91b8ec1277ecc4e0ba850e6fb4c2068880173f130",
     "pretest-scenarios.md": "4dee35f70407f36591982afd9e93598243faf544a162076ab88e91b3349c9a91",
     "research.tex": "5da8aefe89e022885082f567b93f36cf9a78992cd5ce48896e3b37b4f048eff7",
     "sensitivity.csv": "ad54f0015a38e61face31228a609f9d71aff281f8b775e4fc4080e0376dcaee1",

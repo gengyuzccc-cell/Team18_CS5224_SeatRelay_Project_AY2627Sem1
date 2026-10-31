@@ -350,7 +350,7 @@ def study_notes(summary, design):
             "",
             "## Slide 13 — limitations and roles",
             "",
-            "One writer per workshop preserves order at a throughput cost. Deployment is single-region. The interviews, the 12-person study and the live pilot promised in the Preliminary report were not held with people; the pilot slot lapsed and is to be rebooked."
+            "One writer per workshop preserves order at a throughput cost. Deployment is single-region. The interviews, the 12-person study and the live pilot promised in the Preliminary report were not held with people; the pilot slot lapsed and the pilot stage stays ready for one."
             "  Research outcomes are generated from declared assumptions, so they demonstrate the method rather than establish real user benefit. Existing deployed system tests remain separate evidence. The report states the assistance used and each member's role.",
             "",
             "## Slide 14 — close",

@@ -122,7 +122,7 @@ redelivery time are demo values. If you are asked, these are the measured ones:
 | Smoke on dev, 2026-10-17 (same flow, scripted) | PASS, 13/13 checks | `results/2026-10-17-smoke-2/summary.md` |
 | Cancellation-driven backfill | 0 ms (relayed in the same transaction; asserted) | same file, step 4 |
 | Expiry-driven backfill in that smoke run | 108 ms (n = 1, a single sample) | same file (`\SmokeExpiryBackfillMaxMs`) |
-| Expiry-driven backfill distribution | p50 / p95 / max 0.05 / 0.10 / 0.33 s over 300 expiries on dev, 300/300 relayed, 0 outliers (target p95 ≤ 120 s); the staged rehearsal on pilot adds 2 (72–74 ms), reported separately as staged | `results/2026-10-17-backfill-2/summary.md` (`\BackfillExpiredPFiftyS`, `\BackfillExpiredPNinetyFiveS`, `\BackfillExpiredMaxS`, `\BackfillExpiredN`); `\RehearsalBackfillExpiredMinMs`–`MaxMs` from `results/2026-10-17-pilot-rehearsal-3/` |
+| Expiry-driven backfill distribution | p50 / p95 / max 0.05 / 0.10 / 0.33 s over 300 expiries on dev, 300/300 relayed, 0 outliers (target p95 ≤ 120 s); the staged rehearsal on pilot adds 2 (86 and 113 ms, 31 Oct), reported separately as staged | `results/2026-10-17-backfill-2/summary.md` (`\BackfillExpiredPFiftyS`, `\BackfillExpiredPNinetyFiveS`, `\BackfillExpiredMaxS`, `\BackfillExpiredN`); `\RehearsalBackfillExpiredMinMs`–`MaxMs` from `results/2026-10-31-pilot-rehearsal/` |
 | Redelivery delay after a crash | the SQS visibility timeout, 120 s (configuration) | `services/aws/templates/app.yaml` |
 | Repeat execution with crash after commit | 6 of 6 probes: redelivery acknowledged, one record, one effect (PASS) | `results/2026-10-17-repeat-execution-2/summary.md` (`\RepeatAfterCommitPassed`, `\RepeatAfterCommitCases`) |
 

@@ -222,7 +222,11 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 > (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as history. The app
 > stacks run the `8ace25c` build since 31 Oct 05:26 UTC (capacity bound, member lookup by e-mail,
 > verified-e-mail check, least-privilege roles; the 24 Oct notifier rule stays: with SES out of the
-> sandbox, real participants get e-mail, test accounts on reserved domains never do).
+> sandbox, real participants get e-mail, test accounts on reserved domains never do). Since 31 Oct
+> 13:09 UTC (dev) and 13:20 UTC (pilot) both stages serve the web app built from `82b7298`: the
+> `8ace25c` screens plus a check that stops a cancelled status poll from applying a late answer;
+> nothing visible changed, and the walkthrough passed again (45/45,
+> `results/2026-10-31-web-walkthrough-dev-4/`).
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 

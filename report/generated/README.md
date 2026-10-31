@@ -1467,89 +1467,89 @@ Source: none yet — 0/10 with data.
 
 ### Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)
 
-Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-10-17T16:51:30.226Z, commit b8b8f3ae3480 (dirty)` — 79/79 with data.
+Source: `runId d29814ed-2f10-4dec-ab00-ba78fb3b2d21, target pilot, started 2026-10-31T13:04:13.808Z, commit 82b7298cedfb` — 79/79 with data.
 
 | Macro | Value | Source |
 |---|---|---|
-| `\RehearsalVerdict` | PASS | results/2026-10-17-pilot-rehearsal-3/meta.json: ok |
-| `\RehearsalRunId` | 60453144 | results/2026-10-17-pilot-rehearsal-3/meta.json: runId (first 8 characters) |
-| `\RehearsalDate` | 2026-10-17 | results/2026-10-17-pilot-rehearsal-3/meta.json: startedAt (UTC date) |
-| `\RehearsalCommit` | b8b8f3a | results/2026-10-17-pilot-rehearsal-3/meta.json: commit.hash (7 characters) |
-| `\RehearsalDir` | 2026-10-17-pilot-rehearsal-3 | results/2026-10-17-pilot-rehearsal-3 |
-| `\RehearsalRuns` | 1 | results/2026-10-17-pilot-rehearsal-3/meta.json: runs |
-| `\RehearsalChecksPassed` | 85 | results/2026-10-17-pilot-rehearsal-3/meta.json: checks.passed |
-| `\RehearsalChecksTotal` | 85 | results/2026-10-17-pilot-rehearsal-3/meta.json: checks.total |
-| `\RehearsalRunsPassed` | 1 | results/2026-10-17-pilot-rehearsal-3/checks.csv: runs whose check rows are all ok |
-| `\RehearsalInvocations` | 3 | results/<date>-pilot-rehearsal[-<n>]/meta.json: complete runs with target pilot |
-| `\RehearsalInvocationsPassed` | 3 | results/<date>-pilot-rehearsal[-<n>]/meta.json: ok = true |
-| `\RehearsalHoldSeconds` | 120 | results/2026-10-17-pilot-rehearsal-3/meta.json: holdSeconds |
-| `\RehearsalParticipants` | 20 | results/2026-10-17-pilot-rehearsal-3/meta.json: participants |
-| `\RehearsalMailbox` | SES mailbox simulator | results/2026-10-17-pilot-rehearsal-3/meta.json: mailbox |
-| `\RehearsalDurationMin` | 4.8 | results/2026-10-17-pilot-rehearsal-3/meta.json: durationMs / 60000 |
-| `\RehearsalCommands` | 43 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status APPLIED/REJECTED (rows) |
-| `\RehearsalCommandsApplied` | 43 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status = APPLIED |
-| `\RehearsalCommandsRejected` | 0 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, status = REJECTED |
-| `\RehearsalOrganiserCalls` | 6 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = http (rows) |
-| `\RehearsalSettleServerN` | 43 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) |
-| `\RehearsalSettleServerPFiftyMs` | 45 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) |
-| `\RehearsalSettleServerPNinetyFiveMs` | 110 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) |
-| `\RehearsalSettleServerMaxMs` | 279 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, serverSettleMs (nearest rank) |
-| `\RehearsalSettleClientN` | 43 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) |
-| `\RehearsalSettleClientPFiftyMs` | 793 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) |
-| `\RehearsalSettleClientPNinetyFiveMs` | 830 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) |
-| `\RehearsalSettleClientMaxMs` | 905 | results/2026-10-17-pilot-rehearsal-3/raw.csv: kind = command, settleMs (nearest rank) |
-| `\RehearsalBackfills` | 9 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: rows |
-| `\RehearsalBackfillExpiredN` | 2 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED |
-| `\RehearsalBackfillExpiredRelayed` | 2 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs set |
-| `\RehearsalBackfillExpiredMinMs` | 72 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (min) |
-| `\RehearsalBackfillExpiredMaxMs` | 74 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (max) |
-| `\RehearsalBackfillExpiredMaxS` | 0.07 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = EXPIRED, latencyMs (max) / 1000 |
-| `\RehearsalBackfillDeclinedN` | 3 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED |
-| `\RehearsalBackfillDeclinedRelayed` | 3 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs set |
-| `\RehearsalBackfillDeclinedMinMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs (min) |
-| `\RehearsalBackfillDeclinedMaxMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = DECLINED, latencyMs (max) |
-| `\RehearsalBackfillCancelledConfirmedN` | 3 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED |
-| `\RehearsalBackfillCancelledConfirmedRelayed` | 3 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs set |
-| `\RehearsalBackfillCancelledConfirmedMinMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (min) |
-| `\RehearsalBackfillCancelledConfirmedMaxMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (max) |
-| `\RehearsalBackfillCapacityUpN` | 1 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP |
-| `\RehearsalBackfillCapacityUpRelayed` | 1 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs set |
-| `\RehearsalBackfillCapacityUpMinMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs (min) |
-| `\RehearsalBackfillCapacityUpMaxMs` | 0 | results/2026-10-17-pilot-rehearsal-3/backfills.csv: cause = CAPACITY_UP, latencyMs (max) |
-| `\RehearsalNotifications` | 42 | results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): rows |
-| `\RehearsalNotificationsSent` | 42 | results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = SENT |
-| `\RehearsalNotificationsFailed` | 0 | results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = FAILED |
-| `\RehearsalNotificationsPending` | 0 | results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = PENDING |
-| `\RehearsalNotificationsSkipped` | 0 | results/2026-10-17-pilot-rehearsal-3/notifications.csv (storedStatus): status = SKIPPED |
-| `\RehearsalNotificationsOfferKind` | 21 | results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = OFFER |
-| `\RehearsalNotificationsConfirmedKind` | 16 | results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = CONFIRMED |
-| `\RehearsalNotificationsDeclinedKind` | 3 | results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = DECLINED |
-| `\RehearsalNotificationsExpiredKind` | 2 | results/2026-10-17-pilot-rehearsal-3/notifications.csv: kind = EXPIRED |
-| `\RehearsalNotificationsInAppMismatch` | 0 | results/2026-10-17-pilot-rehearsal-3/notifications.csv: inAppStatus != storedStatus |
-| `\RehearsalInAppStatusMatches` | 20 | results/2026-10-17-pilot-rehearsal-3/meta.json: inAppStatusMatches |
-| `\RehearsalInvariants` | held | results/2026-10-17-pilot-rehearsal-3/invariants.csv: verifyOk all true, overCapacity and doubleHolds all 0 |
-| `\RehearsalInvariantReads` | 8 | results/2026-10-17-pilot-rehearsal-3/invariants.csv: rows (one per phase) |
-| `\RehearsalVerifyFailures` | 0 | results/2026-10-17-pilot-rehearsal-3/invariants.csv: verifyOk = false |
-| `\RehearsalOverCapacity` | 0 | results/2026-10-17-pilot-rehearsal-3/invariants.csv: overCapacity (sum) |
-| `\RehearsalDoubleHolds` | 0 | results/2026-10-17-pilot-rehearsal-3/invariants.csv: doubleHolds (sum) |
-| `\RehearsalDistinctServed` | 13 | results/2026-10-17-pilot-rehearsal-3/meta.json: final.distinctParticipantsServed |
-| `\RehearsalSeats` | 13 | results/2026-10-17-pilot-rehearsal-3/meta.json: final.sessions[].capacity (sum) |
-| `\RehearsalConfirmed` | 13 | results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.confirmed |
-| `\RehearsalQueuedAtEnd` | 2 | results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.queued |
-| `\RehearsalAttended` | 5 | results/2026-10-17-pilot-rehearsal-3/meta.json: final.counts.attended |
-| `\RehearsalExportRows` | 20 | results/2026-10-17-pilot-rehearsal-3/meta.json: exportRows |
-| `\RehearsalScriptedDeclines` | 3 | results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.declines |
-| `\RehearsalScriptedExpiries` | 2 | results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.expiries |
-| `\RehearsalScriptedCancellations` | 3 | results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.cancellations |
-| `\RehearsalScriptedCapacityUp` | 1 | results/2026-10-17-pilot-rehearsal-3/meta.json: scripted.capacityUp |
-| `\RehearsalDlqBefore` | 0 | results/2026-10-17-pilot-rehearsal-3/meta.json: deadLetters.before.total |
-| `\RehearsalDlqAfter` | 0 | results/2026-10-17-pilot-rehearsal-3/meta.json: deadLetters.after.total |
-| `\RehearsalAlarms` | 9 | results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.after (count) |
-| `\RehearsalAlarmsInAlarm` | 0 | results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.after[].state = ALARM |
-| `\RehearsalAlarmTransitionsToAlarm` | 0 | results/2026-10-17-pilot-rehearsal-3/meta.json: alarms.transitions (to ALARM) |
-| `\RehearsalLambdaConcurrentMax` | 3 | results/2026-10-17-pilot-rehearsal-3/meta.json: lambda.accountConcurrentMax |
-| `\RehearsalSweepLateExpiries` | 0 | results/2026-10-17-pilot-rehearsal-3/meta.json: customMetrics.SweepLateExpiries.sum (only when customMetrics.CommandSettledLatency.samples > 0) |
-| `\RehearsalCloudWatchSettleSamples` | 43 | results/2026-10-17-pilot-rehearsal-3/meta.json: customMetrics.CommandSettledLatency.samples |
+| `\RehearsalVerdict` | PASS | results/2026-10-31-pilot-rehearsal/meta.json: ok |
+| `\RehearsalRunId` | d29814ed | results/2026-10-31-pilot-rehearsal/meta.json: runId (first 8 characters) |
+| `\RehearsalDate` | 2026-10-31 | results/2026-10-31-pilot-rehearsal/meta.json: startedAt (UTC date) |
+| `\RehearsalCommit` | 82b7298 | results/2026-10-31-pilot-rehearsal/meta.json: commit.hash (7 characters) |
+| `\RehearsalDir` | 2026-10-31-pilot-rehearsal | results/2026-10-31-pilot-rehearsal |
+| `\RehearsalRuns` | 1 | results/2026-10-31-pilot-rehearsal/meta.json: runs |
+| `\RehearsalChecksPassed` | 85 | results/2026-10-31-pilot-rehearsal/meta.json: checks.passed |
+| `\RehearsalChecksTotal` | 85 | results/2026-10-31-pilot-rehearsal/meta.json: checks.total |
+| `\RehearsalRunsPassed` | 1 | results/2026-10-31-pilot-rehearsal/checks.csv: runs whose check rows are all ok |
+| `\RehearsalInvocations` | 4 | results/<date>-pilot-rehearsal[-<n>]/meta.json: complete runs with target pilot |
+| `\RehearsalInvocationsPassed` | 4 | results/<date>-pilot-rehearsal[-<n>]/meta.json: ok = true |
+| `\RehearsalHoldSeconds` | 120 | results/2026-10-31-pilot-rehearsal/meta.json: holdSeconds |
+| `\RehearsalParticipants` | 20 | results/2026-10-31-pilot-rehearsal/meta.json: participants |
+| `\RehearsalMailbox` | SES mailbox simulator | results/2026-10-31-pilot-rehearsal/meta.json: mailbox |
+| `\RehearsalDurationMin` | 5.5 | results/2026-10-31-pilot-rehearsal/meta.json: durationMs / 60000 |
+| `\RehearsalCommands` | 43 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, status APPLIED/REJECTED (rows) |
+| `\RehearsalCommandsApplied` | 43 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, status = APPLIED |
+| `\RehearsalCommandsRejected` | 0 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, status = REJECTED |
+| `\RehearsalOrganiserCalls` | 6 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = http (rows) |
+| `\RehearsalSettleServerN` | 43 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, serverSettleMs (nearest rank) |
+| `\RehearsalSettleServerPFiftyMs` | 47 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, serverSettleMs (nearest rank) |
+| `\RehearsalSettleServerPNinetyFiveMs` | 99 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, serverSettleMs (nearest rank) |
+| `\RehearsalSettleServerMaxMs` | 1,090 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, serverSettleMs (nearest rank) |
+| `\RehearsalSettleClientN` | 43 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, settleMs (nearest rank) |
+| `\RehearsalSettleClientPFiftyMs` | 850 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, settleMs (nearest rank) |
+| `\RehearsalSettleClientPNinetyFiveMs` | 1,079 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, settleMs (nearest rank) |
+| `\RehearsalSettleClientMaxMs` | 1,698 | results/2026-10-31-pilot-rehearsal/raw.csv: kind = command, settleMs (nearest rank) |
+| `\RehearsalBackfills` | 9 | results/2026-10-31-pilot-rehearsal/backfills.csv: rows |
+| `\RehearsalBackfillExpiredN` | 2 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = EXPIRED |
+| `\RehearsalBackfillExpiredRelayed` | 2 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = EXPIRED, latencyMs set |
+| `\RehearsalBackfillExpiredMinMs` | 86 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = EXPIRED, latencyMs (min) |
+| `\RehearsalBackfillExpiredMaxMs` | 113 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = EXPIRED, latencyMs (max) |
+| `\RehearsalBackfillExpiredMaxS` | 0.11 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = EXPIRED, latencyMs (max) / 1000 |
+| `\RehearsalBackfillDeclinedN` | 3 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = DECLINED |
+| `\RehearsalBackfillDeclinedRelayed` | 3 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = DECLINED, latencyMs set |
+| `\RehearsalBackfillDeclinedMinMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = DECLINED, latencyMs (min) |
+| `\RehearsalBackfillDeclinedMaxMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = DECLINED, latencyMs (max) |
+| `\RehearsalBackfillCancelledConfirmedN` | 3 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CANCELLED_CONFIRMED |
+| `\RehearsalBackfillCancelledConfirmedRelayed` | 3 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs set |
+| `\RehearsalBackfillCancelledConfirmedMinMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (min) |
+| `\RehearsalBackfillCancelledConfirmedMaxMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CANCELLED_CONFIRMED, latencyMs (max) |
+| `\RehearsalBackfillCapacityUpN` | 1 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CAPACITY_UP |
+| `\RehearsalBackfillCapacityUpRelayed` | 1 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CAPACITY_UP, latencyMs set |
+| `\RehearsalBackfillCapacityUpMinMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CAPACITY_UP, latencyMs (min) |
+| `\RehearsalBackfillCapacityUpMaxMs` | 0 | results/2026-10-31-pilot-rehearsal/backfills.csv: cause = CAPACITY_UP, latencyMs (max) |
+| `\RehearsalNotifications` | 42 | results/2026-10-31-pilot-rehearsal/notifications.csv (storedStatus): rows |
+| `\RehearsalNotificationsSent` | 42 | results/2026-10-31-pilot-rehearsal/notifications.csv (storedStatus): status = SENT |
+| `\RehearsalNotificationsFailed` | 0 | results/2026-10-31-pilot-rehearsal/notifications.csv (storedStatus): status = FAILED |
+| `\RehearsalNotificationsPending` | 0 | results/2026-10-31-pilot-rehearsal/notifications.csv (storedStatus): status = PENDING |
+| `\RehearsalNotificationsSkipped` | 0 | results/2026-10-31-pilot-rehearsal/notifications.csv (storedStatus): status = SKIPPED |
+| `\RehearsalNotificationsOfferKind` | 21 | results/2026-10-31-pilot-rehearsal/notifications.csv: kind = OFFER |
+| `\RehearsalNotificationsConfirmedKind` | 16 | results/2026-10-31-pilot-rehearsal/notifications.csv: kind = CONFIRMED |
+| `\RehearsalNotificationsDeclinedKind` | 3 | results/2026-10-31-pilot-rehearsal/notifications.csv: kind = DECLINED |
+| `\RehearsalNotificationsExpiredKind` | 2 | results/2026-10-31-pilot-rehearsal/notifications.csv: kind = EXPIRED |
+| `\RehearsalNotificationsInAppMismatch` | 0 | results/2026-10-31-pilot-rehearsal/notifications.csv: inAppStatus != storedStatus |
+| `\RehearsalInAppStatusMatches` | 20 | results/2026-10-31-pilot-rehearsal/meta.json: inAppStatusMatches |
+| `\RehearsalInvariants` | held | results/2026-10-31-pilot-rehearsal/invariants.csv: verifyOk all true, overCapacity and doubleHolds all 0 |
+| `\RehearsalInvariantReads` | 8 | results/2026-10-31-pilot-rehearsal/invariants.csv: rows (one per phase) |
+| `\RehearsalVerifyFailures` | 0 | results/2026-10-31-pilot-rehearsal/invariants.csv: verifyOk = false |
+| `\RehearsalOverCapacity` | 0 | results/2026-10-31-pilot-rehearsal/invariants.csv: overCapacity (sum) |
+| `\RehearsalDoubleHolds` | 0 | results/2026-10-31-pilot-rehearsal/invariants.csv: doubleHolds (sum) |
+| `\RehearsalDistinctServed` | 13 | results/2026-10-31-pilot-rehearsal/meta.json: final.distinctParticipantsServed |
+| `\RehearsalSeats` | 13 | results/2026-10-31-pilot-rehearsal/meta.json: final.sessions[].capacity (sum) |
+| `\RehearsalConfirmed` | 13 | results/2026-10-31-pilot-rehearsal/meta.json: final.counts.confirmed |
+| `\RehearsalQueuedAtEnd` | 2 | results/2026-10-31-pilot-rehearsal/meta.json: final.counts.queued |
+| `\RehearsalAttended` | 5 | results/2026-10-31-pilot-rehearsal/meta.json: final.counts.attended |
+| `\RehearsalExportRows` | 20 | results/2026-10-31-pilot-rehearsal/meta.json: exportRows |
+| `\RehearsalScriptedDeclines` | 3 | results/2026-10-31-pilot-rehearsal/meta.json: scripted.declines |
+| `\RehearsalScriptedExpiries` | 2 | results/2026-10-31-pilot-rehearsal/meta.json: scripted.expiries |
+| `\RehearsalScriptedCancellations` | 3 | results/2026-10-31-pilot-rehearsal/meta.json: scripted.cancellations |
+| `\RehearsalScriptedCapacityUp` | 1 | results/2026-10-31-pilot-rehearsal/meta.json: scripted.capacityUp |
+| `\RehearsalDlqBefore` | 0 | results/2026-10-31-pilot-rehearsal/meta.json: deadLetters.before.total |
+| `\RehearsalDlqAfter` | 0 | results/2026-10-31-pilot-rehearsal/meta.json: deadLetters.after.total |
+| `\RehearsalAlarms` | 9 | results/2026-10-31-pilot-rehearsal/meta.json: alarms.after (count) |
+| `\RehearsalAlarmsInAlarm` | 0 | results/2026-10-31-pilot-rehearsal/meta.json: alarms.after[].state = ALARM |
+| `\RehearsalAlarmTransitionsToAlarm` | 0 | results/2026-10-31-pilot-rehearsal/meta.json: alarms.transitions (to ALARM) |
+| `\RehearsalLambdaConcurrentMax` | 3 | results/2026-10-31-pilot-rehearsal/meta.json: lambda.accountConcurrentMax |
+| `\RehearsalSweepLateExpiries` | 0 | results/2026-10-31-pilot-rehearsal/meta.json: customMetrics.SweepLateExpiries.sum (only when customMetrics.CommandSettledLatency.samples > 0) |
+| `\RehearsalCloudWatchSettleSamples` | 43 | results/2026-10-31-pilot-rehearsal/meta.json: customMetrics.CommandSettledLatency.samples |
 
 ## Notes from the last run
 
@@ -1559,6 +1559,5 @@ Source: `runId 60453144-390d-4cc2-9fdd-b2aa318753c8, target pilot, started 2026-
 - results/2026-10-17-correctness-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-expiry-race-5: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-failure-recovery-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
-- results/2026-10-17-pilot-rehearsal-3: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-preference-order-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run
 - results/2026-10-17-repeat-execution-2: recorded with a dirty working tree (commit.dirty = true); check whether only results/ files were uncommitted before quoting it as a report run

@@ -36,10 +36,10 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
   `docs/DEMO.md` §4 follows this table), and the five slide parts get 2:00 each:
   5 × 2:00 + 5:00 = 15:00. LI ZONGZE speaks in Part 1 and operates in Part 4; ZHANG TIANYI speaks
   only in Part 4.
-- The spoken text of Parts 2, 3 and 5 is at most 280 words, Part 1 about 285 and Part 6 about 340 (the
+- The spoken text of Parts 2, 3 and 5 is at most 280 words, Part 1 about 285 and Part 6 about 350 (the
   generated notes plus the pilot and AI sentences; counted without slide labels, stage directions and
-  [PENDING] markers): about 1:52, 1:54 and 2:15 at 150 words per minute, about 1,465 words or 9:46 for
-  the five slide parts. That leaves about 15 s for hand-overs and the switch to the demo; cut Part 6 to
+  [PENDING] markers): about 1:52, 1:54 and 2:20 at 150 words per minute, about 1,475 words or 9:50 for
+  the five slide parts. That leaves about 10 s for hand-overs and the switch to the demo; cut Part 6 to
   2:00 in rehearsal. A spoken [PENDING] value adds a few words; keep it to the number.
 - Re-time every part with a stopwatch in the first rehearsal (checklist below); if a part runs over
   2:00, cut it, do not speak faster.
@@ -69,7 +69,8 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
      complete: on the median of three rounds it met the targets up to 50 VUs, but two single rounds
      at 50 VUs exceeded 5 s, and it has no network hop.
    - Core engine tests and property test recorded (`results/2026-10-17-core-tests/`; re-run on the audited engine on 31 Oct, `results/2026-10-31-core-tests/`).
-   - Staged pilot rehearsal on the pilot stage (`results/2026-10-17-pilot-rehearsal-3/`): synthetic
+   - Staged pilot rehearsal on the pilot stage (`results/2026-10-17-pilot-rehearsal-3/`; re-run on the
+     submitted build on 31 Oct, `results/2026-10-31-pilot-rehearsal/`, which the report quotes): synthetic
      accounts and scripted actions. It is operational evidence, not user evidence; say "staged" every
      time you mention it.
    - Measured usage of the experiment day, read from CloudWatch and priced
@@ -88,7 +89,9 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
    (`results/2026-10-31-core-tests/`: 156/156, branches 99.7 %); CI green since `8ace25c`. Simulated
    research package merged (`results/research/`, seed 20261031): authored interview scenarios and
    generated task/SUS responses, no people; field interviews, an observed study and a natural pilot
-   remain unperformed.
+   remain unperformed. Later on 31 Oct: the staged pilot rehearsal re-ran on the submitted backend build
+   (`results/2026-10-31-pilot-rehearsal/`, 85/85; the report quotes it), and both stages serve the web
+   app built from `82b7298` (no visible change; walkthrough 45/45, `results/2026-10-31-web-walkthrough-dev-4/`).
 4. Values seen during the demo are demo values. The rehearsal values in the DEMO.md appendix are not
    report measurements.
 5. A missed target is reported as missed, with the measured value and the explanation.

@@ -20,7 +20,7 @@ Maintained by hand from each run's `meta.json` (`python3 -I report/tools/check_n
 | 2026-10-17T15:46:25.018Z | expiry-race | dev | 00faa52 | e1be2b0b | 3 | PASS 27/27 | 2026-10-17-expiry-race-4 | calibrated send time, clean commit |
 | 2026-10-17T16:37:51.206Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | a633cb25 | 1 | PASS 84/84 | 2026-10-17-pilot-rehearsal | staged rehearsal on pilot, synthetic accounts (not user evidence) |
 | 2026-10-17T16:46:21.309Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | 12f30c90 | 1 | PASS 85/85 | 2026-10-17-pilot-rehearsal-2 | staged rehearsal on pilot, synthetic accounts (not user evidence) |
-| 2026-10-17T16:51:30.226Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | 60453144 | 1 | PASS 85/85 | 2026-10-17-pilot-rehearsal-3 | staged rehearsal on pilot, synthetic accounts (not user evidence); quoted in the report |
+| 2026-10-17T16:51:30.226Z | pilot-rehearsal | pilot | b8b8f3a (dirty) | 60453144 | 1 | PASS 85/85 | 2026-10-17-pilot-rehearsal-3 | staged rehearsal on pilot, synthetic accounts (not user evidence); quoted in the report until 31 Oct |
 | 2026-10-17T17:27:04.217Z | web-walkthrough-dev | dev | b8b8f3a (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev | real-browser walkthrough with test accounts (Playwright), UI before d34e0ac; not user evidence |
 | 2026-10-17T18:14:45.190Z | smoke | dev | e05c037 | 3aabe3fe | 1 | PASS 13/13 | 2026-10-17-smoke-2 | re-run series at quota 1000; deployed bundles = build of e05c037 (results/2026-10-17-table3-dev-q1000-provenance.md) |
 | 2026-10-17T18:16:07.202Z | correctness | dev | e05c037 (dirty) | d179d40d | 3 | PASS 672/672 | 2026-10-17-correctness-2 | re-run series at quota 1000; quoted in the report; dirty = runner status log under results/ only |
@@ -42,6 +42,8 @@ Maintained by hand from each run's `meta.json` (`python3 -I report/tools/check_n
 | 2026-10-31T05:30:41.797Z | correctness | dev | 7970cff | 5c1ecf28 | 3 | PASS 672/672 | 2026-10-31-correctness | regression after deploying 8ace25c's app build to dev |
 | 2026-10-31T05:35:11.788Z | access-control | dev | 7970cff | 5a42e145 | 3 | PASS 177/177 | 2026-10-31-access-control | regression after deploying 8ace25c's app build to dev |
 | 2026-10-31T05:29:22.400Z | web-walkthrough-dev | dev | 7970cff (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev-3 | real-browser walkthrough after deploying 8ace25c's app build to dev (SPA already 8ace25c); --no-publish; not user evidence |
+| 2026-10-31T13:04:13.808Z | pilot-rehearsal | pilot | 82b7298 | d29814ed | 1 | PASS 85/85 | 2026-10-31-pilot-rehearsal | staged rehearsal on pilot, synthetic accounts (not user evidence), on the submitted backend build (`8ace25c` bundles, code identical to `82b7298`); quoted in the report |
+| 2026-10-31T13:16:05.319Z | web-walkthrough-dev | dev | 82b7298 (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev-4 | real-browser walkthrough after publishing the SPA built from 82b7298 to dev at 13:09 UTC (8ace25c plus the abort checks in command polling); dirty = uncommitted docs and results only, apps/web as committed; --no-publish; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 

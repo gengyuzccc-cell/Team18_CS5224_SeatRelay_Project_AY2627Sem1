@@ -78,7 +78,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & Simulated (no people): \SimInterviewN{} authored interview profiles, \SimStudyN{} generated participants; completion \SimCompletionSR\,\% vs \SimCompletionCtrl\,\%, SUS \SimSusSR{} vs \SimSusCtrl, time $-$\SimPairedReduction\,\% paired; \S\ref{sec:study}
  & simu\-lated\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
- & \IfPending{\PilotWorkshops}{not run (3--4 Nov slot lapsed; to be rebooked on \code{pilot}, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
+ & \IfPending{\PilotWorkshops}{not run before submission (3--4 Nov slot lapsed; \code{pilot} stage ready, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
 \bottomrule
 \end{tabularx}
@@ -214,23 +214,24 @@ Scripts, raw responses, charts and limitations: \code{results/research/}; compan
 \code{report/Research.tex}.
 
 \subsection{Live pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-\IfPending{\PilotWorkshops}{The pilot (its 3--4 November 2026 slot lapsed before registration could
-open; to be rebooked) is to serve a real workshop in two sessions on the \code{pilot} stage (no fault injection;
-e-mail on), with registration open for at least five days; the organiser's CSV exports and the
-backfill log are the evidence.}{The pilot (planned as two sessions with registration open for at
+\IfPending{\PilotWorkshops}{The pilot was not run before submission: its 3--4 Nov slot lapsed before
+registration could open. It would run a real two-session workshop on the \code{pilot} stage (no fault
+flags, e-mail on, registration open $\geq$\,5 days), with the organiser's CSV exports and backfill log as
+evidence; the stage stays up.}{The pilot (planned as two sessions with registration open for at
 least five days) ran on the \code{pilot} stage: \PilotWorkshops{} workshop(s), \PilotRegistrations{}
 registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended
 (organiser CSV exports and backfill log, \code{results/pilot/}). \pending{pilot observations: natural
 cancellations, notifications, organiser feedback}}
-\emph{Staged, not user evidence:} before the pilot, a scripted rehearsal on the pilot stage with
-\RehearsalParticipants{} synthetic accounts (\code{results/2026-10-17-pilot-rehearsal-3/}) applied
+\emph{Staged, not user evidence:} a scripted rehearsal of that flow (\RehearsalParticipants{} synthetic
+accounts), last run \RehearsalDate{} on the submitted build (\code{results/\RehearsalDir/};
+\RehearsalInvocationsPassed/\RehearsalInvocations{} runs passed since 17 Oct), applied
 \RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
-(\RehearsalBackfillExpiredN{} expiries through the timer path in
+(\RehearsalBackfillExpiredN{} timer-path expiries in
 \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms), sent \RehearsalNotificationsSent{} e-mails to the SES
-simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; invariants held at
-all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, rehearsed
-events are logged apart from natural ones and are, like the team's own observations, operational
-evidence; only independent participants' behaviour and feedback are user evidence.
+simulator, passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; invariants held at
+all \RehearsalInvariantReads{} checkpoints. Logged apart from natural events (Prelim.\ \S5), rehearsals are, like
+the team's own observations, operational evidence; only independent participants' behaviour and
+feedback are user evidence.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}

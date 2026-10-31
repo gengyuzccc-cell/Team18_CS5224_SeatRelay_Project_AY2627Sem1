@@ -22,13 +22,13 @@ How to answer:
 | Performance on dev (k6 at quota 1,000, commit `d121145`, 18 runs, median of 3 rounds) | every target met at all 6 levels (reads and 202 p95 < 1 s, settle p95 < 5 s, errors < 1 %); 0.00 % HTTP errors in every run. Across workshops at 10 / 25 / 50 VUs: reads p95 294 / 292 / 289 ms, 202 p95 315 / 310 / 302 ms, settle p95 client 800 / 796 / 786 ms, server 62 / 88 / 193 ms. Hot spot: reads p95 294 / 294 / 297 ms, 202 p95 310 / 307 / 307 ms, settle p95 client 797 / 1,360 / 3,169 ms, server 115 / 940 / 2,601 ms, up to 35 messages in the FIFO queue at 50 VUs. The throttled first attempt is superseded | `results/loadtest/2026-10-17/summary.md` (target `dev`; the first attempt under "Superseded runs") |
 | Performance on the on-prem reference (k6, local stack) | every target met up to 50 VUs on the median of 3 rounds (settle p95 client 2,875 ms across workshops, 2,879 ms on the hot spot); two single rounds at 50 VUs exceeded 5 s (6,296 and 5,947 ms); no network hop between client and server | `results/loadtest/2026-10-17/summary.md` (target `local`) |
 | Core engine tests | 156/156 tests in 16 files; property test: 2,000 random command sequences (86,475 steps, 86,971 decisions), every invariant held after every step; coverage 100 % of statements, 99.66 % of branches | `results/2026-10-31-core-tests/` (`run.log`, `coverage-summary.json`) |
-| Staged pilot rehearsal (synthetic accounts; not user evidence) | 20 synthetic participants; 43/43 commands applied; 9 seats relayed (2 expiries in 72 and 74 ms, 7 in-transaction relays in 0 ms); 42 notifications SENT to the SES mailbox simulator; invariants held after all 8 phases; 85/85 checks | `results/2026-10-17-pilot-rehearsal-3/summary.md` |
+| Staged pilot rehearsal (synthetic accounts; not user evidence), latest run 31 Oct on the submitted build | 20 synthetic participants; 43/43 commands applied; 9 seats relayed (2 expiries in 86 and 113 ms, 7 in-transaction relays in 0 ms); 42 notifications SENT to the SES mailbox simulator; invariants held after all 8 phases; 85/85 checks; 4 of 4 runs since 17 Oct passed | `results/2026-10-31-pilot-rehearsal/summary.md` (first runs: `results/2026-10-17-pilot-rehearsal-3/`) |
 | Mechanism comparison (1,000 seeds, UNIFIED vs PER_SESSION) | distinct served 58.08 vs 54.03; duplicate-hold events 0.00 vs 34.57; mean per-run p95 refill time 9.45 vs 63.31 min | `results/replay/summary.md` |
 | Cloud cost at 1k registrations per month: list / after free tier / after credits | US$13.30 / 0.52 / 0.00 (on-prem 3-year: increment only 29.32, fully amortised 324.16) | `results/cost/model-summary.md` §1 |
 | Crossover: list price vs on-prem increment / fully amortised | 3,898 / 57,278 registrations per month | `results/cost/model-summary.md` §3 |
 | Measured usage of the experiment day, priced (CloudWatch, 2026-10-17 00:00–20:20 UTC, dev and pilot): list / after free tier | US$3.25 (of which 1.40 is the month's Cognito MAU charge) / 1.19; no registration count in CloudWatch, so no measured cost per registration | `results/cost/usage-priced.md`, `results/cost/usage-2026-10-17-cloudwatch.md` |
 | Research interviews and usability study | 6 student + 3 organiser scenarios; 12 participants, 112 task attempts, 24 SUS forms; SR completion 89.3% vs 78.6%, SUS 69.4 vs 53.3, median individual paired time reduction 38.7%; generated data, method documented | `results/research/summary.json`, `results/research/summary.md` section 2 |
-| Natural live pilot | Not run; staged rehearsal is reported separately | `results/2026-10-17-pilot-rehearsal-3/summary.md`; no `results/pilot/` |
+| Natural live pilot | Not run before submission (the 3–4 Nov slot lapsed; the pilot stage stays up); the staged rehearsal is reported separately | `results/2026-10-31-pilot-rehearsal/summary.md`; no `results/pilot/` |
 
 ---
 
@@ -69,8 +69,8 @@ than 60 s after `expiresAt`. It must be 0, and in the dev backfill re-run it was
 times during the series and never found an overdue workshop, because every expiry had already been
 relayed by its own timer (300 in the backfill run, at most 0.33 s;
 `results/2026-10-17-backfill-2/summary.md`, `results/2026-10-17-table3-dev-q1000-provenance.md`). In
-the staged pilot rehearsal its sum was 0 too, while both expiries were relayed in 72 and 74 ms
-(`results/2026-10-17-pilot-rehearsal-3/summary.md`).
+the staged pilot rehearsals its sum was 0 too; in the latest one (31 Oct) both expiries were relayed
+in 86 and 113 ms (`results/2026-10-31-pilot-rehearsal/summary.md`).
 **Where:** `packages/service/src/worker/sweep.ts`, `services/aws/src/handlers/sweep.ts`, `computeNextDueAt()` in `packages/core/src/decide.ts`, `SWEEP_LATE_GRACE_MS` in `packages/service/src/worker/processCommand.ts`, ARCHITECTURE §6.
 
 ### 4. What happens when an ACCEPT races the expiry timer?
@@ -348,15 +348,17 @@ the measurement of record.
 
 It drove the deployed pilot stage end to end (API Gateway, Lambda, SQS FIFO and delay timers,
 DynamoDB, the notifier and SES) with 20 synthetic accounts and scripted actions 1–3 s apart, fault
-flags off. All 43 commands were applied, 9 released seats were relayed (the 2 expiries in 72 and
-74 ms, the decline, cancellation and capacity relays in 0 ms), 42 notifications were SENT to the SES
-mailbox simulator, the invariants held after all 8 phases, no alarm changed state and the dead-letter
-queues stayed empty (85/85 checks). That is operational evidence that the pilot stage works before
-real participants use it. It says nothing about people: there is no independent participant, no task
+flags off. In the latest run (31 Oct, on the submitted backend build) all 43 commands were applied,
+9 released seats were relayed (the 2 expiries in 86 and 113 ms, the decline, cancellation and capacity
+relays in 0 ms), 42 notifications were SENT to the SES mailbox simulator, the invariants held after all
+8 phases, no alarm changed state and the dead-letter queues stayed empty (85/85 checks); the three
+runs of 17 Oct passed as well. That is operational evidence that the pilot stage works and is ready
+for real participants. It says nothing about people: there is no independent participant, no task
 time, error count or SUS score, and attendance was marked before the sessions started, so it rehearses
 the feature, not a real check-in. That is why it is called staged every time and logged apart from the
-live pilot and the user study (Prelim §5), neither of which had run on 2026-10-17.
-**Where:** `results/2026-10-17-pilot-rehearsal-3/summary.md` (Caveats), `tools/experiments/src/pilot-rehearsal.ts`, `docs/preliminary/commitments.md` (User evaluation).
+live pilot and the user study (Prelim §5): the live pilot was not run before submission, and the user
+study in §4.4 is simulated.
+**Where:** `results/2026-10-31-pilot-rehearsal/summary.md` (Caveats; the 17 Oct runs in `results/2026-10-17-pilot-rehearsal*/`), `tools/experiments/src/pilot-rehearsal.ts`, `docs/preliminary/commitments.md` (User evaluation).
 
 ### 23. Why are your student numbers not in the public repository?
 

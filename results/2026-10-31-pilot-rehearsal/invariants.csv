@@ -1,0 +1,9 @@
+phase,at,verifyOk,overCapacity,doubleHolds,violations,S1,S2,queued,offered,confirmed,backfills,distinctServed
+1 register,2026-10-31T13:05:52.500Z,true,0,0,,0+6/6 q5,0+6/6 q5,8,12,0,0,0
+2 respond,2026-10-31T13:06:34.201Z,true,0,0,,4+2/6 q5,6+0/6 q4,8,2,10,3,10
+3 expiry,2026-10-31T13:07:23.980Z,true,0,0,,6+0/6 q3,6+0/6 q4,6,0,12,5,12
+4 capacity,2026-10-31T13:07:31.219Z,true,0,0,,6+0/6 q3,7+0/7 q3,5,0,13,6,13
+5 cancel,2026-10-31T13:07:54.737Z,true,0,0,,6+0/6 q2,7+0/7 q0,2,0,13,9,13
+6 attendance,2026-10-31T13:08:07.018Z,true,0,0,,6+0/6 q2,7+0/7 q0,2,0,13,9,13
+7 export,2026-10-31T13:08:10.018Z,true,0,0,,6+0/6 q2,7+0/7 q0,2,0,13,9,13
+8 final,2026-10-31T13:09:41.896Z,true,0,0,,6+0/6 q2,7+0/7 q0,2,0,13,9,13

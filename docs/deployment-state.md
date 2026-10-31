@@ -8,7 +8,7 @@ that address, a personal gmail.com mailbox, is the live SES identity (DKIM not s
 `From:` of every participant e-mail. A team alias or a DKIM-signed team domain is future work
 (the report's future-work list says so).
 
-## seatrelay-auth (deployed 2026-10-16, last updated 2026-10-17 for the pilot callback URLs, UPDATE_COMPLETE)
+## seatrelay-auth (deployed 2026-10-16, last updated 2026-10-31, UPDATE_COMPLETE)
 
 | Output | Value |
 |---|---|
@@ -49,7 +49,9 @@ in the AWS Support Center console (Basic support cannot reply via CLI) with the 
 participants relied on in-app notifications (`/me/notifications`), e-mail went only to verified team addresses,
 and the dev stack ran with `EmailEnabled=false` (until 24 Oct).
 
-## seatrelay-web-dev (deployed 2026-10-16, CREATE_COMPLETE)
+## seatrelay-web-dev (deployed 2026-10-16, last updated 2026-10-31, UPDATE_COMPLETE)
+
+Parameters: `Stage=dev ApiOrigin=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com` (`ApiOrigin` since 2026-10-31, for the Content-Security-Policy).
 
 | Output | Value |
 |---|---|
@@ -60,9 +62,9 @@ and the dev stack ran with `EmailEnabled=false` (until 24 Oct).
 Callback/logout URLs registered in Cognito: localhost:5173, the dev CloudFront URL and the pilot CloudFront URL
 (`/callback` for sign-in, `/` for sign-out).
 
-## seatrelay-app-dev (deployed 2026-10-17, last updated 2026-10-24, UPDATE_COMPLETE)
+## seatrelay-app-dev (deployed 2026-10-17, last updated 2026-10-31, UPDATE_COMPLETE)
 
-Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=true WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address>` (`EmailEnabled=false` until 2026-10-24).
+Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=true AllowLocalOrigin=true WorkerMaxConcurrency=5 LogRetentionDays=14 AuthStackName=seatrelay-auth WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address> SenderEmail=<team sender address>` (`EmailEnabled=false` until 2026-10-24; `AllowLocalOrigin` since 2026-10-31).
 
 | Output | Value |
 |---|---|
@@ -93,7 +95,9 @@ display names "… (staged)"): `walkthrough-{organiser,alice,bob,carol}@example.
 histories). The walkthrough leaves its staged organisations and workshops ("Staged walkthrough …", "Cloud Computing
 Workshop (staged demo)") open on dev. Evidence: `results/2026-10-17-web-walkthrough-dev/`.
 
-## seatrelay-web-pilot (deployed 2026-10-17, CREATE_COMPLETE)
+## seatrelay-web-pilot (deployed 2026-10-17, last updated 2026-10-31, UPDATE_COMPLETE)
+
+Parameters: `Stage=pilot ApiOrigin=https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com` (`ApiOrigin` since 2026-10-31).
 
 | Output | Value |
 |---|---|
@@ -103,9 +107,9 @@ Workshop (staged demo)") open on dev. Evidence: `results/2026-10-17-web-walkthro
 
 Registered in Cognito as callback (`/callback`) and logout (`/`) URL together with dev and localhost.
 
-## seatrelay-app-pilot (deployed 2026-10-17, last updated 2026-10-24, UPDATE_COMPLETE)
+## seatrelay-app-pilot (deployed 2026-10-17, last updated 2026-10-31, UPDATE_COMPLETE)
 
-Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=<team alarm address>`.
+Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true AllowLocalOrigin=false WorkerMaxConcurrency=5 LogRetentionDays=14 AuthStackName=seatrelay-auth WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=<team alarm address> SenderEmail=<team sender address>`.
 
 | Item | Value |
 |---|---|
@@ -178,7 +182,7 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   `results/2026-10-24-ses-production-check/`, `results/2026-10-24-web-walkthrough-dev/` (45/45). Smoke,
   correctness and access-control were not re-run after these redeploys (last regression: 17 Oct, `d34e0ac`).
 
-## 2026-10-31: audit fixes, security headers, verification-before-update; app stacks pending
+## 2026-10-31: audit fixes, security headers, verification-before-update; app stacks redeployed
 
 - **Repository:** the six-lens audit of 30 Oct (plan, engine, backend, web, tooling, security; 49
   findings, 25 confirmed after adversarial verification) was fixed in `8ace25c`. CI is green on that
@@ -226,3 +230,24 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   files, branches 99.66 %, `8ace25c`); `report/generated/numbers.tex` quotes this run.
 - **Not changed:** SES (production, 50,000/day), Cognito mailer (default), budgets, alarms, pilot data
   (still only the three 17 Oct staged-rehearsal workshops; no real pilot workshop exists yet).
+
+## 2026-10-31 afternoon: staged rehearsal on the submitted build; web app from `82b7298`
+
+- **Staged pilot rehearsal, run 4** on `pilot` (13:04:13–13:09:41 UTC; app stack unchanged since the
+  05:37 CORS redeploy, i.e. the `8ace25c` bundles, whose backend code is identical to `82b7298`):
+  PASS 85/85 (`results/2026-10-31-pilot-rehearsal/`, run `d29814ed`). 20 synthetic accounts on the
+  SES mailbox simulator (tokens minted for the 17 Oct accounts), 43/43 commands applied, 9 seats relayed
+  (expiries 86 and 113 ms through the timer path), 42 notifications SENT, invariants held after all 8
+  phases, DLQs 0 before and after, no alarm transition, no Lambda error or throttle. Its workshop
+  (`248ad987-…`, sessions 2 and 3 Nov) stays OPEN for inspection, like the three of 17 Oct; the sweep
+  ends the two still-queued synthetic registrations at the cut-off. Final §4.5 quotes this run.
+- **Web app** built from `82b7298` (`index-kaiHpPN-.js`, CSS unchanged `index-DnGuptRW.css`; adds the
+  abort checks in `commandRunner`/`pollCommand` that came with the research merge) published to dev at
+  13:09 UTC and, after the browser walkthrough on dev passed (45/45,
+  `results/2026-10-31-web-walkthrough-dev-4/`, `--no-publish`), to pilot at 13:20 UTC. Both stages
+  serve the same bundle; `env.js` names each stage's API.
+- **Checked after:** `/health` 200 and `/me` 401 on both APIs, both CloudFront URLs 200 with the
+  Content-Security-Policy header, every alarm OK, all six DLQs empty, all five stacks
+  UPDATE_COMPLETE.
+- **Pilot data now:** four staged-rehearsal workshops (17 Oct ×3, 31 Oct ×1), all synthetic; no
+  real pilot workshop exists. The live pilot was not run before submission (Final §4.5, Table 5).
