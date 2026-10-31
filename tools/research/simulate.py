@@ -6,7 +6,8 @@ python3 tools/research/simulate.py --check
 
 The CSV/JSON/Markdown/TeX pipeline uses the standard library. Plotting additionally uses the
 repository's tools/experiments/requirements.txt. No recruitment, consent, recordings or human
-observations are implied. All failure events and timing assumptions are declared in scenarios.json.
+observations are implied. Failure events and timing assumptions are declared in scenarios.json; an
+assisted attempt that reaches the 300 s cap is recorded as a timeout.
 """
 from __future__ import annotations
 

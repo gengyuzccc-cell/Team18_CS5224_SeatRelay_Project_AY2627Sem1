@@ -78,10 +78,10 @@
   "source_sha256": {
     "tools/research/scenarios.json": "0b302c1507e348eaaa30a40c19ccddd2a79001d7e5a4a9e081e664c1f0a0e828",
     "docs/user-study/counterbalance.csv": "600649c099284c4af9ee87365913d71f3324cd204acb1a92bb5edaf03c18355f",
-    "tools/research/simulate.py": "19ea3c656e88042d202dba6a1cb73825c30fdba48a553bac2dc3144cf8af6440",
+    "tools/research/simulate.py": "2f5baf576dcedbc58ae61335b4ee9d34fa3975ae825934a6e99264034f5071a5",
     "tools/research/study.py": "385161567bfb458ad47155ea41cfc010c8a180abac840d50d72074f481c1c2ce",
-    "tools/research/documents.py": "6e32a462b11cb30a9c3738847b9213768ca8924a18182ad018d462a0ec6a1f5a",
-    "tools/research/plot.py": "be28c57c85f60c7eb173c607422a25c72c47504db38f4c9fb0b4032532997426"
+    "tools/research/documents.py": "7dd08d5f609485853ff7e4a2453542d9d5b46c897183c9ec84a8d13c64f6389f",
+    "tools/research/plot.py": "a8bd9b2cc6c99d2acc261e19fe94791a2037c8c968d3b46fb2b0f70b6c4ef2dc"
   },
   "counts": {
     "interview_profiles": 9,
@@ -103,7 +103,7 @@
     "interviews/SIM-I08.md": "ff77f600ea9a150cf209eb783c52edd25ad0800c24c46ab7b0c28f3fec1371e0",
     "interviews/SIM-I09.md": "52d897310e02108d14382646eeb08f60a548cda43518a587feefc695e7ffd6db",
     "paired-subjects.csv": "09b9943329e47e7a29ccc180351c1bfd36fdfb11af185f997c0f8da721d7a6fc",
-    "presentation-notes.en.md": "3018e7215e91a0b750f18049756a5e2f9b92d23a9e2422c0505ad906bb52e342",
+    "presentation-notes.en.md": "0083028dff0c5c29bceb00d5516af0e42cd9cb7e44005ec7cb15f61a52e081f0",
     "pretest-scenarios.md": "4dee35f70407f36591982afd9e93598243faf544a162076ab88e91b3349c9a91",
     "research.tex": "5da8aefe89e022885082f567b93f36cf9a78992cd5ce48896e3b37b4f048eff7",
     "sensitivity.csv": "ad54f0015a38e61face31228a609f9d71aff281f8b775e4fc4080e0376dcaee1",
@@ -111,7 +111,7 @@
     "study-debriefs.md": "5a9e806cb60d351c967a5c5b1505c12c1620630cf302287b73abfc3ae35bc4e6",
     "study-design.csv": "39938b0046f881e2a8292440e1d64282cb89ddd83a15253c337255560aaab182",
     "summary.json": "d4899ac3fdf52d1b94379f8f5d2ad2b43ba67f449296948676a7f017c03f14cd",
-    "summary.md": "c38b303c6073d7ef5a0a30d85611c5d69afe0fcd708a737fcbfa333d0af96ea0",
+    "summary.md": "01a72257ae90ce83e64435031159f75e7c2cf9ded13e848af33b8e5bcd7b2e97",
     "sus-sheet.csv": "6aeb403c68c3fdf57de2b65b014fd3532e13131228560473cafa982d5174f92b",
     "themes.csv": "25aa794c6a000080ad3ec41fd2e021b5efe570cdf9e4fbe32657cdd8c6fdff27"
   },

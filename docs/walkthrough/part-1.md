@@ -20,10 +20,10 @@ SeatRelay replaces this with one registration per workshop. You rank every sessi
 join one queue, and you hold at most one seat. A freed seat is offered to the next person in the queue
 who accepts that session, for a limited time; unanswered, it moves on by itself.
 
-Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of 37 workshop events were repeats. Five universities list at least 713 student organisations, a lower bound. The campus-market formula is 713 times p times S$120 per year. In the three organiser research scenarios, p is 20 multi-session events out of 54 annual events, or 37.0 percent. This illustrates the formula; it does not estimate real market demand.
+Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of 37 workshop events were repeats. Five universities list at least 713 student organisations, a lower bound. The campus-market formula is 713 times p times S$120 per year. In the three fictional organiser scenarios, p is 20 multi-session events out of 54 annual events, or 37.0 percent. This illustrates the formula; it does not estimate real market demand.
 
 **Slide 3, business model.**
-Organisers pay; participants never do. The proposal is a free tier and an organiser plan at S$10 a month. The three organiser scenarios have a median coordination baseline of four hours per event and assumed bargain/expensive monthly prices of S$8/S$15. Baseline work is not time saved, and these responses are not purchasing commitments. In the separate mechanism simulation, per-session forms left 3.87 duplicate confirmed seats per workshop, while one queue left none. Eventbrite relays tickets within one date; our mechanism connects acceptable sessions to one queue place. The proposed first users are NUS student organisations.
+Organisers pay; participants never do. The proposal is a free tier and an organiser plan at S$10 a month. The three scripted organiser scenarios have a median coordination baseline of four hours per event and assumed bargain/expensive monthly prices of S$8/S$15. Baseline work is not time saved, and these responses are not purchasing commitments. In the separate mechanism simulation, per-session forms left 3.87 duplicate confirmed seats per workshop, while one queue left none. Eventbrite relays tickets within one date; our mechanism connects acceptable sessions to one queue place. The proposed first users are NUS student organisations.
 
 Next, CHEN YANG explains the rules that make this work.
 

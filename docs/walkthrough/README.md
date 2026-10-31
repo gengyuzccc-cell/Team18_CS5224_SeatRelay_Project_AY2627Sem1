@@ -16,7 +16,7 @@ tag naming each slide's speaker. Main slides are numbered 1–14; backup slides 
 | 3 | [part-3.md](part-3.md) | LIN JIE (AWS and monitoring) | 4:00–6:00 | 2:00 | 5 Architecture, 6 Request path (202 → poll → settled), 7 Timers and sweep |
 | 4 | [part-4.md](part-4.md) | ZHANG TIANYI (organiser dashboard) narrates every beat; LI ZONGZE operates the participant browser (and Window O and the terminal) without speaking | 6:00–11:00 | 5:00 | 8 Live demo (backup B1–B6) |
 | 5 | [part-5.md](part-5.md) | ZHU GENGYU (data and the local reference) | 11:00–13:00 | 2:00 | 9 System results (Prelim. Table 3 = Final Table 5), 10 Latency, backfill and mechanism comparison, 11 Cloud vs on-prem cost |
-| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 Simulated interviews and usability study, 13 Limitations and roles, 14 Questions |
+| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 Research: simulated interviews and usability study, 13 Limitations, future work, AI use and roles, 14 Questions |
 
 Q&A preparation for the whole project: [../QA-prep.md](../QA-prep.md).
 
@@ -25,8 +25,8 @@ Q&A preparation for the whole project: [../QA-prep.md](../QA-prep.md).
 front end opens with the problem, market and business model; allocation logic and API explains the
 rules; AWS and monitoring the architecture; the organiser-dashboard owner narrates the demo while the
 front-end owner operates the participant browser; data and the local reference presents the results,
-the cost and the on-prem reference; user research and evaluation tooling presents the user study,
-the pilot and the close, and opens the Q&A. The name-to-line mapping was approved by the team on
+the cost and the on-prem reference; user research and evaluation tooling presents the simulated research package,
+the pilot status and the close, and opens the Q&A. The name-to-line mapping was approved by the team on
 2026-10-24 (`docs/ai-declaration-drafts.md`). If a member's line changes, change the names here, in the six part files, in `docs/DEMO.md` §1 (roles) and in the
 `\speaker{...}` lines of `report/Slides.tex`.
 
@@ -36,10 +36,11 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
   `docs/DEMO.md` §4 follows this table), and the five slide parts get 2:00 each:
   5 × 2:00 + 5:00 = 15:00. LI ZONGZE speaks in Part 1 and operates in Part 4; ZHANG TIANYI speaks
   only in Part 4.
-- The spoken text of Parts 2, 3 and 5 is at most 280 words, Part 1 about 285 and Part 6 about 330 (counted
-  without slide labels, stage directions and [PENDING] markers): about 1:52, 1:54 and 2:12 at 150 words per
-  minute, about 1,450 words or 9:40 for the five slide parts. That leaves about 20 s for hand-overs and the
-  switch to the demo; cut Part 6 to 2:00 in rehearsal. A spoken [PENDING] value adds a few words; keep it to the number.
+- The spoken text of Parts 2, 3 and 5 is at most 280 words, Part 1 about 285 and Part 6 about 340 (the
+  generated notes plus the pilot and AI sentences; counted without slide labels, stage directions and
+  [PENDING] markers): about 1:52, 1:54 and 2:15 at 150 words per minute, about 1,465 words or 9:46 for
+  the five slide parts. That leaves about 15 s for hand-overs and the switch to the demo; cut Part 6 to
+  2:00 in rehearsal. A spoken [PENDING] value adds a few words; keep it to the number.
 - Re-time every part with a stopwatch in the first rehearsal (checklist below); if a part runs over
   2:00, cut it, do not speak faster.
 - If the demo runs on the local stack (Plan B), the crash-recovery beat takes seconds instead of two
@@ -74,7 +75,6 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
    - Measured usage of the experiment day, read from CloudWatch and priced
      (`results/cost/usage-priced.md`): US$3.25 at list price, US$1.19 after the free tier. CloudWatch
      has no registration count, so the cost per registration is still modelled.
-   - Research records and analysis are complete (`results/research/`); generation methods and interpretation are documented in the research report. Field interviews, an observed study and a natural pilot remain unperformed.
    - Final: the dev smoke run (`results/2026-10-17-smoke-2/`), the mechanism comparison
      (`results/replay/`) and the cost model (`results/cost/model-summary.md`).
    Status on 2026-10-24: SES production access granted (e-mail on in both stages; reserved test
@@ -85,7 +85,10 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
    explains invalid values, "What we keep" notice, favicon); the app stacks run `8ace25c` too since 05:26
    UTC (capacity bound, member lookup by e-mail, verified-e-mail check); regression on dev passed
    (`results/2026-10-31-{smoke,correctness,access-control,web-walkthrough-dev-3}/`). Core tests re-recorded
-   (`results/2026-10-31-core-tests/`: 156/156, branches 99.7 %); CI green since `8ace25c`.
+   (`results/2026-10-31-core-tests/`: 156/156, branches 99.7 %); CI green since `8ace25c`. Simulated
+   research package merged (`results/research/`, seed 20261031): authored interview scenarios and
+   generated task/SUS responses, no people; field interviews, an observed study and a natural pilot
+   remain unperformed.
 4. Values seen during the demo are demo values. The rehearsal values in the DEMO.md appendix are not
    report measurements.
 5. A missed target is reported as missed, with the measured value and the explanation.

@@ -12,6 +12,8 @@
    must have a row whose start, experiment, target, commit and run id match it, so a run added
    without updating the register (which is maintained by hand) is caught.
 4. Lists the macros that are still pending (no data yet).
+5. Runs tools/research/simulate.py --check --check-figures so results/research/ and
+   report/generated/research.tex are reproducible from tools/research/scenarios.json (seed 20261031).
 
 Exits 1 on any mismatch or missing source; prints a one-line summary either way.
 """
@@ -134,14 +136,18 @@ def main() -> int:
                 problems.append(f"\\{macro}: source {path} does not exist")
     runs_checked, register_problems = check_register()
     problems.extend(register_problems)
-    research = subprocess.run(
-        [sys.executable, "-I", str(ROOT / "tools/research/simulate.py"), "--check", "--check-figures"],
-        capture_output=True, text=True,
-    )
-    if research.returncode:
-        problems.append("research is not reproducible: " + (research.stdout + research.stderr).strip())
+    simulate = ROOT / "tools/research/simulate.py"
+    if not simulate.exists():
+        problems.append("tools/research/simulate.py is missing (the simulated research package cannot be checked)")
     else:
-        print(research.stdout.strip())
+        research = subprocess.run(
+            [sys.executable, "-I", str(simulate), "--check", "--check-figures"],
+            capture_output=True, text=True,
+        )
+        if research.returncode:
+            problems.append("research is not reproducible: " + (research.stdout + research.stderr).strip())
+        else:
+            print(research.stdout.strip())
     pending = [macro for macro, value, _ in rows if "pending" in value.lower()]
     for p in problems:
         print("FAIL:", p)

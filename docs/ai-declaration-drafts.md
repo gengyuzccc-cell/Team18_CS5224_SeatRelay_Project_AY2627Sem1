@@ -74,7 +74,7 @@ the M1 fibre and UPS prices that differed between 2026-10-16 and 2026-10-17 (`re
 
 Timing an expiry race at ±200 ms taught me that network delay is part of the experiment: an "early"
 probe arrived late and was rightly rejected, so the harness calibrates send times. Preparing the
-study, I learned to report the real sample, whatever its size.
+study, I learned to report the real sample, even when it is none (the report's study is simulated; no people took part).
 
 *Grounded in:* the expiry-race run that failed one check because a probe meant to arrive 200 ms
 before `expiresAt` arrived after it (Final §4.2, paragraph "The first series failed, and why."; commit `00faa52` "warm connection

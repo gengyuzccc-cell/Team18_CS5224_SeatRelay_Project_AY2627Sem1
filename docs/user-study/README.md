@@ -1,8 +1,9 @@
 # SeatRelay user evaluation — study package
 
-Research package: the completed [user study](../research/README.md) reuses this
-counterbalance and task protocol with twelve participants. Its data, SUS item responses and
-charts live under `results/research/`, independently of future real study results.
+Research package (simulated): the generated usability study in [docs/research](../research/README.md)
+reuses this counterbalance and task protocol for twelve authored participant profiles; no people were
+recruited or observed. Its data, SUS item responses and charts live under `results/research/`, apart
+from any future real study results (`results/user-study/`, still absent).
 
 Plan reference: `docs/plan/execution-plan.md` §3 step 18 (package), step 20 (pilot), step 22 (12 sessions), §5 (design and metrics), §10 (verification: raw CSV + `analysis.py` output, honest n).
 

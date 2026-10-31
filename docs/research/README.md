@@ -1,8 +1,8 @@
-# SeatRelay Research: interviews and usability study
+# SeatRelay Research (simulated): interviews and usability study
 
-The package contains **six student and three organiser interview records, plus a comparative usability study with twelve participants**.
+The package contains **nine authored interview profiles (six student, three organiser) and a generated usability study for twelve participant profiles; no people took part**.
 
-Method and data source: interview scenarios are authored and task/questionnaire responses are generated; no people were recruited or observed. Section 2 of the full research report documents generation, interpretation limits and provenance metadata.
+Method and data source: interview scenarios are authored and task/questionnaire responses are generated; no people were recruited or observed. The scenario share p = 37.0 % uses the three organiser profiles only (SIM-I07 to SIM-I09, 20 of 54 events); the student profiles carry event counts for context and are excluded from p. Section 2 of the full research report documents generation, interpretation limits and provenance metadata.
 
 ## Materials within one research programme
 

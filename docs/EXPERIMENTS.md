@@ -632,6 +632,7 @@ results/
   replay/                                  mechanism comparison (1,000 seeds): raw.csv, summary.md, *.svg
   cost/                                    model-summary.md, crossover.png, unit-cost.png, crossover-curve.csv,
                                            usage-priced.md, snapshots/<date>.json
+  research/                                SIMULATED research package: authored interview profiles, generated task/SUS rows, charts, summary.md, manifest.json (docs/research/README.md)
   interviews/                              interview records (docs/interviews/README.md)
   user-study/                              study CSV outputs, summary.md, charts (docs/user-study/README.md)
 ```

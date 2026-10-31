@@ -32,7 +32,7 @@ def finish(fig, directory, name, seed):
     fig.text(
         0.015,
         0.012,
-        f"SeatRelay research | 12 participants | seed {seed}",
+        f"SIMULATED research | 12 generated profiles | seed {seed}",
         color="#576979",
         fontsize=7,
     )
@@ -128,7 +128,7 @@ def render(out: Path):
                 )
         starts += counts
     ax.set_yticks([1, 0], ["SeatRelay", "Forms + sheet"])
-    ax.set_xlabel("Task attempts (56 per condition; 12 participants)")
+    ax.set_xlabel("Task attempts (56 per condition; 12 generated profiles)")
     ax.set_xlim(0, 56)
     ax.set_title("Task completion", loc="left", fontweight="bold", pad=38)
     ax.legend(ncol=3, loc="lower left", bbox_to_anchor=(0, 1.04), frameon=False)
@@ -151,18 +151,18 @@ def render(out: Path):
     ax.invert_yaxis()
     ax.set_xlim(0, 100)
     ax.set_xlabel("SUS score (0–100; not a satisfaction percentage)")
-    ax.axvline(75, color="#718493", linestyle="--", linewidth=0.8)
-    ax.set_title("Ten-item SUS responses — participants", loc="left", fontweight="bold")
+    ax.axvline(75, color="#718493", linestyle="--", linewidth=0.8, label="Reference 75")
+    ax.set_title("Ten-item SUS responses — generated profiles", loc="left", fontweight="bold")
     ax.scatter([], [], color=BLUE, label="SeatRelay")
     ax.scatter([], [], color=ORANGE, label="Forms + sheet")
-    ax.legend(loc="lower left", frameon=False, ncol=2)
+    ax.legend(loc="lower left", frameon=False, ncol=3)
     finish(fig, directory, "sus", seed)
 
     fig, ax = plt.subplots(figsize=(7.8, 3.0))
     vals = [ctrl["median_organiser_steps"], sr["median_organiser_steps"]]
     bars = ax.barh([1, 0], vals, color=[ORANGE, BLUE], height=0.4)
     ax.set_yticks([1, 0], ["Forms + sheet", "SeatRelay"])
-    ax.set_xlabel("Median actions per organiser across four tasks (4 participants)")
+    ax.set_xlabel("Median actions per organiser across four tasks (4 generated profiles)")
     ax.set_xlim(0, max(vals) * 1.2)
     ax.bar_label(bars, labels=[f"{v:g}" for v in vals], padding=5)
     ax.set_title("Organiser work — declared action-count model", loc="left", fontweight="bold")

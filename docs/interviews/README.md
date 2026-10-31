@@ -1,10 +1,10 @@
 # SeatRelay Phase 0 interviews — package
 
-Research package: the completed interview records, coding and analysis are in
-[research](../research/README.md). This directory retains the protocol and
+Research package: the simulated (authored) interview records, coding and analysis are in
+[research](../research/README.md); no interviews were held. This directory retains the protocol and
 templates for future real interviews; simulated statements are not stored as field evidence.
 
-> Team summary: The original plan scheduled 20-minute interviews with 4-6 students and 25-minute interviews with 2-3 organisers for 16-24 October (all non-team members). The intended field data would support market share, coordination effort, pricing and problem evidence in Final sections 1-2. Use verbal consent, notes only and anonymous IDs. Store observed records under results/interviews/ and report actual sample sizes. The current generated research package is linked above.
+> Team summary: The original plan scheduled 20-minute interviews with 4-6 students and 25-minute interviews with 2-3 organisers for 16-24 October (all non-team members). The intended field data would support market share, coordination effort, pricing and problem evidence in Final sections 1-2. Use verbal consent, notes only and anonymous IDs. Store observed records under results/interviews/ and report actual sample sizes. The current generated research package is linked above. The purpose was real data: numbers enter the report only from `results/interviews/`; no fabricated or padded records.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours, TAM/SAM/SOM), §3 step 6, §7.1 (Final §1–§2), §8 (10/16–10/24), §10 (every number traceable to `results/`).
 
@@ -56,7 +56,7 @@ Target: 4–6 participants + 2–3 organisers (at least one student club and one
 2. After the last interview: compute and write `results/interviews/summary.md` with, per role, `n`, and:
    - organisers: `p` = Σ multi-session events ÷ Σ events (event-weighted, from `share_multi_session × events_per_year`) and the simple mean; median and range of `hours_per_event`; the four `wtp_*` medians and the range between median `wtp_bargain` and median `wtp_expensive` (with n ≤ 3 do not fit van Westendorp curves — report the raw answers); count of `anchor_10_reaction` yes / no / only_if; tools frequency; privacy constraints frequency; pilot candidates.
    - participants: mean and median `share_multi_session`; distribution of `held_multiple_slots` and `missed_due_full`; `notify_channel` first choices; median `hold_window_ok_min`; `wtp_*` medians; mean `hours_per_event`.
-3. `docs/market-sizing.md` takes `p` and hours from `summary.md`; Final §1 and §2 cite `results/interviews/summary.md`. **Every interview-derived number in the report comes only from these files**; nothing is quoted from memory or from a chat message.
+3. `docs/market-sizing.md` takes `p` and hours from `summary.md`; Final §1 and §2 cite `results/interviews/summary.md`. Until that file exists the report prints the simulated scenario values from `results/research/` and labels them as such (Final §1, §2, Table 1). **Every interview-derived number in the report comes only from these files**; nothing is quoted from memory or from a chat message.
 
 ## 6. Honesty rules (plan §0, §9)
 

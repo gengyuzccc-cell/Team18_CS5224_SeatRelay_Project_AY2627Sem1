@@ -46,6 +46,7 @@ pnpm workspace (Node 22, TypeScript, ESM). Dependency direction: `contracts` ←
 | `tools/replay` | `@seatrelay/replay` | mechanism comparison: the same arrivals replayed through the real engine in UNIFIED and PER_SESSION mode, 1,000 seeds |
 | `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, `dashboard-backfills` (pilot backfill log export), and the Bash deploy / web publish / teardown / cost-snapshot scripts |
 | `tools/market` | | market counts: `inputs.json` (sources, quotes, counts), `count.py` → `results/market/<date>/counts.json`, `capture.py`; dated page captures of the NUS/SMU/SIT sources with `results/market/screenshots/capture.mjs` (`docs/market-sizing.md`) |
+| `tools/research` | | simulated research package: authored `scenarios.json` → generated CSV/JSON/Markdown/TeX, charts and an integrity manifest (`simulate.py --check`); no people, no Node package |
 | `docs/` | | architecture, conventions, runbook, experiments, cost, demo, market sizing, interview and user-study packages, talk notes |
 | `results/` | | raw outputs of every run (the only source of report numbers), see section 9 |
 | `report/` | | Final report sources, `report/build.sh` (page and placeholder checks; `-s` builds the git-ignored Canvas copy with student numbers), `report/tools/report_numbers.py` (numbers file generator) |
@@ -286,7 +287,7 @@ replay on dev.
 | `results/loadtest/<date>/` | k6 matrix: `raw.csv`, `summary.md`, `runs.json`, per-run k6 JSON and logs, `docker-stats.csv` (local) |
 | `results/replay/` | mechanism comparison, 1,000 seeds: `raw.csv`, `summary.md`, SVG charts |
 | `results/cost/` | `model-summary.md`, `crossover.png`, `unit-cost.png`, `crossover-curve.csv`; `snapshots/<date>.json` and `usage-priced.md` from measured usage |
-| `results/research/` | Interview records, task and SUS responses, analysis, charts and reproducibility manifests; methods and data generation are documented in `docs/research/`. |
+| `results/research/` | **Simulated**: nine authored interview profiles, generated task and SUS responses, analysis, charts and reproducibility manifests; no people took part; method in `docs/research/`. |
 | `results/user-study/`, `results/interviews/`, `results/pilot/` | study CSVs and `analysis.py` output, coded interview records and `summary.md`, pilot CSV exports. The team produces these; none exists yet. |
 | `results/RUNS.md` | run register, one line per invocation, failed runs included (EXPERIMENTS §6). It is created by the first report run. |
 

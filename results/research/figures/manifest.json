@@ -1,21 +1,21 @@
 {
   "source_type": "SIMULATED",
-  "plot_source_sha256": "be28c57c85f60c7eb173c607422a25c72c47504db38f4c9fb0b4032532997426",
+  "plot_source_sha256": "a8bd9b2cc6c99d2acc261e19fe94791a2037c8c968d3b46fb2b0f70b6c4ef2dc",
   "inputs_sha256": {
     "summary.json": "d4899ac3fdf52d1b94379f8f5d2ad2b43ba67f449296948676a7f017c03f14cd",
     "paired-subjects.csv": "09b9943329e47e7a29ccc180351c1bfd36fdfb11af185f997c0f8da721d7a6fc",
     "study-design.csv": "39938b0046f881e2a8292440e1d64282cb89ddd83a15253c337255560aaab182",
     "sus-sheet.csv": "6aeb403c68c3fdf57de2b65b014fd3532e13131228560473cafa982d5174f92b",
-    "manifest.json": "85c2e90076b559a50a3c63094f78fa164149811afdd97dd72dbff10102a96be5"
+    "manifest.json": "c8083bd2f8a3f390ca4385085ea623dcb322974684adc2f4074883aabce9cc8c"
   },
   "files_sha256": {
-    "paired-time.png": "69815a2baca325e60b5e7ffe18624c2d48d661af0218b088e35829100d478d22",
-    "paired-time.pdf": "891daf721c2b9102ed23678bfc990fe3b53ba31807d539b7c1a84e94a5902e72",
-    "completion.png": "6b5a36ddfda070c47100e5e9ce2f6b1679b2203d9894b53ff9ac56fc6c9b2cf9",
-    "completion.pdf": "c65c76810ee04af8901ec5c1ad766978186ffa823dfa33c2bb4e557b6110f002",
-    "sus.png": "044c7a7f4af0a8dee4815ce51750843bb028901a489cd46b122283e1bab8f437",
-    "sus.pdf": "f520a5c337d7ae7e8f8f6886404e85773f33d91cc392e509763511af38ec7b7d",
-    "organiser-steps.png": "b0528f485ba927e7863418ef3b52d8ab115bbdd630a9436ac8fae7109dbfea6a",
-    "organiser-steps.pdf": "4df67c633c023fd6fb7ab5edea570791344e1d701032e304ae0a158c68226854"
+    "paired-time.png": "7fadb0d5ee9008af7b5e3432aee0aa46bc282753072bd896358ea586737ceb0a",
+    "paired-time.pdf": "22e3f646ae6d8ce42bad6f18205f537a36cbe2a1bc66724801ec2d454315a5cb",
+    "completion.png": "25308fabb443f209544a0efd9be1f09906c98b1f647aca8dbfdbb778bafa1c1a",
+    "completion.pdf": "d54ab75f9432ee5248c11066a021ba76e2a3cda02ee3296fcc37395eb7a60905",
+    "sus.png": "a6cd997e198c3e90e243b8849d4e26e1e4895835e8ec8480c2aa671235c00f73",
+    "sus.pdf": "8c2ebb5357ce1a48bdc6137b375f12103f05bff4798ee7a4327553484413b518",
+    "organiser-steps.png": "9e315ee5321db99d677490ea2a70c5b99bc2b16e0252f24650776c48db2137ad",
+    "organiser-steps.pdf": "44d93224cbf2d5d8045e26cf8c9e4aa6705d56002450893b12202f6f0c7f6e94"
   }
 }

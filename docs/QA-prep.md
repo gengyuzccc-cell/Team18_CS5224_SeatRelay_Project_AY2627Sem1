@@ -255,9 +255,9 @@ only by Cognito (Keycloak on-prem), and request bodies never carry the user's id
 it from the token. Lambda events are never logged, logs are kept 14 days, and DynamoDB TTL deletes
 command records after 30 days and notifications after 90. Traffic is HTTPS only, the S3 bucket is
 private behind CloudFront Origin Access Control, and DynamoDB is encrypted at rest. Registration
-history has no TTL because organisers need it for the export. Interview and study records use
-participant codes only, with consent.
-**Where:** `services/aws/src/lib/auth.ts`, `buildCommand()` in `packages/contracts/src/commands.ts`, `packages/contracts/src/constants.ts`, `services/aws/templates/app.yaml` (`POWERTOOLS_LOGGER_LOG_EVENT`, `TimeToLiveSpecification`), ARCHITECTURE §14, `docs/user-study/consent.md`.
+history has no TTL because organisers need it for the export. The research records are simulated (no
+people, so no consent was needed); the field protocols use participant codes only, with consent.
+**Where:** `services/aws/src/lib/auth.ts`, `buildCommand()` in `packages/contracts/src/commands.ts`, `packages/contracts/src/constants.ts`, `services/aws/templates/app.yaml` (`POWERTOOLS_LOGGER_LOG_EVENT`, `TimeToLiveSpecification`), ARCHITECTURE §14, `docs/user-study/consent.md`, `results/research/summary.md` §2.
 
 ### 16. Why a single region? What are your RPO and RTO?
 

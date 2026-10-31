@@ -3,6 +3,7 @@ import { errorFields, type LocalLogger } from './logger';
 
 export interface Loop {
   readonly name: string;
+  /** Call only when stopped (or never started): a start() while a stop() is still draining is ignored. */
   start(): void;
   /** Stops after the running tick (if any) completes. */
   stop(): Promise<void>;

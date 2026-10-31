@@ -9,6 +9,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (method, candidate figures, 
 1. Count the **organisers** in Singapore who could run multi-session sign-ups: (a) registered student organisations of the autonomous universities and polytechnics; (b) institutional units that run workshops (libraries, career centres, IT and teaching-support units); (c) SkillsFuture / CET training providers.
 2. Multiply by **p**, the share of organisers whose events include two or more equivalent sessions, measured in the organiser interviews (event-weighted A2 ÷ A1, `docs/interviews/guide-organiser.md`). p is not available yet and stays symbolic.
 3. Price **P = S$120 per organisation per year** (S$10/month, plan §1.1). Value check: person-hours saved per event × hourly rate × multi-session events per year must be at least P.
+   Status 2026-10-31: the Final report fills p (37.0 %), s (66.7 %), a (10 %) and h (4.0 h) from the simulated research package (`results/research/summary.json`: authored organiser scenarios, no interviews) and labels them as scenario values; `results/interviews/summary.md` is still pending and, once it exists, replaces them.
 4. Every count is a dated estimate with a source key and a verification level. Counts given as "more than X" or "X+" enter the sum as X, so the totals are **lower bounds**.
 
 ## 2. Verified inputs (accessed 2026-10-17; rows 3, 5 and 7 re-checked with dated browser screenshots on 2026-10-24)
@@ -79,7 +80,7 @@ SOM (NUS only)    = 200 × p × a × S$120 = S$24,000 × p × a   per year   (+ 
 
 ## 4. Illustrative computation: **illustrative, replace with interview estimate**
 
-> The two p values below are **not data**. They show how the formula behaves. In the report, p comes only from `results/interviews/summary.md`; until that file exists the report shows `\pending{p from organiser interviews}`.
+> The two p values below are **not data**. They show how the formula behaves. In the report, p comes only from `results/interviews/summary.md`; until that file exists the report prints the scripted scenario value from `results/research/` (see the status note in §1), labelled as such, instead of `\pending{p from organiser interviews}`.
 
 | Quantity | p = 0.2 (illustrative) | p = 0.4 (illustrative) |
 |---|---|---|
@@ -116,7 +117,7 @@ Reading: Eventbrite is the only scanned tool with automatic relay and a timed cl
 |---|---|---|---|
 | Student organisations, 5 AUs | ≥ 713 | `nus-osa-getstarted`, `ntu-special-interest-clubs`, `ntu-su-council`, `smu-osl-2022`, `sutd-fifth-row`, `sit-find-your-tribe` | official counts as lower bounds; NTU counted from its directory pages on 2026-10-17; NUS, SMU and SIT re-checked with dated browser screenshots on 2026-10-24 |
 | CET training providers | > 700 (2016) | `ssg-credit-progress-2016` | latest official count found; context, reported separately |
-| Organisers with multi-session sign-ups | 713 × p | organiser interviews | `\pending{p from organiser interviews}` |
+| Organisers with multi-session sign-ups | 713 × p | scripted scenario p = 37.0 % (`results/research/`); interview value pending | labelled scenario value in the report |
 | Price | S$120 per organiser-year | plan §1.1 | S$10/month; justified by `h × w × k ≥ P` |
 
 ## 7. Paragraph for Final §1 (about 120 words, LaTeX)
@@ -140,7 +141,7 @@ About 120 words of prose (citations excluded). The only placeholder is `\pending
 
 - [x] Rows 1, 2, 4, 6, 10–14 verified on 2026-10-17 (fetched or own count; row 10 is an excerpt of an old page)
 - [x] Rows 3, 5, 7 (NUS, SMU, SIT): dated browser screenshots taken on 2026-10-24 (`results/market/screenshots/`, with README, capture script and SHA-256). NUS: "more than 200", unchanged. SIT: **changed to "over 170"**, so row 7, `tools/market/inputs.json` and N_clubs (693 → 713) were updated, and `count.py` and `report_numbers.py` were re-run (`\MarketSitOrgs` 170, `\MarketStudentOrgs` 713, `\MarketTamCampusSgd` 85,600, `\MarketTamCampusCetSgd` 170,000). SMU: the cited 2022 page now returns HTTP 403 and its Wayback capture could not be loaded here; SMU's main site states "over 150 student clubs and societies", so 150 stands. The declaration (`report/sections/07-declaration.tex`), `docs/QA-prep.md` and `docs/walkthrough/part-1.md` were updated to 713 / S$85,600 on 24 Oct.
-- [ ] `p`, `h`, `s` taken from `results/interviews/summary.md` (not from memory); replace the illustrative §4 rows.
+- [ ] `p`, `h`, `s` replaced by values from `results/interviews/summary.md` (currently the labelled simulated scenario values from `results/research/`); replace the illustrative §4 rows.
 - [ ] `w` (hourly rate) has a citation.
 - [ ] Optional: count SUSS and polytechnic student groups to raise the lower bound.
 - [ ] Placeholder scan of the report finds no `\pending{}` left (plan §10).

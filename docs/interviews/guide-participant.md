@@ -1,6 +1,6 @@
 # Interview guide — participants (students), 20 minutes
 
-> Team summary: The original plan called for 20-minute semi-structured interviews with 4-6 non-team students on 16-24 October (plan section 8), covering multi-session registration experiences, duplicate holds, waitlists, notifications, event frequency and willingness to pay.
+> Team summary: The original plan called for 20-minute semi-structured interviews with 4-6 non-team students on 16-24 October (plan section 8), covering (1) real experiences and pain points with multi-session registration, (2) duplicate holds, waitlists and notification preferences, and (3) the two exact numbers market sizing needs: multi-session events (≥ 2 equivalent sessions) attended in the past year and the hours spent, plus willingness to pay.
 > For actual fieldwork, read the consent statement and record consent=yes, take notes without recording, use I01-style IDs instead of names, and complete record-template.md and interviews.csv within 24 hours.
 > Bold questions are required; indented probes are optional follow-ups if time permits.
 

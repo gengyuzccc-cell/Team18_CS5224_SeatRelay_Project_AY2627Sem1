@@ -156,6 +156,8 @@ sentence and count; `count.py` sums them into `results/market/<date>/counts.json
 NUS, SMU and SIT pages (PNG, text, SHA-256) are taken with `results/market/screenshots/capture.mjs`.
 Method and checklist: [market-sizing.md](market-sizing.md).
 
+**`tools/research`** (no package: five Python files and `scenarios.json`). The simulated research package: `simulate.py` generates `results/research/` (authored interview profiles, generated task and SUS responses, charts, `summary.md`, integrity manifest) and `report/generated/research.tex`; `--check --check-figures` verifies every output against the sources; no people took part.
+
 ## Documentation (`docs/`)
 
 | Document | Content |
@@ -173,3 +175,4 @@ Method and checklist: [market-sizing.md](market-sizing.md).
 | [market-sizing.md](market-sizing.md) | Market-size estimate for the report |
 | [interviews/README.md](interviews/README.md) | Interview package (guides, record template) |
 | [user-study/README.md](user-study/README.md) | User-study package (protocol, tasks, SUS, analysis) |
+| [research/README.md](research/README.md) | Simulated interview and usability-study package (authored scenarios, generated responses; entry point) |

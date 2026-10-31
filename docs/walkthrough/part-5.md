@@ -7,7 +7,7 @@
 - **Slides:** 9 System results (Prelim. Table 3 = Final Table 5 verdicts, one tile per aspect), 10 Latency, backfill and
   mechanism comparison (k6 p95 by virtual users, replay charts, backfill line), 11 Cloud vs on-prem
   cost (table and crossover chart), in `report/Slides.tex`
-- **Hands over to:** Part 6 (user study, pilot, limitations)
+- **Hands over to:** Part 6 (simulated research package, pilot status, limitations)
 
 ## What to say (about 280 spoken words, 1:50 at 150 words a minute)
 
