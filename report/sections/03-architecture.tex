@@ -172,8 +172,8 @@ claim no recovery time objective. The actor of every command comes only from the
 (accepted only while its e-mail address is verified), all input is schema-validated and bounded,
 and organiser rights are checked in the API and again in the worker (C7). Each function's role
 lists only the actions its adapter issues. The API is throttled per stage and admits cross-origin
-requests only from the stage's CloudFront origin; a Content-Security-Policy confines the SPA to its
-own scripts and to calls to the API and Cognito; the experiment scripts' password sign-in client is
+requests only from the stage's CloudFront origin (dev also localhost); a Content-Security-Policy
+confines the SPA to its own scripts and to the API and Cognito; the experiment scripts' password sign-in client is
 also an accepted audience, and both stages share one user pool. The application stores e-mail
 address, display name and Cognito user id; access and function logs are kept for 14 days, raw
 request events never. SES production access~\cite{aws-ses-production-access} was granted in

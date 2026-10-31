@@ -24,7 +24,7 @@ Subject (e-mail): *40-min usability session: workshop sign-up tools (NUS CS5224 
 
 > Hi! I'm part of a 6-person NUS CS5224 team building **SeatRelay**, a sign-up tool for workshops that run several identical sessions (e.g. "same talk, Mon / Tue / Wed").
 >
-> We're looking for **NUS students** for a **40-minute** session between **30 Oct and 5 Nov** (on campus, [building/room]). You'll try two sign-up tools with made-up data, do a few small tasks (sign up, check your waitlist spot, confirm a seat…) and fill in a short questionnaire. No preparation needed, nothing is recorded except anonymous task results.
+> We're looking for **NUS students** for a **40-minute** session on **[dates the team sets, by 11 Nov]** (on campus, [building/room]). You'll try two sign-up tools with made-up data, do a few small tasks (sign up, check your waitlist spot, confirm a seat…) and fill in a short questionnaire. No preparation needed, nothing is recorded except anonymous task results.
 >
 > **If you've ever organised an event with sign-ups**, we especially want to hear from you — we have a short organiser version.
 >

@@ -36,10 +36,10 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
   `docs/DEMO.md` §4 follows this table), and the five slide parts get 2:00 each:
   5 × 2:00 + 5:00 = 15:00. LI ZONGZE speaks in Part 1 and operates in Part 4; ZHANG TIANYI speaks
   only in Part 4.
-- The spoken text of Parts 1, 2, 3 and 5 is at most 280 words and Part 6 about 300 (counted without
-  slide labels, stage directions and [PENDING] markers): about 1:52 and 2:00 at 150 words per minute,
-  about 1,410 words or 9:25 for the five slide parts. That leaves about 30 s for hand-overs and the switch to
-  the demo. A spoken [PENDING] value adds a few words; keep it to the number.
+- The spoken text of Parts 2, 3 and 5 is at most 280 words, Part 1 about 285 and Part 6 about 330 (counted
+  without slide labels, stage directions and [PENDING] markers): about 1:52, 1:54 and 2:12 at 150 words per
+  minute, about 1,450 words or 9:40 for the five slide parts. That leaves about 20 s for hand-overs and the
+  switch to the demo; cut Part 6 to 2:00 in rehearsal. A spoken [PENDING] value adds a few words; keep it to the number.
 - Re-time every part with a stopwatch in the first rehearsal (checklist below); if a part runs over
   2:00, cut it, do not speak faster.
 - If the demo runs on the local stack (Plan B), the crash-recovery beat takes seconds instead of two

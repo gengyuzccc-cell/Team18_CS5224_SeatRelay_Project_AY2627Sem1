@@ -32,8 +32,8 @@ scripts' checks, derived from these targets (\code{docs/EXPERIMENTS.md}).
 \begin{table}[b]
 \centering\footnotesize
 \caption{Acceptance targets of the Preliminary report (Table~3, verbatim) vs measured values (dev
-stage, 3 runs per experiment unless stated). Source directories:
-\code{results/2026-10-17-<experiment>[-<n>]/}, \code{results/loadtest/}, \code{results/replay/},
+stage, 3 runs per experiment unless stated). Sources:
+\code{results/2026-10-\{17,31\}-<experiment>[-<n>]/}, \code{results/loadtest/}, \code{results/replay/},
 \code{results/cost/}.}
 \label{tab:results}
 \begin{tabularx}{\textwidth}{@{}P{4.0cm}P{2.45cm}LP{1.0cm}@{}}
@@ -44,7 +44,7 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \CorrectnessScenarios{} scenarios $\times$ \CorrectnessRuns{} runs: \CorrectnessChecksPassed/\CorrectnessChecksTotal{} checks; over-capacity \CorrectnessOverCapacity, double holds \CorrectnessDoubleHolds; \CorrectnessVerifications{} \code{verify} calls, \CorrectnessVerifyFailures{} failed
  & \CorrectnessVerdict\\
 \textbf{Preference, order}: Fixed cases plus randomly generated arrival sequences & Never allocates an unacceptable session
- & Engine: \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences (\CorePropertySteps{} steps), invariants after every step; \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
+ & Engine (\code{\CoreTestsCommit}, 31 Oct): \IfPending{\CorePropertySequences}{\pending{core property-test run not yet recorded}}{\CorePropertySequences{} random sequences (\CorePropertySteps{} steps), invariants after every step; \CoreTestsPassed/\CoreTestsTotal{} tests passed, branch coverage \CoreBranchCoveragePct\,\%}. Dev: \PrefOrderCasesPassed/\PrefOrderCases{} fixed cases (\PrefOrderDistinctCases{} $\times$ \PrefOrderRuns{} runs), \PrefOrderNonAcceptable{} unacceptable offers
  & \IfPending{\CorePropertySequences}{\PrefOrderVerdict{} (dev part)}{\PrefOrderVerdict}\\
 \textbf{Concurrency}: 50 requests contending for few seats; one account acting on several sessions & Final state satisfies every invariant
  & \ConcurrencyAccounts{} accounts, each listing several sessions, race for \ConcurrencySeats{} seats in \ConcurrencySessions{} sessions: \code{verify} found no violation after any phase; \ConcurrencyTransportErrors{} of \ConcurrencyCommands{} commands failed; same-account ACCEPT/DECLINE/CANCEL races \ConcurrencySameAccountConsistent/\ConcurrencySameAccountRaces{} consistent; version-conflict retries \ConcurrencyMetaRetries{} (one consumer per workshop); server settle p95 \ConcurrencySettleServerPNinetyFiveMs\,ms; \ConcurrencyChecksPassed/\ConcurrencyChecksTotal{} checks
@@ -75,10 +75,10 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
 \textbf{User study} (Prelim.\ \S5): 4--6 student interviews, then 12 non-team university students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
- & \IfPending{\StudyParticipants}{not run (planned 29 Oct--5 Nov; protocol and analysis script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
+ & \IfPending{\StudyParticipants}{not run (first window lapsed; possible until 11 Nov; protocol and script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
  & --\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
- & \IfPending{\PilotWorkshops}{not run (planned 3--4 Nov on the \code{pilot} stage, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
+ & \IfPending{\PilotWorkshops}{not run (3--4 Nov slot lapsed; to be rebooked on \code{pilot}, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
 \bottomrule
 \end{tabularx}
@@ -157,7 +157,7 @@ test~\cite{k6} (10--50 virtual users over 10 workshops and on one hot workshop) 
 \IfFileExists{figures/generated/backfill-latency.pdf}{%
 \begin{figure}[t]
   \centering\includegraphics[width=\textwidth]{figures/generated/backfill-latency}
-  \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{expiresAt}) on dev with
+  \caption{Expiry-driven backfill latency (\code{reallocatedAt} $-$ \code{releasedAt} = \code{expiresAt}) on dev with
   \code{holdSeconds}~=~60: (a)~histogram with the p95, (b)~empirical cumulative distribution (dotted:
   95\,\%); the 120\,s target lies far off the scale (maximum \BackfillExpiredMaxS\,s). Source:
   \code{results/\BackfillDir/raw.csv} (run \code{\BackfillRunId}).}
@@ -180,7 +180,7 @@ queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop aga
 [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; fewer under PER\_SESSION in
 \ReplayDistinctFewerSeedsPct\,\% of seeds, equal in \ReplayDistinctEqualSeedsPct\,\%), and a released
 seat reached a new participant after \ReplayRefillMeanUnifiedMean{} instead of
-\ReplayRefillMeanPerSessionMean{} minutes on average (per-mode means; \ReplayRefillMeanN{} seeds had refills in both). Seats left empty
+\ReplayRefillMeanPerSessionMean{} minutes on average (per-mode means over all seeds with refills). Seats left empty
 at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
 [\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). This compares two modes of our own engine
 under an assumed behaviour model, not a field measurement or a test of the tools in
@@ -229,8 +229,8 @@ participants made \StudyErrorsSR{} erroneous actions and \StudyHelpSR{} help req
 against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control (charts in \code{results/user-study/}).}
 
 \subsection{Live pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-\IfPending{\PilotWorkshops}{The pilot, planned for 3--4 November 2026 and not run by the time of
-writing, is to serve a real workshop in two sessions on the \code{pilot} stage (no fault injection;
+\IfPending{\PilotWorkshops}{The pilot (its 3--4 November 2026 slot lapsed before registration could
+open; to be rebooked) is to serve a real workshop in two sessions on the \code{pilot} stage (no fault injection;
 e-mail on), with registration open for at least five days; the organiser's CSV exports and the
 backfill log are the evidence.}{The pilot (planned as two sessions with registration open for at
 least five days) ran on the \code{pilot} stage: \PilotWorkshops{} workshop(s), \PilotRegistrations{}

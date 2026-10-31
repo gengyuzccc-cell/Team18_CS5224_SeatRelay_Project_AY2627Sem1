@@ -317,8 +317,9 @@ Answer from the AI usage declaration in the Final report, and say no more than i
 assistant generated the code, templates, tests, scripts, desk research, documentation, speaker notes,
 interview and user-study materials, figures, and the report, slide and poster text (including revisions), and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
 The scope, rules R1–R7, constraints C1–C7 and acceptance targets are the team's, from the Preliminary
-report. The interviews, the user study and the pilot are run by the team: none had run on 2026-10-24 (study
-planned 29 Oct-5 Nov, pilot 3-4 Nov); give their status on the day. The members' statements say what
+report. The interviews, the user study and the pilot are run by the team: none had run on 2026-10-31 (the
+study's 29 Oct-5 Nov window and the pilot's 3-4 Nov slot lapsed; rebooking per the checklist); give their
+status on the day. The members' statements say what
 each learned; the assistant drafted them and the team approved them. The checks on the generated work
 were automated (below); do not claim a manual review beyond that.
 Correctness does not rest on trusting generated code; it rests on independent checks:

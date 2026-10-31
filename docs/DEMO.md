@@ -216,7 +216,8 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 > value before sending, a "What we keep" notice on the home page and real favicon files; every visible
 > text the demo relies on is unchanged. The browser walkthrough re-ran against each build (24 Oct and
 > 31 Oct, 45/45 checks each; `results/2026-10-24-web-walkthrough-dev/`,
-> `results/2026-10-31-web-walkthrough-dev/`); `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4`
+> `results/2026-10-31-web-walkthrough-dev-2/`; the earlier 31 Oct run, `results/2026-10-31-web-walkthrough-dev/`,
+> checked the new Content-Security-Policy on the unchanged 24 Oct build); `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4`
 > and the backup slides still come from the 24 Oct run. The 17 Oct walkthroughs
 > (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as history. The app
 > stacks run the notifier change of 24 Oct (`bcd7bd1`): with SES out of the sandbox, real participants

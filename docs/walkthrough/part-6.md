@@ -6,16 +6,17 @@
   (`report/Slides.tex`)
 - **Hands over to:** Q&A (all members; see [../QA-prep.md](../QA-prep.md))
 
-## What to say (about 300 spoken words, 2:00 at 150 words a minute; the Division-of-work line is not read out)
+## What to say (about 330 spoken words, 2:12 at 150 words a minute, cut to 2:00 in rehearsal; the Division-of-work line is not read out)
 
 **Slide 12, user study and pilot.** Our evaluation with independent users has not run yet. The plan: First come four to six student interviews, two to three organiser interviews and a record
 of what our own pilot organisers do today. Then twelve non-team university students, at least four with organising experience, will each
 use SeatRelay and today's practice, one Google Form per session plus a spreadsheet with
 duplicate-detection formulas. Half start with each tool. The targets
 are 90 percent task completion, task times 25 percent shorter, and a usability score of at least 75.
-Not run yet: the study is planned for 29 Oct to 5 Nov (on the day, give the results if
-`results/user-study/summary.md` exists). The live pilot, two sessions of one real workshop, is also
-still to come: planned for 3-4 Nov (on the day, give its status from `results/pilot/`).
+Not run yet: the study's first window (29 Oct to 5 Nov) lapsed; sessions are possible until 11 Nov
+(on the day, give the results if `results/user-study/summary.md` exists). The live pilot, two sessions
+of one real workshop, is also still to come: its 3-4 Nov slot lapsed and it is to be rebooked (on the
+day, give its status from `results/pilot/`).
 
 Before the pilot we rehearsed it on the pilot stage with 20 synthetic accounts and scripted actions.
 That is **staged**, not user evidence: all 43 commands were applied, 9 released seats were relayed, and
@@ -88,4 +89,4 @@ statements say what each learned; the assistant drafted them and the team approv
 the generated work were automated: the engine's property tests and coverage threshold, CI, the
 Table 3 experiments with `verify`, and the number trace (`check_numbers.py`). Do not claim a manual
 review beyond that. The interviews, the user study and the pilot are run by the team (on 2026-10-24
-none had run: study planned 29 Oct-5 Nov, pilot 3-4 Nov; give their status on the day).
+none had run: the study's first window and the pilot's 3-4 Nov slot lapsed; give their status on the day).
