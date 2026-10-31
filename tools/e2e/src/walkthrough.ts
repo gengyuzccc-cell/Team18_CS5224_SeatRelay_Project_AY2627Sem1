@@ -385,7 +385,7 @@ async function shot(key: ActorKey, name: string, caption: string, fullPage = fal
 }
 
 /** Scrolls so that `target` sits near the top of the viewport (below the sticky top bar). */
-async function scrollToTop(page: Page, target: Locator, offset = 80): Promise<void> {
+async function scrollToTop(target: Locator, offset = 80): Promise<void> {
   await target.evaluate((el, off) => {
     const top = el.getBoundingClientRect().top + window.scrollY - off;
     window.scrollTo({ top, behavior: 'instant' as ScrollBehavior });
@@ -644,7 +644,7 @@ async function organiserSetsUp(browser: Browser): Promise<void> {
     // Shot right away (no beat) and with the pointer off the button, so it still shows the
     // green "Created" confirmation rather than the hover colour.
     await page.mouse.move(0, 0);
-    await scrollToTop(page, row);
+    await scrollToTop(row);
     await shot('organiser', 'organisation-created', 'Organiser area: the new organisation');
     await click(row.getByRole('link', { name: 'Workshops' }));
     await expect(page.getByRole('heading', { name: 'Organisation workshops' })).toBeVisible();
@@ -657,7 +657,7 @@ async function organiserSetsUp(browser: Browser): Promise<void> {
       `Creates a workshop: unified queue, ${HOLD_SECONDS} s hold, 3 sessions (capacities ${CAPACITIES.join(' / ')})`,
     );
     const wizard = section(page, 'wizard-heading');
-    await scrollToTop(page, wizard);
+    await scrollToTop(wizard);
     await page.locator('#ws-title').pressSequentially(ctx.workshopTitle, { delay: opts.typeDelay });
     await page
       .locator('#ws-desc')
@@ -697,7 +697,7 @@ async function organiserSetsUp(browser: Browser): Promise<void> {
       addRatio < 0.5,
       `width ratio ${addRatio.toFixed(2)}`,
     );
-    await scrollToTop(page, wizard);
+    await scrollToTop(wizard);
     await beat();
     await shot(
       'organiser',
@@ -1078,7 +1078,7 @@ async function carolQueuesBehindBobsOffer(browser: Browser): Promise<void> {
     await expect(stat(page, 'Queued')).toHaveText('1');
     await expect(stat(page, 'Offered')).toHaveText('1');
     await expect(stat(page, 'Backfills')).toHaveText('1/1');
-    await scrollToTop(page, section(page, 'sessions-heading'));
+    await scrollToTop(section(page, 'sessions-heading'));
     await beat(1.2);
     await shot(
       'organiser',
@@ -1204,7 +1204,7 @@ async function organiserReviews(): Promise<void> {
       s2[2] === '1' && s2[3] === '1' && s2[4] === '0' && s2[5] === '0' && s2[6] === '0',
       s2.slice(0, 7).join(' | '),
     );
-    await scrollToTop(page, log);
+    await scrollToTop(log);
     await beat(1.5);
     await shot(
       'organiser',
@@ -1216,7 +1216,7 @@ async function organiserReviews(): Promise<void> {
   await step('dashboard: attendance tick', async () => {
     director.cut('organiser', 'Ticks attendance for the confirmed participant');
     const confirmed = section(page, 'confirmed-heading');
-    await scrollToTop(page, confirmed);
+    await scrollToTop(confirmed);
     const row = confirmed.locator('tbody tr').filter({ hasText: 'Carol (staged)' });
     await expect(row).toHaveCount(1);
     await expect(row.locator('.attendance label')).toHaveText('Not marked');
@@ -1237,7 +1237,7 @@ async function organiserReviews(): Promise<void> {
       'Exports CSV, then "Verify invariants": no over-capacity, no double holds',
     );
     const actions = section(page, 'actions-heading');
-    await scrollToTop(page, actions);
+    await scrollToTop(actions);
     const [download] = await Promise.all([
       page.waitForEvent('download', { timeout: 20_000 }),
       click(actions.getByRole('button', { name: 'Export CSV' })),

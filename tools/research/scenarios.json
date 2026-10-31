@@ -1,0 +1,563 @@
+{
+  "source_type": "SIMULATED",
+  "scenario_date": "2026-10-31",
+  "seed": 20261031,
+  "purpose": "Research demonstration; no interviews, recruitment or user observations took place.",
+  "assumptions": {
+    "adoption_share": 0.1,
+    "time_cap_seconds": 300,
+    "second_condition_time_factor": 0.94,
+    "person_log_sd": 0.16,
+    "attempt_log_sd": 0.18,
+    "task_time_seconds": {
+      "T1": {
+        "SR": 85,
+        "CTRL": 110
+      },
+      "T2": {
+        "SR": 45,
+        "CTRL": 52
+      },
+      "T3": {
+        "SR": 33,
+        "CTRL": 28
+      },
+      "T4": {
+        "SR": 22,
+        "CTRL": 30
+      },
+      "T5": {
+        "SR": 30,
+        "CTRL": 42
+      },
+      "O1": {
+        "SR": 150,
+        "CTRL": 190
+      },
+      "O2": {
+        "SR": 56,
+        "CTRL": 150
+      },
+      "O3": {
+        "SR": 38,
+        "CTRL": 32
+      },
+      "O4": {
+        "SR": 42,
+        "CTRL": 100
+      }
+    },
+    "organiser_steps": {
+      "O1": {
+        "SR": 8,
+        "CTRL": 12
+      },
+      "O2": {
+        "SR": 2,
+        "CTRL": 7
+      },
+      "O3": {
+        "SR": 1,
+        "CTRL": 2
+      },
+      "O4": {
+        "SR": 1,
+        "CTRL": 5
+      }
+    },
+    "dataset_b_time_factor": 1.04,
+    "minimum_time_seconds": 8,
+    "assisted_min_seconds": 155,
+    "assisted_time_factor": 1.3,
+    "wrong_answer_min_seconds": 90,
+    "wrong_answer_time_factor": 1.5,
+    "sus_item_sd": 0.6,
+    "incidental_error_probability": 0.12,
+    "failure_help_probability": 0.12
+  },
+  "codebook": [
+    {
+      "id": "STATE",
+      "name": "Unclear state and next action",
+      "include": "Confusion between queued, held and confirmed, or uncertainty about the next action",
+      "exclude": "A complaint only about not receiving email",
+      "implication": "State the current status, required action and consequence of inaction together"
+    },
+    {
+      "id": "DUPLICATE",
+      "name": "Duplicate registration as insurance",
+      "include": "Registering for equivalent sessions to preserve options or avoid missing out",
+      "exclude": "Registering for independent events with different content",
+      "implication": "Collect acceptable sessions and preferences once; explain the one-seat-per-workshop rule"
+    },
+    {
+      "id": "RELAY",
+      "name": "Manual coordination after cancellation",
+      "include": "A manual chain of cancellation, contacting the next person, waiting for a reply and updating a sheet",
+      "exclude": "Recording actual attendance only",
+      "implication": "Automate backfill with an explanatory log; distinguish an offer from its acceptance"
+    },
+    {
+      "id": "HOLD",
+      "name": "Confirmation windows and notification reach",
+      "include": "Classes, work or offline periods make a short hold window unsuitable",
+      "exclude": "The event start time itself is unsuitable",
+      "implication": "Allow organisers to configure holds and display the deadline clearly"
+    },
+    {
+      "id": "TRUST",
+      "name": "Queue fairness and explainability",
+      "include": "Questions about arrival order, preference matching or why another person received a seat first",
+      "exclude": "Personal preferences unrelated to allocation rules",
+      "implication": "Explain both arrival order and acceptable-session constraints; avoid promising an exact wait"
+    },
+    {
+      "id": "GOVERNANCE",
+      "name": "Permissions, data and procurement constraints",
+      "include": "Institutional systems, exports, retention, organisation permissions or budget restrictions",
+      "exclude": "General feature wishes without a concrete restriction",
+      "implication": "Provide CSV export and organisation permissions; validate pricing and procurement separately"
+    }
+  ],
+  "interviews": [
+    {
+      "id": "SIM-I01",
+      "role": "participant",
+      "persona": "Second-year student with a changing timetable, familiar with forms and group chats",
+      "events_per_year": 12,
+      "multi_session_events": 4,
+      "coordination_hours": 0.3,
+      "tools": ["google_forms", "telegram"],
+      "held_multiple_slots": 2,
+      "notify_channel": ["telegram", "email"],
+      "hold_window_min": 30,
+      "wtp_sgd": [0, 0, 2, 4],
+      "wtp_unit": "per event",
+      "episode": "The same CV workshop runs on Tuesday and Thursday. Concerned about a timetable change, the student registers for both and later cannot find how to cancel one.",
+      "workflow": "Opens two forms from a group message, submits both, keeps two confirmation emails and contacts the organiser once the class timetable is settled.",
+      "need": "Select both acceptable sessions while occupying only one seat; provide cancellation without searching old emails.",
+      "negative_case": "If neither selected session remains suitable, the student must withdraw and register again rather than receive an unselected session.",
+      "quotes": [
+        "I register twice to keep my options, not because I want to attend twice.",
+        "A place where I can cancel is more useful than another notification."
+      ],
+      "codes": ["DUPLICATE", "STATE", "HOLD"]
+    },
+    {
+      "id": "SIM-I02",
+      "role": "participant",
+      "persona": "First-year student using a waitlist for the first time",
+      "events_per_year": 8,
+      "multi_session_events": 2,
+      "coordination_hours": 0.5,
+      "tools": ["google_forms", "email"],
+      "held_multiple_slots": 0,
+      "notify_channel": ["email", "in_app"],
+      "hold_window_min": 60,
+      "wtp_sgd": [0, 0, 1, 3],
+      "wtp_unit": "per event",
+      "episode": "Submits a waitlist form for a full session but interprets the response receipt as successful registration, only asking the organiser the day before the event.",
+      "workflow": "Saves a screenshot after submitting and searches email for confirmation; does not clearly distinguish receipt of a request from a confirmed seat.",
+      "need": "State plainly whether a seat is available and whether an acceptance action is required to keep it.",
+      "negative_case": "A countdown may increase anxiety; first-time users need to know whether they can remain queued after expiry.",
+      "quotes": [
+        "When I received the form response, I thought I was registered.",
+        "What does held mean, and how is it different from confirmed?"
+      ],
+      "codes": ["STATE", "HOLD", "TRUST"]
+    },
+    {
+      "id": "SIM-I03",
+      "role": "participant",
+      "persona": "Third-year student on an internship who rarely checks personal email during work",
+      "events_per_year": 10,
+      "multi_session_events": 3,
+      "coordination_hours": 0.2,
+      "tools": ["email", "google_forms"],
+      "held_multiple_slots": 1,
+      "notify_channel": ["telegram", "email"],
+      "hold_window_min": 120,
+      "wtp_sgd": [0, 1, 3, 5],
+      "wtp_unit": "per event",
+      "episode": "Receives a backfill email during an internship and sees it at lunch, after the seat has moved to the next person.",
+      "workflow": "Disables notifications at work and checks email at lunch rather than keeping the registration page open.",
+      "need": "Know the confirmation window before joining, so that the student can choose events whose response requirements are practical.",
+      "negative_case": "Fifteen minutes is not universally suitable; automation can repeatedly exclude people unable to respond quickly.",
+      "quotes": [
+        "Automatic relay is useful, but I cannot check my mailbox every fifteen minutes.",
+        "Tell me the deadline first so I can judge whether this waitlist works for me."
+      ],
+      "codes": ["HOLD", "RELAY", "TRUST"]
+    },
+    {
+      "id": "SIM-I04",
+      "role": "participant",
+      "persona": "Postgraduate student available at one fixed time who prefers simple tools",
+      "events_per_year": 6,
+      "multi_session_events": 1,
+      "coordination_hours": 0.1,
+      "tools": ["google_forms", "email"],
+      "held_multiple_slots": 0,
+      "notify_channel": ["email", "in_app"],
+      "hold_window_min": 60,
+      "wtp_sgd": [0, 0, 1, 2],
+      "wtp_unit": "per event",
+      "episode": "Can attend only on Friday. The existing form allows that session to be chosen directly and causes no substantial difficulty.",
+      "workflow": "Opens a link, selects the only suitable session, submits and checks the confirmation email.",
+      "need": "Keep single-session selection simple without forcing multiple choices or ranking.",
+      "negative_case": "For simple events without a waitlist, another login and confirmation step may add more work than the existing form.",
+      "quotes": [
+        "I can only come on Friday; I do not need the system to arrange the other two days.",
+        "If the form already works, I do not want to learn a new system just to register."
+      ],
+      "codes": ["STATE", "GOVERNANCE"]
+    },
+    {
+      "id": "SIM-I05",
+      "role": "participant",
+      "persona": "Fourth-year student attending career workshops who is concerned about fairness",
+      "events_per_year": 16,
+      "multi_session_events": 6,
+      "coordination_hours": 0.4,
+      "tools": ["google_forms", "sheets", "telegram"],
+      "held_multiple_slots": 3,
+      "notify_channel": ["in_app", "email"],
+      "hold_window_min": 45,
+      "wtp_sgd": [0, 1, 2, 5],
+      "wtp_unit": "per event",
+      "episode": "A group chat shows that a later registrant received a Thursday seat first. The student accepts only Tuesday but mistakenly believes someone has jumped the queue.",
+      "workflow": "Checks group messages and spreadsheet timestamps, then privately asks the organiser about queue order.",
+      "need": "Explain that a later registrant who accepts another session may receive a seat first.",
+      "negative_case": "One queue number alone cannot explain allocation across sessions; the head of the queue is not guaranteed the next seat in any session.",
+      "quotes": [
+        "Did the other person jump the queue, or did I not choose that time?",
+        "I am happy to register once, but I want to understand who receives a seat and why."
+      ],
+      "codes": ["DUPLICATE", "TRUST", "STATE"]
+    },
+    {
+      "id": "SIM-I06",
+      "role": "participant",
+      "persona": "Second-year exchange student who relies on email rather than local group chats",
+      "events_per_year": 9,
+      "multi_session_events": 3,
+      "coordination_hours": 0.3,
+      "tools": ["email", "google_forms"],
+      "held_multiple_slots": 1,
+      "notify_channel": ["email", "in_app"],
+      "hold_window_min": 60,
+      "wtp_sgd": [0, 0, 2, 4],
+      "wtp_unit": "per event",
+      "episode": "Misses a backfill message sent only to an infrequently checked group and must find a group administrator to cancel.",
+      "workflow": "Bookmarks the event link, checks email and contacts the organiser when the current state is unclear.",
+      "need": "Email links should return to the current state; cancellation should show a clear ending and remove obsolete confirmation controls.",
+      "negative_case": "Does not want to join a chat group; one notification channel cannot suit everyone.",
+      "quotes": [
+        "The email should take me straight back to my current status.",
+        "If I still see the old seat after cancelling, I worry the cancellation did not work."
+      ],
+      "codes": ["STATE", "RELAY", "HOLD"]
+    },
+    {
+      "id": "SIM-I07",
+      "role": "organiser",
+      "persona": "Events lead of a student technology club whose team shares a spreadsheet",
+      "org_type": "student_club",
+      "events_per_year": 12,
+      "multi_session_events": 6,
+      "coordination_hours": 4.0,
+      "tools": ["google_forms", "sheets", "telegram"],
+      "wtp_sgd": [2, 8, 15, 25],
+      "wtp_unit": "per organisation per month",
+      "open_procurement": true,
+      "anchor_10_reaction": "only_if_regular_use",
+      "episode": "Three training sessions share a pool of registrants. Two committee members handle cancellations separately and contact the same waitlisted person twice.",
+      "workflow": "Creates three forms, merges email addresses, flags duplicates, checks queue order, contacts people individually and updates all three sheets after acceptance.",
+      "need": "All committee members need the same current state; the backfill log should identify the release, the new hold and whether it was accepted.",
+      "negative_case": "A monthly fee is unattractive in quiet months; export and permission controls are prerequisites for adoption.",
+      "quotes": [
+        "The difficult part is two people editing the sheet at once without knowing who has contacted whom.",
+        "Ten dollars may work when we run events every month, but I do not want to keep paying during the break."
+      ],
+      "codes": ["DUPLICATE", "RELAY", "GOVERNANCE", "TRUST"]
+    },
+    {
+      "id": "SIM-I08",
+      "role": "organiser",
+      "persona": "Student coordinator of a career-development programme whose small team can choose free tools",
+      "org_type": "student_club",
+      "events_per_year": 18,
+      "multi_session_events": 6,
+      "coordination_hours": 3.0,
+      "tools": ["email", "google_forms", "sheets"],
+      "wtp_sgd": [0, 5, 10, 20],
+      "wtp_unit": "per organisation per month",
+      "open_procurement": true,
+      "anchor_10_reaction": "only_if_time_saved",
+      "episode": "An evening session is cancelled at short notice. The team must ask every participant about alternative times because the form did not collect preferences.",
+      "workflow": "Downloads registrations, filters confirmed participants, emails them about alternatives and manually assembles waitlist and attendance lists.",
+      "need": "Collect acceptable times at registration and reallocate after a session cancellation while keeping a clear history.",
+      "negative_case": "An automatically issued offer does not establish attendance; confirmed participants must not be reported as actual attendees.",
+      "quotes": [
+        "The form only asked which day they wanted; after cancellation we realised we did not know their alternatives.",
+        "Receiving a backfill offer and actually attending are two different things."
+      ],
+      "codes": ["RELAY", "STATE", "GOVERNANCE"]
+    },
+    {
+      "id": "SIM-I09",
+      "role": "organiser",
+      "persona": "Departmental student assistant subject to supervisor approval and institutional system requirements",
+      "org_type": "department",
+      "events_per_year": 24,
+      "multi_session_events": 8,
+      "coordination_hours": 5.5,
+      "tools": ["email", "school_system", "sheets"],
+      "wtp_sgd": [5, 10, 20, 35],
+      "wtp_unit": "per organisation per month",
+      "open_procurement": false,
+      "anchor_10_reaction": "no_without_approval",
+      "episode": "A departmental training programme already uses an institutional registration system, but waitlisting is handled by email and exporting a participant list requires approval.",
+      "workflow": "Exports from the institutional system, creates supporting sheets per training session, contacts waitlisted people and updates the institutional records afterwards.",
+      "need": "Clarify data retention, permissions, export and institutional approval before procurement can be considered.",
+      "negative_case": "A higher acceptable price does not imply purchasing authority; price interest must not be treated as validated demand.",
+      "quotes": [
+        "The features look useful, but I cannot decide to move the participant list to a new system.",
+        "The price is not the main issue; approval and who can export the data are."
+      ],
+      "codes": ["RELAY", "HOLD", "GOVERNANCE", "TRUST"]
+    }
+  ],
+  "study_profiles": [
+    {
+      "id": "SIM-P01",
+      "digital_familiarity": "high",
+      "preferred": "SR",
+      "concern": "The up and down arrows for the first ranking are hard to discover",
+      "sus_sr": 4.1,
+      "sus_ctrl": 3.1
+    },
+    {
+      "id": "SIM-P02",
+      "digital_familiarity": "low",
+      "preferred": "SR",
+      "concern": "Needs a one-sentence explanation of held versus confirmed",
+      "sus_sr": 3.7,
+      "sus_ctrl": 3.0
+    },
+    {
+      "id": "SIM-P03",
+      "digital_familiarity": "high",
+      "preferred": "SR",
+      "concern": "The backfill log should distinguish holds from confirmed seats",
+      "sus_sr": 4.4,
+      "sus_ctrl": 2.8
+    },
+    {
+      "id": "SIM-P04",
+      "digital_familiarity": "medium",
+      "preferred": "CTRL",
+      "concern": "Prefers a simple form without login for a single-session event",
+      "sus_sr": 3.4,
+      "sus_ctrl": 3.8
+    },
+    {
+      "id": "SIM-P05",
+      "digital_familiarity": "high",
+      "preferred": "SR",
+      "concern": "Wants to understand that the system will not automatically upgrade an already held seat",
+      "sus_sr": 4.2,
+      "sus_ctrl": 3.2
+    },
+    {
+      "id": "SIM-P06",
+      "digital_familiarity": "medium",
+      "preferred": "SR",
+      "concern": "Date entry in the creation wizard needs clearer guidance",
+      "sus_sr": 3.9,
+      "sus_ctrl": 3.0
+    },
+    {
+      "id": "SIM-P07",
+      "digital_familiarity": "medium",
+      "preferred": "SR",
+      "concern": "May miss a fifteen-minute confirmation window while in class",
+      "sus_sr": 3.8,
+      "sus_ctrl": 3.1
+    },
+    {
+      "id": "SIM-P08",
+      "digital_familiarity": "low",
+      "preferred": "depends",
+      "concern": "Mistakes a held seat for a confirmed seat and needs more direct wording",
+      "sus_sr": 3.5,
+      "sus_ctrl": 3.4
+    },
+    {
+      "id": "SIM-P09",
+      "digital_familiarity": "high",
+      "preferred": "SR",
+      "concern": "Cross-session waitlist counts need a clear definition",
+      "sus_sr": 4.0,
+      "sus_ctrl": 2.9
+    },
+    {
+      "id": "SIM-P10",
+      "digital_familiarity": "medium",
+      "preferred": "SR",
+      "concern": "Email should show the absolute deadline in the local time zone",
+      "sus_sr": 4.3,
+      "sus_ctrl": 3.2
+    },
+    {
+      "id": "SIM-P11",
+      "digital_familiarity": "low",
+      "preferred": "CTRL",
+      "concern": "Mistakes held for confirmed in the scenario and does not select Accept",
+      "sus_sr": 3.5,
+      "sus_ctrl": 3.7
+    },
+    {
+      "id": "SIM-P12",
+      "digital_familiarity": "medium",
+      "preferred": "SR",
+      "concern": "Values automatic backfill but still wants an auditable log",
+      "sus_sr": 4.2,
+      "sus_ctrl": 3.1
+    }
+  ],
+  "study_exceptions": [
+    {
+      "id": "SIM-P04",
+      "condition": "SR",
+      "task": "T3",
+      "success": "assisted",
+      "note": "Authored event: Distinguishes held from confirmed after a hint"
+    },
+    {
+      "id": "SIM-P08",
+      "condition": "SR",
+      "task": "T3",
+      "success": "0",
+      "note": "Authored event: Still interprets held as confirmed in the final answer; fails on answer correctness",
+      "failure_kind": "incorrect_answer"
+    },
+    {
+      "id": "SIM-P11",
+      "condition": "SR",
+      "task": "T4",
+      "success": "0",
+      "note": "Authored event: Does not select Accept; the confirmation task reaches the 300-second cap",
+      "failure_kind": "timeout"
+    },
+    {
+      "id": "SIM-P02",
+      "condition": "SR",
+      "task": "T1",
+      "success": "assisted",
+      "note": "Authored event: Needs a hint to discover preference-ranking controls"
+    },
+    {
+      "id": "SIM-P06",
+      "condition": "SR",
+      "task": "O1",
+      "success": "assisted",
+      "note": "Authored event: Needs contextual guidance on the date-input format"
+    },
+    {
+      "id": "SIM-P09",
+      "condition": "SR",
+      "task": "O3",
+      "success": "assisted",
+      "note": "Authored event: Needs a hint to inspect waitlist counts by session"
+    },
+    {
+      "id": "SIM-P01",
+      "condition": "CTRL",
+      "task": "T2",
+      "success": "assisted",
+      "note": "Authored event: Cannot distinguish the waitlist entry point from the registration form"
+    },
+    {
+      "id": "SIM-P02",
+      "condition": "CTRL",
+      "task": "T1",
+      "success": "assisted",
+      "note": "Authored event: Opens a form for the wrong date and needs a hint"
+    },
+    {
+      "id": "SIM-P04",
+      "condition": "CTRL",
+      "task": "T3",
+      "success": "0",
+      "note": "Authored event: Interprets a form-response receipt as a confirmed seat in the final answer",
+      "failure_kind": "incorrect_answer"
+    },
+    {
+      "id": "SIM-P05",
+      "condition": "CTRL",
+      "task": "T4",
+      "success": "assisted",
+      "note": "Authored event: Cannot find the confirmation email that requires a reply"
+    },
+    {
+      "id": "SIM-P07",
+      "condition": "CTRL",
+      "task": "T1",
+      "success": "assisted",
+      "note": "Authored event: Submits duplicate registrations for two equivalent sessions"
+    },
+    {
+      "id": "SIM-P08",
+      "condition": "CTRL",
+      "task": "T5",
+      "success": "0",
+      "note": "Authored event: Cannot find cancellation; the task reaches the 300-second cap",
+      "failure_kind": "timeout"
+    },
+    {
+      "id": "SIM-P10",
+      "condition": "CTRL",
+      "task": "T2",
+      "success": "assisted",
+      "note": "Authored event: Needs an explanation that waitlisting is not confirmation"
+    },
+    {
+      "id": "SIM-P11",
+      "condition": "CTRL",
+      "task": "T3",
+      "success": "assisted",
+      "note": "Authored event: Needs a hint to consult the status sheet"
+    },
+    {
+      "id": "SIM-P03",
+      "condition": "CTRL",
+      "task": "O2",
+      "success": "0",
+      "note": "Authored event: Sends the backfill email to the wrong next person",
+      "failure_kind": "incorrect_answer"
+    },
+    {
+      "id": "SIM-P06",
+      "condition": "CTRL",
+      "task": "O1",
+      "success": "assisted",
+      "note": "Authored event: Forgets to link the third form to the shared sheet"
+    },
+    {
+      "id": "SIM-P09",
+      "condition": "CTRL",
+      "task": "O4",
+      "success": "0",
+      "note": "Authored event: Exports the CSV for only one session",
+      "failure_kind": "incorrect_answer"
+    },
+    {
+      "id": "SIM-P12",
+      "condition": "CTRL",
+      "task": "O2",
+      "success": "assisted",
+      "note": "Authored event: Needs a hint to check duplicate registrations and queue order"
+    }
+  ]
+}

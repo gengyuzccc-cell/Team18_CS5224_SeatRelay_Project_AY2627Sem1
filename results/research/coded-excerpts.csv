@@ -1,0 +1,19 @@
+source_type,excerpt_id,interview_id,scripted_text,document_level_codes,coding_scope
+SIMULATED,SIM-I01-Q1,SIM-I01,"I register twice to keep my options, not because I want to attend twice.",DUPLICATE;STATE;HOLD,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I01-Q2,SIM-I01,A place where I can cancel is more useful than another notification.,DUPLICATE;STATE;HOLD,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I02-Q1,SIM-I02,"When I received the form response, I thought I was registered.",STATE;HOLD;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I02-Q2,SIM-I02,"What does held mean, and how is it different from confirmed?",STATE;HOLD;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I03-Q1,SIM-I03,"Automatic relay is useful, but I cannot check my mailbox every fifteen minutes.",HOLD;RELAY;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I03-Q2,SIM-I03,Tell me the deadline first so I can judge whether this waitlist works for me.,HOLD;RELAY;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I04-Q1,SIM-I04,I can only come on Friday; I do not need the system to arrange the other two days.,STATE;GOVERNANCE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I04-Q2,SIM-I04,"If the form already works, I do not want to learn a new system just to register.",STATE;GOVERNANCE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I05-Q1,SIM-I05,"Did the other person jump the queue, or did I not choose that time?",DUPLICATE;TRUST;STATE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I05-Q2,SIM-I05,"I am happy to register once, but I want to understand who receives a seat and why.",DUPLICATE;TRUST;STATE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I06-Q1,SIM-I06,The email should take me straight back to my current status.,STATE;RELAY;HOLD,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I06-Q2,SIM-I06,"If I still see the old seat after cancelling, I worry the cancellation did not work.",STATE;RELAY;HOLD,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I07-Q1,SIM-I07,The difficult part is two people editing the sheet at once without knowing who has contacted whom.,DUPLICATE;RELAY;GOVERNANCE;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I07-Q2,SIM-I07,"Ten dollars may work when we run events every month, but I do not want to keep paying during the break.",DUPLICATE;RELAY;GOVERNANCE;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I08-Q1,SIM-I08,The form only asked which day they wanted; after cancellation we realised we did not know their alternatives.,RELAY;STATE;GOVERNANCE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I08-Q2,SIM-I08,Receiving a backfill offer and actually attending are two different things.,RELAY;STATE;GOVERNANCE,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I09-Q1,SIM-I09,"The features look useful, but I cannot decide to move the participant list to a new system.",RELAY;HOLD;GOVERNANCE;TRUST,profile-level; not an independent utterance-level coding study
+SIMULATED,SIM-I09-Q2,SIM-I09,The price is not the main issue; approval and who can export the data are.,RELAY;HOLD;GOVERNANCE;TRUST,profile-level; not an independent utterance-level coding study

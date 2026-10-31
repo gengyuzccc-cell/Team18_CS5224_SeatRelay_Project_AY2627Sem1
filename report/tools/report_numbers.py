@@ -382,7 +382,7 @@ def section_concurrency(book: Book, runs, target: str) -> None:
     raw = db.read_csv(run.path / "raw.csv", book.notes) if run else None
     book.num("ConcurrencyCommands", len(raw) if raw is not None else None, 0, src_of(run, "raw.csv", "rows"), "commands issued")
     if raw is not None and "error" in raw.columns:
-        errors = int(raw["error"].fillna("").astype(str).str.len().gt(0).sum())
+        errors = int(raw["error"].astype("string").fillna("").str.len().gt(0).sum())
     else:
         errors = None
     book.num("ConcurrencyTransportErrors", errors, 0, src_of(run, "raw.csv", "error (non-empty)"), "commands with a transport error")

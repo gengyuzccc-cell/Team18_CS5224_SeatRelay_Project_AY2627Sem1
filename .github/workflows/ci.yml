@@ -36,6 +36,15 @@ jobs:
       - name: Unit + property tests (with coverage for core)
         run: pnpm test
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate research and generated charts
+        run: |
+          python3 -m unittest discover -s tools/research -p 'test_*.py'
+          python3 -I tools/research/simulate.py --check --check-figures
+
       - name: Build web app
         run: pnpm --filter @seatrelay/web build
 

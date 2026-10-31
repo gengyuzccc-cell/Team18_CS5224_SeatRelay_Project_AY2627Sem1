@@ -4,8 +4,9 @@
 \item \emph{Market:} organisation counts are lower bounds (official figures; NTU counted by us); NUS,
   SMU and SIT were re-checked with dated browser screenshots on 24 Oct 2026
   (\code{results/market/screenshots/}; SIT's rose from 150 to 170, SMU's is from its campus-life page
-  as the 2022 page is gone); $p$, $s$ and the value per event come only from the organiser interviews;
-  the price (\sd10 a month) is our proposal and the adoption share $a$ our assumption.
+  as the 2022 page is gone); this prototype edition uses scripted assumptions for $p$, $s$,
+  coordination effort and price reactions. The price (\sd10 a month) and adoption share $a$ are proposals,
+  not validated demand. Research provenance is retained in the dataset metadata.
 \item \emph{Cost:} usage per registration is modelled (\S\ref{sec:business}), as CloudWatch does
   not count registrations; X-Ray is priced at 100\,\% sampling (an upper bound); operations labour
   and the on-prem machine's capacity are assumed\IfPending{\PerfLocalCpuPeakPct}{ (the on-prem stack has not been load-tested)}{};
@@ -17,23 +18,18 @@
 \end{itemize}
 
 \section*{AI usage declaration}
-\emph{Where.} As the Preliminary report declared, AI assistance was used before it to compare
-candidate topics, locate vendor documentation, discuss architecture options and draft prose. Since
-then, as it promised to declare, an AI coding assistant (Claude Code) generated, from the team's
-Preliminary report and decisions: the execution plan; the code (engine, API and Lambda handlers,
-on-prem server, React SPA and its redesign); the infrastructure templates; the tests; the experiment,
-load-test, replay, analysis and cost scripts; the market captures and desk research; the
-documentation, speaker notes and study materials; the figures; and the text of this report, the
-slides and the poster, with all revisions up to this build. \emph{How.} The scope, rules R1--R7, constraints
-C1--C7 and acceptance targets are the team's, from the Preliminary report; the team owns the AWS
-account and the repository; the assistant ran the deployments and all scripts with the team's
-credentials and built both PDFs. The interviews, the user study and the
-pilot are the team's to run (at this build: interviews \IfPending{\InterviewN}{not held}{held}, study
-\IfPending{\StudyParticipants}{not run}{run}, pilot \IfPending{\PilotWorkshops}{not run}{run}). Every measured, simulated and
-own-count number is written by a script from a raw file in \code{results/} (configuration values come
-from the code and \code{docs/deployment-state.md}; external facts are cited);
-\code{report/tools/check\_numbers.py}, run by every build, regenerates them all and checks that the
-source file of every generated number exists; ZHANG TIANYI is the member responsible for the number check. \emph{What we learned.} The assistant drafted these statements
+\emph{Where.} The original declaration records Claude Code assisting with planning and generating
+code, infrastructure, tests, experiment/analysis scripts, desk research, study materials, figures,
+documentation and report/presentation drafts from the team's plan. Codex created this prototype's
+interview scenarios, reproducible task/SUS data and report integration
+(\code{tools/research/}, \code{results/research/}); the research is explicitly simulated.
+\emph{How.} Scope, rules R1--R7, constraints C1--C7 and acceptance targets come from the team's
+Preliminary report. The original record describes deployments and experiments run with the team's
+credentials; this extension makes no new deployment or human-study claim. A real pilot is
+\IfPending{\PilotWorkshops}{not run}{recorded separately}. Report numbers are generated from raw
+files in \code{results/}; configuration and cited external facts retain their own sources.
+Every build runs \code{report/tools/check\_numbers.py} to reproduce the numbers and verify their
+sources. ZHANG TIANYI is responsible for that check. \emph{What we learned.} The assistant drafted these statements
 from the project record (\code{docs/ai-declaration-drafts.md} cites it for each); the team approved
 them. \textbf{LI ZONGZE} (product, front end): a 202 response is not a result, so I learned to design around
 request received, queued and confirmed, to poll with back-off instead of WebSockets, and to check

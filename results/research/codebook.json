@@ -1,0 +1,48 @@
+{
+  "source_type": "SIMULATED",
+  "coding_unit": "scripted profile",
+  "codes": [
+    {
+      "id": "STATE",
+      "name": "Unclear state and next action",
+      "include": "Confusion between queued, held and confirmed, or uncertainty about the next action",
+      "exclude": "A complaint only about not receiving email",
+      "implication": "State the current status, required action and consequence of inaction together"
+    },
+    {
+      "id": "DUPLICATE",
+      "name": "Duplicate registration as insurance",
+      "include": "Registering for equivalent sessions to preserve options or avoid missing out",
+      "exclude": "Registering for independent events with different content",
+      "implication": "Collect acceptable sessions and preferences once; explain the one-seat-per-workshop rule"
+    },
+    {
+      "id": "RELAY",
+      "name": "Manual coordination after cancellation",
+      "include": "A manual chain of cancellation, contacting the next person, waiting for a reply and updating a sheet",
+      "exclude": "Recording actual attendance only",
+      "implication": "Automate backfill with an explanatory log; distinguish an offer from its acceptance"
+    },
+    {
+      "id": "HOLD",
+      "name": "Confirmation windows and notification reach",
+      "include": "Classes, work or offline periods make a short hold window unsuitable",
+      "exclude": "The event start time itself is unsuitable",
+      "implication": "Allow organisers to configure holds and display the deadline clearly"
+    },
+    {
+      "id": "TRUST",
+      "name": "Queue fairness and explainability",
+      "include": "Questions about arrival order, preference matching or why another person received a seat first",
+      "exclude": "Personal preferences unrelated to allocation rules",
+      "implication": "Explain both arrival order and acceptable-session constraints; avoid promising an exact wait"
+    },
+    {
+      "id": "GOVERNANCE",
+      "name": "Permissions, data and procurement constraints",
+      "include": "Institutional systems, exports, retention, organisation permissions or budget restrictions",
+      "exclude": "General feature wishes without a concrete restriction",
+      "implication": "Provide CSV export and organisation permissions; validate pricing and procurement separately"
+    }
+  ]
+}

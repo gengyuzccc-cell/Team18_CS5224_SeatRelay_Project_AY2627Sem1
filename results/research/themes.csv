@@ -1,0 +1,7 @@
+source_type,code,theme,scripted_profiles,profile_ids
+SIMULATED,STATE,Unclear state and next action,6,SIM-I01;SIM-I02;SIM-I04;SIM-I05;SIM-I06;SIM-I08
+SIMULATED,DUPLICATE,Duplicate registration as insurance,3,SIM-I01;SIM-I05;SIM-I07
+SIMULATED,RELAY,Manual coordination after cancellation,5,SIM-I03;SIM-I06;SIM-I07;SIM-I08;SIM-I09
+SIMULATED,HOLD,Confirmation windows and notification reach,5,SIM-I01;SIM-I02;SIM-I03;SIM-I06;SIM-I09
+SIMULATED,TRUST,Queue fairness and explainability,5,SIM-I02;SIM-I03;SIM-I05;SIM-I07;SIM-I09
+SIMULATED,GOVERNANCE,"Permissions, data and procurement constraints",4,SIM-I04;SIM-I07;SIM-I08;SIM-I09

@@ -103,4 +103,15 @@ describe('pollCommand', () => {
       }),
     ).rejects.toBeInstanceOf(PollAbortedError);
   });
+
+  it('discards a terminal response that arrives after cancellation', async () => {
+    const controller = new AbortController();
+    const getCommand = async () => {
+      controller.abort();
+      return view('APPLIED');
+    };
+    await expect(
+      pollCommand(getCommand, COMMAND_ID, { ...clock(), signal: controller.signal }),
+    ).rejects.toBeInstanceOf(PollAbortedError);
+  });
 });

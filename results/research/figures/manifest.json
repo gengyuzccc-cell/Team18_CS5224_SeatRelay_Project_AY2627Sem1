@@ -1,0 +1,21 @@
+{
+  "source_type": "SIMULATED",
+  "plot_source_sha256": "be28c57c85f60c7eb173c607422a25c72c47504db38f4c9fb0b4032532997426",
+  "inputs_sha256": {
+    "summary.json": "d4899ac3fdf52d1b94379f8f5d2ad2b43ba67f449296948676a7f017c03f14cd",
+    "paired-subjects.csv": "09b9943329e47e7a29ccc180351c1bfd36fdfb11af185f997c0f8da721d7a6fc",
+    "study-design.csv": "39938b0046f881e2a8292440e1d64282cb89ddd83a15253c337255560aaab182",
+    "sus-sheet.csv": "6aeb403c68c3fdf57de2b65b014fd3532e13131228560473cafa982d5174f92b",
+    "manifest.json": "85c2e90076b559a50a3c63094f78fa164149811afdd97dd72dbff10102a96be5"
+  },
+  "files_sha256": {
+    "paired-time.png": "69815a2baca325e60b5e7ffe18624c2d48d661af0218b088e35829100d478d22",
+    "paired-time.pdf": "891daf721c2b9102ed23678bfc990fe3b53ba31807d539b7c1a84e94a5902e72",
+    "completion.png": "6b5a36ddfda070c47100e5e9ce2f6b1679b2203d9894b53ff9ac56fc6c9b2cf9",
+    "completion.pdf": "c65c76810ee04af8901ec5c1ad766978186ffa823dfa33c2bb4e557b6110f002",
+    "sus.png": "044c7a7f4af0a8dee4815ce51750843bb028901a489cd46b122283e1bab8f437",
+    "sus.pdf": "f520a5c337d7ae7e8f8f6886404e85773f33d91cc392e509763511af38ec7b7d",
+    "organiser-steps.png": "b0528f485ba927e7863418ef3b52d8ab115bbdd630a9436ac8fae7109dbfea6a",
+    "organiser-steps.pdf": "4df67c633c023fd6fb7ab5edea570791344e1d701032e304ae0a158c68226854"
+  }
+}

@@ -43,7 +43,8 @@ titles (a library tour \MarketNusLibcalRepeatTitleOneEvents{} times, an orientat
 \MarketNusLibcalRepeatTitleTwoEvents{} times)~\cite{nus-libcal}; on the SMU Libraries calendar in the
 same window, \MarketSmuLibcalRepeatTitles{} titles ran twice among \MarketSmuLibcalEvents{}
 events~\cite{smu-libcal} (our script's counts, \code{results/market/}). Most titles ran once, so calendars show that the situation exists but not
-how often an organiser faces it; that share, $p$, must come from interviews.
+how often an organiser faces it. In this prototype edition, $p$ is an explicit scripted scenario
+input; it has not been estimated from human interviews.
 
 \paragraph{Market size.}
 We size the market bottom-up (Table~\ref{tab:market}): the number of organisers who could run
@@ -52,18 +53,17 @@ multi-session sign-ups, times $p$, times the price $P$ of \sd120 per organiser-y
 polytechnics~\cite{moe-au,moe-psei}; five of the universities list at least \MarketStudentOrgs{}
 student organisations, a lower bound because counts given as \enquote{more than $X$} enter as $X$
 and the sixth university (SUSS) and the polytechnics are not counted. With $p$ the event-weighted share of
-organisers' events with two or more equivalent sessions (\IfPending{\InterviewOrganisers}{to be
-measured in the organiser interviews, not yet held}{$p = \text{\InterviewPEventWeightedPct}\,\%$,
-\InterviewOrganisers{} organisers interviewed}), the campus total addressable market is
+organisers' events with two or more equivalent sessions (scenario $p = \text{\SimMultiSessionPct}\,\%$
+from \SimInterviewOrganisers{} fictional organiser profiles), the campus total addressable market is
 $\text{TAM} = \text{\MarketStudentOrgs} \times p \times \text{\sd\MarketPriceSgd} \approx
 \text{\sd\MarketTamCampusSgd}\,p$ per year, and about \sd\MarketTamCampusCetSgd\,$p$ if the more
 than \MarketCetProviders{} CET training providers~\cite{ssg-credit-progress-2016} are included. The
 serviceable market is $\text{SAM} = s \cdot \text{TAM}$, with $s$ the share of organisers not bound to
 a closed institutional system; the first-year obtainable market, NUS student organisations at
 adoption share $a$, is $\text{SOM} = \text{\MarketNusOrgs} \times p \times a \times
-\text{\sd\MarketPriceSgd} \leq \text{\sd\MarketSomNusMaxSgd}$ a year (\IfPending{\InterviewOrganisers}{$s$
-and $a$ are set after those interviews}{\pending{$s$ from the organiser interviews; the team's assumed
-adoption share $a$}}). Even at $p = 1$ the counted campus market is only \sd\MarketTamCampusSgd{} a year (more with SUSS
+\text{\sd\MarketPriceSgd} \leq \text{\sd\MarketSomNusMaxSgd}$ a year. For illustration only,
+$s = \SimServiceablePct\,\%$ of the scripted organisers can choose tools and $a = \SimAdoptionPct\,\%$
+is an independent planning assumption; neither is validated market demand. Even at $p = 1$ the counted campus market is only \sd\MarketTamCampusSgd{} a year (more with SUSS
 and the polytechnics, but similar), so the business case rests on the time each organiser
 saves (\S\ref{sec:business}), not on market size.
 
@@ -80,8 +80,8 @@ Student organisations, five autonomous universities (NUS \MarketNusOrgs, NTU \Ma
  & official counts as lower bounds; NTU counted by us from its directory pages\\
 CET training providers & $> \text{\MarketCetProviders}$ (2016) & \cite{ssg-credit-progress-2016}
  & latest official count found; reported separately\\
-Organisers with multi-session sign-ups & $\text{\MarketStudentOrgs} \times p$ & organiser interviews
- & $p$: \IfPending{\InterviewPEventWeightedPct}{after the interviews}{\InterviewPEventWeightedPct}\\
+Organisers with multi-session sign-ups & $\text{\MarketStudentOrgs} \times p$ & scripted prototype scenario
+ & illustrative $p$: \SimMultiSessionPct\,\%; no human interviews\\
 Price $P$ per organiser & \sd\MarketPriceSgd/year & \S\ref{sec:business} & \sd10 per month\\
 \bottomrule
 \end{tabularx}

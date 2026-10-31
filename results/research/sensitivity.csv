@@ -1,0 +1,4 @@
+source_type,sr_time_factor,paired_reduction_pct,sr_faster_profiles
+SIMULATED,0.8,51.02,11
+SIMULATED,1.0,38.69,9
+SIMULATED,1.2,26.75,9

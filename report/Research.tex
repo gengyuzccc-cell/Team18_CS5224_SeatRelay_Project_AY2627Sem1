@@ -1,0 +1,174 @@
+% Companion report: explicitly simulated research, no human-subject claims.
+% Build from report/: latexmk -pdf Research.tex
+\documentclass[a4paper,11pt]{article}
+\usepackage[a4paper,margin=1.9cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,mathptmx,microtype}
+\usepackage{graphicx,booktabs,tabularx,array,enumitem,xcolor,fancyhdr}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\input{generated/research.tex}
+\definecolor{ink}{HTML}{183247}
+\definecolor{accent}{HTML}{216A9F}
+\definecolor{pale}{HTML}{EDF3F7}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\color{accent}SeatRelay / Research}
+\fancyhead[R]{\small Interviews and usability}
+\fancyfoot[L]{\scriptsize SeatRelay research / 12 participants}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{1.5em}
+\setlist{nosep,leftmargin=1.4em}
+\renewcommand{\arraystretch}{1.2}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcommand{\datafile}[1]{{\small\path{#1}}}
+\newcommand{\chart}[2]{\begin{center}\includegraphics[width=#2\textwidth]{../results/research/figures/#1.pdf}\end{center}}
+
+\begin{document}
+{\color{accent}\small RESEARCH REPORT / 31 OCTOBER 2026}\par
+{\Huge\bfseries SeatRelay}\par
+{\LARGE Interviews and usability study}\par
+{\large A reproducible evaluation package for the prototype}\par
+\vspace{8pt}
+\colorbox{pale}{\parbox{\dimexpr\textwidth-2\fboxsep}{\textbf{Method and data source.}
+The personas, interview statements, task outcomes and SUS responses were authored or generated.
+There was no recruitment, consent process or human observation. Results demonstrate a research
+workflow and design trade-offs; they do not establish real usability, market demand or willingness to pay.}}
+
+\section*{1. Research questions and scope}
+The prototype lets a person submit ranked acceptable sessions once, join a single queue and confirm
+a timed offer. This package asks how that model could affect registration effort, interpretation of
+held versus confirmed seats, and an organiser's cancellation workflow.
+
+\begin{tabularx}{\textwidth}{@{}lL@{}}
+\toprule
+Interviews & \SimInterviewStudents{} student and \SimInterviewOrganisers{} organiser profiles;
+9 records, 18 scripted excerpts, 6 qualitative codes\\
+Formal study & \SimStudyN{} participants; \SimStudyParticipantN{} on the participant track and
+\SimStudyOrganiserN{} on the organiser track\\
+Data & \SimTaskAttempts{} task attempts, \SimSusForms{} ten-item SUS forms; both conditions\\
+Control & Prepared per-session forms and a shared sheet with duplicate detection\\
+Reproducibility & Seed 20261031; declared assumptions, CSV files, calculations and SHA-256 manifest\\
+\bottomrule
+\end{tabularx}
+
+\section*{2. Design and generation}
+The assignment follows the existing counterbalance sheet: six profiles use SeatRelay first and six
+use the control first. Four organiser profiles are evenly split by order. Equivalent A/B datasets
+are balanced within every task and condition. Participant tasks are register, queue, interpret,
+accept and cancel; organiser tasks are create, process cancellation, inspect the queue and export.
+
+Shared person-level timing factors and task-level variation use declared log-normal models.
+Second-condition times receive a 0.94 practice multiplier; dataset B a 1.04 multiplier. Baseline
+status/queue interpretation can be faster in the prepared spreadsheet. Failure events are authored
+in advance and retained, including misunderstandings in SeatRelay. Seed selection is fixed, not
+searched to make targets pass. Two pre-study walkthrough scenarios are documented as scripts and excluded from the formal sample. There is one formal study; its two conditions are not separate study rounds.
+
+The statistical unit for timing is the participant: sum that person's tasks within each
+condition, then calculate their paired reduction. Completion keeps unassisted, assisted and failed
+attempts separate. Timeouts are 300 seconds; wrong final answers can fail sooner. SUS scores are
+calculated from all ten 1--5 item responses with the required reverse scoring, not invented as totals.
+
+\newpage
+\section*{3. Interviews: themes and counterexamples}
+The coding unit is an entire scripted profile. Code definitions, exclusions and source IDs make the
+interpretation inspectable; there was no independent coding exercise or claim of thematic saturation.
+Theme counts describe these scripts only, not prevalence among students or organisers.
+
+\begin{tabularx}{\textwidth}{@{}p{3.2cm}LL@{}}
+\toprule
+Theme & Script evidence & Prototype implication\\
+\midrule
+State and next action & SIM-I02 mistakes receipt for confirmation; I06 sees stale state & Explain whether a seat is held, what to click, and what inaction means\\
+Duplicate insurance & I01 and I05 register twice to preserve options & One submission should capture acceptable alternatives and state the one-seat rule\\
+Manual relay & I07--I09 describe cancellation, contact and spreadsheet updates & Log who released a seat, who received the offer and whether it was accepted\\
+Hold and notifications & I03 cannot check mail during an internship & Show the deadline before joining; retain configurable hold duration\\
+Fairness and explanation & I05 questions why a later arrival got another session & Explain acceptable-session matching as well as queue order\\
+Governance & I09 lacks authority to move personal data to a new system & Document membership, export, retention and procurement constraints\\
+\bottomrule
+\end{tabularx}
+
+\subsection*{Illustrative scripted statements (not quotations from people)}
+\begin{itemize}
+\item SIM-I01: ``I register twice to keep my options, not because I want to attend twice.''
+\item SIM-I03: ``Automatic relay is useful, but I cannot check my mailbox every fifteen minutes.''
+\item SIM-I04: ``If the form already works, I do not want to learn a new system just to register.''
+\item SIM-I09: ``The price is not the main issue; approval and who can export the data are.''
+\end{itemize}
+
+\subsection*{Pricing and market scenarios}
+The three fictional organisers have 20 multi-session events among 54 annual events, giving the
+scenario event-weighted share \SimMultiSessionPct\,\%. Median baseline coordination is
+\SimCoordinationHours{} hours per event. Their assumed bargain and expensive prices are
+S\$\SimBargainSgd{} and S\$\SimExpensiveSgd{} per organisation per month. Student prices use a separate
+per-event unit and are never pooled with organiser prices.
+
+These are scenario inputs, not estimated demand. Baseline coordination is not time saved.
+Two profiles can choose tools themselves; one is institutionally constrained. A separate 10\,\%
+adoption assumption illustrates the market formula; no procurement commitment, price curve or
+representative market share is inferred from fictional answers.
+
+\subsection*{Traceability}
+Each full interview record includes background, concrete episode, current workflow, unmet need,
+negative case, quantitative assumptions, scripted statements and profile-level codes.
+\datafile{results/research/interviews/} contains SIM-I01 through SIM-I09.
+\datafile{coded-excerpts.csv} links every scripted statement to its profile; \datafile{codebook.json}
+defines inclusion and exclusion criteria.
+
+\newpage
+\section*{4. Descriptive study outputs}
+\begin{tabularx}{\textwidth}{@{}Lrr@{}}
+\toprule
+\textbf{12 participants} & SeatRelay & Forms + sheet\\
+\midrule
+Unassisted completion (56 attempts each) & \SimCompletionSR\,\% & \SimCompletionCtrl\,\%\\
+Median task total per profile (seconds) & \SimTotalTimeSR & \SimTotalTimeCtrl\\
+Mean SUS (0--100 score) & \SimSusSR & \SimSusCtrl\\
+Errors / help requests & \SimErrorsSR{} / \SimHelpSR & \SimErrorsCtrl{} / \SimHelpCtrl\\
+Median actions per organiser (four tasks) & \SimStepsSR & \SimStepsCtrl\\
+\bottomrule
+\end{tabularx}
+
+The median of individual paired time reductions is \SimPairedReduction\,\% and
+\SimFasterProfiles{} of \SimStudyN{} profiles are faster with SeatRelay. This is not a ratio of the two
+condition medians. Task rows are repeated observations, not \SimTaskAttempts{} independent people.
+No significance test or population confidence interval is used for generated responses.
+
+\chart{completion}{0.94}
+\chart{sus}{0.94}
+The scenario does not make all reference targets pass. SeatRelay's unassisted completion falls
+below 90\,\% and its mean SUS below 75. Assisted attempts remain visible; SUS is a scale score,
+not a percentage of satisfied users. Two profiles prefer the control and one is conditional in the
+authored debriefs, which are separate from the task model's timing outcomes.
+
+\newpage
+\section*{5. Paired timing, actions and sensitivity}
+\chart{paired-time}{0.90}
+\chart{organiser-steps}{0.82}
+The two task tracks have different task counts and are displayed separately. Every paired line is
+one participant. A failed task's recorded time remains in that person's total; unsuccessful
+attempts are not removed to increase the apparent advantage.
+
+\datafile{sensitivity.csv} changes only SeatRelay's baseline time by factors 0.8, 1.0 and 1.2,
+keeping the seed, authored failure events and other inputs fixed. These alternative assumptions
+test dependence on the timing model; their range is not a confidence interval. Fixed action counts
+come from the task protocol's declared workflows, with extra errors/help actions retained.
+
+\section*{6. Interpretation and design recommendations}
+\begin{tabularx}{\textwidth}{@{}p{1.4cm}LL@{}}
+\toprule
+Priority & Scenario issue & Next evaluation criterion\\
+\midrule
+P0 & Held versus confirmed is misread (P08/T3, P11/T4) & Ask for current state and next action without a hint; test the confirmation step explicitly\\
+P1 & Ranking and date entry require help (P02/T1, P06/O1) & Check first-use discoverability and date-format errors\\
+P1 & Short response windows and opaque queue counts & Compare context-appropriate hold windows; ask why a later profile can get another session\\
+P2 & Login overhead for simple events; procurement limits & Include a no-waitlist case and approval/export requirements in subsequent scenarios\\
+\bottomrule
+\end{tabularx}
+
+H1 and the human side of H3 are illustrated under assumptions, not empirically confirmed.
+The completed prototype package does not establish live attendance or adoption. Engine and
+deployed-system tests remain separate evidence. Full research report:
+\datafile{results/research/summary.md}.
+\end{document}

@@ -338,6 +338,10 @@ export class CommandRunner {
       });
       return;
     }
+    if (controller.signal.aborted) {
+      this.#aborted(controller, attempt);
+      return;
+    }
     this.#releaseController(controller);
     await this.#settle(attempt, view);
   }

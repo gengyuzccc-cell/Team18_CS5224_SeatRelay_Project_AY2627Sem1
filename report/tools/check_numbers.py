@@ -134,6 +134,14 @@ def main() -> int:
                 problems.append(f"\\{macro}: source {path} does not exist")
     runs_checked, register_problems = check_register()
     problems.extend(register_problems)
+    research = subprocess.run(
+        [sys.executable, "-I", str(ROOT / "tools/research/simulate.py"), "--check", "--check-figures"],
+        capture_output=True, text=True,
+    )
+    if research.returncode:
+        problems.append("research is not reproducible: " + (research.stdout + research.stderr).strip())
+    else:
+        print(research.stdout.strip())
     pending = [macro for macro, value, _ in rows if "pending" in value.lower()]
     for p in problems:
         print("FAIL:", p)

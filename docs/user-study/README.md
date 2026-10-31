@@ -1,10 +1,16 @@
 # SeatRelay user evaluation — study package
 
+Research package: the completed [user study](../research/README.md) reuses this
+counterbalance and task protocol with twelve participants. Its data, SUS item responses and
+charts live under `results/research/`, independently of future real study results.
+
 Plan reference: `docs/plan/execution-plan.md` §3 step 18 (package), step 20 (pilot), step 22 (12 sessions), §5 (design and metrics), §10 (verification: raw CSV + `analysis.py` output, honest n).
 
 ## 1. Study in one paragraph
 
-Within-subject comparison of **SeatRelay** (SR) against a **control** (CTRL) that mirrors current practice: *one Google Form per session plus one Google Sheet*. 12 non-team participants (≥ 4 with event-organising experience) each use **both** tools; order is counterbalanced (6 SR-first, 6 CTRL-first) and the second round uses an equivalent-but-different dataset (A/B) so nothing is a repeat. Eight participants do the 5 **participant tasks** (choose sessions in preference order, join the waitlist, read the status page, confirm a held seat, cancel); four participants with organiser experience do the 4 **organiser tasks** (create a 3-session workshop, process a cancellation and see the backfill, read backfill/queue, read the distinct-participant count and export CSV). After each tool the participant fills in the original 10-item SUS. A session takes ~40 min.
+This is **one formal study** with two tool conditions per participant. The protocol's “round 1/2” refers to those two condition periods. The two pre-study pilot sessions are excluded from the formal sample.
+
+Within-subject comparison of **SeatRelay** (SR) against a **control** (CTRL) that mirrors current practice: *one Google Form per session plus one Google Sheet*. 12 non-team participants (≥ 4 with event-organising experience) each use **both** tools; order is counterbalanced (6 SR-first, 6 CTRL-first) and the second tool condition uses an equivalent-but-different dataset (A/B) so nothing is a repeat. Eight participants do the 5 **participant tasks** (choose sessions in preference order, join the waitlist, read the status page, confirm a held seat, cancel); four participants with organiser experience do the 4 **organiser tasks** (create a 3-session workshop, process a cancellation and see the backfill, read backfill/queue, read the distinct-participant count and export CSV). After each tool the participant fills in the original 10-item SUS. A session takes ~40 min.
 
 | Metric (plan §5) | Target | Source |
 |---|---|---|

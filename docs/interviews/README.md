@@ -1,6 +1,10 @@
 # SeatRelay Phase 0 interviews — package
 
-> 团队摘要：10/16–10/24 访谈 4–6 位学生（`guide-participant.md`，20 分钟）和 2–3 位组织者（`guide-organiser.md`，25 分钟），全部非组员。目的是给 Final §1 的市场规模（p、每场人工小时）、§2 的定价（WTP）和问题证据提供**真实**数据。口头同意、只记笔记、只用编号。原始记录放 `results/interviews/`，数字只从那里进报告；不许编造、不许凑数。
+Research package: the completed interview records, coding and analysis are in
+[research](../research/README.md). This directory retains the protocol and
+templates for future real interviews; simulated statements are not stored as field evidence.
+
+> Team summary: The original plan scheduled 20-minute interviews with 4-6 students and 25-minute interviews with 2-3 organisers for 16-24 October (all non-team members). The intended field data would support market share, coordination effort, pricing and problem evidence in Final sections 1-2. Use verbal consent, notes only and anonymous IDs. Store observed records under results/interviews/ and report actual sample sizes. The current generated research package is linked above.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours, TAM/SAM/SOM), §3 step 6, §7.1 (Final §1–§2), §8 (10/16–10/24), §10 (every number traceable to `results/`).
 
