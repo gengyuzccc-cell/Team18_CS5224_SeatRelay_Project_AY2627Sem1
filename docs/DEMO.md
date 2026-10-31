@@ -220,9 +220,9 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 > checked the new Content-Security-Policy on the unchanged 24 Oct build); `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4`
 > and the backup slides still come from the 24 Oct run. The 17 Oct walkthroughs
 > (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as history. The app
-> stacks run the notifier change of 24 Oct (`bcd7bd1`): with SES out of the sandbox, real participants
-> get e-mail, test accounts on reserved domains never do; the `8ace25c` app build (capacity bound,
-> member lookup by e-mail, verified-e-mail check) is deployed once its change sets are executed.
+> stacks run the `8ace25c` build since 31 Oct 05:26 UTC (capacity bound, member lookup by e-mail,
+> verified-e-mail check, least-privilege roles; the 24 Oct notifier rule stays: with SES out of the
+> sandbox, real participants get e-mail, test accounts on reserved domains never do).
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 

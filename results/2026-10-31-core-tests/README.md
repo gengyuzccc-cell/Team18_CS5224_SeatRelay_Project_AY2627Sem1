@@ -12,7 +12,8 @@ commit in `commit.txt` (`8ace25c`, the audit-fix commit).
   drain that spans several decisions in `drain.ts`), and `packages/contracts` in `8ace25c`
   (`CapacitySchema`). Three new test files: `audit-engine.test.ts`, `drainNotices.test.ts`
   (core) and `audit-bounds.test.ts` (contracts, counted in that package's own suite).
-- Deployment: on 31 Oct the app stacks still run the `bcd7bd1` build (its engine is `7432ebe`'s); the
-  change set for `8ace25c` is created and waits to be executed (`docs/deployment-state.md`, 31 Oct).
+- Deployment: the `8ace25c` bundles (this engine) run on `dev` since 2026-10-31 05:26 UTC and on
+  `pilot` since 05:31 UTC (`docs/deployment-state.md`, 31 Oct); the dev regression after the redeploy
+  passed (`results/2026-10-31-{smoke,correctness,access-control}/`).
 - `run.log`: the full verbose output. `coverage-summary.json`: v8 coverage (`coverage.include = src/**`).
 - Run in the development container, no load generator running alongside.

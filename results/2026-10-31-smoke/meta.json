@@ -1,0 +1,68 @@
+{
+  "runId": "adcdb34d-7f32-45c5-9fce-6e3bff6d8aa2",
+  "name": "smoke",
+  "tableRow": "Acceptance smoke test (RUNBOOK §3, plan §3 step 12; both deployments)",
+  "criterion": "every step asserts; cancellation backfill in the same settlement (0 ms); expiry relayed by the timer path within 15 s; late ACCEPT → OFFER_EXPIRED; verify ok; DLQ / FAILED rows empty",
+  "startedAt": "2026-10-31T05:29:22.686Z",
+  "finishedAt": "2026-10-31T05:30:39.892Z",
+  "durationMs": 77206,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "7970cfffa556df636076fa0a5c18b28d5a6d7d5b",
+    "short": "7970cfffa556",
+    "dirty": false,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 1,
+  "holdSeconds": 60,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 0,
+    "minted": 4,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "run1.expiryBackfillLatencyMs": 85,
+    "run1.workshopId": "e8104b87-4abd-4d9f-b567-94d3331c846f"
+  },
+  "checks": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "settleMs": {
+    "count": 6,
+    "min": 793,
+    "max": 1331,
+    "mean": 910.1666666666666,
+    "p50": 815,
+    "p95": 1331,
+    "p99": 1331,
+    "stdev": 190.40169525389095
+  },
+  "serverSettleMs": {
+    "count": 6,
+    "min": 35,
+    "max": 162,
+    "mean": 72.5,
+    "p50": 41,
+    "p95": 162,
+    "p99": 162,
+    "stdev": 47.5
+  },
+  "expiryBackfillLatencyMs": [
+    85
+  ]
+}

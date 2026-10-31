@@ -231,11 +231,13 @@ Resources:
                 - { 'Fn::ImportValue': !Sub '${AuthStackName}-ToolingClientId' }
       # Routes are declared per method (never ANY / $default) so that CORS pre-flight OPTIONS is
       # answered by API Gateway itself instead of being rejected 401 by the authorizer.
+      # The list items may be intrinsics (SAM copies them into the OpenAPI body and CloudFormation
+      # resolves them); a conditional list as a whole is not (SAM would emit it in place of the
+      # CORS object). AWS::NoValue drops the localhost entry when AllowLocalOrigin is false.
       CorsConfiguration:
-        AllowOrigins: !If
-          - LocalOriginAllowed
-          - [!Ref WebOrigin, 'http://localhost:5173']
-          - [!Ref WebOrigin]
+        AllowOrigins:
+          - !Ref WebOrigin
+          - !If [LocalOriginAllowed, 'http://localhost:5173', !Ref 'AWS::NoValue']
         AllowHeaders: [authorization, content-type]
         AllowMethods: [GET, POST, PUT, PATCH, DELETE]
         MaxAge: 600

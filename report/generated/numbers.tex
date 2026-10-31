@@ -548,9 +548,9 @@
 
 % ==============================================================================================
 % Regression runs after the last redeploy
-%   source: results/2026-10-17-smoke-3
-%   source: results/2026-10-17-correctness-3
-%   source: results/2026-10-17-access-control-3
+%   source: results/2026-10-31-smoke
+%   source: results/2026-10-31-correctness
+%   source: results/2026-10-31-access-control
 % ==============================================================================================
 % report/series.json regression -> meta.json of each run -- regression run directories
 \newcommand{\RegressionRuns}{3}
@@ -559,13 +559,13 @@
 % report/series.json regression -> meta.json of each run: checks.total (sum) -- regression checks in total
 \newcommand{\RegressionChecksTotal}{862}
 % report/series.json regression -> meta.json of each run: commit.hash -- commit under test in the regression runs
-\newcommand{\RegressionCommit}{d34e0ac}
+\newcommand{\RegressionCommit}{7970cff}
 % report/series.json regression -> meta.json of each run: experiment names -- experiments re-run as regression checks
 \newcommand{\RegressionExperiments}{smoke, correctness and access-control}
 % report/series.json regression -> meta.json of each run: ok -- all regression runs passed
 \newcommand{\RegressionVerdict}{PASS}
 % report/series.json regression -> meta.json of each run: directory suffix -- suffix of the regression directories
-\newcommand{\RegressionDirSuffix}{3}
+\newcommand{\RegressionDirSuffix}{1}
 
 % ==============================================================================================
 % Timer-path relays seen outside the backfill experiment (dev)

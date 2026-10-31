@@ -389,17 +389,17 @@ Source: `results/2026-10-17-throttling-evidence` — 18/18 with data.
 
 ### Regression runs after the last redeploy
 
-Source: `results/2026-10-17-smoke-3`; `results/2026-10-17-correctness-3`; `results/2026-10-17-access-control-3` — 7/7 with data.
+Source: `results/2026-10-31-smoke`; `results/2026-10-31-correctness`; `results/2026-10-31-access-control` — 7/7 with data.
 
 | Macro | Value | Source |
 |---|---|---|
 | `\RegressionRuns` | 3 | report/series.json regression -> meta.json of each run |
 | `\RegressionChecksPassed` | 862 | report/series.json regression -> meta.json of each run: checks.passed (sum) |
 | `\RegressionChecksTotal` | 862 | report/series.json regression -> meta.json of each run: checks.total (sum) |
-| `\RegressionCommit` | d34e0ac | report/series.json regression -> meta.json of each run: commit.hash |
+| `\RegressionCommit` | 7970cff | report/series.json regression -> meta.json of each run: commit.hash |
 | `\RegressionExperiments` | smoke, correctness and access-control | report/series.json regression -> meta.json of each run: experiment names |
 | `\RegressionVerdict` | PASS | report/series.json regression -> meta.json of each run: ok |
-| `\RegressionDirSuffix` | 3 | report/series.json regression -> meta.json of each run: directory suffix |
+| `\RegressionDirSuffix` | 1 | report/series.json regression -> meta.json of each run: directory suffix |
 
 ### Timer-path relays seen outside the backfill experiment (dev)
 

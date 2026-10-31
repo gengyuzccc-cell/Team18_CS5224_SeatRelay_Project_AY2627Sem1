@@ -199,13 +199,29 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   against it at 00:31 UTC: 45/45 (`results/2026-10-31-web-walkthrough-dev-2/`; run with `--no-publish`,
   so `docs/demo/` keeps the 24 Oct assets). The pilot SPA was then republished from the same build
   (same bundle names).
-- **`seatrelay-app-dev` and `seatrelay-app-pilot`: NOT yet redeployed.** They still run the 24 Oct
-  build (`bcd7bd1`). The `8ace25c` bundles are built and the dev change set exists
-  (`samcli-deploy1793405322`, created 2026-10-31T00:08:44Z: `Modify` on the api/worker roles and the
-  five functions, the HTTP API's CORS and the sweep schedule; no replacement), but executing it was
-  blocked in the assistant's environment; `docs/SUBMISSION-CHECKLIST.md` row 2.6 has the commands.
-  Until then the API does not check `email_verified`, does not bound capacity above 1 (the SPA does),
-  returns whole per-user lists, and cannot add organisation members by e-mail (user id only).
+- **`seatrelay-app-dev`** UPDATE_COMPLETE 2026-10-31T05:26:01Z and **`seatrelay-app-pilot`**
+  UPDATE_COMPLETE 2026-10-31T05:31:17Z from the `8ace25c` bundles (the change sets reviewed at 00:08
+  and 05:30 UTC: `Modify` only, no replacement; executed with the team's authorisation). Checked live
+  afterwards: `USER_POOL_ID` set, api and worker roles carry only the listed DynamoDB actions (api also
+  `cognito-idp:ListUsers`), `AWS_NODEJS_CONNECTION_REUSE_ENABLED` gone, pilot `ALLOW_FAULT_FLAGS=false`,
+  `EMAIL_ENABLED=true` on both, no alarm, all DLQs empty. Functional checks on dev
+  (scratch log, not a results run): member added by e-mail (200; unknown address 404), `SET_CAPACITY`
+  20,000 → 400 `VALIDATION_ERROR`, 10,000 → APPLIED, 0 and −5 → REJECTED `INVALID_CAPACITY`,
+  `/me/registrations` and `/me/notifications` of a synthetic account capped at 500, a temporary user
+  with `email_verified=false` gets 401 on `/me` (user deleted afterwards).
+- **CORS rendering fix, second redeploy** (`app-pilot` 05:37:35Z, `app-dev` 05:40:35Z, only `HttpApi`
+  changed): SAM copies the items of `CorsConfiguration.AllowOrigins` into the OpenAPI body but emits a
+  conditional *list* (`!If` around the whole list) in place of the CORS object, so the first `8ace25c`
+  deploy left the previous CORS settings in force on both stages (pilot still admitted localhost). The
+  template now uses a per-item `!If` with `AWS::NoValue`; live after the fix: pilot
+  `AllowOrigins = [https://diiztwl34x7s1.cloudfront.net]` (a pre-flight from `http://localhost:5173`
+  gets no allow-origin header), dev keeps both origins.
+- **Regression on dev after the redeploy** (`report/series.json` "regression", RUNS.md): smoke 13/13
+  (`results/2026-10-31-smoke/`), correctness 672/672 in 3 runs (`results/2026-10-31-correctness/`),
+  access-control 177/177 in 3 runs (`results/2026-10-31-access-control/`), browser walkthrough 45/45
+  (`results/2026-10-31-web-walkthrough-dev-3/`). Three audit-check workshops created by these checks
+  on dev are cancelled ("Audit fix check 2026-10-30 …", "Audit regression check 2026-10-31 …");
+  `loaduser-10@example.com` was added as a member of the staged walkthrough organisation.
 - **Core tests** re-recorded on the audited engine: `results/2026-10-31-core-tests/` (156/156 in 16
   files, branches 99.66 %, `8ace25c`); `report/generated/numbers.tex` quotes this run.
 - **Not changed:** SES (production, 50,000/day), Cognito mailer (default), budgets, alarms, pilot data

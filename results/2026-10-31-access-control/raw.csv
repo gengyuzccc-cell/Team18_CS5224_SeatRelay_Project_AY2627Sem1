@@ -1,0 +1,166 @@
+run,group,probe,who,method,path,expected,actual,ok
+1,no token,missing token → 401,anonymous,GET,/me,401,401,true
+1,no token,missing token → 401,anonymous,GET,/me/registrations,401,401,true
+1,no token,missing token → 401,anonymous,GET,/me/notifications,401,401,true
+1,no token,missing token → 401,anonymous,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,401,401,true
+1,no token,missing token → 401,anonymous,GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,401,401,true
+1,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/dashboard,401,401,true
+1,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/export.csv,401,401,true
+1,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/verify,401,401,true
+1,no token,missing token → 401,anonymous,POST,/orgs,401,401,true
+1,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,401,401,true
+1,no token,tampered token → 401,victim (bad signature),GET,/me,401,401,true
+1,no token,tampered token → 401,victim (bad signature),GET,/me/registrations,401,401,true
+1,no token,tampered token → 401,victim (bad signature),GET,/me/notifications,401,401,true
+1,no token,tampered token → 401,victim (bad signature),POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,401,401,true
+1,no token,tampered token → 401,victim (bad signature),GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,401,401,true
+1,no token,tampered token → 401,victim (bad signature),GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/dashboard,401,401,true
+1,no token,public health without a token,anonymous,GET,/health,200,200,true
+1,someone else's offer,ACCEPT_OFFER of the victim's offer,attacker,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+1,someone else's offer,DECLINE_OFFER of the victim's offer,attacker,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+1,cross-org (outsider organiser),dashboard,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),CSV export,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),verify,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/verify,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),attendance,outsider organiser,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),list workshops,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),create workshop,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),add self as member,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),edit workshop,outsider organiser,PATCH,/workshops/e3749d39-e449-4758-a89e-8facddf88d98,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),SET_CAPACITY,outsider organiser,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),CANCEL_SESSION,outsider organiser,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),CLOSE_REGISTRATION,outsider organiser,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (outsider organiser),CANCEL_WORKSHOP,outsider organiser,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),dashboard,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),CSV export,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),verify,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/verify,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),attendance,participant,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/e3749d39-e449-4758-a89e-8facddf88d98/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),list workshops,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),create workshop,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),add self as member,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),edit workshop,participant,PATCH,/workshops/e3749d39-e449-4758-a89e-8facddf88d98,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),SET_CAPACITY,participant,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),CANCEL_SESSION,participant,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),CLOSE_REGISTRATION,participant,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (participant),CANCEL_WORKSHOP,participant,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,403 FORBIDDEN,403 FORBIDDEN,true
+1,cross-org (own org path),dashboard via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/e3749d39-e449-4758-a89e-8facddf88d98/dashboard,404 NOT_FOUND,404 NOT_FOUND,true
+1,cross-org (own org path),CSV export via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/e3749d39-e449-4758-a89e-8facddf88d98/export.csv,404 NOT_FOUND,404 NOT_FOUND,true
+1,command visibility,another participant reads the victim's command,attacker,GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,404 NOT_FOUND,404 NOT_FOUND,true
+1,command visibility,an outsider organiser reads the victim's command,outsider organiser,GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,404 NOT_FOUND,404 NOT_FOUND,true
+1,command visibility,the issuer reads it,victim,GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,200,200,true
+1,command visibility,the workshop's organiser reads it,organiser,GET,/commands/9dff0048-8d2b-4bd2-a0b9-003195ccb89f,200,200,true
+1,command visibility,unknown command,victim,GET,/commands/7740b6c0-866a-476d-9906-c263e987b26c,404 NOT_FOUND,404 NOT_FOUND,true
+1,command visibility,re-POST of the victim's commandId by another user,attacker,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,409 CONFLICT,409 CONFLICT,true
+1,unknown / malformed,command on an unknown workshop,attacker,POST,/workshops/45b8aa51-7405-4fff-b635-56787ce6039c/commands,404 NOT_FOUND,404 NOT_FOUND,true
+1,unknown / malformed,public view of an unknown workshop,attacker,GET,/workshops/296ac0d5-7b3a-43c6-9fd0-35a9216af836,404 NOT_FOUND,404 NOT_FOUND,true
+1,unknown / malformed,malformed command body,attacker,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true
+1,unknown / malformed,unknown command type,attacker,POST,/workshops/e3749d39-e449-4758-a89e-8facddf88d98/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true
+2,no token,missing token → 401,anonymous,GET,/me,401,401,true
+2,no token,missing token → 401,anonymous,GET,/me/registrations,401,401,true
+2,no token,missing token → 401,anonymous,GET,/me/notifications,401,401,true
+2,no token,missing token → 401,anonymous,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,401,401,true
+2,no token,missing token → 401,anonymous,GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,401,401,true
+2,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/dashboard,401,401,true
+2,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/export.csv,401,401,true
+2,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/verify,401,401,true
+2,no token,missing token → 401,anonymous,POST,/orgs,401,401,true
+2,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,401,401,true
+2,no token,tampered token → 401,victim (bad signature),GET,/me,401,401,true
+2,no token,tampered token → 401,victim (bad signature),GET,/me/registrations,401,401,true
+2,no token,tampered token → 401,victim (bad signature),GET,/me/notifications,401,401,true
+2,no token,tampered token → 401,victim (bad signature),POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,401,401,true
+2,no token,tampered token → 401,victim (bad signature),GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,401,401,true
+2,no token,tampered token → 401,victim (bad signature),GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/dashboard,401,401,true
+2,no token,public health without a token,anonymous,GET,/health,200,200,true
+2,someone else's offer,ACCEPT_OFFER of the victim's offer,attacker,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+2,someone else's offer,DECLINE_OFFER of the victim's offer,attacker,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+2,cross-org (outsider organiser),dashboard,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),CSV export,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),verify,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/verify,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),attendance,outsider organiser,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),list workshops,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),create workshop,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),add self as member,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),edit workshop,outsider organiser,PATCH,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),SET_CAPACITY,outsider organiser,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),CANCEL_SESSION,outsider organiser,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),CLOSE_REGISTRATION,outsider organiser,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (outsider organiser),CANCEL_WORKSHOP,outsider organiser,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),dashboard,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),CSV export,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),verify,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/verify,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),attendance,participant,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),list workshops,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),create workshop,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),add self as member,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),edit workshop,participant,PATCH,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),SET_CAPACITY,participant,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),CANCEL_SESSION,participant,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),CLOSE_REGISTRATION,participant,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (participant),CANCEL_WORKSHOP,participant,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,403 FORBIDDEN,403 FORBIDDEN,true
+2,cross-org (own org path),dashboard via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/dashboard,404 NOT_FOUND,404 NOT_FOUND,true
+2,cross-org (own org path),CSV export via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/export.csv,404 NOT_FOUND,404 NOT_FOUND,true
+2,command visibility,another participant reads the victim's command,attacker,GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,404 NOT_FOUND,404 NOT_FOUND,true
+2,command visibility,an outsider organiser reads the victim's command,outsider organiser,GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,404 NOT_FOUND,404 NOT_FOUND,true
+2,command visibility,the issuer reads it,victim,GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,200,200,true
+2,command visibility,the workshop's organiser reads it,organiser,GET,/commands/93f87ea8-9c98-4f49-977b-f65d59027003,200,200,true
+2,command visibility,unknown command,victim,GET,/commands/a7d1e078-4916-4e37-bcc5-21dffeac5e7a,404 NOT_FOUND,404 NOT_FOUND,true
+2,command visibility,re-POST of the victim's commandId by another user,attacker,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,409 CONFLICT,409 CONFLICT,true
+2,unknown / malformed,command on an unknown workshop,attacker,POST,/workshops/401cea05-29e4-4709-9258-1b6925cc7330/commands,404 NOT_FOUND,404 NOT_FOUND,true
+2,unknown / malformed,public view of an unknown workshop,attacker,GET,/workshops/85ff0458-8e78-492a-bea2-49be133aa039,404 NOT_FOUND,404 NOT_FOUND,true
+2,unknown / malformed,malformed command body,attacker,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true
+2,unknown / malformed,unknown command type,attacker,POST,/workshops/0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true
+3,no token,missing token → 401,anonymous,GET,/me,401,401,true
+3,no token,missing token → 401,anonymous,GET,/me/registrations,401,401,true
+3,no token,missing token → 401,anonymous,GET,/me/notifications,401,401,true
+3,no token,missing token → 401,anonymous,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,401,401,true
+3,no token,missing token → 401,anonymous,GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,401,401,true
+3,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/dashboard,401,401,true
+3,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/export.csv,401,401,true
+3,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/verify,401,401,true
+3,no token,missing token → 401,anonymous,POST,/orgs,401,401,true
+3,no token,missing token → 401,anonymous,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,401,401,true
+3,no token,tampered token → 401,victim (bad signature),GET,/me,401,401,true
+3,no token,tampered token → 401,victim (bad signature),GET,/me/registrations,401,401,true
+3,no token,tampered token → 401,victim (bad signature),GET,/me/notifications,401,401,true
+3,no token,tampered token → 401,victim (bad signature),POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,401,401,true
+3,no token,tampered token → 401,victim (bad signature),GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,401,401,true
+3,no token,tampered token → 401,victim (bad signature),GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/dashboard,401,401,true
+3,no token,public health without a token,anonymous,GET,/health,200,200,true
+3,someone else's offer,ACCEPT_OFFER of the victim's offer,attacker,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+3,someone else's offer,DECLINE_OFFER of the victim's offer,attacker,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,REJECTED(OFFER_NOT_YOURS),REJECTED(OFFER_NOT_YOURS),true
+3,cross-org (outsider organiser),dashboard,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),CSV export,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),verify,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/verify,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),attendance,outsider organiser,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),list workshops,outsider organiser,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),create workshop,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),add self as member,outsider organiser,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),edit workshop,outsider organiser,PATCH,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),SET_CAPACITY,outsider organiser,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),CANCEL_SESSION,outsider organiser,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),CLOSE_REGISTRATION,outsider organiser,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (outsider organiser),CANCEL_WORKSHOP,outsider organiser,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),dashboard,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/dashboard,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),CSV export,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/export.csv,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),verify,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/verify,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),attendance,participant,PUT,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/attendance/39ea355c-f091-7030-f5cd-c9669cca4f10,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),list workshops,participant,GET,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),create workshop,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/workshops,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),add self as member,participant,POST,/orgs/3e3fad61-2cc6-4403-b62d-c8fb2d023ce1/members,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),edit workshop,participant,PATCH,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),SET_CAPACITY,participant,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),CANCEL_SESSION,participant,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),CLOSE_REGISTRATION,participant,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (participant),CANCEL_WORKSHOP,participant,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,403 FORBIDDEN,403 FORBIDDEN,true
+3,cross-org (own org path),dashboard via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/dashboard,404 NOT_FOUND,404 NOT_FOUND,true
+3,cross-org (own org path),CSV export via own organisation,outsider organiser,GET,/orgs/248a588c-ada5-4cf4-a77f-4e4cbeeef497/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/export.csv,404 NOT_FOUND,404 NOT_FOUND,true
+3,command visibility,another participant reads the victim's command,attacker,GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,404 NOT_FOUND,404 NOT_FOUND,true
+3,command visibility,an outsider organiser reads the victim's command,outsider organiser,GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,404 NOT_FOUND,404 NOT_FOUND,true
+3,command visibility,the issuer reads it,victim,GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,200,200,true
+3,command visibility,the workshop's organiser reads it,organiser,GET,/commands/4a8b6eb2-98e7-4b7f-b796-af5e41d584c7,200,200,true
+3,command visibility,unknown command,victim,GET,/commands/1b8f311d-1abd-497d-ab71-a1dc54c59122,404 NOT_FOUND,404 NOT_FOUND,true
+3,command visibility,re-POST of the victim's commandId by another user,attacker,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,409 CONFLICT,409 CONFLICT,true
+3,unknown / malformed,command on an unknown workshop,attacker,POST,/workshops/63e1dbac-b53a-4214-8c97-4bd45d39fd2e/commands,404 NOT_FOUND,404 NOT_FOUND,true
+3,unknown / malformed,public view of an unknown workshop,attacker,GET,/workshops/5b4fb4a1-ced2-4214-b571-69b30836f8a8,404 NOT_FOUND,404 NOT_FOUND,true
+3,unknown / malformed,malformed command body,attacker,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true
+3,unknown / malformed,unknown command type,attacker,POST,/workshops/a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5/commands,400 VALIDATION_ERROR,400 VALIDATION_ERROR,true

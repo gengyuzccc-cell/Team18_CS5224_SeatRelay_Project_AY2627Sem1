@@ -1,0 +1,55 @@
+{
+  "runId": "5a42e145-4014-48b5-8e3d-6dd72cd902d7",
+  "name": "access-control",
+  "tableRow": "Access control (plan §4, Table 3; C7)",
+  "criterion": "401 without / with a tampered token; 403 on every cross-organisation organiser route and command; OFFER_NOT_YOURS for someone else's offer; 404 for another user's command; nothing changed",
+  "startedAt": "2026-10-31T05:35:11.788Z",
+  "finishedAt": "2026-10-31T05:36:05.905Z",
+  "durationMs": 54117,
+  "target": {
+    "name": "dev",
+    "stage": "dev",
+    "apiBase": "https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com",
+    "apiSource": "stack"
+  },
+  "commit": {
+    "hash": "7970cfffa556df636076fa0a5c18b28d5a6d7d5b",
+    "short": "7970cfffa556",
+    "dirty": false,
+    "branch": "claude/serene-lovelace-7t14s9"
+  },
+  "runs": 3,
+  "holdSeconds": 900,
+  "faults": true,
+  "label": null,
+  "accounts": {
+    "prefix": "loaduser",
+    "domain": "example.com",
+    "organiser": "loaduser-organiser@example.com",
+    "cached": 3,
+    "minted": 1,
+    "created": 0
+  },
+  "params": {
+    "orgId": "3e3fad61-2cc6-4403-b62d-c8fb2d023ce1",
+    "outsiderOrgId": "248a588c-ada5-4cf4-a77f-4e4cbeeef497",
+    "accounts": {
+      "organiser": "loaduser-organiser@example.com",
+      "outsider": "loaduser-outsider@example.com",
+      "victim": "loaduser-1@example.com",
+      "attacker": "loaduser-2@example.com"
+    },
+    "run1.workshopId": "e3749d39-e449-4758-a89e-8facddf88d98",
+    "run2.workshopId": "0f40a1c4-b3af-4a4b-8014-e43cbf3b82a7",
+    "run3.workshopId": "a04774bf-bba6-4d9c-a6bd-d17d30c7b0a5"
+  },
+  "checks": {
+    "total": 177,
+    "passed": 177,
+    "failed": 0,
+    "skipped": 0
+  },
+  "ok": true,
+  "probes": 165,
+  "passed": 165
+}

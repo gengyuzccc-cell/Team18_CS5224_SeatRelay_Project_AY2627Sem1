@@ -38,6 +38,10 @@ Maintained by hand from each run's `meta.json` (`python3 -I report/tools/check_n
 | 2026-10-24T08:25:04.593Z | web-walkthrough-dev | dev | cb160d2 (dirty) |  |  | PASS (45 checks) | 2026-10-24-web-walkthrough-dev | redesigned web app after the 24 Oct SPA redeploy; screenshots and backup video in docs/demo/; not user evidence |
 | 2026-10-31T00:11:18.430Z | web-walkthrough-dev | dev | f994022 (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev | same SPA (cb160d2) and app build (bcd7bd1) as 24 Oct, run after the web stack got its Content-Security-Policy headers (31 Oct): no CSP breakage; docs/demo/ kept from 24 Oct; not user evidence |
 | 2026-10-31T00:31:39.104Z | web-walkthrough-dev | dev | 8ace25c (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev-2 | the 8ace25c SPA (audit fixes, published 00:30 UTC) on the unchanged 24 Oct app build, under the CSP; run with --no-publish, so docs/demo/ stays from 24 Oct; not user evidence |
+| 2026-10-31T05:29:22.686Z | smoke | dev | 7970cff | adcdb34d | 1 | PASS 13/13 | 2026-10-31-smoke | regression after deploying 8ace25c's app build to dev (05:26 UTC; report/series.json regression) |
+| 2026-10-31T05:30:41.797Z | correctness | dev | 7970cff | 5c1ecf28 | 3 | PASS 672/672 | 2026-10-31-correctness | regression after deploying 8ace25c's app build to dev |
+| 2026-10-31T05:35:11.788Z | access-control | dev | 7970cff | 5a42e145 | 3 | PASS 177/177 | 2026-10-31-access-control | regression after deploying 8ace25c's app build to dev |
+| 2026-10-31T05:29:22.400Z | web-walkthrough-dev | dev | 7970cff (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev-3 | real-browser walkthrough after deploying 8ace25c's app build to dev (SPA already 8ace25c); --no-publish; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 
