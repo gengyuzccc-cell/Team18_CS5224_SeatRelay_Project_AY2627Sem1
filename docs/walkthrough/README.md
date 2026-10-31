@@ -16,7 +16,7 @@ tag naming each slide's speaker. Main slides are numbered 1–14; backup slides 
 | 3 | [part-3.md](part-3.md) | LIN JIE (AWS and monitoring) | 4:00–6:00 | 2:00 | 5 Architecture, 6 Request path (202 → poll → settled), 7 Timers and sweep |
 | 4 | [part-4.md](part-4.md) | ZHANG TIANYI (organiser dashboard) narrates every beat; LI ZONGZE operates the participant browser (and Window O and the terminal) without speaking | 6:00–11:00 | 5:00 | 8 Live demo (backup B1–B6) |
 | 5 | [part-5.md](part-5.md) | ZHU GENGYU (data and the local reference) | 11:00–13:00 | 2:00 | 9 System results (Prelim. Table 3 = Final Table 5), 10 Latency, backfill and mechanism comparison, 11 Cloud vs on-prem cost |
-| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 Interviews and usability study, 13 Limitations and roles, 14 Questions |
+| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 Simulated interviews and usability study, 13 Limitations and roles, 14 Questions |
 
 Q&A preparation for the whole project: [../QA-prep.md](../QA-prep.md).
 

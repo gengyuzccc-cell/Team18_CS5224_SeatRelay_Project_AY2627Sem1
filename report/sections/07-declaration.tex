@@ -18,18 +18,19 @@
 \end{itemize}
 
 \section*{AI usage declaration}
-\emph{Where.} The original declaration records Claude Code assisting with planning and generating
-code, infrastructure, tests, experiment/analysis scripts, desk research, study materials, figures,
-documentation and report/presentation drafts from the team's plan. Codex created this prototype's
-interview scenarios, reproducible task/SUS data and report integration
-(\code{tools/research/}, \code{results/research/}); the research is explicitly simulated.
-\emph{How.} Scope, rules R1--R7, constraints C1--C7 and acceptance targets come from the team's
-Preliminary report. The original record describes deployments and experiments run with the team's
-credentials; this extension makes no new deployment or human-study claim. A real pilot is
-\IfPending{\PilotWorkshops}{not run}{recorded separately}. Report numbers are generated from raw
-files in \code{results/}; configuration and cited external facts retain their own sources.
-Every build runs \code{report/tools/check\_numbers.py} to reproduce the numbers and verify their
-sources. ZHANG TIANYI is responsible for that check. \emph{What we learned.} The assistant drafted these statements
+\emph{Where.} As the Preliminary report declared, AI assistance was used before it to compare
+topics and draft prose. Since then an AI coding assistant (Claude Code) generated, from the team's
+Preliminary report and decisions, the plan, code, templates, tests, experiment and analysis scripts,
+market captures, documentation, speaker notes, study materials, figures and the text of this report,
+the slides and the poster, and ran the deployments and measurements with the team's credentials. A
+second assistant (Codex) authored the interview scenarios, generated the task and SUS responses and
+wrote \S\ref{sec:study} and the companion report (\code{tools/research/}, \code{results/research/}).
+\emph{How.} Scope, rules R1--R7, constraints C1--C7 and acceptance targets are the team's. No
+interview or study was held with people and the pilot is \IfPending{\PilotWorkshops}{not run}{recorded in
+\S\ref{sec:pilot}}: the research in \S\ref{sec:study} is simulated and says so. Every measured, simulated
+and own-count number is written by a script from a raw file in \code{results/} (external facts are
+cited); \code{report/tools/check\_numbers.py}, run by every build, regenerates them and checks each
+source; ZHANG TIANYI is the member responsible for that check. \emph{What we learned.} The assistant drafted these statements
 from the project record (\code{docs/ai-declaration-drafts.md} cites it for each); the team approved
 them. \textbf{LI ZONGZE} (product, front end): a 202 response is not a result, so I learned to design around
 request received, queued and confirmed, to poll with back-off instead of WebSockets, and to check

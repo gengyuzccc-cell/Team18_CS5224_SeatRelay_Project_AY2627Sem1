@@ -1,9 +1,8 @@
 # SeatRelay repository index
 
-Research: [interviews and usability study](research/README.md), with records, task responses,
-reproducible analysis, charts and report integration. Data sources are documented in the methodology.
-
-[Development handoff: remaining work and review findings](HANDOFF.md): scope, tasks and completion criteria, outstanding findings, completed fixes and verification baseline.
+Research (simulated): [interviews and usability study](research/README.md): authored interview
+profiles, generated task and SUS responses, reproducible analysis, charts and report integration;
+no people were recruited or observed.
 
 A map of the pnpm workspace: one paragraph per package or service, with a link to its README. The
 dependency direction is `contracts` ← `core` ← `service` ← {`aws`, `local`}; `apps/web` depends only

@@ -1,10 +1,9 @@
 # SeatRelay: code explanation (Team 18, NUS CS5224, AY2026/27 Sem 1)
 
-**Research:** [interviews and usability study](docs/research/README.md), with nine interview
-records, twelve study participants, task and SUS responses, charts and reproducible calculations.
-Data generation and interpretation are documented in the research methodology.
-
-[Development handoff: remaining work and review findings](docs/HANDOFF.md) records the scope, remaining tasks, review findings and verified baseline.
+**Research (simulated):** [interviews and usability study](docs/research/README.md): nine authored
+interview profiles, twelve generated study participants, task and SUS responses, charts and
+reproducible calculations (seed 20261031). No people were recruited or observed; the methodology
+says so, and the report and slides label it as a scenario package.
 
 SeatRelay runs registration for one workshop offered in 2–5 equivalent sessions: a participant registers
 once with an ordered list of acceptable sessions, joins one queue, holds at most one seat, and a released
