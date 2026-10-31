@@ -1,5 +1,11 @@
 # Submission checklist (deadline: 13 Nov 2026)
 
+**Prototype scope update (2026-10-31):** the user requested a simulated interview/usability-study
+deliverable. That package is complete in [research](research/README.md), with
+explicitly synthetic source records, raw responses, analysis and charts; the report and slides
+state its generation method. The historical field-study commitments below are retained as empirical
+work, not marked complete by simulated data. No real interview, recruitment or pilot is claimed.
+
 Every action that remains before `Final.pdf` and `Slides.pdf` are submitted, with the owner role and the
 file each action changes. Owners are the Preliminary report's work lines; the names in brackets follow
 the assignment in `docs/ai-declaration-drafts.md`, approved by the team on 2026-10-24.

@@ -1,0 +1,85 @@
+{
+  "source_type": "SIMULATED",
+  "interview_profiles": 9,
+  "student_interview_profiles": 6,
+  "organiser_interview_profiles": 3,
+  "study_profiles": 12,
+  "participant_track": 8,
+  "organiser_track": 4,
+  "task_attempts": 112,
+  "sus_forms": 24,
+  "conditions": {
+    "SR": {
+      "attempts": 56,
+      "unassisted": 50,
+      "assisted": 4,
+      "failed": 2,
+      "completion_pct": 89.29,
+      "completion_with_help_pct": 96.43,
+      "median_subject_total_s": 322.5,
+      "sus_mean": 69.38,
+      "sus_median": 68.75,
+      "sus_min": 50.0,
+      "sus_max": 85.0,
+      "errors": 15,
+      "help_requests": 8,
+      "median_organiser_steps": 13.5,
+      "by_track": {
+        "participant": {
+          "n": 40,
+          "unassisted": 36,
+          "completion_pct": 90.0
+        },
+        "organiser": {
+          "n": 16,
+          "unassisted": 14,
+          "completion_pct": 87.5
+        }
+      }
+    },
+    "CTRL": {
+      "attempts": 56,
+      "unassisted": 44,
+      "assisted": 7,
+      "failed": 5,
+      "completion_pct": 78.57,
+      "completion_with_help_pct": 91.07,
+      "median_subject_total_s": 384.5,
+      "sus_mean": 53.33,
+      "sus_median": 51.25,
+      "sus_min": 42.5,
+      "sus_max": 67.5,
+      "errors": 24,
+      "help_requests": 14,
+      "median_organiser_steps": 28.0,
+      "by_track": {
+        "participant": {
+          "n": 40,
+          "unassisted": 32,
+          "completion_pct": 80.0
+        },
+        "organiser": {
+          "n": 16,
+          "unassisted": 12,
+          "completion_pct": 75.0
+        }
+      }
+    }
+  },
+  "paired_subject_median_reduction_pct": 38.69,
+  "sr_faster_profiles": 9,
+  "scripted_preference": {
+    "SR": 9,
+    "CTRL": 2,
+    "depends": 1
+  },
+  "interview_scenario": {
+    "event_weighted_multi_session_pct": 37.04,
+    "baseline_coordination_hours_median": 4.0,
+    "bargain_sgd_month_median": 8,
+    "expensive_sgd_month_median": 15,
+    "open_procurement_pct": 66.67,
+    "adoption_share_assumed": 0.1
+  },
+  "inference": "Descriptive outputs conditional on authored assumptions; no empirical hypothesis test, population confidence interval or market validation."
+}

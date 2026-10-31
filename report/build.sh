@@ -16,16 +16,18 @@ TARGET="Final"; MAXPAGES=10; SUBMISSION=0; REHEARSAL=0
 while getopts "t:m:sp" o; do case "$o" in t) TARGET="$OPTARG";; m) MAXPAGES="$OPTARG";; s) SUBMISSION=1;; p) REHEARSAL=1;; esac; done
 cd "$(dirname "${BASH_SOURCE[0]}")"
 command -v latexmk >/dev/null || { echo "latexmk not found (install TeX Live)"; exit 1; }
-SOURCE="$TARGET"; EXTRA=()
+SOURCE="$TARGET"
+# Keep the argument array non-empty: macOS Bash 3.2 treats an empty array as unset with -u.
+LATEX_ARGS=(-pdf -interaction=nonstopmode -halt-on-error -file-line-error)
 if [[ "$SUBMISSION" -eq 1 ]]; then
   [[ -f team-ids.tex ]] || echo "WARNING: report/team-ids.tex not found; the submission PDF shows names only"
-  TARGET="$SOURCE-submission"; EXTRA=(-jobname="$TARGET" '-usepretex=\def\SRSubmission{1}')
+  TARGET="$SOURCE-submission"; LATEX_ARGS+=(-jobname="$TARGET" '-usepretex=\def\SRSubmission{1}')
 fi
 if [[ "$REHEARSAL" -eq 1 ]]; then
   [[ "$SUBMISSION" -eq 0 ]] || { echo "-p and -s do not combine (the rehearsal copy is for the team)"; exit 1; }
-  TARGET="$SOURCE-rehearsal"; EXTRA=(-jobname="$TARGET" '-usepretex=\def\SRSpeakerTags{1}')
+  TARGET="$SOURCE-rehearsal"; LATEX_ARGS+=(-jobname="$TARGET" '-usepretex=\def\SRSpeakerTags{1}')
 fi
-latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error "${EXTRA[@]}" "$SOURCE.tex" > "$TARGET.build.log" 2>&1 || { tail -40 "$TARGET.build.log"; echo "LaTeX build failed"; exit 1; }
+latexmk "${LATEX_ARGS[@]}" "$SOURCE.tex" > "$TARGET.build.log" 2>&1 || { tail -40 "$TARGET.build.log"; echo "LaTeX build failed"; exit 1; }
 PAGES="$(pdfinfo "$TARGET.pdf" 2>/dev/null | awk '/^Pages:/ {print $2}')"
 OVERFULL="$(grep -cE 'Overfull \\[hv]box' "$TARGET.log" || true)"  # vertical overflows too (text into the margin)
 UNDEF="$(grep -cE 'Reference .* undefined|Citation .* undefined|There were undefined references' "$TARGET.log" || true)"

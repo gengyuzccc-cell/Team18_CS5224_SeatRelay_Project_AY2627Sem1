@@ -1,0 +1,13 @@
+source_type,participant_id,track,order,condition_1,dataset_1,condition_2,dataset_2,digital_familiarity,preferred_condition,scripted_concern,consent
+SIMULATED,SIM-P01,participant,SR_first,SR,A,CTRL,B,high,SR,The up and down arrows for the first ranking are hard to discover,not_applicable_simulated
+SIMULATED,SIM-P02,participant,CTRL_first,CTRL,B,SR,A,low,SR,Needs a one-sentence explanation of held versus confirmed,not_applicable_simulated
+SIMULATED,SIM-P03,organiser,SR_first,SR,A,CTRL,B,high,SR,The backfill log should distinguish holds from confirmed seats,not_applicable_simulated
+SIMULATED,SIM-P04,participant,CTRL_first,CTRL,A,SR,B,medium,CTRL,Prefers a simple form without login for a single-session event,not_applicable_simulated
+SIMULATED,SIM-P05,participant,SR_first,SR,B,CTRL,A,high,SR,Wants to understand that the system will not automatically upgrade an already held seat,not_applicable_simulated
+SIMULATED,SIM-P06,organiser,CTRL_first,CTRL,B,SR,A,medium,SR,Date entry in the creation wizard needs clearer guidance,not_applicable_simulated
+SIMULATED,SIM-P07,participant,SR_first,SR,B,CTRL,A,medium,SR,May miss a fifteen-minute confirmation window while in class,not_applicable_simulated
+SIMULATED,SIM-P08,participant,CTRL_first,CTRL,A,SR,B,low,depends,Mistakes a held seat for a confirmed seat and needs more direct wording,not_applicable_simulated
+SIMULATED,SIM-P09,organiser,CTRL_first,CTRL,A,SR,B,high,SR,Cross-session waitlist counts need a clear definition,not_applicable_simulated
+SIMULATED,SIM-P10,participant,CTRL_first,CTRL,B,SR,A,medium,SR,Email should show the absolute deadline in the local time zone,not_applicable_simulated
+SIMULATED,SIM-P11,participant,SR_first,SR,A,CTRL,B,low,CTRL,Mistakes held for confirmed in the scenario and does not select Accept,not_applicable_simulated
+SIMULATED,SIM-P12,organiser,SR_first,SR,B,CTRL,A,medium,SR,Values automatic backfill but still wants an auditable log,not_applicable_simulated

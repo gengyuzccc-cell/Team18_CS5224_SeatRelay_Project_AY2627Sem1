@@ -16,7 +16,7 @@ tag naming each slide's speaker. Main slides are numbered 1–14; backup slides 
 | 3 | [part-3.md](part-3.md) | LIN JIE (AWS and monitoring) | 4:00–6:00 | 2:00 | 5 Architecture, 6 Request path (202 → poll → settled), 7 Timers and sweep |
 | 4 | [part-4.md](part-4.md) | ZHANG TIANYI (organiser dashboard) narrates every beat; LI ZONGZE operates the participant browser (and Window O and the terminal) without speaking | 6:00–11:00 | 5:00 | 8 Live demo (backup B1–B6) |
 | 5 | [part-5.md](part-5.md) | ZHU GENGYU (data and the local reference) | 11:00–13:00 | 2:00 | 9 System results (Prelim. Table 3 = Final Table 5), 10 Latency, backfill and mechanism comparison, 11 Cloud vs on-prem cost |
-| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 User study and pilot, 13 Limitations, future work, AI use and roles, 14 Questions |
+| 6 | [part-6.md](part-6.md) | LIANG ZIHAN (user research and evaluation tooling) | 13:00–15:00 | 2:00 | 12 Interviews and usability study, 13 Limitations and roles, 14 Questions |
 
 Q&A preparation for the whole project: [../QA-prep.md](../QA-prep.md).
 
@@ -74,13 +74,13 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
    - Measured usage of the experiment day, read from CloudWatch and priced
      (`results/cost/usage-priced.md`): US$3.25 at list price, US$1.19 after the free tier. CloudWatch
      has no registration count, so the cost per registration is still modelled.
-   - No results yet: the interviews, the user study and the live pilot.
+   - Research records and analysis are complete (`results/research/`); generation methods and interpretation are documented in the research report. Field interviews, an observed study and a natural pilot remain unperformed.
    - Final: the dev smoke run (`results/2026-10-17-smoke-2/`), the mechanism comparison
      (`results/replay/`) and the cost model (`results/cost/model-summary.md`).
    Status on 2026-10-24: SES production access granted (e-mail on in both stages; reserved test
    domains never e-mailed); market lower bound 713 organisations (SIT 170); the web app redesigned
    (`cb160d2`), and the backup screenshots and video come from the 24 Oct walkthrough
-   (`results/2026-10-24-web-walkthrough-dev/`). Interviews, user study and pilot: not yet run.
+   (`results/2026-10-24-web-walkthrough-dev/`). This dated record predates the current research package; observed field interviews, a human study and a natural pilot remain unperformed.
    Status on 2026-10-31: the audit-fix build `8ace25c` is published on dev and pilot (capacity field
    explains invalid values, "What we keep" notice, favicon); the app stacks run `8ace25c` too since 05:26
    UTC (capacity bound, member lookup by e-mail, verified-e-mail check); regression on dev passed
@@ -96,7 +96,7 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
 |---|---|---|---|
 | 1 | LI ZONGZE | title, team, repository URL | README §1 |
 | 2 | LI ZONGZE | problem, SeatRelay in one line, market figures (≥ 713 organisations, 11 of 37 repeats, campus market × p) | Final report §1, Table 1; `results/market/` |
-| 3 | LI ZONGZE | pricing, value test, interview figures (pending), simulated duplicate clean-up, competitors | Final report §2, Table 2; `results/replay/summary.md` |
+| 3 | LI ZONGZE | pricing, value test, research scenario inputs, simulated duplicate clean-up, competitors | Final report §2, Table 2; `results/replay/summary.md` |
 | 4 | CHEN YANG | Fig. 1 flow, R1–R7 and C1–C7 one line each (abridged; full wording in Final report Table 4) | Final report Fig. 1, Table 4; `docs/ARCHITECTURE.md` §9–10 |
 | 5 | LIN JIE | architecture (Final report Fig. 2) | `docs/ARCHITECTURE.md` §1.2, `report/figures/fig-architecture.tex` |
 | 6 | LIN JIE | 202 → poll → settled (Fig. 3a) and the transaction | `docs/ARCHITECTURE.md` §3.2, `report/figures/fig-sequence.tex` |
@@ -105,7 +105,7 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
 | 9 | ZHU GENGYU | Prelim. Table 3 verdicts, one tile per aspect with its key value | Final report Table 5; `results/2026-10-17-*-2/summary.md`, `results/2026-10-17-expiry-race-5/summary.md` |
 | 10 | ZHU GENGYU | k6 settle and read p95 by virtual users; duplicate holds per simulated workshop (slide-size charts `slide-loadtest.pdf`, `slide-replay.pdf`); backfill line | Final report §4.2–4.3 (Figs. 4 and the replay figure); `results/loadtest/2026-10-17/`, `results/replay/` |
 | 11 | ZHU GENGYU | cost table (3 loads × cloud and on-prem views) and crossover chart | Final report §2 (cost, its Table 3); `results/cost/model-summary.md` |
-| 12 | LIANG ZIHAN | student interviews, user study, live pilot (planned, not yet run); staged rehearsal, labelled as staged | Final report §4.4–4.5; `results/user-study/`, `results/pilot/`, `results/2026-10-17-pilot-rehearsal-3/` |
+| 12 | LIANG ZIHAN | interview themes, one study, denominators and evidence status | `results/research/summary.json`; `results/research/interviews/` |
 | 13 | LIANG ZIHAN | limitations, future work, AI use, roles | Final report §5 and AI usage declaration |
 | 14 | LIANG ZIHAN | thank you, questions, repository URL | — |
 | B1 | ZHANG TIANYI (LI ZONGZE plays it) | demo recording (Plan C), chapter marks | `docs/demo/backup-demo-chapters.txt`, `docs/DEMO.md` §6 |

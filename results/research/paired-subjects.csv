@@ -1,0 +1,13 @@
+source_type,participant_id,track,order,sr_total_s,ctrl_total_s,reduction_pct
+SIMULATED,SIM-P01,participant,SR_first,172,293,41.2969
+SIMULATED,SIM-P02,participant,CTRL_first,236,263,10.2662
+SIMULATED,SIM-P03,organiser,SR_first,319,502,36.4542
+SIMULATED,SIM-P04,participant,CTRL_first,347,345,-0.5797
+SIMULATED,SIM-P05,participant,SR_first,177,327,45.8716
+SIMULATED,SIM-P06,organiser,CTRL_first,417,706,40.9348
+SIMULATED,SIM-P07,participant,SR_first,326,325,-0.3077
+SIMULATED,SIM-P08,participant,CTRL_first,259,483,46.3768
+SIMULATED,SIM-P09,organiser,CTRL_first,459,620,25.9677
+SIMULATED,SIM-P10,participant,CTRL_first,217,422,48.5782
+SIMULATED,SIM-P11,participant,SR_first,501,347,-44.3804
+SIMULATED,SIM-P12,organiser,SR_first,327,617,47.0016

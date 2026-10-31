@@ -1,0 +1,113 @@
+source_type,participant_id,scenario_date,track,order,period,condition,dataset,task_id,success,failure_kind,time_s,errors,help_requests,manual_steps,notes
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,1,SR,A,T1,1,,63,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,1,SR,A,T2,1,,38,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,1,SR,A,T3,1,,32,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,1,SR,A,T4,1,,18,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,1,SR,A,T5,1,,21,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,2,CTRL,B,T1,1,,70,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,2,CTRL,B,T2,assisted,,155,1,2,,Authored event: Cannot distinguish the waitlist entry point from the registration form
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,2,CTRL,B,T3,1,,18,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,2,CTRL,B,T4,1,,22,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P01,2026-10-31,participant,SR_first,2,CTRL,B,T5,1,,28,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,1,CTRL,B,T1,assisted,,155,2,2,,Authored event: Opens a form for the wrong date and needs a hint
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,1,CTRL,B,T2,1,,33,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,1,CTRL,B,T3,1,,21,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,1,CTRL,B,T4,1,,28,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,1,CTRL,B,T5,1,,26,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,2,SR,A,T1,assisted,,155,2,2,,Authored event: Needs a hint to discover preference-ranking controls
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,2,SR,A,T2,1,,19,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,2,SR,A,T3,1,,21,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,2,SR,A,T4,1,,17,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P02,2026-10-31,participant,CTRL_first,2,SR,A,T5,1,,24,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,1,SR,A,O1,1,,182,0,0,8,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,1,SR,A,O2,1,,50,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,1,SR,A,O3,1,,42,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,1,SR,A,O4,1,,45,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,2,CTRL,B,O1,1,,177,0,0,12,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,2,CTRL,B,O2,0,incorrect_answer,214,2,0,9,Authored event: Sends the backfill email to the wrong next person
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,2,CTRL,B,O3,1,,32,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P03,2026-10-31,organiser,SR_first,2,CTRL,B,O4,1,,79,0,0,5,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,1,CTRL,A,T1,1,,120,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,1,CTRL,A,T2,1,,51,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,1,CTRL,A,T3,0,incorrect_answer,90,1,0,,Authored event: Interprets a form-response receipt as a confirmed seat in the final answer
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,1,CTRL,A,T4,1,,43,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,1,CTRL,A,T5,1,,41,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,2,SR,B,T1,1,,94,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,2,SR,B,T2,1,,35,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,2,SR,B,T3,assisted,,155,1,2,,Authored event: Distinguishes held from confirmed after a hint
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,2,SR,B,T4,1,,27,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P04,2026-10-31,participant,CTRL_first,2,SR,B,T5,1,,36,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,1,SR,B,T1,1,,57,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,1,SR,B,T2,1,,44,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,1,SR,B,T3,1,,29,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,1,SR,B,T4,1,,18,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,1,SR,B,T5,1,,29,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,2,CTRL,A,T1,1,,84,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,2,CTRL,A,T2,1,,37,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,2,CTRL,A,T3,1,,18,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,2,CTRL,A,T4,assisted,,155,1,2,,Authored event: Cannot find the confirmation email that requires a reply
+SIMULATED,SIM-P05,2026-10-31,participant,SR_first,2,CTRL,A,T5,1,,33,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,1,CTRL,B,O1,0,timeout,300,2,0,14,Authored event: Forgets to link the third form to the shared sheet
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,1,CTRL,B,O2,1,,241,0,0,7,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,1,CTRL,B,O3,1,,54,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,1,CTRL,B,O4,1,,111,0,0,5,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,2,SR,A,O1,assisted,,253,2,2,11,Authored event: Needs contextual guidance on the date-input format
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,2,SR,A,O2,1,,90,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,2,SR,A,O3,1,,35,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P06,2026-10-31,organiser,CTRL_first,2,SR,A,O4,1,,39,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,1,SR,B,T1,1,,151,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,1,SR,B,T2,1,,82,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,1,SR,B,T3,1,,39,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,1,SR,B,T4,1,,25,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,1,SR,B,T5,1,,29,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,2,CTRL,A,T1,assisted,,155,2,2,,Authored event: Submits duplicate registrations for two equivalent sessions
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,2,CTRL,A,T2,1,,63,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,2,CTRL,A,T3,1,,24,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,2,CTRL,A,T4,1,,43,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P07,2026-10-31,participant,SR_first,2,CTRL,A,T5,1,,40,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,1,CTRL,A,T1,1,,78,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,1,CTRL,A,T2,1,,59,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,1,CTRL,A,T3,1,,20,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,1,CTRL,A,T4,1,,26,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,1,CTRL,A,T5,0,timeout,300,2,0,,Authored event: Cannot find cancellation; the task reaches the 300-second cap
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,2,SR,B,T1,1,,87,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,2,SR,B,T2,1,,36,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,2,SR,B,T3,0,incorrect_answer,90,2,0,,Authored event: Still interprets held as confirmed in the final answer; fails on answer correctness
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,2,SR,B,T4,1,,21,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P08,2026-10-31,participant,CTRL_first,2,SR,B,T5,1,,25,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,1,CTRL,A,O1,1,,236,0,0,12,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,1,CTRL,A,O2,1,,196,0,0,7,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,1,CTRL,A,O3,1,,43,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,1,CTRL,A,O4,0,incorrect_answer,145,2,0,7,Authored event: Exports the CSV for only one session
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,2,SR,B,O1,1,,168,1,0,9,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,2,SR,B,O2,1,,85,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,2,SR,B,O3,assisted,,155,2,2,4,Authored event: Needs a hint to inspect waitlist counts by session
+SIMULATED,SIM-P09,2026-10-31,organiser,CTRL_first,2,SR,B,O4,1,,51,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,1,CTRL,B,T1,1,,160,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,1,CTRL,B,T2,assisted,,155,1,2,,Authored event: Needs an explanation that waitlisting is not confirmation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,1,CTRL,B,T3,1,,33,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,1,CTRL,B,T4,1,,30,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,1,CTRL,B,T5,1,,44,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,2,SR,A,T1,1,,73,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,2,SR,A,T2,1,,53,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,2,SR,A,T3,1,,41,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,2,SR,A,T4,1,,16,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P10,2026-10-31,participant,CTRL_first,2,SR,A,T5,1,,34,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,1,SR,A,T1,1,,80,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,1,SR,A,T2,1,,51,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,1,SR,A,T3,1,,39,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,1,SR,A,T4,0,timeout,300,2,0,,Authored event: Does not select Accept; the confirmation task reaches the 300-second cap
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,1,SR,A,T5,1,,31,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,2,CTRL,B,T1,1,,84,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,2,CTRL,B,T2,1,,36,1,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,2,CTRL,B,T3,assisted,,155,1,2,,Authored event: Needs a hint to consult the status sheet
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,2,CTRL,B,T4,1,,34,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P11,2026-10-31,participant,SR_first,2,CTRL,B,T5,1,,38,0,0,,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,1,SR,B,O1,1,,168,0,0,8,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,1,SR,B,O2,1,,72,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,1,SR,B,O3,1,,39,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,1,SR,B,O4,1,,48,0,0,1,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,2,CTRL,A,O1,1,,214,0,0,12,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,2,CTRL,A,O2,assisted,,236,2,2,10,Authored event: Needs a hint to check duplicate registrations and queue order
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,2,CTRL,A,O3,1,,36,0,0,2,Generated from the declared task-time model; no human observation
+SIMULATED,SIM-P12,2026-10-31,organiser,SR_first,2,CTRL,A,O4,1,,131,0,0,5,Generated from the declared task-time model; no human observation

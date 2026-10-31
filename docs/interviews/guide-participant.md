@@ -1,8 +1,8 @@
 # Interview guide — participants (students), 20 minutes
 
-> 团队摘要：对 4–6 位非组员学生做 20 分钟半结构化访谈（10/16–10/24，plan §8）。目的：(1) 多场次活动报名的真实经历与痛点；(2) 重复占位、候补、通知偏好；(3) 市场规模需要的两个精确数字（过去一年参加过多少个「≥ 2 个等价场次」的活动；其中多少次同时占了多个名额）；(4) 支付意愿。
-> 开场读一遍同意句并在 CSV 的 `consent` 列记 `yes`；只记笔记、不录音；用 `I01…` 编号，不记姓名。结束后 24 小时内按 `record-template.md` 整理并把数字填进 `interviews.csv`。
-> 粗体问题是必须问的；缩进的「Probe」是追问，时间不够可跳过。
+> Team summary: The original plan called for 20-minute semi-structured interviews with 4-6 non-team students on 16-24 October (plan section 8), covering multi-session registration experiences, duplicate holds, waitlists, notifications, event frequency and willingness to pay.
+> For actual fieldwork, read the consent statement and record consent=yes, take notes without recording, use I01-style IDs instead of names, and complete record-template.md and interviews.csv within 24 hours.
+> Bold questions are required; indented probes are optional follow-ups if time permits.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (market sizing, p), §3 step 6, §8 (10/16–10/24: 4–6 students). Record with `record-template.md`; coded numbers go to `interviews.csv`; rules in `README.md`.
 
@@ -25,7 +25,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (market sizing, p), §3 step
 
 Read aloud, then tick `consent = yes` in the record:
 
-> "Thanks for your time. We are four NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 20-minute conversation about your experience signing up for events. We take written notes only, no recording. Your name is not written anywhere; you get a code like I03. Anonymised quotes and the numbers we collect may appear in our course report. You can skip any question or stop at any time, and you can ask us to delete your notes until 10 November. Is that okay?"
+> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 20-minute conversation about your experience signing up for events. We take written notes only, no recording. Your name is not written anywhere; you get a code like I03. Anonymised quotes and the numbers we collect may appear in our course report. You can skip any question or stop at any time, and you can ask us to delete your notes until 10 November. Is that okay?"
 
 If no: thank them and stop; do not create a record.
 

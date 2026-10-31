@@ -20,20 +20,10 @@ SeatRelay replaces this with one registration per workshop. You rank every sessi
 join one queue, and you hold at most one seat. A freed seat is offered to the next person in the queue
 who accepts that session, for a limited time; unanswered, it moves on by itself.
 
-Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of the 37 workshop
-events were repeats. Five universities list at least 713 student
-organisations, a lower bound. At our price the campus market is 713 times p times S$120, about S$85,600
-times p a year, where p is the share of organisers with multi-session sign-ups, from our interviews:
-[PENDING: p, from results/interviews/summary.md].
+Repeats do happen: on the NUS Libraries calendar from August to mid-October, 11 of 37 workshop events were repeats. Five universities list at least 713 student organisations, a lower bound. The campus-market formula is 713 times p times S$120 per year. In the three organiser research scenarios, p is 20 multi-session events out of 54 annual events, or 37.0 percent. This illustrates the formula; it does not estimate real market demand.
 
 **Slide 3, business model.**
-Organisers pay; participants never do. There is a free tier, and the organiser plan costs S$10 a
-month. The market is small, so the case rests on the hours an organiser saves
-per multi-session event: [PENDING: median hours per event and willingness to pay, from
-results/interviews/summary.md]. In our simulation, per-session forms left 3.87 duplicate confirmed
-seats per workshop to chase; one queue left none. Eventbrite relays tickets, but only within one date;
-no tool we scanned ties sessions to one queue place. Our first users would be NUS student organisations, starting with our
-planned pilot workshop (once the pilot has run, drop "planned").
+Organisers pay; participants never do. The proposal is a free tier and an organiser plan at S$10 a month. The three organiser scenarios have a median coordination baseline of four hours per event and assumed bargain/expensive monthly prices of S$8/S$15. Baseline work is not time saved, and these responses are not purchasing commitments. In the separate mechanism simulation, per-session forms left 3.87 duplicate confirmed seats per workshop, while one queue left none. Eventbrite relays tickets within one date; our mechanism connects acceptable sessions to one queue place. The proposed first users are NUS student organisations.
 
 Next, CHEN YANG explains the rules that make this work.
 
@@ -47,10 +37,10 @@ Next, CHEN YANG explains the rules that make this work.
 | CET training providers (context, 2016) | more than 700 | `docs/market-sizing.md` §2 row 10 (`ssg-credit-progress-2016`) |
 | Price | S$10/month = S$120 per organisation per year | plan §1.1 (a design decision, not data) |
 | Campus TAM | 713 × p × S$120 ≈ S$85,600 × p per year (three significant figures; a lower bound like the 713) | `results/market/2026-10-17/counts.json` (`\MarketTamCampusSgd`); `docs/market-sizing.md` §3 |
-| p (share of organisers with multi-session sign-ups) | [PENDING: from organiser interviews] | `results/interviews/summary.md` (`\InterviewPEventWeightedPct`) |
-| Interviews held (organisers / participants) | [PENDING] | `results/interviews/summary.md` (`\InterviewN`, `\InterviewOrganisers`, `\InterviewParticipants`) |
-| Hours of coordination per multi-session event | [PENDING] | `results/interviews/summary.md` (`\InterviewHoursMedian`) |
-| Willingness to pay (van Westendorp medians) | [PENDING] | `results/interviews/summary.md` (`\InterviewWtpBargainMedian`, `\InterviewWtpExpensiveMedian`) |
+| p (event-weighted share of multi-session events in organiser scenarios) | 20/54 = 37.0%; scenario input | `results/research/summary.json`, `interview_scenario.event_weighted_multi_session_pct` |
+| Interview scenarios (organisers / students) | 3 / 6 | `results/research/interviews.csv`; source method in `results/research/summary.md` section 2 |
+| Baseline coordination per event | median 4.0 hours; not time saved | `results/research/summary.json`, `interview_scenario.baseline_coordination_hours_median` |
+| Assumed price responses (organisers) | bargain median S$8, expensive median S$15 per organisation-month | `results/research/interviews.csv`; no empirical pricing claim |
 | Free tier and plan details | free tier: one open workshop at a time; organiser plan S$10/month (S$120/year) with any number of open workshops and co-organisers; the prototype does not enforce plan limits | Final report §2 (a design decision, not data) |
 | Duplicate confirmed seats left for the organiser, per workshop (simulation) | 3.87 with per-session forms, 0.00 with one queue | `results/replay/summary.md` (headline table) |
 
@@ -59,21 +49,10 @@ Do not quote the illustrative p = 0.2 / 0.4 rows of `docs/market-sizing.md` §4.
 ## Likely questions
 
 **Q1. How did you get p, and how reliable is it?**
-p is the event-weighted share of organisers' events that run two or more equivalent sessions. It is
-computed from interview questions A1 and A2 (`docs/interviews/guide-organiser.md`) as Σ multi-session
-events ÷ Σ events. On 2026-10-17 no interview had taken place; on the day, give the real number
-([PENDING: n organisers]). They will be a convenience sample from our network, and the report states
-that as a limitation. The organisation counts are lower bounds: "more than X"
-counts as X, and SUSS and the polytechnics are excluded. That is why we give the TAM as a formula
-in p instead of guessing it.
+p is the event-weighted share: sum of multi-session events divided by sum of annual events. The three organiser scenarios specify 20/54, or 37.0 percent. These inputs are authored, not observed interviews; they show how the market formula works. Official organisation counts remain independently sourced lower bounds, with SUSS and the polytechnics excluded.
 
 **Q2. Why would an organiser pay S$10 a month when Google Forms is free?**
-The price has to be below the time it saves: hours per multi-session event × hourly rate × such
-events per year must be at least S$120. The interview figures are [PENDING: hours, WTP from
-results/interviews/summary.md]. Free forms leave duplicate detection and waitlist e-mails to the
-organiser. In our simulation of 1,000 workshops, per-session forms left 3.87 duplicate confirmed
-seats per workshop for the organiser to chase, against none with one queue
-(`results/replay/summary.md`).
+The proposed annual price must be justified by time saved per event times the value of an hour times events per year. The research scenarios assume a four-hour coordination baseline and bargain/expensive monthly prices of S$8/S$15; neither establishes actual time saved or purchasing intent. The separate mechanism simulation exposes duplicate-seat cleanup as one potential source of manual effort. Price and adoption require field validation.
 
 **Q3. Doesn't Eventbrite already do this?**
 Partly. Eventbrite's waitlist offers a released ticket to the next person with a claim window, but

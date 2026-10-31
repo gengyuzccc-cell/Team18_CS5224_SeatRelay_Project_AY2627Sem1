@@ -134,6 +134,27 @@ function harness(
 }
 
 describe('CommandRunner settle (plan §1.3)', () => {
+  it('keeps a newer outcome when a superseded poll ignores cancellation', async () => {
+    let releaseOld: ((view: CommandResultView) => void) | undefined;
+    const h = harness({
+      getCommand: async (commandId) => {
+        if (commandId === IDS[0]) {
+          return new Promise<CommandResultView>((resolve) => {
+            releaseOld = resolve;
+          });
+        }
+        return { ...settledView('APPLIED', cancelled), commandId };
+      },
+    });
+    const old = h.runner.run(WS, { type: 'CANCEL_REGISTRATION' });
+    await vi.waitFor(() => expect(releaseOld).toBeDefined());
+    await h.runner.run(WS, { type: 'CANCEL_REGISTRATION' });
+    releaseOld?.({ ...settledView('APPLIED', cancelled), commandId: IDS[0]! });
+    await old;
+    expect(h.deps.applyResult).toHaveBeenCalledTimes(1);
+    expect(h.runner.state).toMatchObject({ phase: 'applied', commandId: IDS[1] });
+  });
+
   it('writes the poll result into the cache before onSettled and the refetch', async () => {
     const h = harness();
     await h.runner.run(WS, { type: 'CANCEL_REGISTRATION' });

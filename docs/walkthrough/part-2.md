@@ -66,5 +66,4 @@ whether you are still queued.
 The hold is set per workshop, from 30 s to 24 h. The 900 s default is also the SQS message-timer
 maximum, so a default offer needs one timer hop. Longer holds hop through the forwarder in steps of
 at most 15 minutes. The experiments use 60 s so that each expiry sample takes one minute instead of
-fifteen; the relay path is the same whatever the hold length. How long students find acceptable:
-[PENDING: `hold_window_ok_min` median from results/interviews/summary.md].
+fifteen; the relay path is the same whatever the hold length. The six student interview scenarios specify preferred windows of 30-120 minutes, with a median of 60. These are authored preferences, not observed acceptance of the default. See tools/research/scenarios.json; the study task protocol uses a 30-minute hold to keep offers alive across tasks.

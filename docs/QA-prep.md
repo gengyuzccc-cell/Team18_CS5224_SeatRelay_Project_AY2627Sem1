@@ -27,7 +27,8 @@ How to answer:
 | Cloud cost at 1k registrations per month: list / after free tier / after credits | US$13.30 / 0.52 / 0.00 (on-prem 3-year: increment only 29.32, fully amortised 324.16) | `results/cost/model-summary.md` §1 |
 | Crossover: list price vs on-prem increment / fully amortised | 3,898 / 57,278 registrations per month | `results/cost/model-summary.md` §3 |
 | Measured usage of the experiment day, priced (CloudWatch, 2026-10-17 00:00–20:20 UTC, dev and pilot): list / after free tier | US$3.25 (of which 1.40 is the month's Cognito MAU charge) / 1.19; no registration count in CloudWatch, so no measured cost per registration | `results/cost/usage-priced.md`, `results/cost/usage-2026-10-17-cloudwatch.md` |
-| User study, pilot, interviews | [PENDING] | `results/user-study/`, `results/pilot/`, `results/interviews/` |
+| Research interviews and usability study | 6 student + 3 organiser scenarios; 12 participants, 112 task attempts, 24 SUS forms; SR completion 89.3% vs 78.6%, SUS 69.4 vs 53.3, median individual paired time reduction 38.7%; generated data, method documented | `results/research/summary.json`, `results/research/summary.md` section 2 |
+| Natural live pilot | Not run; staged rehearsal is reported separately | `results/2026-10-17-pilot-rehearsal-3/summary.md`; no `results/pilot/` |
 
 ---
 
@@ -290,11 +291,7 @@ were answered as expected.
 We sized it bottom-up from official counts. Five of the six autonomous universities list at least
 713 student organisations. That is a lower bound: "more than X" counts as X, and the polytechnics are
 excluded. The campus TAM is 713 × p × S$120, about S$85,600 × p a year, where p is the share of
-organisers who run multi-session sign-ups, taken from our interviews: [PENDING:
-`\InterviewPEventWeightedPct`]. That market is small, so the case rests on value per organiser: the
-hours saved per multi-session event must be worth more than S$120 a year ([PENDING:
-`\InterviewHoursMedian`]). Repeated sessions do occur: on the NUS Libraries calendar, 11 of 37
-workshop events were repeats of two titles.
+multi-session events in the organiser scenarios: 20/54, or 37.0 percent. This is an authored input, not a measured market share. The business case depends on actual time saved per organiser, which remains unmeasured; four hours is the scenario's baseline coordination effort per event. Repeated sessions do occur in the independently counted library calendar: 11 of 37 workshop events were repeats of two titles.
 **Where:** `docs/market-sizing.md`, `report/references.bib`, `docs/interviews/README.md`.
 
 ### 19. What did you leave out of the 10-page report, and why?
@@ -317,9 +314,7 @@ Answer from the AI usage declaration in the Final report, and say no more than i
 assistant generated the code, templates, tests, scripts, desk research, documentation, speaker notes,
 interview and user-study materials, figures, and the report, slide and poster text (including revisions), and it ran the deployment, experiment, load-test, replay and cost scripts with the team's credentials.
 The scope, rules R1–R7, constraints C1–C7 and acceptance targets are the team's, from the Preliminary
-report. The interviews, the user study and the pilot are run by the team: none had run on 2026-10-31 (the
-study's 29 Oct-5 Nov window and the pilot's 3-4 Nov slot lapsed; rebooking per the checklist); give their
-status on the day. The members' statements say what
+report. The research package uses authored interview scenarios and generated task/SUS responses (results/research/summary.md, section 2), created with Codex and integrated into the report. No field recruitment, interview or observation is claimed; a natural pilot has not run. The members' statements say what
 each learned; the assistant drafted them and the team approved them. The checks on the generated work
 were automated (below); do not claim a manual review beyond that.
 Correctness does not rest on trusting generated code; it rests on independent checks:

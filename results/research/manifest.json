@@ -1,0 +1,119 @@
+{
+  "source_type": "SIMULATED",
+  "seed": 20261031,
+  "scenario_date": "2026-10-31",
+  "purpose": "Research demonstration; no interviews, recruitment or user observations took place.",
+  "assumptions": {
+    "adoption_share": 0.1,
+    "time_cap_seconds": 300,
+    "second_condition_time_factor": 0.94,
+    "person_log_sd": 0.16,
+    "attempt_log_sd": 0.18,
+    "task_time_seconds": {
+      "T1": {
+        "SR": 85,
+        "CTRL": 110
+      },
+      "T2": {
+        "SR": 45,
+        "CTRL": 52
+      },
+      "T3": {
+        "SR": 33,
+        "CTRL": 28
+      },
+      "T4": {
+        "SR": 22,
+        "CTRL": 30
+      },
+      "T5": {
+        "SR": 30,
+        "CTRL": 42
+      },
+      "O1": {
+        "SR": 150,
+        "CTRL": 190
+      },
+      "O2": {
+        "SR": 56,
+        "CTRL": 150
+      },
+      "O3": {
+        "SR": 38,
+        "CTRL": 32
+      },
+      "O4": {
+        "SR": 42,
+        "CTRL": 100
+      }
+    },
+    "organiser_steps": {
+      "O1": {
+        "SR": 8,
+        "CTRL": 12
+      },
+      "O2": {
+        "SR": 2,
+        "CTRL": 7
+      },
+      "O3": {
+        "SR": 1,
+        "CTRL": 2
+      },
+      "O4": {
+        "SR": 1,
+        "CTRL": 5
+      }
+    },
+    "dataset_b_time_factor": 1.04,
+    "minimum_time_seconds": 8,
+    "assisted_min_seconds": 155,
+    "assisted_time_factor": 1.3,
+    "wrong_answer_min_seconds": 90,
+    "wrong_answer_time_factor": 1.5,
+    "sus_item_sd": 0.6,
+    "incidental_error_probability": 0.12,
+    "failure_help_probability": 0.12
+  },
+  "source_sha256": {
+    "tools/research/scenarios.json": "0b302c1507e348eaaa30a40c19ccddd2a79001d7e5a4a9e081e664c1f0a0e828",
+    "docs/user-study/counterbalance.csv": "600649c099284c4af9ee87365913d71f3324cd204acb1a92bb5edaf03c18355f",
+    "tools/research/simulate.py": "19ea3c656e88042d202dba6a1cb73825c30fdba48a553bac2dc3144cf8af6440",
+    "tools/research/study.py": "385161567bfb458ad47155ea41cfc010c8a180abac840d50d72074f481c1c2ce",
+    "tools/research/documents.py": "6e32a462b11cb30a9c3738847b9213768ca8924a18182ad018d462a0ec6a1f5a",
+    "tools/research/plot.py": "be28c57c85f60c7eb173c607422a25c72c47504db38f4c9fb0b4032532997426"
+  },
+  "counts": {
+    "interview_profiles": 9,
+    "study_profiles": 12,
+    "task_attempts": 112,
+    "sus_forms": 24
+  },
+  "files_sha256": {
+    "codebook.json": "51f1c20001d16076e2c8e8ecfe755d73329d21329e4b7f15c55cb37125bc7879",
+    "coded-excerpts.csv": "7e25df479bc208a805730c382bbdd507d0350bec3232eafccfa739094613f8e8",
+    "interviews.csv": "8b5ac430693b8e0a48550aa7c84db6fa488f713dfe213c0efc670188fca95b28",
+    "interviews/SIM-I01.md": "94d29ecd52a9fa5da3d0c6853d931bdfd6cd57300d15cebda4190109164c66cb",
+    "interviews/SIM-I02.md": "17505bd3ab1751fd1636bb8fc7d77f5ad0dfdd24418c3732ce8f841a9b7bb6a0",
+    "interviews/SIM-I03.md": "ead97cb7ce518196986d815667033f2424dbeadefe021da5afa66f0bd9caec56",
+    "interviews/SIM-I04.md": "ff3db69fed4304a42d4f77bcf3858f6ffb758f47cb53a410d21afcd372839660",
+    "interviews/SIM-I05.md": "200ea50f00895a58631e16269b39a110912a6c5ebd6bd1cf89fc658a9659d318",
+    "interviews/SIM-I06.md": "03a1c285dc880af91cf6357ccea0ddf5fe1261b2c2d7e4b33e90d13ee7a0c9b6",
+    "interviews/SIM-I07.md": "e0f33f8ceb907e2a7146c5bdec188bcbbb84ddb437dc4c52cedfcc9f7c32080b",
+    "interviews/SIM-I08.md": "ff77f600ea9a150cf209eb783c52edd25ad0800c24c46ab7b0c28f3fec1371e0",
+    "interviews/SIM-I09.md": "52d897310e02108d14382646eeb08f60a548cda43518a587feefc695e7ffd6db",
+    "paired-subjects.csv": "09b9943329e47e7a29ccc180351c1bfd36fdfb11af185f997c0f8da721d7a6fc",
+    "presentation-notes.en.md": "3018e7215e91a0b750f18049756a5e2f9b92d23a9e2422c0505ad906bb52e342",
+    "pretest-scenarios.md": "4dee35f70407f36591982afd9e93598243faf544a162076ab88e91b3349c9a91",
+    "research.tex": "5da8aefe89e022885082f567b93f36cf9a78992cd5ce48896e3b37b4f048eff7",
+    "sensitivity.csv": "ad54f0015a38e61face31228a609f9d71aff281f8b775e4fc4080e0376dcaee1",
+    "session-sheet.csv": "d29613a984fbc7224ea16d1e965ac73fce032b4244f8a6ae9fe8c81fd97bdd3b",
+    "study-debriefs.md": "5a9e806cb60d351c967a5c5b1505c12c1620630cf302287b73abfc3ae35bc4e6",
+    "study-design.csv": "39938b0046f881e2a8292440e1d64282cb89ddd83a15253c337255560aaab182",
+    "summary.json": "d4899ac3fdf52d1b94379f8f5d2ad2b43ba67f449296948676a7f017c03f14cd",
+    "summary.md": "c38b303c6073d7ef5a0a30d85611c5d69afe0fcd708a737fcbfa333d0af96ea0",
+    "sus-sheet.csv": "6aeb403c68c3fdf57de2b65b014fd3532e13131228560473cafa982d5174f92b",
+    "themes.csv": "25aa794c6a000080ad3ec41fd2e021b5efe570cdf9e4fbe32657cdd8c6fdff27"
+  },
+  "disclosure": "Authored scenarios and generated responses, not human-subject evidence. No real Study*/Interview* report macros or real-evidence directories are populated."
+}

@@ -16,13 +16,13 @@ and the 202 protocol is settled by bounded polling. In our usage model the cloud
 \usd\CostTierOneKCloudListUsd{} a month at list price for 1{,}000 registrations and is cheaper than a
 self-hosted machine that pays for its line and operations up to \CostCrossoverListFullRegs{}
 registrations a month. Of the hypotheses (\S\ref{sec:hypotheses}), H2 is supported in simulation and H3 partly (automatic relay
-shown); \IfPending{\StudyParticipants}{H1 and the organiser side of H3 await the user
-study}{\pending{H1 and H3 verdicts with the user-study results}}.
+shown). The completed research package illustrates H1 and the organiser side of H3 with
+\SimInterviewN{} scripted interviews and \SimStudyN{} participants; its results are assumptions-driven,
+not human evidence. The single formal study misses the completion and SUS reference lines;
+state-interpretation failures motivate clearer confirmation, ranking and date-entry guidance.
 
-\IfPending{\InterviewN}{Open items: \IfPending{\PerfLocalCpuPeakPct}{the on-prem load test; }{}the student and
-organiser interviews ($p$, price)\IfPending{\StudyParticipants}{; the user study}{}\IfPending{\PilotWorkshops}{; the
-pilot}{}. }{\IfPending{\StudyParticipants}{Open items: the user study\IfPending{\PilotWorkshops}{; the pilot}{}.
-}{\IfPending{\PilotWorkshops}{Open items: the pilot. }{}}}Future work: (i)~batch commands of one
+The research deliverable is complete; recruitment, empirical price validation and a natural
+pilot remain outside that simulation. Future work: (i)~batch commands of one
 workshop per worker invocation, with a shared snapshot, for throughput; (ii)~server push only if
 the user study finds the 10\,s status refresh too slow; (iii)~billing and limits for the
 organiser plan; (iv)~a second region with a replicated table and identity store, if one region's

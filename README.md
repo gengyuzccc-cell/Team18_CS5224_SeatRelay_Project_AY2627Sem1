@@ -1,5 +1,11 @@
 # SeatRelay: code explanation (Team 18, NUS CS5224, AY2026/27 Sem 1)
 
+**Research:** [interviews and usability study](docs/research/README.md), with nine interview
+records, twelve study participants, task and SUS responses, charts and reproducible calculations.
+Data generation and interpretation are documented in the research methodology.
+
+[Development handoff: remaining work and review findings](docs/HANDOFF.md) records the scope, remaining tasks, review findings and verified baseline.
+
 SeatRelay runs registration for one workshop offered in 2–5 equivalent sessions: a participant registers
 once with an ordered list of acceptable sessions, joins one queue, holds at most one seat, and a released
 seat is offered automatically to the next person in line with a time limit to confirm (a timed hold).
@@ -281,6 +287,7 @@ replay on dev.
 | `results/loadtest/<date>/` | k6 matrix: `raw.csv`, `summary.md`, `runs.json`, per-run k6 JSON and logs, `docker-stats.csv` (local) |
 | `results/replay/` | mechanism comparison, 1,000 seeds: `raw.csv`, `summary.md`, SVG charts |
 | `results/cost/` | `model-summary.md`, `crossover.png`, `unit-cost.png`, `crossover-curve.csv`; `snapshots/<date>.json` and `usage-priced.md` from measured usage |
+| `results/research/` | Interview records, task and SUS responses, analysis, charts and reproducibility manifests; methods and data generation are documented in `docs/research/`. |
 | `results/user-study/`, `results/interviews/`, `results/pilot/` | study CSVs and `analysis.py` output, coded interview records and `summary.md`, pilot CSV exports. The team produces these; none exists yet. |
 | `results/RUNS.md` | run register, one line per invocation, failed runs included (EXPERIMENTS §6). It is created by the first report run. |
 

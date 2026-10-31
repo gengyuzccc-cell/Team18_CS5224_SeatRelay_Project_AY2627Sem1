@@ -74,9 +74,9 @@ Aspect: scenario and method & Target & Measured & Verdict\\
 \textbf{Mechanism comparison} (Prelim.\ \S4): one fixed sequence through per-session waitlists and the unified queue & No target: duplicate holds, distinct served, backfill time
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
-\textbf{User study} (Prelim.\ \S5): 4--6 student interviews, then 12 non-team university students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
- & \IfPending{\StudyParticipants}{not run (first window lapsed; possible until 11 Nov; protocol and script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
- & --\\
+\textbf{User research} (Prelim.\ \S5): interviews and usability tasks, SeatRelay vs prepared forms + spreadsheet & Reference lines: completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
+ & \SimInterviewN{} interviews; \SimStudyN{} participants, one study. Completion \SimCompletionSR\,\% vs \SimCompletionCtrl\,\%; SUS \SimSusSR{} vs \SimSusCtrl{}; paired time reduction \SimPairedReduction\,\%. Descriptive outputs, \S\ref{sec:study}
+ & model\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
  & \IfPending{\PilotWorkshops}{not run (3--4 Nov slot lapsed; to be rebooked on \code{pilot}, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
@@ -195,38 +195,23 @@ Table~\ref{tab:competitors}; the plan's extra replay on dev was not run.
   \label{fig:replay}
 \end{figure}
 
-\subsection{User study}\label{sec:study}
-% Two branches: until the study has run, the protocol in full; once results/user-study/ exists, a
-% one-sentence protocol and the measured values only (the plan is labelled as the plan). This keeps
-% the report within 10 pages when the data arrive: a scratch build with every pending macro set to
-% "00.0" must still print pages<=10 (docs/SUBMISSION-CHECKLIST.md, row 3.1). The study charts
-% (docs/user-study/analysis.py) stay in results/user-study/ and can go on the slides.
-\IfPending{\StudyParticipants}{\emph{Not yet run.} The protocol (\code{docs/user-study/})
-follows the Preliminary report: four to six student interviews come first, with a record of what the
-team's own pilot organisers do today (\IfPending{\InterviewParticipants}{neither held yet}{\InterviewParticipants{}
-students interviewed, \code{results/interviews/}}); two to three organiser interviews, added since, give
-$p$, $h$ and the willingness to pay (\IfPending{\InterviewOrganisers}{none held yet}{\InterviewOrganisers{}
-held}). The study will then recruit twelve non-team university
-students, at least four with organising experience, and a two-person dry run that is excluded; each
-uses SeatRelay and a control that mirrors current practice, one Google Form per session plus a shared
-Sheet with duplicate-detection formulas, in counterbalanced order with equivalent data sets. If
-recruitment falls short, the real sample and its limits are reported. Participants do five tasks
-(choose acceptable sessions, join the waitlist, interpret their status, confirm, cancel) and
-organisers four (create a multi-session workshop, handle a cancellation, inspect the backfill, read
-the distinct count and export). The measures are completion, paired task time (Wilcoxon signed-rank
-test~\cite{wilcoxon1945}), the original ten-item SUS~\cite{brooke1996sus}, erroneous actions, help
-requests, the organiser's manual steps and a short interview.}{The study followed the protocol of the
-Preliminary report (\code{docs/user-study/}): SeatRelay against one Google Form per session plus a
-shared Sheet, counterbalanced, measured by completion, paired task time (Wilcoxon signed-rank
-test~\cite{wilcoxon1945}), SUS~\cite{brooke1996sus}, errors, help requests and the organiser's manual
-steps (interviews: \IfPending{\InterviewN}{none held}{\InterviewParticipants{} students and
-\InterviewOrganisers{} organisers, \code{results/interviews/}}). With \StudyParticipants{} participants
-(planned: twelve; \StudyOrganiserTrack{} on the organiser track), completion was \StudyCompletionSRPct\,\% with SeatRelay and
-\StudyCompletionCtrlPct\,\% with the control; the median paired task time was
-\StudyTimeImprovementPct\,\% lower (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS was \StudySusSRMean{}
-[\StudySusSRLo, \StudySusSRHi] against \StudySusCtrlMean{} [\StudySusCtrlLo, \StudySusCtrlHi];
-participants made \StudyErrorsSR{} erroneous actions and \StudyHelpSR{} help requests with SeatRelay
-against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control (charts in \code{results/user-study/}).}
+\subsection{User research: interviews and usability study}\label{sec:study}
+\textbf{Method and data source.} The research uses authored interview scenarios and generated task/SUS responses;
+no participants were recruited or observed. The package covers
+\SimInterviewStudents{} student and \SimInterviewOrganisers{} organiser interview profiles, codes
+six themes, and generates responses for \SimStudyN{} participants (seed 20261031).
+Eight perform five participant tasks and four perform four organiser tasks in both conditions,
+with counterbalanced order and equivalent data sets: \SimTaskAttempts{} attempts and \SimSusForms{}
+ten-item SUS forms in one formal study~\cite{brooke1996sus}. Two scripted pre-study walkthroughs are
+excluded. The control has prepared forms and a sheet with duplicate detection. Failures remain in
+the data; timing is paired by participant before aggregation.
+
+The scenario misses the completion and SUS reference lines. Held-versus-confirmed confusion,
+ranking and date-entry assistance motivate clearer state/deadline wording and contextual guidance.
+These are design recommendations, not changes evaluated in another study. Outcomes are generated
+from declared assumptions; no significance or population claim follows.
+Scripts, raw responses, charts and limitations: \code{results/research/}; companion report:
+\code{report/Research.tex}.
 
 \subsection{Live pilot, and a staged rehearsal reported separately}\label{sec:pilot}
 \IfPending{\PilotWorkshops}{The pilot (its 3--4 November 2026 slot lapsed before registration could
@@ -262,9 +247,10 @@ evidence; only independent participants' behaviour and feedback are user evidenc
   relayed inside its own transaction, \SmokeCancelBackfillMs\,ms), and in simulation per-session forms left
   duplicate confirmed seats to clean up and one queue none (\S\ref{sec:business}). Open: \IfPending{\BackfillExpiredPNinetyFiveS}{the
   backfill-latency target (run aborted, \S\ref{sec:results}) and }{}\IfPending{\StudyParticipants}{the
-  organiser's manual steps in the user study (\S\ref{sec:study}).}{\pending{H3: compare the organiser's
+  organiser's actual manual steps. The scenario gives \SimStepsSR{} versus \SimStepsCtrl{}
+  median actions over four organiser tasks (\S\ref{sec:study}); this is a model output.}{\pending{H3: compare the organiser's
   manual steps in the user study}}
-\item \textbf{H1} (unified registration reduces participant effort): \IfPending{\StudyParticipants}{\emph{not
-  tested yet}; it rests on the user study's paired task times, completion, errors and help
-  requests (\S\ref{sec:study}).}{\pending{H1 verdict from the user-study results (\S\ref{sec:study})}}
+\item \textbf{H1} (unified registration reduces participant effort): \emph{illustrated under
+  assumed behaviour, not empirically tested}. The study scenario exposes both shorter task totals
+  and state-interpretation failures (\S\ref{sec:study}); real user benefit remains unmeasured.
 \end{itemize}

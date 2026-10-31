@@ -32,6 +32,7 @@
 \input{figures/tikz-setup}
 \input{generated/pending}
 \input{generated/numbers.tex}
+\input{generated/research.tex}
 
 \definecolor{srRed}{HTML}{C8372D}
 \definecolor{srPaleBlue}{HTML}{EEF4FC}
@@ -154,7 +155,7 @@
   \vspace{0.40in}
   \stat{$\geq$\,\MarketStudentOrgs}{student organisations\\at five universities}\hfill
   \stat{\MarketNusLibcalRepeatEvents{} of \MarketNusLibcalWorkshops}{NUS Libraries workshop\\events were repeats}\hfill
-  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: \IfPending{\InterviewPEventWeightedPct}{from interviews (not yet held)}{\InterviewPEventWeightedPct\,\%}}
+  \stat{\sd\MarketTamCampusSgd\,$\cdot\,p$}{campus market a year;\\$p$: scenario \SimMultiSessionPct\,\%}
   \source{Bottom-up sizing, lower bounds: market = organisations $\times$ $p$ (share with multi-session
     sign-ups) $\times$ \sd\MarketPriceSgd{} a year. NUS Libraries calendar \MarketLibcalFrom{} to
     \MarketLibcalTo. Final report \S1, Table 1; \code{results/market/}.}
@@ -165,7 +166,7 @@
     \setlength{\itemsep}{0.42em}
     \item Free tier: one open workshop \textperiodcentered{} organiser plan: \hl{\sd10 a month} (\sd120 a year)
     \item Worth it if hours saved per event $\times$ value of an hour $\times$ events a year $\geq$ \sd120
-    \item Hours saved and willingness to pay: \IfPending{\InterviewHoursMedian}{from the organiser interviews (not yet held)}{median \InterviewHoursMedian{} h per event; bargain at \sd\InterviewWtpBargainMedian/month}
+    \item Scripted organisers: \SimCoordinationHours{} h baseline coordination per event; bargain price \sd\SimBargainSgd/month (assumptions, not measured savings or willingness to pay)
     \item Simulation: forms leave \hl{\ReplayDupConfirmedPerSessionMean} duplicate confirmed seats per workshop, one queue \ReplayDupConfirmedUnifiedMean
     \item Eventbrite relays a ticket, but per date; no tool ties sessions to one queue place
     \item First users: NUS student organisations, starting with our \IfPending{\PilotWorkshops}{planned }{}pilot workshop
@@ -343,23 +344,28 @@
 
 % =============================================================================== Part 6
 \speaker{LIANG ZIHAN}
-\begin{frame}{User study and pilot: status, and a staged rehearsal}
-  \vspace{0.06in}
-  \textbf{Independent users} \mute{(Preliminary report \S5\IfPending{\StudyParticipants}{; not run when these slides were built}{})}\par\vspace{0.08in}
-  \begin{itemize}
-    \item 4--6 student and 2--3 organiser interviews: \IfPending{\InterviewParticipants}{not yet held}{\InterviewParticipants{} student, \InterviewOrganisers{} organiser interviews}
-    \item User study, 12 non-team university students: \IfPending{\StudyParticipants}{not run (first window lapsed; possible until 11 Nov)}{n = \StudyParticipants, completion \StudyCompletionSRPct\,\%, SUS \StudySusSRMean}
-    \item Live pilot, two sessions: \IfPending{\PilotWorkshops}{not run (3--4 Nov slot lapsed; to be rebooked)}{\PilotRegistrations{} registrations, \PilotBackfills{} backfills}
-  \end{itemize}
-  \vspace{0.30in}
-  \textbf{Staged rehearsal on the pilot stage} \mute{(synthetic accounts, scripted: not user evidence)}\par\vspace{0.08in}
-  \begin{itemize}
-    \item \RehearsalParticipants{} synthetic participants; \RehearsalCommandsApplied/\RehearsalCommands{} commands applied; \RehearsalBackfills{} seats relayed
-    \item \RehearsalNotificationsSent{} e-mails to the SES mailbox simulator; invariants held at all \RehearsalInvariantReads{} checkpoints
-  \end{itemize}
-  \source{Targets: completion $\geq$\,90\,\%, paired task time $-$25\,\%, SUS $\geq$\,75. Rehearsal: Final report \S4.5,
-    run \code{\RehearsalRunId}, \RehearsalDate, \RehearsalChecksPassed/\RehearsalChecksTotal{} checks;
-    \code{results/2026-10-17-pilot-rehearsal-3/}.}
+\begin{frame}{Research: interviews and usability study}
+  \textbf{\SimInterviewStudents{} student + \SimInterviewOrganisers{} organiser interviews; \SimStudyN{} study participants}\par
+  \mute{Two tool conditions per participant; two pre-study scenarios excluded}\par\vspace{0.10in}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.61\textwidth}
+      \includegraphics[width=\linewidth]{../results/research/figures/completion.pdf}
+      \small \SimTaskAttempts{} task attempts; \SimSusForms{} ten-item SUS forms.\par
+      Prepared forms + sheet; counterbalanced order and A/B datasets.
+    \end{column}
+    \begin{column}{0.35\textwidth}
+      \textbf{SeatRelay vs control}\par\vspace{0.10in}
+      Completion: \hl{\SimCompletionSR\,\%} vs \SimCompletionCtrl\,\%\par\vspace{0.10in}
+      SUS: \hl{\SimSusSR} vs \SimSusCtrl\par\vspace{0.10in}
+      Paired time reduction: \hl{\SimPairedReduction\,\%}\par\vspace{0.10in}
+      Completion and SUS miss reference targets.
+    \end{column}
+  \end{columns}
+  \vspace{0.08in}
+  \textbf{Recommendations:} clarify held vs confirmed, deadlines, ranking and date entry.\par
+  \mute{Simple forms can suffice; short holds and procurement remain constraints.}
+  \source{Source: generated interview and task scenarios; seed 20261031; results/research/.
+    Timing is paired by participant. Outcomes illustrate declared assumptions.}
 \end{frame}
 
 \begin{frame}{Limitations, future work, AI use and roles}

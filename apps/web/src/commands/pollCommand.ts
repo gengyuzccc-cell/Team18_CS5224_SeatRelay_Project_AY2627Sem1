@@ -90,6 +90,9 @@ export async function pollCommand(
     attempt += 1;
     try {
       const view = await getCommand(commandId, options.signal);
+      if (options.signal?.aborted) {
+        throw new PollAbortedError();
+      }
       consecutiveErrors = 0;
       options.onAttempt?.(attempt, view);
       if (isTerminal(view)) {

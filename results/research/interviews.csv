@@ -1,0 +1,10 @@
+source_type,id,role,persona,org_type,events_per_year,multi_session_events,share_multi_session,baseline_coordination_hours,tools,wtp_too_cheap,wtp_bargain,wtp_expensive,wtp_too_expensive,wtp_unit,consent
+SIMULATED,SIM-I01,participant,"Second-year student with a changing timetable, familiar with forms and group chats",,12,4,0.333333,0.3,google_forms;telegram,0,0,2,4,per event,not_applicable_simulated
+SIMULATED,SIM-I02,participant,First-year student using a waitlist for the first time,,8,2,0.25,0.5,google_forms;email,0,0,1,3,per event,not_applicable_simulated
+SIMULATED,SIM-I03,participant,Third-year student on an internship who rarely checks personal email during work,,10,3,0.3,0.2,email;google_forms,0,1,3,5,per event,not_applicable_simulated
+SIMULATED,SIM-I04,participant,Postgraduate student available at one fixed time who prefers simple tools,,6,1,0.166667,0.1,google_forms;email,0,0,1,2,per event,not_applicable_simulated
+SIMULATED,SIM-I05,participant,Fourth-year student attending career workshops who is concerned about fairness,,16,6,0.375,0.4,google_forms;sheets;telegram,0,1,2,5,per event,not_applicable_simulated
+SIMULATED,SIM-I06,participant,Second-year exchange student who relies on email rather than local group chats,,9,3,0.333333,0.3,email;google_forms,0,0,2,4,per event,not_applicable_simulated
+SIMULATED,SIM-I07,organiser,Events lead of a student technology club whose team shares a spreadsheet,student_club,12,6,0.5,4.0,google_forms;sheets;telegram,2,8,15,25,per organisation per month,not_applicable_simulated
+SIMULATED,SIM-I08,organiser,Student coordinator of a career-development programme whose small team can choose free tools,student_club,18,6,0.333333,3.0,email;google_forms;sheets,0,5,10,20,per organisation per month,not_applicable_simulated
+SIMULATED,SIM-I09,organiser,Departmental student assistant subject to supervisor approval and institutional system requirements,department,24,8,0.333333,5.5,email;school_system;sheets,5,10,20,35,per organisation per month,not_applicable_simulated

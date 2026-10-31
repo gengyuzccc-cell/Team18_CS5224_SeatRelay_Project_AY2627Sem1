@@ -1,10 +1,11 @@
 # Session protocol (facilitator + note-taker script)
 
-> 团队摘要：每位参与者约 40 分钟，先后使用 SeatRelay 和对照（每场一个 Google Form + 电子表格），顺序与数据集按 `counterbalance.csv` 分配。
-> 主持人逐字读任务卡，读完开始计时，参与者说 "done" 停表，5 分钟封顶计失败；提示只按"提示阶梯"给，给了提示算 assisted。
-> 每个任务结束后记录员立刻在 `session-sheet.csv` 写一行；每个条件后立刻做 SUS；最后 4 分钟简短访谈，记录到 `interview-notes.md`。
+> Team summary: Each session takes about 40 minutes. The participant uses SeatRelay and the control (one Google Form per session plus a spreadsheet), with order and datasets assigned by counterbalance.csv.
+> The facilitator reads each task card verbatim, starts timing after reading and stops when the participant says "done". The five-minute cap is a failure. Give hints only through the hint ladder; a hint makes completion assisted.
+> Record one session-sheet.csv row immediately after every task and administer SUS after each tool. The final four minutes are a short debrief recorded in interview-notes.md.
 
 Total ≈ 40 min. Times are cumulative targets, not hard limits, except the per-task 5-minute cap.
+“Round 1” and “round 2” below are the two tool-condition periods within one formal study.
 
 ## 0. Before the participant arrives (10 min, not counted)
 

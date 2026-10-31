@@ -27,7 +27,7 @@ export function createLoop(options: LoopOptions): Loop {
   let running = false;
   let stopped = true;
   let finished: Promise<void> = Promise.resolve();
-  const abort = new AbortController();
+  let abort = new AbortController();
 
   async function run(): Promise<void> {
     while (!stopped) {
@@ -58,6 +58,7 @@ export function createLoop(options: LoopOptions): Loop {
       }
       running = true;
       stopped = false;
+      abort = new AbortController();
       logger.info(`${name} started`, { intervalMs });
       finished = run().finally(() => {
         running = false;

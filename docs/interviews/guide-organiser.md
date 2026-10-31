@@ -1,8 +1,8 @@
 # Interview guide — organisers (clubs, departments, training providers), 25 minutes
 
-> 团队摘要：对 2–3 位组织者（学生社团干事、常办 workshop 的部门职员、或 CET 培训机构人员）做 25 分钟访谈（10/16–10/24，plan §8）。必须拿到的数字：每年办几场有报名的活动、其中多少场有「≥ 2 个等价场次」（→ 问题发生率 p）、每场人工协调几小时、用什么工具、van Westendorp 四个价格 + 对 S$10/月的反应、数据/隐私限制。
-> 顺带问能否在 11/3–11/4 用 SeatRelay 办一次真实试点（plan §8 10/22 截止）。
-> 粗体问题必须问；「Probe」是追问。结束后 24 小时内整理记录并填 `interviews.csv`。
+> Team summary: The original plan called for 25-minute interviews with 2-3 organisers on 16-24 October (plan section 8). Collect annual event counts, the number with at least two equivalent sessions, coordination hours per event, current tools, four van Westendorp prices, the response to S$10/month, and data/privacy restrictions.
+> The original protocol also asked about a live pilot on 3-4 November, with the workshop to be agreed by 22 October. These dates describe the original plan, not completed fieldwork.
+> Bold questions are required; probes are follow-ups. Complete the records and interviews.csv within 24 hours.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours per event, S$120/year pricing), §3 step 6, §5, §8 (2–3 organiser interviews; pilot workshop decided by 10/22). Record with `record-template.md`; numbers to `interviews.csv`; rules in `README.md`.
 
@@ -24,7 +24,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours per event, S$120/y
 
 Read aloud, then tick `consent = yes`:
 
-> "Thanks for your time. We are four NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 25-minute conversation about how you run sign-ups today. We take written notes only, no recording. Neither your name nor your organisation's name is written in our records; you get a code like I07 and an organisation type like 'student club'. Anonymised quotes and the numbers we collect may appear in our course report. Skip anything, stop any time, and you can ask us to delete your notes until 10 November. Is that okay?"
+> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 25-minute conversation about how you run sign-ups today. We take written notes only, no recording. Neither your name nor your organisation's name is written in our records; you get a code like I07 and an organisation type like 'student club'. Anonymised quotes and the numbers we collect may appear in our course report. Skip anything, stop any time, and you can ask us to delete your notes until 10 November. Is that okay?"
 
 Warm-up:
 - **What is your role, and what kind of organisation is it?** Code `org_type`: `student_club` / `department` / `cet_provider` / `other` (describe).
