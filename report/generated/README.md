@@ -131,7 +131,7 @@ Source: `runId d179d40d-6148-41b2-8a5d-1a4df8ae0ac5, target dev, started 2026-10
 
 ### Preference, order: deployment replay (dev) and core property test
 
-Source: `runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10-17T18:20:35.647Z, commit e05c037d485d (dirty)`; `core-tests: results/2026-10-17-core-tests` — 25/25 with data.
+Source: `runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10-17T18:20:35.647Z, commit e05c037d485d (dirty)`; `core-tests: results/2026-10-31-core-tests` — 25/25 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -152,14 +152,14 @@ Source: `runId 4b65ed89-d047-4946-9188-deaefb827df1, target dev, started 2026-10
 | `\PrefOrderSettleClientPFiftyMs` | 782 | results/2026-10-17-preference-order-2/meta.json: settleMs.p50 |
 | `\PrefOrderSettleClientPNinetyFiveMs` | 812 | results/2026-10-17-preference-order-2/meta.json: settleMs.p95 |
 | `\PrefOrderSettleServerPNinetyFiveMs` | 61 | results/2026-10-17-preference-order-2/latency.csv: serverSettleMs (nearest-rank p95) |
-| `\CoreTestsPassed` | 127 | results/2026-10-17-core-tests/run.log: 'Tests N passed' |
-| `\CoreTestsTotal` | 127 | results/2026-10-17-core-tests/run.log: 'Tests ... (total)' |
-| `\CoreTestFiles` | 13 | results/2026-10-17-core-tests/run.log: 'Test Files ... (total)' |
-| `\CorePropertySequences` | 2,000 | results/2026-10-17-core-tests/run.log: test title '<n> random command sequences' |
-| `\CorePropertySteps` | 84,983 | results/2026-10-17-core-tests/run.log: 'property test: <n> runs, <m> steps' |
-| `\CoreBranchCoveragePct` | 99.8 | results/2026-10-17-core-tests/coverage-summary.json: total.branches.pct |
-| `\CoreLineCoveragePct` | 100.0 | results/2026-10-17-core-tests/coverage-summary.json: total.lines.pct |
-| `\CoreTestsCommit` | d121145 | results/2026-10-17-core-tests/commit.txt |
+| `\CoreTestsPassed` | 156 | results/2026-10-31-core-tests/run.log: 'Tests N passed' |
+| `\CoreTestsTotal` | 156 | results/2026-10-31-core-tests/run.log: 'Tests ... (total)' |
+| `\CoreTestFiles` | 16 | results/2026-10-31-core-tests/run.log: 'Test Files ... (total)' |
+| `\CorePropertySequences` | 2,000 | results/2026-10-31-core-tests/run.log: test title '<n> random command sequences' |
+| `\CorePropertySteps` | 86,475 | results/2026-10-31-core-tests/run.log: 'property test: <n> runs, <m> steps' |
+| `\CoreBranchCoveragePct` | 99.7 | results/2026-10-31-core-tests/coverage-summary.json: total.branches.pct |
+| `\CoreLineCoveragePct` | 100.0 | results/2026-10-31-core-tests/coverage-summary.json: total.lines.pct |
+| `\CoreTestsCommit` | 8ace25c | results/2026-10-31-core-tests/commit.txt |
 
 ### Concurrency (dev)
 

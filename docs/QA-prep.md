@@ -21,7 +21,7 @@ How to answer:
 | Cause of the first series' 503s | API 503s = API 5xx metric = api-Lambda throttles: 76 (concurrency), 63 (backfill setup), 5,580 (first k6 matrix); account-wide concurrency maximum 10 = the quota; quota raised to 1,000 | `results/2026-10-17-throttling-evidence/summary.md`, `api-503.csv`, `lambda-metrics.csv` |
 | Performance on dev (k6 at quota 1,000, commit `d121145`, 18 runs, median of 3 rounds) | every target met at all 6 levels (reads and 202 p95 < 1 s, settle p95 < 5 s, errors < 1 %); 0.00 % HTTP errors in every run. Across workshops at 10 / 25 / 50 VUs: reads p95 294 / 292 / 289 ms, 202 p95 315 / 310 / 302 ms, settle p95 client 800 / 796 / 786 ms, server 62 / 88 / 193 ms. Hot spot: reads p95 294 / 294 / 297 ms, 202 p95 310 / 307 / 307 ms, settle p95 client 797 / 1,360 / 3,169 ms, server 115 / 940 / 2,601 ms, up to 35 messages in the FIFO queue at 50 VUs. The throttled first attempt is superseded | `results/loadtest/2026-10-17/summary.md` (target `dev`; the first attempt under "Superseded runs") |
 | Performance on the on-prem reference (k6, local stack) | every target met up to 50 VUs on the median of 3 rounds (settle p95 client 2,875 ms across workshops, 2,879 ms on the hot spot); two single rounds at 50 VUs exceeded 5 s (6,296 and 5,947 ms); no network hop between client and server | `results/loadtest/2026-10-17/summary.md` (target `local`) |
-| Core engine tests | 127/127 tests in 13 files; property test: 2,000 random command sequences (84,983 steps, 85,400 decisions), every invariant held after every step; coverage 100 % of statements, 99.82 % of branches | `results/2026-10-17-core-tests/` (`run.log`, `coverage-summary.json`) |
+| Core engine tests | 156/156 tests in 16 files; property test: 2,000 random command sequences (86,475 steps, 86,971 decisions), every invariant held after every step; coverage 100 % of statements, 99.66 % of branches | `results/2026-10-31-core-tests/` (`run.log`, `coverage-summary.json`) |
 | Staged pilot rehearsal (synthetic accounts; not user evidence) | 20 synthetic participants; 43/43 commands applied; 9 seats relayed (2 expiries in 72 and 74 ms, 7 in-transaction relays in 0 ms); 42 notifications SENT to the SES mailbox simulator; invariants held after all 8 phases; 85/85 checks | `results/2026-10-17-pilot-rehearsal-3/summary.md` |
 | Mechanism comparison (1,000 seeds, UNIFIED vs PER_SESSION) | distinct served 58.08 vs 54.03; duplicate-hold events 0.00 vs 34.57; mean per-run p95 refill time 9.45 vs 63.31 min | `results/replay/summary.md` |
 | Cloud cost at 1k registrations per month: list / after free tier / after credits | US$13.30 / 0.52 / 0.00 (on-prem 3-year: increment only 29.32, fully amortised 324.16) | `results/cost/model-summary.md` §1 |
@@ -128,8 +128,8 @@ workshop's version number. If two decisions ever overlapped, one transaction wou
 worker would reload and decide again (up to 3 times, counted as `MetaConflictRetries`). Each decision
 preserves C1 and C2 on a consistent snapshot and commits all its writes in one transaction. The
 evidence:
-- the property test: 2,000 random sequences (84,983 steps), with the invariants checked after every
-  step (`results/2026-10-17-core-tests/`);
+- the property tests: 2,000 random sequences (86,475 steps), with the invariants checked after every
+  step (`results/2026-10-31-core-tests/`);
 - `verify` after every experiment step;
 - 50 accounts racing for 5 seats on dev: PASS, 39/39 checks in the re-run at quota 1,000, 0 of 210
   commands failed, and `MetaConflictRetries` was 0. The throttled first run failed only on its HTTP

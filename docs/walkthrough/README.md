@@ -67,7 +67,7 @@ the pilot and the close, and opens the Q&A. The name-to-line mapping was approve
      errors. The throttled first attempt is superseded. The on-prem matrix on the local stack is
      complete: on the median of three rounds it met the targets up to 50 VUs, but two single rounds
      at 50 VUs exceeded 5 s, and it has no network hop.
-   - Core engine tests and property test recorded (`results/2026-10-17-core-tests/`).
+   - Core engine tests and property test recorded (`results/2026-10-17-core-tests/`; re-run on the audited engine on 31 Oct, `results/2026-10-31-core-tests/`).
    - Staged pilot rehearsal on the pilot stage (`results/2026-10-17-pilot-rehearsal-3/`): synthetic
      accounts and scripted actions. It is operational evidence, not user evidence; say "staged" every
      time you mention it.

@@ -37,6 +37,7 @@ Maintained by hand from each run's `meta.json` (`python3 -I report/tools/check_n
 | 2026-10-17T21:21:17.227Z | web-walkthrough-dev | dev | a563d92 (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev-2 | real-browser walkthrough after deploying d34e0ac (ended card, named holders); screenshots and backup video in docs/demo/; not user evidence |
 | 2026-10-24T08:25:04.593Z | web-walkthrough-dev | dev | cb160d2 (dirty) |  |  | PASS (45 checks) | 2026-10-24-web-walkthrough-dev | redesigned web app after the 24 Oct SPA redeploy; screenshots and backup video in docs/demo/; not user evidence |
 | 2026-10-31T00:11:18.430Z | web-walkthrough-dev | dev | f994022 (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev | same SPA (cb160d2) and app build (bcd7bd1) as 24 Oct, run after the web stack got its Content-Security-Policy headers (31 Oct): no CSP breakage; docs/demo/ kept from 24 Oct; not user evidence |
+| 2026-10-31T00:31:39.104Z | web-walkthrough-dev | dev | 8ace25c (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev-2 | the 8ace25c SPA (audit fixes, published 00:30 UTC) on the unchanged 24 Oct app build, under the CSP; run with --no-publish, so docs/demo/ stays from 24 Oct; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 

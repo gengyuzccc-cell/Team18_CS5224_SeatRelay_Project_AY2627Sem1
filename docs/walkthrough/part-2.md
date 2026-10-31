@@ -40,7 +40,7 @@ Next, LIN JIE shows how this runs on AWS.
 | Registration cut-off | 30 min before the session starts | `CUTOFF_BEFORE_START_SECONDS`, same file |
 | Sessions per workshop | 2–5 | same file |
 | Offers per decision | at most 12, then a REALLOCATE continuation | `packages/core/src/state.ts` (`DEFAULT_DECISION_LIMITS`) |
-| Engine property test | 2,000 random command sequences (84,983 steps), every invariant held after every step; 127/127 core tests pass, branch coverage 99.8 % | `results/2026-10-17-core-tests/` (`\CorePropertySequences`, `\CorePropertySteps`, `\CoreTestsPassed`, `\CoreBranchCoveragePct`) |
+| Engine property test | 2,000 random command sequences (86,475 steps), every invariant held after every step; 156/156 core tests pass, branch coverage 99.7 % | `results/2026-10-31-core-tests/` (`\CorePropertySequences`, `\CorePropertySteps`, `\CoreTestsPassed`, `\CoreBranchCoveragePct`) |
 | Preference order on AWS | 20 fixed cases × 3 runs: 60 of 60 as predicted, 0 offers of an unacceptable session (PASS) | `results/2026-10-17-preference-order-2/summary.md` (`\PrefOrderCasesPassed`, `\PrefOrderNonAcceptable`) |
 | Duplicate-hold events per workshop (simulation, 1,000 seeds) | 0.00 with one queue, 34.57 with per-session forms | `results/replay/summary.md` |
 

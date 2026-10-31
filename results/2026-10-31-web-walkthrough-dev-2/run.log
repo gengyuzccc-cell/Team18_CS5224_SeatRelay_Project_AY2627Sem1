@@ -1,0 +1,106 @@
+2026-10-31T00:31:39.105Z  walkthrough of https://d2ni5e1z674t04.cloudfront.net (stage dev), accounts walkthrough-*, output tools/e2e/out/20261031-003139
+2026-10-31T00:31:39.193Z  browser 141.0.7390.37 (/opt/pw-browsers/chromium-1194/chrome-linux/chrome)
+2026-10-31T00:31:39.193Z  == preflight
+2026-10-31T00:31:40.235Z  ok   env.js names the API, the hosted UI and the stage (https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com https://seatrelay-379549361891.auth.ap-southeast-1.amazoncognito.com dev)
+2026-10-31T00:31:41.066Z  ok   API /health ok on stage dev ({"ok":true,"service":"seatrelay","stage":"dev","time":"2026-10-31T00:31:40.953Z"})
+2026-10-31T00:31:41.132Z  == organiser signs in through the hosted UI
+2026-10-31T00:31:44.625Z  shot 01-home-signed-out.png (organiser)
+2026-10-31T00:31:50.057Z  shot 02-hosted-ui-sign-in.png (organiser)
+2026-10-31T00:31:55.385Z  ok   Organiser: authorization request = code flow with PKCE (S256), scopes openid email profile ({"responseType":"code","method":"S256","challenge":true,"scope":"openid email profile"})
+2026-10-31T00:31:55.385Z  ok   Organiser: token request = authorization_code grant with a code_verifier ({"grantType":"authorization_code","verifier":true})
+2026-10-31T00:31:55.385Z  ok   Organiser: OIDC user stored in localStorage after the callback (oidc.user:https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_ZZ7UsL6Ib:6f926dm22ulrv8gfjro2db1ac)
+2026-10-31T00:31:55.385Z  ok   Organiser: back on / without code/state in the address bar (https://d2ni5e1z674t04.cloudfront.net/)
+2026-10-31T00:31:57.347Z  ok   layout: "Go to the organiser area" keeps its own width (not stretched across the card) (width ratio 0.44)
+2026-10-31T00:31:58.334Z  shot 03-home-signed-in.png (organiser)
+2026-10-31T00:31:58.334Z  == organiser creates an organisation
+2026-10-31T00:32:03.477Z  shot 04-organisation-created.png (organiser)
+2026-10-31T00:32:04.809Z  == organiser creates a workshop with three sessions
+2026-10-31T00:32:06.280Z  ok   layout: wizard step 1, the Mode select and the Hold input are top-aligned (offset 0.0 px)
+2026-10-31T00:32:07.277Z  shot 05-wizard-basics.png (organiser)
+2026-10-31T00:32:08.591Z  ok   layout: "Add session" keeps its own width (width ratio 0.12)
+2026-10-31T00:32:09.755Z  shot 06-wizard-sessions.png (organiser)
+2026-10-31T00:32:11.236Z  shot 07-wizard-review.png (organiser)
+2026-10-31T00:32:14.023Z  ok   Session 1: capacity 2, nothing held, all free (Session 1 2 Nov 2026, 10:00 am | Open | 2 | 0 | 0 | 2 | 0)
+2026-10-31T00:32:14.031Z  ok   Session 2: capacity 1, nothing held, all free (Session 2 3 Nov 2026, 10:00 am | Open | 1 | 0 | 0 | 1 | 0)
+2026-10-31T00:32:14.045Z  ok   Session 3: capacity 1, nothing held, all free (Session 3 4 Nov 2026, 2:00 pm | Open | 1 | 0 | 0 | 1 | 0)
+2026-10-31T00:32:14.053Z  ok   share link points at the public workshop page (https://d2ni5e1z674t04.cloudfront.net/workshops/347397b7-c9ac-41af-818c-656ae478f366)
+2026-10-31T00:32:14.093Z  ok   layout: "Edit details" keeps its own width (width ratio 0.08)
+2026-10-31T00:32:14.127Z  ok   layout: "Cancel session" keeps its own width in the Manage cell (width ratio 0.57)
+2026-10-31T00:32:15.115Z  shot 08-dashboard-new.png (organiser)
+2026-10-31T00:32:15.116Z  == Alice signs in from the share link
+2026-10-31T00:32:19.568Z  ok   layout: Alice's "Sign in to register" stays centred in its panel (0.0 px off centre)
+2026-10-31T00:32:20.209Z  shot 09-public-page-signed-out.png (alice)
+2026-10-31T00:32:29.848Z  ok   Alice: authorization request = code flow with PKCE (S256), scopes openid email profile ({"responseType":"code","method":"S256","challenge":true,"scope":"openid email profile"})
+2026-10-31T00:32:29.849Z  ok   Alice: token request = authorization_code grant with a code_verifier ({"grantType":"authorization_code","verifier":true})
+2026-10-31T00:32:29.849Z  ok   Alice: OIDC user stored in localStorage after the callback (oidc.user:https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_ZZ7UsL6Ib:6f926dm22ulrv8gfjro2db1ac)
+2026-10-31T00:32:29.849Z  ok   Alice: back on /workshops/347397b7-c9ac-41af-818c-656ae478f366 without code/state in the address bar (https://d2ni5e1z674t04.cloudfront.net/workshops/347397b7-c9ac-41af-818c-656ae478f366)
+2026-10-31T00:32:31.727Z  == Alice picks two sessions and orders them
+2026-10-31T00:32:32.442Z  ok   tick order sets the ranks: Session 1 = 1, Session 2 = 2 (Session 1,Session 2)
+2026-10-31T00:32:33.410Z  ok   ▲ moves Session 2 to rank 1 (Session 2,Session 1 / 1,2)
+2026-10-31T00:32:34.384Z  shot 10-register-preferences.png (alice)
+2026-10-31T00:32:34.384Z  == Alice registers: request received, then a held seat with a countdown
+2026-10-31T00:32:35.665Z  shot 11-request-received.png (alice)
+2026-10-31T00:32:36.545Z  ok   countdown shows the 60 s hold (between 0:30 and 1:00) (59 s)
+2026-10-31T00:32:36.557Z  ok   visible order: "Request received" before "Registration applied" (toast:Sending… → toast:Request received | Processing… the result will appear here. → status:Request received, waiting for the outcome… → toast:Registration applied | A seat in Session 2 is held for you — confirm within 00:59. → card:offered)
+2026-10-31T00:32:37.717Z  shot 12-offer-countdown.png (alice)
+2026-10-31T00:32:37.718Z  == Alice accepts
+2026-10-31T00:32:41.268Z  shot 13-confirmed.png (alice)
+2026-10-31T00:32:41.268Z  == Bob registers for the full session and is queued
+2026-10-31T00:32:45.940Z  ok   layout: Bob's "Sign in to register" stays centred in its panel (0.0 px off centre)
+2026-10-31T00:32:55.814Z  ok   Bob: authorization request = code flow with PKCE (S256), scopes openid email profile ({"responseType":"code","method":"S256","challenge":true,"scope":"openid email profile"})
+2026-10-31T00:32:55.814Z  ok   Bob: token request = authorization_code grant with a code_verifier ({"grantType":"authorization_code","verifier":true})
+2026-10-31T00:32:55.814Z  ok   Bob: OIDC user stored in localStorage after the callback (oidc.user:https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_ZZ7UsL6Ib:6f926dm22ulrv8gfjro2db1ac)
+2026-10-31T00:32:55.814Z  ok   Bob: back on /workshops/347397b7-c9ac-41af-818c-656ae478f366 without code/state in the address bar (https://d2ni5e1z674t04.cloudfront.net/workshops/347397b7-c9ac-41af-818c-656ae478f366)
+2026-10-31T00:32:57.715Z  ok   public table: Session 2 has 0 free before Bob registers (Session 2 | 3 Nov 2026, 10:00 am cut-off 3 Nov 2026, 9:30 am | Open | 1 | 0 | 0)
+2026-10-31T00:33:02.093Z  shot 14-queued.png (bob)
+2026-10-31T00:33:02.094Z  == Alice cancels her confirmed seat
+2026-10-31T00:33:03.570Z  shot 15-cancel-confirm.png (alice)
+2026-10-31T00:33:08.010Z  shot 16-cancelled.png (alice)
+2026-10-31T00:33:08.010Z  == Bob's status page picks up the backfill on its 10 s refresh
+2026-10-31T00:33:11.905Z  ok   Bob sees the offer without reloading, within one refresh period (+ slack) (5996 ms after the cancellation settled)
+2026-10-31T00:33:11.931Z  ok   Bob's countdown is running (≤ 60 s) (53 s)
+2026-10-31T00:33:13.202Z  shot 17-offer-after-cancellation.png (bob)
+2026-10-31T00:33:13.202Z  == Carol registers for Session 2 and is queued behind the held seat
+2026-10-31T00:33:18.204Z  ok   layout: Carol's "Sign in to register" stays centred in its panel (0.0 px off centre)
+2026-10-31T00:33:29.174Z  ok   Carol: authorization request = code flow with PKCE (S256), scopes openid email profile ({"responseType":"code","method":"S256","challenge":true,"scope":"openid email profile"})
+2026-10-31T00:33:29.174Z  ok   Carol: token request = authorization_code grant with a code_verifier ({"grantType":"authorization_code","verifier":true})
+2026-10-31T00:33:29.174Z  ok   Carol: OIDC user stored in localStorage after the callback (oidc.user:https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_ZZ7UsL6Ib:6f926dm22ulrv8gfjro2db1ac)
+2026-10-31T00:33:29.174Z  ok   Carol: back on /workshops/347397b7-c9ac-41af-818c-656ae478f366 without code/state in the address bar (https://d2ni5e1z674t04.cloudfront.net/workshops/347397b7-c9ac-41af-818c-656ae478f366)
+2026-10-31T00:33:34.513Z  shot 18-queued.png (carol)
+2026-10-31T00:33:34.513Z  == dashboard: offer, queue and the cancellation backfill
+2026-10-31T00:33:35.644Z  ok   backfill log: Session 2, "confirmed seat cancelled", reallocated to Bob (8:33:04 am | Session 2 | confirmed seat cancelled | 8:33:04 am | 0 ms | Bob (staged) <walkthrough-bob@example.com>)
+2026-10-31T00:33:37.156Z  shot 19-dashboard-queue-offer.png (organiser)
+2026-10-31T00:33:37.156Z  == Bob does not answer: the 60 s hold runs out
+2026-10-31T00:33:57.621Z  shot 20-offer-expiring.png (bob)
+2026-10-31T00:34:07.737Z  shot 21-after-expiry.png (bob)
+2026-10-31T00:34:07.737Z  == Carol's page picks up the automatic backfill
+2026-10-31T00:34:14.733Z  ok   Carol sees the relayed seat within 45 s of the expiry (10376 ms)
+2026-10-31T00:34:16.115Z  shot 22-offer-after-expiry.png (carol)
+2026-10-31T00:34:16.115Z  == Carol accepts
+2026-10-31T00:34:19.969Z  shot 23-confirmed.png (carol)
+2026-10-31T00:34:19.969Z  == dashboard: backfill log, counters, distinct served
+2026-10-31T00:34:20.899Z  ok   backfill log lists the expiry and the cancellation, both reallocated, holders named (8:34:04 am | Session 2 | offer expired | 8:34:04 am | 263 ms | Carol (staged) <walkthrough-carol@example.com> ;; 8:33:04 am | Session 2 | confirmed seat cancelled | 8:33:04 am | 0 ms | Bob (staged) <walkthrough-bob@example.com>)
+2026-10-31T00:34:20.914Z  ok   Session 2: capacity 1, confirmed 1, held 0, free 0, waiting 0 (Session 2 3 Nov 2026, 10:00 am | Open | 1 | 1 | 0 | 0 | 0)
+2026-10-31T00:34:22.510Z  shot 24-dashboard-backfill-log.png (organiser)
+2026-10-31T00:34:22.510Z  == dashboard: attendance tick
+2026-10-31T00:34:26.948Z  shot 25-dashboard-attendance.png (organiser)
+2026-10-31T00:34:26.948Z  == dashboard: CSV export and verify invariants
+2026-10-31T00:34:28.159Z  ok   CSV export downloaded with a header and the participants (seatrelay-347397b7-c9ac-41af-818c-656ae478f366.csv: 4 lines; header seq,userId,email,displayName,status,endReason,acceptable,confirmedSessionId,confirmedSessionTitle,currentOfferId,offerSessionId,offerExpiresAt,attended,createdAt,updatedAt)
+2026-10-31T00:34:30.911Z  shot 26-dashboard-verify-ok.png (organiser)
+2026-10-31T00:34:31.454Z  shot 27-dashboard-overview.png (organiser)
+2026-10-31T00:34:31.656Z  shot 28-dashboard-full.png (organiser)
+2026-10-31T00:34:31.657Z  == Alice's registrations: the cancelled one under Past
+2026-10-31T00:34:33.355Z  shot 29-my-registrations.png (alice)
+2026-10-31T00:34:33.355Z  == Bob's registrations: the ended one with its reason
+2026-10-31T00:34:35.037Z  shot 30-my-registrations-ended.png (bob)
+2026-10-31T00:34:35.037Z  == Bob's notifications
+2026-10-31T00:34:37.436Z  shot 31-notifications.png (bob)
+2026-10-31T00:34:37.436Z  == Alice signs out (hosted UI logout round trip)
+2026-10-31T00:34:40.500Z  ok   Alice: no OIDC user left in localStorage after sign-out ()
+2026-10-31T00:34:44.432Z  ok   after sign-out the hosted UI asks for credentials again (no silent sign-in) (/login)
+2026-10-31T00:35:04.399Z  video organiser: tools/e2e/out/20261031-003139/videos/organiser/6060d01e642624dd9c01bf5a7ed103ab.webm 196.6 s; start by page creation 2026-10-31T00:31:41.131Z, by close − duration 2026-10-31T00:31:30.607Z (Δ 10.52 s)
+2026-10-31T00:35:04.458Z  video alice: tools/e2e/out/20261031-003139/videos/alice/637fe10cb2aba19b2b91a21cbb80d848.webm 155.6 s; start by page creation 2026-10-31T00:32:15.203Z, by close − duration 2026-10-31T00:32:18.248Z (Δ -3.04 s)
+2026-10-31T00:35:04.534Z  video bob: tools/e2e/out/20261031-003139/videos/bob/a05fe5e99e70912f538e14d48eab827b.webm 144.9 s; start by page creation 2026-10-31T00:32:41.328Z, by close − duration 2026-10-31T00:32:32.558Z (Δ 8.77 s)
+2026-10-31T00:35:04.605Z  video carol: tools/e2e/out/20261031-003139/videos/carol/cb6e9aafef4ece37806988709d8b05f3.webm 107.0 s; start by page creation 2026-10-31T00:33:13.322Z, by close − duration 2026-10-31T00:33:17.256Z (Δ -3.93 s)
+2026-10-31T00:35:04.608Z  cutting 24 clips (164 s + 5 s intro)
+2026-10-31T00:35:42.210Z  ok   video ≤ 25 MB (2.3 MB, 170 s)

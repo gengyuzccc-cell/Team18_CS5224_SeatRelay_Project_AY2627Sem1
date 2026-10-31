@@ -211,12 +211,17 @@ Notation: **Do** = operator action, **Expect** = what appears (exact UI text whe
 
 > **Deployed build.** Since 2026-10-24 08:24 UTC dev and pilot serve the redesigned web app (commit
 > `cb160d2`: poster colours and fonts, hold meter, seat bars, animated preference reordering, grouped
-> dashboard actions; every visible text the demo relies on is unchanged). The browser walkthrough re-ran
-> against it at 08:25 UTC (45/45 checks) and refreshed `docs/demo/screenshots/`,
-> `docs/demo/backup-demo.mp4` and the backup slides (`results/2026-10-24-web-walkthrough-dev/`). The
-> 17 Oct walkthroughs (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as
-> history. The app stacks run the notifier change of 24 Oct (`bcd7bd1`): with SES out of the sandbox,
-> real participants get e-mail, test accounts on reserved domains never do.
+> dashboard actions). On 2026-10-31 the audit-fix build `8ace25c` was published (dev 00:30 UTC;
+> pilot, see `docs/deployment-state.md`): same screens, plus a capacity field that explains an invalid
+> value before sending, a "What we keep" notice on the home page and real favicon files; every visible
+> text the demo relies on is unchanged. The browser walkthrough re-ran against each build (24 Oct and
+> 31 Oct, 45/45 checks each; `results/2026-10-24-web-walkthrough-dev/`,
+> `results/2026-10-31-web-walkthrough-dev/`); `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4`
+> and the backup slides still come from the 24 Oct run. The 17 Oct walkthroughs
+> (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as history. The app
+> stacks run the notifier change of 24 Oct (`bcd7bd1`): with SES out of the sandbox, real participants
+> get e-mail, test accounts on reserved domains never do; the `8ace25c` app build (capacity bound,
+> member lookup by e-mail, verified-e-mail check) is deployed once its change sets are executed.
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 

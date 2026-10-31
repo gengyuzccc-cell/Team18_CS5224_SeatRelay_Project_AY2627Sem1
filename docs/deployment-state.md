@@ -177,3 +177,36 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   `index-_vrUTyTT.js` / `index-DnGuptRW.css`; supersedes the `d34e0ac` bundle named above). Checks:
   `results/2026-10-24-ses-production-check/`, `results/2026-10-24-web-walkthrough-dev/` (45/45). Smoke,
   correctness and access-control were not re-run after these redeploys (last regression: 17 Oct, `d34e0ac`).
+
+## 2026-10-31: audit fixes, security headers, verification-before-update; app stacks pending
+
+- **Repository:** the six-lens audit of 30 Oct (plan, engine, backend, web, tooling, security; 49
+  findings, 25 confirmed after adversarial verification) was fixed in `8ace25c`. CI is green on that
+  commit (run 64); every earlier run had failed in the lint step since 21 Oct (browser globals in
+  `docs/poster/render.mjs`).
+- **`seatrelay-auth`** UPDATE_COMPLETE 2026-10-31T00:09:55Z: the user pool now requires a changed
+  e-mail address to be verified before it replaces the old one
+  (`UserAttributeUpdateSettings.AttributesRequireVerificationBeforeUpdate = [email]`); new parameter
+  `CognitoEmailSourceArn` (empty: sign-up codes still go through Cognito's default mailer, 50/day).
+- **`seatrelay-web-dev`** UPDATE_COMPLETE 2026-10-31T00:07:32Z and **`seatrelay-web-pilot`** (same
+  change, shortly after): a per-stage CloudFront response-headers policy with a Content-Security-Policy
+  (`default-src 'self'`, `connect-src` = the stage's API, the Cognito issuer and the hosted UI,
+  `frame-ancestors 'none'`) replaces the managed SecurityHeadersPolicy. The 31 Oct browser walkthrough
+  ran under it on the unchanged 24 Oct SPA: 45/45 (`results/2026-10-31-web-walkthrough-dev/`).
+- **dev SPA** republished at 00:30 UTC from `8ace25c` (`index-QXj8a_uu.js` / `index-DnGuptRW.css`;
+  supersedes the `cb160d2` bundle): capacity validation before sending, stale "done" labels fixed,
+  renewal refetch, "What we keep" notice, favicon files, no stale not-found prefix. Browser walkthrough
+  against it at 00:31 UTC: 45/45 (`results/2026-10-31-web-walkthrough-dev-2/`; run with `--no-publish`,
+  so `docs/demo/` keeps the 24 Oct assets). The pilot SPA was then republished from the same build
+  (same bundle names).
+- **`seatrelay-app-dev` and `seatrelay-app-pilot`: NOT yet redeployed.** They still run the 24 Oct
+  build (`bcd7bd1`). The `8ace25c` bundles are built and the dev change set exists
+  (`samcli-deploy1793405322`, created 2026-10-31T00:08:44Z: `Modify` on the api/worker roles and the
+  five functions, the HTTP API's CORS and the sweep schedule; no replacement), but executing it was
+  blocked in the assistant's environment; `docs/SUBMISSION-CHECKLIST.md` row 2.6 has the commands.
+  Until then the API does not check `email_verified`, does not bound capacity above 1 (the SPA does),
+  returns whole per-user lists, and cannot add organisation members by e-mail (user id only).
+- **Core tests** re-recorded on the audited engine: `results/2026-10-31-core-tests/` (156/156 in 16
+  files, branches 99.66 %, `8ace25c`); `report/generated/numbers.tex` quotes this run.
+- **Not changed:** SES (production, 50,000/day), Cognito mailer (default), budgets, alarms, pilot data
+  (still only the three 17 Oct staged-rehearsal workshops; no real pilot workshop exists yet).
