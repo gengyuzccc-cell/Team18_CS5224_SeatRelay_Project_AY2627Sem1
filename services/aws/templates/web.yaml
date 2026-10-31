@@ -9,6 +9,13 @@ Parameters:
     Type: String
     AllowedValues: [dev, pilot]
     Default: dev
+  ApiOrigin:
+    Type: String
+    Default: https://*.execute-api.ap-southeast-1.amazonaws.com
+    Description: >-
+      The stage's API origin for the Content-Security-Policy connect-src (the app stack's ApiUrl without
+      a path). The default allows any HTTP API in the region, for the first deployment before the app
+      stack exists; pin the exact origin afterwards (samconfig.toml does for dev and pilot).
 
 Resources:
   WebBucket:
@@ -40,6 +47,42 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
+  # The managed SecurityHeadersPolicy's headers plus a Content-Security-Policy for the SPA: scripts,
+  # styles, fonts and images only from this origin (React inline style attributes need
+  # 'unsafe-inline' for style-src; the icon is a data: URI), network calls only to the stage's API,
+  # the Cognito issuer (discovery document, JWKS) and the hosted UI (token endpoint); never framed.
+  SecurityHeaders:
+    Type: AWS::CloudFront::ResponseHeadersPolicy
+    Properties:
+      ResponseHeadersPolicyConfig:
+        Name: !Sub seatrelay-web-${Stage}-security-headers
+        Comment: !Sub SeatRelay web (${Stage}) security headers with CSP
+        SecurityHeadersConfig:
+          ContentSecurityPolicy:
+            Override: true
+            ContentSecurityPolicy: !Sub >-
+              default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
+              img-src 'self' data:; font-src 'self';
+              connect-src 'self' ${ApiOrigin} https://cognito-idp.${AWS::Region}.amazonaws.com
+              https://seatrelay-${AWS::AccountId}.auth.${AWS::Region}.amazoncognito.com;
+              frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+          ContentTypeOptions:
+            Override: true
+          FrameOptions:
+            FrameOption: DENY
+            Override: true
+          ReferrerPolicy:
+            ReferrerPolicy: strict-origin-when-cross-origin
+            Override: true
+          StrictTransportSecurity:
+            AccessControlMaxAgeSec: 31536000
+            IncludeSubdomains: true
+            Override: true
+          XSSProtection:
+            ModeBlock: true
+            Protection: true
+            Override: true
+
   Distribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -63,7 +106,7 @@ Resources:
           CachedMethods: [GET, HEAD]
           Compress: true
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # Managed-CachingOptimized
-          ResponseHeadersPolicyId: 67f7725c-6f97-4210-82d7-5512b31e9d03 # Managed-SecurityHeadersPolicy
+          ResponseHeadersPolicyId: !Ref SecurityHeaders
         CustomErrorResponses:
           # SPA deep links: S3 answers 403/404 for unknown keys → serve index.html with 200, never cached
           - ErrorCode: 403

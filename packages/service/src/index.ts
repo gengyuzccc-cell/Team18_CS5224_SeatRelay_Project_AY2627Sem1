@@ -44,6 +44,7 @@ export {
   type OrganiserScope,
 } from './api/context';
 export { API_ROUTES, API_ROUTE_TABLE, createApiApp, type ApiApp } from './api/app';
+export { MAX_MY_NOTIFICATIONS, MAX_MY_REGISTRATIONS, mostRecentRegistrations } from './api/limits';
 export { commandAcceptedView } from './api/routes/commands';
 export {
   DEFAULT_MAX_VERSION_RETRIES,

@@ -39,7 +39,8 @@ pnpm workspace (Node 22, TypeScript, ESM). Dependency direction: `contracts` ←
 | `tools/experiments` | `@seatrelay/experiments` | one script per Table 3 row plus `smoke`; `bin/run-table3.sh`; `analysis/plot_results.py`; `cost/` (prices, on-prem inputs, `model.py`) |
 | `tools/loadtest` | `@seatrelay/loadtest` | k6 scenarios `cross-workshop` and `hotspot`, `prepare-scenario`, `run-matrix` |
 | `tools/replay` | `@seatrelay/replay` | mechanism comparison: the same arrivals replayed through the real engine in UNIFIED and PER_SESSION mode, 1,000 seeds |
-| `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, and the Bash deploy / web publish / teardown / cost-snapshot scripts |
+| `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, `dashboard-backfills` (pilot backfill log export), and the Bash deploy / web publish / teardown / cost-snapshot scripts |
+| `tools/market` | | market counts: `inputs.json` (sources, quotes, counts), `count.py` → `results/market/<date>/counts.json`, `capture.py`; dated page captures of the NUS/SMU/SIT sources with `results/market/screenshots/capture.mjs` (`docs/market-sizing.md`) |
 | `docs/` | | architecture, conventions, runbook, experiments, cost, demo, market sizing, interview and user-study packages, talk notes |
 | `results/` | | raw outputs of every run (the only source of report numbers), see section 9 |
 | `report/` | | Final report sources, `report/build.sh` (page and placeholder checks; `-s` builds the git-ignored Canvas copy with student numbers), `report/tools/report_numbers.py` (numbers file generator) |

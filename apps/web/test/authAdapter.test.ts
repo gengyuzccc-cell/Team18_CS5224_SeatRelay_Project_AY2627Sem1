@@ -72,6 +72,10 @@ describe('authAdapter', () => {
     expect(sanitizeReturnTo('/workshops/abc?x=1')).toBe('/workshops/abc?x=1');
     expect(sanitizeReturnTo('https://evil.example')).toBe('/');
     expect(sanitizeReturnTo('//evil.example')).toBe('/');
+    // react-router 6.30 navigates `/\\host` as a protocol-relative URL (CVE-2026-53669).
+    expect(sanitizeReturnTo('/\\evil.example')).toBe('/');
+    expect(sanitizeReturnTo('/\\/evil.example')).toBe('/');
+    expect(sanitizeReturnTo('/workshops/abc\\..\\x')).toBe('/');
     expect(sanitizeReturnTo('/callback?code=1')).toBe('/');
     expect(sanitizeReturnTo(undefined)).toBe('/');
     expect(returnToFromState({ returnTo: '/me/registrations' })).toBe('/me/registrations');

@@ -18,7 +18,12 @@ describe('auth: JWT authorizer claims → AuthUser', () => {
       name: 'Bob',
     });
     expect(
-      userFromEvent(apiEvent({ path: '/me', claims: { sub: ' u1 ', email: 'u1@example.com' } })),
+      userFromEvent(
+        apiEvent({
+          path: '/me',
+          claims: { sub: ' u1 ', email: 'u1@example.com', email_verified: 'true' },
+        }),
+      ),
     ).toEqual({ userId: 'u1', email: 'u1@example.com' });
   });
 
@@ -31,11 +36,27 @@ describe('auth: JWT authorizer claims → AuthUser', () => {
     ).toBeUndefined();
   });
 
+  test('an e-mail that is not verified is anonymous (the claim arrives as a string or a boolean)', () => {
+    const claims = (email_verified: unknown) => ({ sub: 'u1', email: 'u1@example.com', email_verified });
+    expect(userFromEvent(apiEvent({ path: '/me', claims: claims('true') }))).toMatchObject({
+      userId: 'u1',
+    });
+    expect(userFromEvent(apiEvent({ path: '/me', claims: claims(true) }))).toMatchObject({
+      userId: 'u1',
+    });
+    expect(userFromEvent(apiEvent({ path: '/me', claims: claims('false') }))).toBeUndefined();
+    expect(userFromEvent(apiEvent({ path: '/me', claims: claims(false) }))).toBeUndefined();
+    expect(userFromEvent(apiEvent({ path: '/me', claims: claims(undefined) }))).toBeUndefined();
+    expect(
+      userFromEvent(apiEvent({ path: '/me', claims: { sub: 'u1', email: 'u1@example.com' } })),
+    ).toBeUndefined();
+  });
+
   test('display names are bounded', () => {
     const user = userFromEvent(
       apiEvent({
         path: '/me',
-        claims: { sub: 'u', email: 'u@example.com', name: 'n'.repeat(500) },
+        claims: { sub: 'u', email: 'u@example.com', email_verified: 'true', name: 'n'.repeat(500) },
       }),
     );
     expect(user?.name).toHaveLength(120);

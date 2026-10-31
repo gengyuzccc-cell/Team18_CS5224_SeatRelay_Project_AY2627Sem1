@@ -6,9 +6,9 @@ import type { SeatRelayEnv } from '../env';
  * react-oidc-context; the **ID token** is the API bearer (it carries `email`, and the API
  * authorizer checks `aud` = web client id). Silent renew uses the refresh token.
  *
- * Logout differs per provider: Cognito's discovery document has no `end_session_endpoint`, so
- * after `removeUser()` the browser is sent to the hosted UI `/logout` endpoint; Keycloak uses
- * standard RP-initiated logout (`signoutRedirect`).
+ * Logout differs per provider: for Cognito, after `removeUser()` the browser is sent to the
+ * hosted UI `/logout` endpoint (which is also what Cognito now publishes as
+ * `end_session_endpoint`); Keycloak uses standard RP-initiated logout (`signoutRedirect`).
  */
 
 export const CALLBACK_PATH = '/callback';
@@ -86,14 +86,19 @@ export function profileOf(user: User | null | undefined): SessionProfile | undef
   return { userId: sub, email, ...(name !== undefined ? { name } : {}) };
 }
 
-/** Where to go after the sign-in round trip; only same-origin paths are accepted. */
+/**
+ * Where to go after the sign-in round trip; only same-origin paths are accepted. `/\host` and
+ * `//host` are protocol-relative URLs to a browser (and to react-router's navigate), so a path
+ * that starts with a second slash or a backslash, or contains a backslash at all, is refused.
+ */
 export function sanitizeReturnTo(candidate: unknown): string {
   if (typeof candidate !== 'string') {
     return '/';
   }
   if (
     !candidate.startsWith('/') ||
-    candidate.startsWith('//') ||
+    /^\/[\\/]/.test(candidate) ||
+    candidate.includes('\\') ||
     candidate.startsWith(CALLBACK_PATH)
   ) {
     return '/';

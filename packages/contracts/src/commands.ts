@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_SESSIONS_PER_WORKSHOP } from './constants';
+import { MAX_CAPACITY, MAX_SESSIONS_PER_WORKSHOP } from './constants';
 import { FaultFlagSchema, TickSourceSchema } from './enums';
 import {
   DisplayNameSchema,
@@ -46,8 +46,11 @@ const CancelRegistrationPayload = {
 };
 const SetCapacityPayload = {
   sessionId: IdSchema,
-  /** Any integer at the schema level; `< 1` is rejected by the engine (INVALID_CAPACITY). */
-  capacity: z.number().int(),
+  /**
+   * Any integer up to MAX_CAPACITY at the schema level; `< 1` is left to the engine, which
+   * settles it as REJECTED (INVALID_CAPACITY) like every other rule violation.
+   */
+  capacity: z.number().int().max(MAX_CAPACITY),
 };
 const SessionPayload = { sessionId: IdSchema };
 

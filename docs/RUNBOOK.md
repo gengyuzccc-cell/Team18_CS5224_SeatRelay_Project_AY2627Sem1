@@ -36,9 +36,15 @@ sam deploy --config-env auth \
 ```
 
 * The SES identity sends a verification e-mail to `SenderEmail`; click it.
-* Request SES production access with the text in `docs/ses-production-request.md`.
-* Cognito's own mailer is limited to 50 e-mails/day/account; keep `EmailSendingAccount: COGNITO_DEFAULT`
-  until SES production access is granted.
+* SES production access was granted on 2026-10-24 (case `179219791000451`; 50,000 messages/day,
+  14/s; request text in `docs/ses-production-request.md`, check in
+  `results/2026-10-24-ses-production-check/summary.md`). The first request (17 Oct) was refused
+  while the sender identity was unverified.
+* Cognito's own mailer is limited to 50 e-mails/day/account. Sending the sign-up codes through SES
+  (`EmailSendingAccount: DEVELOPER`) is optional and was deliberately not done: the only SES
+  identity is a gmail.com address, whose mail cannot be aligned with gmail.com's SPF/DKIM, so the
+  codes would be more likely to land in spam (see that summary). Switch once a team-controlled
+  domain is verified with Easy DKIM.
 
 ### 1.2 Deploy / update a stage (dev or pilot)
 
@@ -50,15 +56,17 @@ STAGE=dev ALARM_EMAIL=team@example.com tools/scripts/bin/deploy-all.sh
 → `sam deploy --config-env web-dev` → `sam deploy --config-env dev --parameter-overrides WebOrigin=<cloudfront url> …`
 → registers the CloudFront URL as Cognito callback/logout URL → `deploy-web.sh` (build + S3 upload + invalidation).
 
-Stage differences: dev has `AllowFaultFlags=true`, `EmailEnabled=false`, throttle 300 rps / 500 burst,
-no table deletion protection; pilot has `AllowFaultFlags=false`, `EmailEnabled=true`, 50 / 100,
-deletion protection on.
+Stage differences: dev has `AllowFaultFlags=true`, `EmailEnabled=true` (`false` until 2026-10-24),
+throttle 300 rps / 500 burst, no table deletion protection; pilot has `AllowFaultFlags=false`,
+`EmailEnabled=true`, 50 / 100, deletion protection on. Throttling is per stage only (HTTP APIs have
+no usage plans, so there is no per-user quota); abuse by a single account is bounded by the stage
+limit and the budget alarms.
 
 Manual equivalents:
 
 ```bash
 cd services/aws && pnpm build
-sam deploy --config-env dev --parameter-overrides Stage=dev WebOrigin=https://dxxxx.cloudfront.net AllowFaultFlags=true EmailEnabled=false AlarmEmail=team@example.com
+sam deploy --config-env dev --parameter-overrides Stage=dev WebOrigin=https://dxxxx.cloudfront.net AllowFaultFlags=true EmailEnabled=true AlarmEmail=team@example.com
 sam deploy --config-env web-dev
 STAGE=dev tools/scripts/bin/deploy-web.sh
 ```
@@ -139,9 +147,10 @@ It performs, with three accounts, the scenario of plan §3 step 12 and asserts e
 ## 4. Fault injection (dev only)
 
 Commands may carry `_fault: BEFORE_COMMIT | AFTER_COMMIT | TIMER_SEND` when the stack parameter
-`AllowFaultFlags=true`. `BEFORE_COMMIT` throws before the transaction (message is retried, nothing
-written), `AFTER_COMMIT` throws after the transaction (retry hits `COMMAND_ALREADY_SETTLED` and acks),
-`TIMER_SEND` throws while sending the expiry timer (retry resends; duplicate ticks are harmless).
+`AllowFaultFlags=true`. `BEFORE_COMMIT` throws after the expiry timers are sent but before the
+transaction (nothing is committed; the timers already sent become harmless no-op ticks; the message is
+retried), `AFTER_COMMIT` throws after the transaction (retry hits `COMMAND_ALREADY_SETTLED` and acks),
+`TIMER_SEND` throws before the expiry timer is sent (retry sends it; duplicate ticks are harmless).
 
 ## 5. Alarms and what to do
 
@@ -149,6 +158,11 @@ written), `AFTER_COMMIT` throws after the transaction (retry hits `COMMAND_ALREA
 |---|---|---|
 | `commands-dlq-not-empty` | a command failed 3 times (infrastructure error) | read the DLQ message, fix, redrive with `aws sqs start-message-move-task` |
 | `commands-oldest-message-age > 120 s` | worker backlog / stuck message group | check worker errors, raise `WorkerMaxConcurrency` |
-| `notify-dlq-not-empty` | notification batch exhausted retries | inspect SES quota / sandbox state |
+| `expiry-dlq-not-empty` | an expiry timer message failed 5 times in the forwarder (`expiry-delay` → `commands.fifo`) | read the DLQ message, check the forwarder logs, redrive with `aws sqs start-message-move-task`; meanwhile the 5-minute sweep catches the late expiry (`SweepLateExpiries`) |
+| `api-errors` (Lambda `Errors` ≥ 1) | the API Lambda threw (uncaught error, usually a dependency failure or a bad deploy) | check `/aws/lambda/seatrelay-<stage>-api`; a 4xx/5xx answered by the handler is not counted here |
+| `api-5xx` (API Gateway `5xx` ≥ 1) | the API answered 5xx, including Lambda throttling (the 17 Oct 503s) and integration timeouts | check the API Gateway and api logs; compare with the account's Lambda concurrency quota |
+| `worker-errors` (Lambda `Errors` ≥ 1) | the worker invocation itself failed (the batch handler threw) | check `/aws/lambda/seatrelay-<stage>-worker`; the messages are retried and reach the DLQ after 3 attempts |
+| `worker-record-failures` (`WorkerRecordFailures` ≥ 1) | the worker reported partial batch failures: a message it could not settle (malformed message, infrastructure error; injected faults are not counted) | find the command id in the worker log and check `GET /commands/{id}`; an infrastructure error is retried and reaches the DLQ after 3 attempts, a malformed message is dropped (logged, not retried) and must be re-sent by the client |
+| `notify-dlq-not-empty` | notification batch exhausted retries | inspect SES quota and account status (`aws sesv2 get-account`), notifier logs |
 | `notifier-iterator-age > 60 s` | stream consumer lagging | check SES throttling |
 | budget 50/80/100 % | spend (credits excluded) | pause experiments; `teardown.sh dev` |

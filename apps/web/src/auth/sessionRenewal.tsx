@@ -60,19 +60,25 @@ export function unauthorizedAction(
   return canRenew && !renewedRecently ? 'renew' : 'sign-out';
 }
 
+/**
+ * What `recoverUnauthorized` did: `renewed` means a token other than the rejected one is now
+ * stored (the requests that failed can be repeated), `signed-out` that the session was dropped.
+ */
+export type UnauthorizedOutcome = 'ignored' | 'renewed' | 'signed-out';
+
 export interface SessionRenewal {
   /** The start-up refresh is running (or about to): treat the session as loading. */
   pending: boolean;
   /** Refresh-token grant, one at a time; resolves to the renewed user or null. */
   renew(): Promise<User | null>;
   /** The API answered 401 for `sentToken`. */
-  recoverUnauthorized(sentToken: string | undefined): Promise<void>;
+  recoverUnauthorized(sentToken: string | undefined): Promise<UnauthorizedOutcome>;
 }
 
 const NO_RENEWAL: SessionRenewal = {
   pending: false,
   renew: async () => null,
-  recoverUnauthorized: async () => undefined,
+  recoverUnauthorized: async () => 'ignored',
 };
 
 const SessionRenewalContext = createContext<SessionRenewal>(NO_RENEWAL);
@@ -106,16 +112,20 @@ export function SessionRenewalProvider({
   }, [userManager]);
 
   const recoverUnauthorized = useCallback(
-    async (sentToken: string | undefined) => {
+    async (sentToken: string | undefined): Promise<UnauthorizedOutcome> => {
       const current = await userManager.getUser();
       const action = unauthorizedAction(current, sentToken, lastRenewAt.current, Date.now());
       if (action === 'ignore') {
-        return;
+        // A renewal that another request triggered already replaced the rejected token.
+        const replaced =
+          current !== null && sentToken !== undefined && current.id_token !== sentToken;
+        return replaced ? 'renewed' : 'ignored';
       }
       if (action === 'renew' && (await renew()) !== null) {
-        return;
+        return 'renewed';
       }
       await userManager.removeUser();
+      return 'signed-out';
     },
     [renew, userManager],
   );

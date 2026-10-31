@@ -38,12 +38,14 @@ The control is deliberately a *well-prepared* spreadsheet (duplicate-detection f
 | Date | What | Who |
 |---|---|---|
 | by 10/27 | Control condition built (`control-condition-setup.md`), SeatRelay study accounts + seed script ready (`tasks-*.md` state tables), task cards printed, 2 pilot people and 12 participants booked | team |
-| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (UI freeze is 10/28, tag `v0.9-study`) | facilitator |
+| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (the UI freeze is the commit tagged `v0.9-study`; the tag is created on the build deployed after the 30 Oct 2026 audit fixes, so until then nothing is frozen) | facilitator |
 | **10/29 (Thu)** | **Pilot, 2 people** (not counted). Fix task wording, time caps, reset checklist; record the changes in `results/user-study/study-log.md` | facilitator + note-taker |
 | **10/30 (Fri) – 11/05 (Thu)** | **12 sessions**, ~40 min each, 2 per day (suggested: 10/30 P01–P02, 10/31 P03–P04, 11/02 P05–P06, 11/03 P07–P08, 11/04 P09–P10, 11/05 P11–P12; 11/01 and evenings as buffer) | facilitator + note-taker |
 | after each session | Rows typed into `session-sheet.csv` / `sus-sheet.csv`; interview + background notes into `interview-notes.md`; both systems reset | note-taker |
 | 11/05 evening | `python3 docs/user-study/analysis.py` → `results/user-study/` | analyst |
 | 11/06–11/10 | Numbers and charts into Final §4; sample size and limitations stated as-is | report author |
+
+Status on 30 Oct 2026: none of the rows above has happened yet (no pilot run, no session); the dates are the original plan. The latest feasible schedule, as a proposal for the team, is in `docs/SUBMISSION-CHECKLIST.md` row 1.5.
 
 Book sessions 50 min apart (40 min session + 10 min reset). Two sessions back-to-back need two laptops already reset, or the 10-min gap.
 
@@ -76,7 +78,7 @@ Team members are **never** participants (plan §5). Pilot people are not counted
 | `sus-sheet.csv` | Final SUS data (same) |
 | `counterbalance.csv` | The assignment actually used, with dates |
 | `interview-notes.md` | Per participant: background answers, interview answers, facilitator observations (no names, IDs only) |
-| `study-log.md` | Pilot changes, deviations from protocol (e.g. a reset that failed, a task skipped), no-shows and replacements, the SeatRelay commit/tag and stack used |
+| `study-log.md` | Pilot changes, deviations from protocol (e.g. a reset that failed, a task skipped), no-shows and replacements, the SeatRelay commit/tag (`v0.9-study`, or the commit hash if the tag does not exist yet) and stack used |
 | `summary.md` | Output of `analysis.py` (tables, p-values, warnings, n) |
 | `task-time-paired.png`, `sus-boxplot.png`, `completion-bars.png` | Charts from `analysis.py` |
 

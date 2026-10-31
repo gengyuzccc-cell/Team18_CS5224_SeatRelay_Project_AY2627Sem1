@@ -501,6 +501,9 @@ export function WorkshopPage() {
       <ErrorBanner
         error={query.error}
         title={isNotFound(query.error) ? 'Workshop not found' : 'Could not load the workshop'}
+        {...(isNotFound(query.error)
+          ? { description: 'There is no workshop with this id; check the link you were given.' }
+          : {})}
         onRetry={refetch}
       />
     );

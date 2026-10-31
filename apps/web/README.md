@@ -22,7 +22,7 @@ generated at container start by `services/local/nginx/entrypoint.sh` (from `VITE
 
 | Field            | Type                      | Meaning                                                                                       | Local default                            |
 | ---------------- | ------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `provider`       | `'cognito' \| 'keycloak'` | Which logout flow to use (Cognito has no `end_session_endpoint`)                              | `keycloak`                               |
+| `provider`       | `'cognito' \| 'keycloak'` | Which logout flow to use (Cognito: the hosted-UI `/logout` endpoint, also its `end_session_endpoint`; Keycloak: RP-initiated logout) | `keycloak`                               |
 | `authority`      | string                    | OIDC issuer; discovery at `<authority>/.well-known/openid-configuration`                      | `http://localhost:8080/realms/seatrelay` |
 | `clientId`       | string                    | Public PKCE client; also the `aud` the API checks on the ID token                             | `seatrelay-web`                          |
 | `hostedUiDomain` | string                    | Cognito hosted UI base URL (`https://….amazoncognito.com`); required for `cognito`, else `''` | `''`                                     |

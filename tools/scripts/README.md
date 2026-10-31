@@ -22,6 +22,7 @@ separator is optional.
 | `get-tokens-keycloak` | Local stack: the same cache format (`.token-cache.local.json`) through the password grant of the public `tooling` client. Users: the four realm users (default), `--users FILE` (JSON `[{ email, password?, name? }]` or one e-mail per line) or `--count N --prefix p --domain d` (generated). Missing accounts are created through the Keycloak admin API (bootstrap admin / admin of the compose file) and existing ones get `--password` set, unless `--no-create`. |
 | `seed-demo` | The demo preset of `docs/DEMO.md`: organisation + one workshop with 3 sessions (capacity 2 / 2 / 1, `--hold 60` s by default so an expiry can be shown live) and N participants registered with varied preference lists (`[S1,S2,S3] [S2,S3] [S3,S1] [S1] [S2,S1,S3] [S3]`, cycling). Earlier workshops with the same title in the demo organisation are cancelled first (`--keep-previous` keeps them), so a re-run yields one clean demo workshop. Prints org / workshop / session ids, each session's free / held seats and queue length, and each participant's state as JSON. |
 | `seed-study` | Resets one user-study round to the tables of `docs/user-study/tasks-participant.md` §1 / `tasks-organiser.md` §1 (`--track participant\|organiser --dataset A\|B`). Re-running = reset. |
+| `dashboard-backfills` | Reads `GET /orgs/{orgId}/workshops/{wsId}/dashboard` as the organiser (`--organiser-email`, `--password` / `$SEATRELAY_TEST_PASSWORD`; the account must exist, nothing is created) and writes the backfill log of every workshop of the organisation (or of each `--workshop ID`) as `results/pilot/backfills-<wsId>.csv` (`--out` to change), columns `cause,session,releasedAt,reallocatedAt,latencyMs,recomputedMs,newParticipant,backfillId`, the file the pilot rehearsal writes as `backfills.csv`. `session` is S1, S2, … in dashboard order; `newParticipant` is the new holder's opaque user id (never the e-mail). `report/tools/report_numbers.py` reads these files for `\PilotBackfills`, `\PilotBackfillsReallocated` and `\PilotBackfillMaxMs` (SUBMISSION-CHECKLIST row 1.4). `--org-id` when the organiser belongs to several organisations. |
 | `bin/deploy-all.sh`, `bin/deploy-web.sh`, `bin/teardown.sh`, `bin/cost-snapshot.sh`, `bin/activate-cost-tags.sh` | Bash (Git Bash / WSL on Windows); see the header comment of each. |
 
 ## Targets and credentials
@@ -99,6 +100,9 @@ pnpm --filter @seatrelay/scripts seed-study -- --track participant --dataset A -
 pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loaduser --stage dev   # password: $SEATRELAY_TEST_PASSWORD
 pnpm --filter @seatrelay/scripts seed-demo -- --target dev
 pnpm --filter @seatrelay/scripts seed-study -- --track organiser --dataset B --target dev
+
+# after the real pilot (organiser password in $SEATRELAY_TEST_PASSWORD or --password)
+pnpm --filter @seatrelay/scripts dashboard-backfills -- --target pilot --organiser-email organiser@example.org
 ```
 
 ## seed-study: what "reset" means
@@ -141,11 +145,12 @@ O2 → Hui Min / Oscar, O3 → Samuel / Quentin).
 | `targets.ts` | `resolveTarget` (API base per target), `userProviderFor`. |
 | `tokenCache.ts` | read / write / merge of the cache; `findCachedUser`, `isTokenFresh`. |
 | `seed.ts`, `seedDemo.ts`, `seedStudy.ts`, `study.ts` | the seeding primitives (`findOrCreateOrg`, `cancelOrgWorkshops`, `confirmSeat`, `joinQueue`) and the study tables. |
+| `backfills.ts` | `exportBackfills` (dashboard → rows), `backfillRows`, `backfillsCsv` (RFC 4180), `BACKFILL_CSV_COLUMNS`, `backfillsFileName`. |
 | `cli.ts` | `parseCli` (`node:util` parseArgs + `--help`, ignores a leading `--`), `runMain` (operational errors without stack traces), `resolveUserPath` (`INIT_CWD`), `log`, `REPO_ROOT`. |
 
 ## Checks
 
 ```bash
 pnpm --filter @seatrelay/scripts typecheck
-pnpm --filter @seatrelay/scripts test        # vitest: API client against the in-memory service, Cognito/CloudFormation with aws-sdk-client-mock (incl. rejected credentials), Keycloak with a fake fetch, study tables + seeding + reset, demo preset + re-run
+pnpm --filter @seatrelay/scripts test        # vitest: API client against the in-memory service, Cognito/CloudFormation with aws-sdk-client-mock (incl. rejected credentials), Keycloak with a fake fetch, study tables + seeding + reset, demo preset + re-run, backfill CSV export
 ```

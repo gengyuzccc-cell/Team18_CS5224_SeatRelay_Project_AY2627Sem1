@@ -1,4 +1,5 @@
 import {
+  MAX_CAPACITY,
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
   type ConfirmedEntry,
@@ -9,7 +10,7 @@ import {
   type WorkshopPublic,
 } from '@seatrelay/contracts';
 import { useMutation } from '@tanstack/react-query';
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
 import { useDashboard, useInvalidateWorkshopInfo } from '../api/queries';
@@ -109,6 +110,22 @@ function CommandFeedback({ command }: { command: CommandHandle }) {
   return null;
 }
 
+/**
+ * Why a capacity draft cannot be sent (undefined when it can): the same bounds as the engine's
+ * INVALID_CAPACITY, checked before the request so the organiser is told instead of nothing
+ * happening (the browser's min/max only apply to a form submit).
+ */
+export function capacityInputProblem(value: string): string | undefined {
+  const next = Number(value);
+  if (value.trim().length === 0 || !Number.isInteger(next) || next < 1) {
+    return 'Capacity must be a whole number of at least 1.';
+  }
+  if (next > MAX_CAPACITY) {
+    return `Capacity cannot exceed ${MAX_CAPACITY}.`;
+  }
+  return undefined;
+}
+
 /** Per-session row: counters + SET_CAPACITY + CANCEL_SESSION, each with its own command flow. */
 function SessionRow({
   session,
@@ -129,9 +146,21 @@ function SessionRow({
   const confirmBox = useInlineConfirm();
   const confirm = confirmBox.open;
   const closed = workshopClosed || isCancelledLike(session.status);
+  // The draft follows the server value: a change made elsewhere, or a rejected decrease, must
+  // not leave the field showing a number that is neither the capacity nor what to send next.
+  useEffect(() => {
+    setValue(String(session.capacity));
+  }, [session.capacity]);
+  const capacityState = capacity.state;
+  useEffect(() => {
+    if (capacityState.phase === 'rejected') {
+      setValue(String(session.capacity));
+    }
+  }, [capacityState, session.capacity]);
+  const next = Number(value);
+  const invalid = capacityInputProblem(value);
   const apply = () => {
-    const next = Number(value);
-    if (!Number.isInteger(next) || next < 1) {
+    if (invalid !== undefined) {
       return;
     }
     if (capacity.canRetry) {
@@ -173,11 +202,13 @@ function SessionRow({
                 id={`cap-${session.id}`}
                 type="number"
                 min={1}
+                max={MAX_CAPACITY}
                 step={1}
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
                 className="input-small"
                 disabled={capacity.busy || capacity.canRetry}
+                aria-invalid={invalid !== undefined}
               />
               <AsyncButton
                 className="btn-small"
@@ -189,7 +220,8 @@ function SessionRow({
                 error="Retry"
                 onClick={apply}
                 disabled={
-                  capacity.busy || (!capacity.canRetry && Number(value) === session.capacity)
+                  capacity.busy ||
+                  (!capacity.canRetry && (invalid !== undefined || next === session.capacity))
                 }
               />
               {capacity.canRetry && (
@@ -202,6 +234,11 @@ function SessionRow({
                 </button>
               )}
             </div>
+            {invalid !== undefined && (
+              <span className="error-text small" role="alert">
+                {invalid}
+              </span>
+            )}
             <CommandFeedback command={capacity} />
             {!confirm ? (
               <AsyncButton
@@ -280,7 +317,8 @@ function AttendanceCell({
       setState('error');
     }
   };
-  const id = `att-${entry.userId}`;
+  // One participant can hold a seat in two sessions (PER_SESSION): each row needs its own id.
+  const id = useId();
   return (
     <div className="attendance">
       <input
@@ -556,6 +594,19 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
   const cancel = useCommand(workshop.id, { sessions, onSettled: refetch });
   const confirmBox = useInlineConfirm();
   const confirm = confirmBox.open;
+  // The "done" copy names the command that ran, not the live status (which the refetch flips),
+  // and the button offers the next action again as soon as the status reflects that command. The
+  // settled command is then forgotten, so a later flip from elsewhere (another organiser, another
+  // tab) cannot bring the old "Closed"/"Opened" label back next to the opposite badge.
+  const applied = toggle.state.phase === 'applied' ? toggle.state.view.type : undefined;
+  const reflected =
+    applied === undefined || (applied === 'CLOSE_REGISTRATION') === (workshop.status !== 'OPEN');
+  const resetToggle = toggle.reset;
+  useEffect(() => {
+    if (applied !== undefined && reflected) {
+      resetToggle();
+    }
+  }, [applied, reflected, resetToggle]);
   if (isCancelledLike(workshop.status)) {
     return (
       <p className="banner banner-info">
@@ -567,14 +618,15 @@ function WorkshopActions({ view, refetch }: { view: DashboardView; refetch: () =
       </p>
     );
   }
+  const toggleState = commandState(toggle) === 'done' && reflected ? 'idle' : commandState(toggle);
   return (
     <div className="actions focus-target" ref={confirmBox.fallback} tabIndex={-1}>
       <AsyncButton
         variant="secondary"
-        state={commandState(toggle)}
+        state={toggleState}
         idle={workshop.status === 'OPEN' ? 'Close registration' : 'Open registration'}
         pending={workshop.status === 'OPEN' ? 'Closing…' : 'Opening…'}
-        done={workshop.status === 'OPEN' ? 'Closed' : 'Opened'}
+        done={applied === 'CLOSE_REGISTRATION' ? 'Closed' : 'Opened'}
         error="Retry"
         onClick={() =>
           toggle.canRetry

@@ -432,20 +432,27 @@ sequenceDiagram
   `BisectBatchOnFunctionError`, `MaximumRetryAttempts 20`, `MaximumRecordAgeInSeconds 3600`,
   `ReportBatchItemFailures`, on-failure destination `notify-dlq`.
 - **Delivery** (`handlers/notifier.ts`):
-  - `EMAIL_ENABLED != true` (dev): the notification is marked `SKIPPED` (in-app only).
+  - `EMAIL_ENABLED != true`: the notification is marked `SKIPPED` (in-app only). Both stages run
+    with `EmailEnabled=true` since 2026-10-24 (dev was `false` before).
+  - An address on a reserved test domain (example.com/.net/.org and the `.example`, `.test`,
+    `.invalid`, `.localhost` top-level domains; `isReservedAddress`) is marked `SKIPPED` without
+    an SES call, so the synthetic experiment accounts never bounce (commit `bcd7bd1`).
   - Otherwise the notifier skips items that are no longer `PENDING` (a retried batch never sends
     twice), waits for a token-bucket slot (`EMAIL_RATE_PER_SEC`, default 1/s), sends with SES
     `SendEmail` (text + minimal HTML) and marks the item `SENT`.
 - **Failure policy** (`adapters/ses.ts` classifies errors):
-  - A **permanent** SES error (`MessageRejected`, e.g. an unverified recipient while the account is
-    in the SES sandbox) marks the item `FAILED` with `lastError` and is **not** retried.
+  - A **permanent** SES error (`MessageRejected`, e.g. a suppressed or invalid recipient; in the
+    sandbox also any unverified recipient) marks the item `FAILED` with `lastError` and is **not** retried.
   - A **transient** error (throttling, 5xx) stops the batch at that record and reports it in
     `batchItemFailures`. The stream retries from there; after 20 attempts or 1 h the record goes to
     `notify-dlq`.
   - Both kinds count `NotificationFailures`. Alarms: notify DLQ not empty, notifier `IteratorAge > 60 s`.
-- **SES sandbox status** (`docs/deployment-state.md`): production access was denied on 2026-10-17
-  while the sender identity was unverified. Until it is granted, dev runs with `EmailEnabled=false`.
-  Participants rely on in-app notifications, and e-mail only reaches verified team addresses (plan §9).
+- **SES status** (`docs/deployment-state.md`, `results/2026-10-24-ses-production-check/`):
+  production access was refused on 2026-10-17 while the sender identity was unverified and granted
+  on 2026-10-24 (50,000 messages/day, 14/s). Both stages send e-mail; reserved test domains are
+  skipped as above. Cognito's sign-up codes still use its default mailer (50/day) because the only
+  SES identity is a gmail.com address, which cannot be aligned with gmail.com's SPF/DKIM. In-app
+  notifications remain the primary channel (plan §9).
 
 ---
 
@@ -636,7 +643,7 @@ hot-spot load test measures the single-workshop limit (`docs/EXPERIMENTS.md`, Pe
 | Duplicate timers | Dropped by the FIFO dedup id within 5 min, and no-ops anyway. | — |
 | Continuation lost after the commit | `nextDueAt = now` keeps the workshop in the DUE index, so the sweep resumes the chain. A redelivered user command's convergence pass also resumes it. | — |
 | DynamoDB throttling or transient errors | SDK retries; then throw → redelivery (worker) or 500 (API). | `api-errors` / `worker-errors` alarms |
-| SES sandbox (unverified recipient) | `MessageRejected` → notification `FAILED`, not retried. In-app notification still present. | `NotificationFailures`; status in `GET /me/notifications` |
+| SES permanent rejection (`MessageRejected`; in the sandbox any unverified recipient) | notification `FAILED`, not retried. In-app notification still present. | `NotificationFailures`; status in `GET /me/notifications` |
 | SES throttling or outage, notifier down | The stream retries from the failed record (bisect, 20 attempts, 1 h max age), then sends it to `notify-dlq`. State changes are unaffected: notifications are decoupled. | `IteratorAge` alarm, `notify-dlq` alarm; `failure-recovery` notifier-outage case |
 | Cognito e-mail quota | Cognito's own mailer sends 50 verification e-mails/day/account. | Pre-created accounts (`create-test-users` with `MessageAction SUPPRESS`) for experiments and the demo |
 | AZ failure | The managed services are multi-AZ. | — |
@@ -692,17 +699,17 @@ Prices and the per-dimension model are in `docs/COST.md` (`tools/experiments/cos
 
 | Concern | Implementation |
 |---|---|
-| Authentication | Cognito user pool: e-mail as username (case-insensitive), verified e-mail, `PreventUserExistenceErrors`, password policy ≥ 8 characters. The SPA is a public client using code + PKCE and holds **no secrets** (`env.js` contains only public ids). The API Gateway JWT authorizer validates signature, issuer, audience and expiry before the Lambda runs. Only `/health` and `/public/workshops/{wsId}` are anonymous. On-prem: `jose` RS256 verification against the Keycloak JWKS (`iss`, `aud`, `exp`; `services/local/src/auth.ts`). |
+| Authentication | Cognito user pool: e-mail as username (case-insensitive), verified e-mail (a changed address stays unverified, and the old one in force, until its code is entered: `AttributesRequireVerificationBeforeUpdate`), `PreventUserExistenceErrors`, password policy ≥ 8 characters. The API accepts an identity only when the token's `email_verified` is true (`lib/auth.ts`). The SPA is a public client using code + PKCE and holds **no secrets** (`env.js` contains only public ids). The API Gateway JWT authorizer validates signature, issuer, audience and expiry before the Lambda runs. Only `/health` and `/public/workshops/{wsId}` are anonymous. On-prem: `jose` RS256 verification against the Keycloak JWKS (`iss`, `aud`, `exp`; `services/local/src/auth.ts`). |
 | Actor integrity | `actorUserId` and `actorEmail` come from verified claims only (`buildCommand`). The body never carries them. |
 | Authorisation (C7) | Org membership on every organiser route and organiser command, checked in the API and again in the worker. Cross-organisation paths return 404 after the 403 membership check. Command results are invisible (404) to anyone other than the issuer or the workshop's organisers. Offer ownership is checked by the engine (`OFFER_NOT_YOURS`). |
-| Input validation | zod schemas from `@seatrelay/contracts` for every body and path parameter (`parseBody`, `validateParams`) → 400 `VALIDATION_ERROR`. Malformed JSON returns 400. Queue messages are re-validated in the worker (`CommandSchema`). DynamoDB reads are validated on mapping. Lengths are capped (title 200, description 5,000, name 120). |
+| Input validation | zod schemas from `@seatrelay/contracts` for every body and path parameter (`parseBody`, `validateParams`) → 400 `VALIDATION_ERROR`. Malformed JSON returns 400. Queue messages are re-validated in the worker (`CommandSchema`). DynamoDB reads are validated on mapping. Lengths and numbers are capped (title 200, description 5,000, name 120, capacity 1–`MAX_CAPACITY` = 10,000, hold 30–86,400 s, 2–5 sessions); the engine re-checks the capacity bound (`INVALID_CAPACITY`). The two per-user lists are capped at the 500 most recent entries (`MAX_MY_REGISTRATIONS`, `MAX_MY_NOTIFICATIONS`). |
 | Fault flags | `_fault` is stripped by the API unless `ALLOW_FAULT_FLAGS=true` (dev only); pilot runs with `false`. |
-| IAM, least privilege per function (SAM policy templates scoped to this stack's resources) | `api`: CRUD on the table + Send on `commands.fifo`. `worker`: CRUD on the table + Send on `commands.fifo` and `expiry-delay`. `expiryForwarder`: Send on those two queues, no table access. `sweep`: **read-only** on the table + Send on `commands.fifo`. `notifier`: CRUD on the table + Send on `notify-dlq` + `ses:SendEmail`/`SendRawEmail`. The table-level CRUD template is broader than the minimal action set; the possible tightening is in section 17. |
+| IAM, least privilege per function (explicit statements scoped to this stack's resources) | `api`: `GetItem`/`PutItem`/`UpdateItem`/`DeleteItem`/`Query`/`BatchGetItem`/`ConditionCheckItem` on the table and its indexes (`TransactWriteItems` is authorised through the per-item actions) + Send on `commands.fifo` + `cognito-idp:ListUsers` on the pool (member lookup by e-mail). `worker`: the same table statement + Send on `commands.fifo` and `expiry-delay`. `expiryForwarder`: Send on those two queues, no table access. `sweep`: `Query` on `index/GSI1` + `BatchGetItem` on the table + Send on `commands.fifo`. `notifier`: `GetItem`/`UpdateItem` on the table + Send on `notify-dlq` + `ses:SendEmail` on this account's SES identities, plus SAM's stream-read policy for the event source. |
 | PII minimisation | Only e-mail and display name (from the ID token) are stored. Passwords live only in Cognito/Keycloak. Lambda events are never logged verbatim (`POWERTOOLS_LOGGER_LOG_EVENT=false`). Errors go to clients as `{ code, message }` without stack traces. |
 | Retention | CommandResult 30 days and Notification 90 days (DynamoDB TTL; on-prem `janitor.ts`). Logs 14 days. |
-| Transport and storage | HTTPS only: CloudFront `redirect-to-https`, API Gateway HTTPS. CloudFront managed security-headers policy. Private S3 with Origin Access Control (SigV4), four public-access blocks, `BucketOwnerEnforced`, SSE-S3. DynamoDB encrypted at rest (service default). |
-| Abuse limits | API throttling per stage, CORS limited to the CloudFront origin and `http://localhost:5173` (headers `authorization`, `content-type`), SES pacing, worker concurrency cap. |
-| Supply chain | `pnpm install --frozen-lockfile` and `pnpm audit --audit-level high` in CI (`.github/workflows/ci.yml`). Lambda bundles keep `@aws-sdk/*` external (runtime-provided). |
+| Transport and storage | HTTPS only: CloudFront `redirect-to-https`, API Gateway HTTPS. A CloudFront response-headers policy per stage (HSTS, `nosniff`, `X-Frame-Options: DENY`, referrer policy) with a Content-Security-Policy: scripts, styles, fonts and images from the SPA's origin only (`data:` for the icon, inline style attributes allowed), `connect-src` limited to the stage's API, the Cognito issuer and the hosted UI, `frame-ancestors 'none'` (`templates/web.yaml`, parameter `ApiOrigin`). Private S3 with Origin Access Control (SigV4), four public-access blocks, `BucketOwnerEnforced`, SSE-S3. DynamoDB encrypted at rest (service default). |
+| Abuse limits | API throttling per stage (no per-user quota: HTTP APIs have no usage plans; one account is bounded by the stage limit and the budget alarms), CORS limited to the stage's CloudFront origin (dev also `http://localhost:5173`; parameter `AllowLocalOrigin`; headers `authorization`, `content-type`), SES pacing, worker concurrency cap, the per-user list caps above. |
+| Supply chain | `pnpm install --frozen-lockfile` in CI; `pnpm audit --audit-level high` runs there as an advisory step (`continue-on-error`, `.github/workflows/ci.yml`). Open advisories on 31 Oct 2026 and why they are accepted: zod 3.25 (memory exhaustion on oversized constrained collections; every request is bounded by the API payload limit and the schema caps above), react-router 6.30 (open redirect through a backslash in `useNavigate`; `sanitizeReturnTo` rejects backslashes and the only navigation targets are server-generated ids), vitest/tinypool/`@vitest/mocker` (test tooling only, never deployed), `fast-uri` through fastify (on-prem reference only). nodemailer (on-prem only) was upgraded to 10.3. Lambda bundles keep `@aws-sdk/*` external (runtime-provided). |
 | Test identities | The Cognito `tooling` client (password auth) and the Keycloak `tooling` client exist only for scripts and k6, with generated test accounts. Real participants use the `web` client. |
 
 ---
@@ -735,7 +742,7 @@ Prices and the per-dimension model are in `docs/COST.md` (`tools/experiments/cos
 | Stack | Template | Lifetime | Stage differences |
 |---|---|---|---|
 | `seatrelay-auth` | `templates/auth.yaml` | Deployed once, never deleted (users live here); budgets, SES identity | — |
-| `seatrelay-app-dev` / `-pilot` | `templates/app.yaml` | Per stage; dev can be torn down | dev: `AllowFaultFlags=true`, `EmailEnabled=false`, throttle 300/500, no table deletion protection. pilot: `false`, `true`, 50/100, deletion protection on. |
+| `seatrelay-app-dev` / `-pilot` | `templates/app.yaml` | Per stage; dev can be torn down | dev: `AllowFaultFlags=true`, `EmailEnabled=true` (`false` until 2026-10-24), throttle 300/500, no table deletion protection. pilot: `false`, `true`, 50/100, deletion protection on. |
 | `seatrelay-web-dev` / `-pilot` | `templates/web.yaml` | Per stage | — |
 
 Build: `services/aws/scripts/build.mjs` (esbuild, ESM, `node22`, arm64 runtime `nodejs22.x`,
@@ -754,5 +761,5 @@ Build: `services/aws/scripts/build.mjs` (esbuild, ESM, `node22`, arm64 runtime `
 | R1 "conditional write on the marker item" | The engine check under the single writer and META lock enforces R1. The marker is upserted as a mirror (plus a unique index on-prem). | The workshop-level optimistic lock already makes the decision atomic. A marker condition would need the same key semantics across archive and re-register in one transaction. |
 | Workshop statuses `OPEN \| CLOSED \| CANCELLED` | Adds `CANCELLING` (workshop and session) | Organiser cancellations are drained in budget-sized commits (≤ 100 items per transaction). |
 | Offers per command ≤ 12 | Also ≤ 12 expiries and ≤ 90 storage items per decision | Keeps every commit within the DynamoDB transaction limit. |
-| IAM "notifier: DDB Update" | SAM `DynamoDBCrudPolicy` on the table | Simplicity. Tightening to `GetItem`/`UpdateItem` (notifier) and scoping `ses:SendEmail` to the identity ARN are possible follow-ups. |
 | Mechanism comparison "also one real replay per mode on dev" | Simulation only (`tools/replay`) | No deployed replay script exists. See `docs/EXPERIMENTS.md`. |
+| API contract exported as OpenAPI into `docs/` (plan §2.5) | The zod schemas in `packages/contracts/src/api.ts` and the route table in `packages/service/src/api/app.ts` (`API_ROUTES`) are the contract; no OpenAPI document was generated | The typed client in `tools/scripts` and the web app import the schemas directly, so a generated document would be a second source of truth to keep in step. |

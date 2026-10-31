@@ -75,10 +75,10 @@ Aspect: scenario and method & Target & Measured & Verdict\\
  & \ReplaySeeds{} simulated workshops: duplicate-hold events \ReplayDupHoldEventsUnifiedMean{} vs \ReplayDupHoldEventsPerSessionMean; distinct served, per-session $-$ unified: \ReplayDistinctDeltaMean{} [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; \S\ref{sec:mechanism}
  & done (simulation)\\
 \textbf{User study} (Prelim.\ \S5): 4--6 student interviews, then 12 non-team university students, SeatRelay vs one form per session + spreadsheet & Completion $\geq$\,90\,\%; paired time $-$25\,\%; SUS $\geq$\,75
- & \IfPending{\StudyParticipants}{not yet run (planned 29 Oct--5 Nov; protocol and analysis script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
+ & \IfPending{\StudyParticipants}{not run (planned 29 Oct--5 Nov; protocol and analysis script ready, \S\ref{sec:study})}{n = \StudyParticipants; completion \StudyCompletionSRPct\,\% (control \StudyCompletionCtrlPct\,\%); time $-$\StudyTimeImprovementPct\,\% (Wilcoxon $p$ = \StudyTimeWilcoxonP); SUS \StudySusSRMean{} [\StudySusSRLo, \StudySusSRHi]; \S\ref{sec:study}}
  & --\\
 \textbf{Live pilot} (Prelim.\ \S5): two small sessions of identical content & Observation, no target
- & \IfPending{\PilotWorkshops}{not yet run (planned 3--4 Nov on the \code{pilot} stage, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
+ & \IfPending{\PilotWorkshops}{not run (planned 3--4 Nov on the \code{pilot} stage, \S\ref{sec:pilot})}{\PilotWorkshops{} workshops, \PilotRegistrations{} registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended; \S\ref{sec:pilot}}
  & --\\
 \bottomrule
 \end{tabularx}
@@ -180,11 +180,11 @@ queue served \ReplayDistinctUnifiedMean{} distinct participants per workshop aga
 [\ReplayDistinctDeltaLo, \ReplayDistinctDeltaHi]; fewer under PER\_SESSION in
 \ReplayDistinctFewerSeedsPct\,\% of seeds, equal in \ReplayDistinctEqualSeedsPct\,\%), and a released
 seat reached a new participant after \ReplayRefillMeanUnifiedMean{} instead of
-\ReplayRefillMeanPerSessionMean{} minutes on average (\ReplayRefillMeanN{} seeds with refills in both). Seats left empty
+\ReplayRefillMeanPerSessionMean{} minutes on average (per-mode means; \ReplayRefillMeanN{} seeds had refills in both). Seats left empty
 at cut-off did not differ (difference \ReplaySeatsWastedDeltaMean{}
 [\ReplaySeatsWastedDeltaLo, \ReplaySeatsWastedDeltaHi]). This compares two modes of our own engine
-under an assumed behaviour model: it is neither a field measurement nor a test of the tools in
-Table~\ref{tab:competitors}; the plan's extra replay on the deployed system was not run.
+under an assumed behaviour model, not a field measurement or a test of the tools in
+Table~\ref{tab:competitors}; the plan's extra replay on dev was not run.
 
 \begin{figure}[t]
   \centering\resultfig{replay-comparison}{5.2cm}{replay chart}
@@ -229,10 +229,10 @@ participants made \StudyErrorsSR{} erroneous actions and \StudyHelpSR{} help req
 against \StudyErrorsCtrl{} and \StudyHelpCtrl{} with the control (charts in \code{results/user-study/}).}
 
 \subsection{Live pilot, and a staged rehearsal reported separately}\label{sec:pilot}
-\IfPending{\PilotWorkshops}{The pilot, planned for 3--4 November 2026 and not yet run, will serve a
-real workshop in two sessions on the \code{pilot} stage (no fault injection; e-mail and in-app
-notifications), with registration open for at least five days; the organiser's CSV exports and the
-backfill log will be the evidence.}{The pilot (planned as two sessions with registration open for at
+\IfPending{\PilotWorkshops}{The pilot, planned for 3--4 November 2026 and not run by the time of
+writing, is to serve a real workshop in two sessions on the \code{pilot} stage (no fault injection;
+e-mail on), with registration open for at least five days; the organiser's CSV exports and the
+backfill log are the evidence.}{The pilot (planned as two sessions with registration open for at
 least five days) ran on the \code{pilot} stage: \PilotWorkshops{} workshop(s), \PilotRegistrations{}
 registrations, \PilotConfirmed{} confirmed, \PilotBackfills{} backfills, \PilotAttended{} attended
 (organiser CSV exports and backfill log, \code{results/pilot/}). \pending{pilot observations: natural
@@ -242,10 +242,10 @@ cancellations, notifications, organiser feedback}}
 \RehearsalCommandsApplied/\RehearsalCommands{} commands, relayed \RehearsalBackfills{} seats
 (\RehearsalBackfillExpiredN{} expiries through the timer path in
 \RehearsalBackfillExpiredMinMs--\RehearsalBackfillExpiredMaxMs\,ms), sent \RehearsalNotificationsSent{} e-mails to the SES
-mailbox simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; the invariants
-held at all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, rehearsed
-events are logged apart from natural ones and, like observations by the team's own organisers, are
-operational evidence; only independent participants' behaviour and feedback are user evidence.
+simulator and passed \RehearsalChecksPassed/\RehearsalChecksTotal{} checks; invariants held at
+all \RehearsalInvariantReads{} checkpoints. As the Preliminary report requires, rehearsed
+events are logged apart from natural ones and are, like the team's own observations, operational
+evidence; only independent participants' behaviour and feedback are user evidence.
 
 \subsection{Hypotheses H1--H3: verdicts on the evidence so far}\label{sec:hypotheses}
 \begin{itemize}

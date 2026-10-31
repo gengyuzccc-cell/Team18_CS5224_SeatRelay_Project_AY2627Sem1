@@ -34,11 +34,13 @@ async function failure(promise: Promise<unknown>): Promise<ApiError> {
 }
 
 describe('API client error bodies', () => {
-  it('maps the API Gateway JWT authorizer 401 to UNAUTHORIZED (session-expired copy)', async () => {
+  it('maps the API Gateway JWT authorizer 401 to UNAUTHORIZED (session-renewal copy)', async () => {
     const { client, onUnauthorized } = clientAnswering(401, '{"message":"Unauthorized"}');
     const error = await failure(client.request('GET', '/me', { schema: okSchema }));
     expect(error.code).toBe('UNAUTHORIZED');
-    expect(describeError(error)).toBe('Your session has expired; please sign in again.');
+    expect(describeError(error)).toBe(
+      'Your session needs to be renewed; sign in again if this message stays.',
+    );
     expect(onUnauthorized).toHaveBeenCalledWith('id-token-1');
   });
 
@@ -48,6 +50,19 @@ describe('API client error bodies', () => {
     expect(error.code).toBe('TOO_MANY_REQUESTS');
     expect(describeError(error)).toBe(
       'Too many requests right now; please wait a moment and retry.',
+    );
+  });
+
+  it('shows a NOT_FOUND / CONFLICT server message alone (no "Not found: Workshop not found")', () => {
+    expect(describeError(new ApiError(404, 'NOT_FOUND', 'Workshop not found'))).toBe(
+      'Workshop not found',
+    );
+    expect(describeError(new ApiError(409, 'CONFLICT', 'Command already settled'))).toBe(
+      'Command already settled',
+    );
+    expect(describeError(new ApiError(404, 'NOT_FOUND', ''))).toBe('Not found.');
+    expect(describeError(new ApiError(400, 'VALIDATION_ERROR', 'title too long'))).toBe(
+      'The server rejected the input: title too long',
     );
   });
 

@@ -46,6 +46,13 @@ Parameters:
   LogRetentionDays:
     Type: Number
     Default: 14
+  AllowLocalOrigin:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: 'true'
+    Description: >-
+      Also allow http://localhost:5173 (the Vite dev server) as a CORS origin. true on dev; false
+      on pilot, whose API should answer only its own CloudFront origin.
 
 Mappings:
   StageConfig:
@@ -61,6 +68,7 @@ Mappings:
 Conditions:
   HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, '']]
   HasSenderEmail: !Not [!Equals [!Ref SenderEmail, '']]
+  LocalOriginAllowed: !Equals [!Ref AllowLocalOrigin, 'true']
 
 Globals:
   Function:
@@ -84,7 +92,6 @@ Globals:
         POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_LOGGER_LOG_EVENT: 'false'
         NODE_OPTIONS: --enable-source-maps
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
 
 Resources:
   # ---------------------------------------------------------------- DynamoDB
@@ -225,9 +232,10 @@ Resources:
       # Routes are declared per method (never ANY / $default) so that CORS pre-flight OPTIONS is
       # answered by API Gateway itself instead of being rejected 401 by the authorizer.
       CorsConfiguration:
-        AllowOrigins:
-          - !Ref WebOrigin
-          - http://localhost:5173
+        AllowOrigins: !If
+          - LocalOriginAllowed
+          - [!Ref WebOrigin, 'http://localhost:5173']
+          - [!Ref WebOrigin]
         AllowHeaders: [authorization, content-type]
         AllowMethods: [GET, POST, PUT, PATCH, DELETE]
         MaxAge: 600
@@ -259,9 +267,28 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: api
           WEB_ORIGIN: !Ref WebOrigin
+          # Turns on `POST /orgs/{orgId}/members` by e-mail (Cognito ListUsers, adapters/cognito.ts).
+          USER_POOL_ID: { 'Fn::ImportValue': !Sub '${AuthStackName}-UserPoolId' }
+      # Least privilege (plan section 2.4): exactly the DynamoDB actions the adapter issues
+      # (TransactWriteItems is authorised through the per-item Put/Update/Delete and
+      # ConditionCheckItem actions), the FIFO send, and ListUsers on the pool for the e-mail lookup.
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+                - dynamodb:BatchGetItem
+                - dynamodb:ConditionCheckItem
+              Resource:
+                - !GetAtt Table.Arn
+                - !Sub '${Table.Arn}/index/*'
+            - Effect: Allow
+              Action: [cognito-idp:ListUsers]
+              Resource: { 'Fn::ImportValue': !Sub '${AuthStackName}-UserPoolArn' }
         - SQSSendMessagePolicy:
             QueueName: !GetAtt CommandsQueue.QueueName
       Events:
@@ -311,9 +338,21 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: worker
+      # Same DynamoDB statement as the api (the worker's commit is one TransactWriteItems).
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DeleteItem
+                - dynamodb:Query
+                - dynamodb:BatchGetItem
+                - dynamodb:ConditionCheckItem
+              Resource:
+                - !GetAtt Table.Arn
+                - !Sub '${Table.Arn}/index/*'
         - SQSSendMessagePolicy:
             QueueName: !GetAtt CommandsQueue.QueueName
         - SQSSendMessagePolicy:

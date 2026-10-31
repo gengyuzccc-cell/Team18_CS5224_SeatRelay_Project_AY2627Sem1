@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Icon } from './Icon';
 
 /** Share link with a copy-to-clipboard button (falls back to a selectable input). */
 export function CopyLink({ url, label = 'Share link' }: { url: string; label?: string }) {
   const [copied, setCopied] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const id = useId();
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -15,12 +16,12 @@ export function CopyLink({ url, label = 'Share link' }: { url: string; label?: s
   };
   return (
     <div className="copy-link">
-      <label className="field-label" htmlFor={`copy-${label}`}>
+      <label className="field-label" htmlFor={id}>
         {label}
       </label>
       <div className="copy-row">
         <input
-          id={`copy-${label}`}
+          id={id}
           type="text"
           className="mono-url"
           readOnly

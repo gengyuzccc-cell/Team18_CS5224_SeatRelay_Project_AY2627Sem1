@@ -37,15 +37,3 @@ export function nextPollDelay(
   const index = Math.min(attempt, POLL_BACKOFF_MS.length - 1);
   return { delayMs: POLL_BACKOFF_MS[index] ?? POLL_MAX_MS, slow: false };
 }
-
-/** The first `count` delays as a browser would experience them (elapsed = sum of delays). */
-export function pollSchedule(count: number, initialMs: number = COMMAND_POLL_AFTER_MS): PollStep[] {
-  const steps: PollStep[] = [];
-  let elapsed = 0;
-  for (let attempt = 0; attempt < count; attempt += 1) {
-    const step = nextPollDelay(attempt, elapsed, initialMs);
-    steps.push(step);
-    elapsed += step.delayMs;
-  }
-  return steps;
-}

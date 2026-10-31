@@ -1,10 +1,23 @@
+import { COMMAND_POLL_AFTER_MS } from '@seatrelay/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   nextPollDelay,
   POLL_SLOW_AFTER_MS,
   POLL_SLOW_INTERVAL_MS,
-  pollSchedule,
+  type PollStep,
 } from '../src/commands/backoff';
+
+/** The first `count` delays as a browser would experience them (elapsed = sum of delays). */
+function pollSchedule(count: number, initialMs: number = COMMAND_POLL_AFTER_MS): PollStep[] {
+  const steps: PollStep[] = [];
+  let elapsed = 0;
+  for (let attempt = 0; attempt < count; attempt += 1) {
+    const step = nextPollDelay(attempt, elapsed, initialMs);
+    steps.push(step);
+    elapsed += step.delayMs;
+  }
+  return steps;
+}
 
 describe('polling backoff schedule (plan §1.3)', () => {
   it('starts at 300 ms and backs off 300 → 500 → 1000 → 2000, then stays capped at 2000', () => {

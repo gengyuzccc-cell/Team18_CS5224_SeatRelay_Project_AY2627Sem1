@@ -168,13 +168,13 @@ crash delays only its own workshop until redelivery (120\,s). A region failure i
 table could be restored from PITR, typically five minutes behind~\cite{aws-ddb-pitr-howitworks}, but
 user identities live in one regional Cognito user pool without backup and the table's user ids are
 Cognito subjects, so accounts would have to be recreated and remapped; this path is untested and we
-claim no recovery time objective. The actor of every command comes only from the verified token, all
-input is schema-validated, and organiser rights are checked in the API and again in the worker (C7).
-Each function has its own role: the sweep only reads the table and the forwarder cannot access it,
-while \code{api} and \code{worker} use SAM's table-level read-write template, which could be
-narrowed. The API is throttled per stage and admits cross-origin requests only from the stage's
-CloudFront and the local development origins; the experiment scripts' password sign-in client
-is also an accepted audience, and both stages share one user pool. The application stores e-mail
+claim no recovery time objective. The actor of every command comes only from the verified token
+(accepted only while its e-mail address is verified), all input is schema-validated and bounded,
+and organiser rights are checked in the API and again in the worker (C7). Each function's role
+lists only the actions its adapter issues. The API is throttled per stage and admits cross-origin
+requests only from the stage's CloudFront origin; a Content-Security-Policy confines the SPA to its
+own scripts and to calls to the API and Cognito; the experiment scripts' password sign-in client is
+also an accepted audience, and both stages share one user pool. The application stores e-mail
 address, display name and Cognito user id; access and function logs are kept for 14 days, raw
 request events never. SES production access~\cite{aws-ses-production-access} was granted in
 October, so participants get e-mail as well as in-app notifications; addresses on reserved test

@@ -4,7 +4,7 @@ import type {
   WorkshopMode,
   WorkshopPublic,
 } from '@seatrelay/contracts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCommand, type CommandPhase } from '../commands/useCommand';
 import { COMMAND_TYPE_TEXT, endReasonText, rejectReasonText, sessionTitle } from '../commands/copy';
 import { describeError } from '../util/errors';
@@ -65,6 +65,15 @@ export function StatusCard({
   const mode: WorkshopMode = workshop.mode;
   const workshopClosed = isCancelledLike(workshop.status);
   const offer = registration.currentOffer;
+  const offerId = offer?.id;
+  // The "done" copy belongs to the registration the command produced. Once the card shows a
+  // different one (a decline that led straight to the next offer, a refetch), the buttons offer
+  // their actions again instead of labelling the new offer "Declined".
+  useEffect(() => {
+    if (!command.busy) {
+      setActive(undefined);
+    }
+  }, [registration.seq, registration.status, offerId, command.busy]);
   const offeredSession =
     offer === undefined ? undefined : sessions.find((s) => s.id === offer.sessionId);
   const clippedByCutoff =

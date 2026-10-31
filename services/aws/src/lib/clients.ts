@@ -1,3 +1,4 @@
+import { CognitoIdentityProviderClient } from '@aws-sdk/client-cognito-identity-provider';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { SESClient } from '@aws-sdk/client-ses';
@@ -15,3 +16,5 @@ export const documentClient = lazy(() =>
 export const sqsClient = lazy(() => new SQSClient({}));
 
 export const sesClient = lazy(() => new SESClient({}));
+
+export const cognitoClient = lazy(() => new CognitoIdentityProviderClient({}));

@@ -2617,8 +2617,12 @@
 \newcommand{\PilotDistinctParticipants}{\pending{pilot not yet run}}
 % results/pilot/*.csv (organiser exports): attended = true -- participants marked as attended
 \newcommand{\PilotAttended}{\pending{pilot not yet run}}
-% results/pilot: dashboard backfill log -- backfills during the pilot
+% results/pilot/backfills-<wsId>.csv (dashboard-backfills export): rows -- backfills during the pilot
 \newcommand{\PilotBackfills}{\pending{pilot not yet run}}
+% results/pilot/backfills-<wsId>.csv (dashboard-backfills export): reallocatedAt non-empty -- backfills whose seat was relayed to someone
+\newcommand{\PilotBackfillsReallocated}{\pending{pilot not yet run}}
+% results/pilot/backfills-<wsId>.csv (dashboard-backfills export): latencyMs (max) -- largest backfill latency during the pilot (ms)
+\newcommand{\PilotBackfillMaxMs}{\pending{pilot not yet run}}
 
 % ==============================================================================================
 % Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)

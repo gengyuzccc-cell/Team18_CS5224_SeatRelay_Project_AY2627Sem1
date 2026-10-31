@@ -14,21 +14,20 @@
     "dev": "tsx watch src/main.ts"
   },
   "dependencies": {
+    "@fastify/cors": "10.1.0",
     "@seatrelay/contracts": "workspace:*",
     "@seatrelay/core": "workspace:*",
     "@seatrelay/service": "workspace:*",
     "fastify": "5.12.7",
-    "@fastify/cors": "10.1.0",
-    "pg": "8.23.1",
     "jose": "5.10.0",
-    "nodemailer": "6.10.1",
+    "nodemailer": "10.3.1",
+    "pg": "8.23.1",
     "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/pg": "8.23.1",
-    "@types/nodemailer": "6.4.24",
     "tsx": "4.23.15",
-    "vitest": "3.2.7",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
   }
 }

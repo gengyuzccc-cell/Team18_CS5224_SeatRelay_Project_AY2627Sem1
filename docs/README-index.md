@@ -135,12 +135,22 @@ The operational scripts:
 - `get-tokens-keycloak` (local accounts and tokens);
 - `seed-demo` (the demo preset of [DEMO.md](DEMO.md));
 - `seed-study` (resets a user-study round);
+- `dashboard-backfills` (writes a workshop's dashboard backfill log as
+  `results/pilot/backfills-<wsId>.csv` for the report);
 - the Bash helpers `deploy-all.sh`, `deploy-web.sh`, `teardown.sh`, `cost-snapshot.sh` and
   `activate-cost-tags.sh`.
 
 It also exports the typed API client, the identity-provider helpers and the token-cache library
 that `loadtest` and `experiments` reuse. All seeding goes through the public API, so the seeded
 state is produced by the engine.
+
+**`tools/market`** (no package: three Python/JSON files).
+The market-size counts of the report. `inputs.json` holds every source with its URL, quoted
+sentence and count; `count.py` sums them into `results/market/<date>/counts.json`, which
+`report/tools/report_numbers.py` turns into the market macros (`\MarketStudentOrgs`,
+`\MarketTamCampusSgd`); `capture.py` fetches the source pages. The dated browser captures of the
+NUS, SMU and SIT pages (PNG, text, SHA-256) are taken with `results/market/screenshots/capture.mjs`.
+Method and checklist: [market-sizing.md](market-sizing.md).
 
 ## Documentation (`docs/`)
 

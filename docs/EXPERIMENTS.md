@@ -96,8 +96,11 @@ pnpm --filter @seatrelay/scripts create-test-users -- --count 60 --prefix loadus
   traces, and the notifier pause (`PutFunctionConcurrency`).
 - **Without credentials** those steps are reported as *skipped* in `summary.md`. They are not
   counted as passed. A run with skipped steps is not a report run.
-- **Stage settings.** Dev runs with `AllowFaultFlags=true` and `EmailEnabled=false`, so
-  notifications end as `SKIPPED`. Pilot strips `_fault`: never run fault experiments against pilot.
+- **Stage settings.** Dev runs with `AllowFaultFlags=true` and `EmailEnabled=true` (`false`
+  until 2026-10-24). Notifications to the `example.com` experiment accounts still end as `SKIPPED`,
+  because the notifier never calls SES for a reserved test domain (`isReservedAddress` in
+  `services/aws/src/handlers/notifier.ts`), not because e-mail is off. Pilot strips `_fault`:
+  never run fault experiments against pilot.
 
 ### 2.3 Common harness (`tools/experiments/src/lib/run.ts`)
 

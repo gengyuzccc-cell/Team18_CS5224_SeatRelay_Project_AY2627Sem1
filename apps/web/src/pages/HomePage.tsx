@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState, type FormEvent } from 'react';
+import { DATA_NOTICE_ID } from '../util/notice';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { isLiveStatus, useMyRegistrations } from '../api/queries';
 import { useSession } from '../auth/useSession';
 import { EmptyState } from '../components/EmptyState';
@@ -95,6 +96,49 @@ function MySummary() {
   );
 }
 
+/**
+ * Data notice (PDPA notification obligation for a pilot with participants outside the team):
+ * what signing in gives SeatRelay, who sees it, how long it is kept and how to have it removed.
+ * Content only; the retention periods are the stores' automatic expiry.
+ */
+function DataNotice() {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash === `#${DATA_NOTICE_ID}`) {
+      document.getElementById(DATA_NOTICE_ID)?.scrollIntoView();
+    }
+  }, [hash]);
+  return (
+    <section className="card" id={DATA_NOTICE_ID} aria-labelledby="data-notice-heading">
+      <header className="card-header">
+        <h2 id="data-notice-heading">What we keep</h2>
+      </header>
+      <ul className="list small">
+        <li>
+          Signing in through SeatRelay's own sign-in service (an AWS Cognito user pool, independent
+          of any university account) gives SeatRelay your e-mail address, display name and an
+          account id.
+        </li>
+        <li>
+          Your registrations, holds, confirmations and attendance are visible to the organisers of
+          that workshop, including in their CSV export.
+        </li>
+        <li>
+          In-app notifications are kept for 90 days and command records for 30 days, then expire
+          automatically. The API access log keeps your IP address and browser user agent for 14
+          days.
+        </li>
+        <li>Notification e-mails are sent from the team's sender address.</li>
+        <li>
+          SeatRelay is NUS CS5224 Team 18 coursework; this pilot is not a university service. To
+          have your account and its data removed, ask a workshop organiser or reply to any SeatRelay
+          e-mail.
+        </li>
+      </ul>
+    </section>
+  );
+}
+
 export function HomePage() {
   const session = useSession();
   useDocumentTitle();
@@ -183,6 +227,8 @@ export function HomePage() {
           </Link>
         </section>
       </div>
+
+      <DataNotice />
     </div>
   );
 }

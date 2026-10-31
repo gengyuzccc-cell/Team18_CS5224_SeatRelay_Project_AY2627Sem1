@@ -85,7 +85,9 @@ interface Options {
 function walkthroughPassword(env: NodeJS.ProcessEnv = process.env): string {
   const password = env.E2E_PASSWORD || env.SEATRELAY_TEST_PASSWORD;
   if (!password || password === 'Passw0rd!') {
-    throw new Error('set SEATRELAY_TEST_PASSWORD (or E2E_PASSWORD) to the private password of the walkthrough accounts');
+    throw new Error(
+      'set SEATRELAY_TEST_PASSWORD (or E2E_PASSWORD) to the private password of the walkthrough accounts',
+    );
   }
   return password;
 }

@@ -18,6 +18,14 @@ Parameters:
     Type: String
     Default: ''
     Description: Team mailbox used as SES sender identity (verification mail is sent on creation). Empty = skip.
+  CognitoEmailSourceArn:
+    Type: String
+    Default: ''
+    Description: >-
+      Empty (default): Cognito's own mailer sends the sign-up and reset codes (50 e-mails per day per
+      account). Set to the ARN of a verified SES identity (the sender identity above,
+      arn:aws:ses:REGION:ACCOUNT:identity/ADDRESS) to send them through SES instead (production
+      access required): the one-deploy switch for a pilot day that needs more than 50 codes.
   BudgetEmail:
     Type: String
     Default: ''
@@ -32,6 +40,7 @@ Parameters:
 Conditions:
   HasSenderEmail: !Not [!Equals [!Ref SenderEmail, '']]
   HasBudgetEmail: !Not [!Equals [!Ref BudgetEmail, '']]
+  CognitoSendsViaSes: !Not [!Equals [!Ref CognitoEmailSourceArn, '']]
 
 Resources:
   UserPool:
@@ -69,10 +78,19 @@ Resources:
           AttributeDataType: String
           Required: false
           Mutable: true
-      # Cognito's own mailer: 50 e-mails/day/account hard quota (resets 09:00 UTC). Switch to
-      # DEVELOPER + SES ARN only after SES production access is granted (plan §2.4).
-      EmailConfiguration:
-        EmailSendingAccount: COGNITO_DEFAULT
+      # A changed e-mail address stays unverified until its code is entered, and the pool keeps
+      # the old address meanwhile; the API trusts only tokens whose email_verified is true.
+      UserAttributeUpdateSettings:
+        AttributesRequireVerificationBeforeUpdate: [email]
+      # Cognito's own mailer (50 e-mails/day/account, resets 09:00 UTC) unless CognitoEmailSourceArn
+      # names a verified SES identity. Kept on the default mailer after SES production access was
+      # granted (24 Oct 2026) because the only verified identity is a personal gmail.com address
+      # (docs/RUNBOOK.md); the parameter is the switch if a pilot day needs more than 50 codes.
+      EmailConfiguration: !If
+        - CognitoSendsViaSes
+        - EmailSendingAccount: DEVELOPER
+          SourceArn: !Ref CognitoEmailSourceArn
+        - EmailSendingAccount: COGNITO_DEFAULT
       VerificationMessageTemplate:
         DefaultEmailOption: CONFIRM_WITH_CODE
         EmailSubject: Your SeatRelay verification code

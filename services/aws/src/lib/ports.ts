@@ -6,10 +6,11 @@ import {
   type ApiAppConfig,
   type WorkerPorts,
 } from '@seatrelay/service';
+import { CognitoUserDirectory } from '../adapters/cognito';
 import { DynamoWorkshopStore } from '../adapters/dynamo/store';
 import { SqsCommandQueue, SqsTimerScheduler } from '../adapters/sqs';
-import { documentClient, sqsClient } from './clients';
-import { STAGE, envFlag, requireEnv } from './env';
+import { cognitoClient, documentClient, sqsClient } from './clients';
+import { STAGE, env, envFlag, requireEnv } from './env';
 import { createLambdaRuntime, lazy, type LambdaRuntime } from './runtime';
 
 /**
@@ -40,15 +41,22 @@ export const workerPorts = lazy((): WorkerPorts => ({
   metrics: runtime().metrics,
 }));
 
-export const apiConfig = lazy((): ApiAppConfig => ({
-  store: store(),
-  queue: commandQueue(),
-  clock: systemClock,
-  ids: uuidIdGen,
-  logger: runtime().logger,
-  allowFaultFlags: envFlag('ALLOW_FAULT_FLAGS'),
-  stage: STAGE(),
-  serviceName: 'seatrelay',
-}));
+export const apiConfig = lazy((): ApiAppConfig => {
+  // USER_POOL_ID (set by the template) turns on adding organisation members by e-mail.
+  const userPoolId = env('USER_POOL_ID');
+  return {
+    store: store(),
+    queue: commandQueue(),
+    clock: systemClock,
+    ids: uuidIdGen,
+    logger: runtime().logger,
+    allowFaultFlags: envFlag('ALLOW_FAULT_FLAGS'),
+    stage: STAGE(),
+    serviceName: 'seatrelay',
+    ...(userPoolId === undefined
+      ? {}
+      : { userDirectory: new CognitoUserDirectory(cognitoClient(), userPoolId) }),
+  };
+});
 
 export const apiApp = lazy((): ApiApp => createApiApp(apiConfig()));

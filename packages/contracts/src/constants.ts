@@ -20,6 +20,14 @@ export const COMMAND_POLL_AFTER_MS = 300;
 export const COMMAND_RESULT_TTL_SECONDS = 30 * 86_400;
 export const NOTIFICATION_TTL_SECONDS = 90 * 86_400;
 
+/**
+ * Largest capacity a session may have (set at creation or by SET_CAPACITY). A workshop of the
+ * plan's scale has tens of seats per session; the bound keeps every stored number far inside
+ * what the adapters can hold (DynamoDB numbers must stay below 2^53, the on-prem `integer`
+ * column below 2^31) and is enforced by the schemas, the engine and the dashboard.
+ */
+export const MAX_CAPACITY = 10_000;
+
 export const MAX_TITLE_LENGTH = 200;
 export const MAX_DESCRIPTION_LENGTH = 5_000;
 export const MAX_DISPLAY_NAME_LENGTH = 120;

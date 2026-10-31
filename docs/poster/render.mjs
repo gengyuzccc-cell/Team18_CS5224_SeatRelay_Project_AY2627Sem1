@@ -1,6 +1,7 @@
 // Prints docs/poster/poster.html (A1 portrait, 594 x 841 mm) with Chromium: a 150 dpi PNG for the
 // STePS "poster image" link and a vector PDF for the A1 print. Playwright comes from tools/e2e.
 //   node docs/poster/render.mjs
+/* global document, getComputedStyle */ // used inside page.evaluate(), which runs in the browser
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';

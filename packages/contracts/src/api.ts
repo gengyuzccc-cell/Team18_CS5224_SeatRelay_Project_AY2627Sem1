@@ -22,6 +22,7 @@ import {
 import {
   AttendanceSchema,
   BackfillRecordSchema,
+  CapacitySchema,
   CommandResultPayloadSchema,
   DisplayNameSchema,
   EmailSchema,
@@ -68,7 +69,7 @@ export type AddMemberBody = z.infer<typeof AddMemberBodySchema>;
 export const CreateSessionInputSchema = z.object({
   title: z.string().trim().min(1).max(MAX_TITLE_LENGTH),
   startsAt: IsoDateTimeInputSchema,
-  capacity: PositiveIntSchema,
+  capacity: CapacitySchema,
 });
 export type CreateSessionInput = z.infer<typeof CreateSessionInputSchema>;
 

@@ -4,6 +4,8 @@ import { Icon } from './Icon';
 interface Props {
   error: unknown;
   title?: string;
+  /** Replaces the error's own one-liner when the title already says what went wrong. */
+  description?: string;
   onRetry?: () => void;
   retryLabel?: string;
 }
@@ -11,6 +13,7 @@ interface Props {
 export function ErrorBanner({
   error,
   title = 'Something went wrong',
+  description,
   onRetry,
   retryLabel = 'Retry',
 }: Props) {
@@ -20,7 +23,7 @@ export function ErrorBanner({
         <Icon name="alert" />
         <div>
           <strong>{title}</strong>
-          <p>{describeError(error)}</p>
+          <p>{description ?? describeError(error)}</p>
         </div>
       </div>
       {onRetry !== undefined && (

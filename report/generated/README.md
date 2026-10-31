@@ -71,7 +71,7 @@ Units and `\%` are written in the report text, not in the macro.
 ## All macros
 
 
-1329 macros, 1244 with data, 85 pending.
+1331 macros, 1244 with data, 87 pending.
 
 ### Acceptance smoke test (dev)
 
@@ -1450,7 +1450,7 @@ Source: none yet — 0/13 with data.
 
 ### Real pilot (organiser CSV exports)
 
-Source: none yet — 0/8 with data.
+Source: none yet — 0/10 with data.
 
 | Macro | Value | Source |
 |---|---|---|
@@ -1461,7 +1461,9 @@ Source: none yet — 0/8 with data.
 | `\PilotEnded` | PENDING: pilot not yet run | results/pilot/*.csv (organiser exports): status = ENDED |
 | `\PilotDistinctParticipants` | PENDING: pilot not yet run | results/pilot/*.csv (organiser exports): userId (distinct over files) |
 | `\PilotAttended` | PENDING: pilot not yet run | results/pilot/*.csv (organiser exports): attended = true |
-| `\PilotBackfills` | PENDING: pilot not yet run | results/pilot: dashboard backfill log |
+| `\PilotBackfills` | PENDING: pilot not yet run | results/pilot/backfills-<wsId>.csv (dashboard-backfills export): rows |
+| `\PilotBackfillsReallocated` | PENDING: pilot not yet run | results/pilot/backfills-<wsId>.csv (dashboard-backfills export): reallocatedAt non-empty |
+| `\PilotBackfillMaxMs` | PENDING: pilot not yet run | results/pilot/backfills-<wsId>.csv (dashboard-backfills export): latencyMs (max) |
 
 ### Staged pilot rehearsal on the pilot stack (synthetic accounts; operational evidence only, not user evidence)
 

@@ -6,6 +6,7 @@
  */
 export * from './lib/api';
 export * from './lib/aws';
+export * from './lib/backfills';
 export * from './lib/cli';
 export * from './lib/cognito';
 export * from './lib/jwt';

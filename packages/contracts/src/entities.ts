@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  MAX_CAPACITY,
   MAX_DESCRIPTION_LENGTH,
   MAX_DISPLAY_NAME_LENGTH,
   MAX_HOLD_SECONDS,
@@ -36,6 +37,8 @@ export const EmailSchema = z.string().email().max(254);
 export const DisplayNameSchema = z.string().min(1).max(MAX_DISPLAY_NAME_LENGTH);
 export const NonNegativeIntSchema = z.number().int().min(0);
 export const PositiveIntSchema = z.number().int().min(1);
+/** A session's capacity: 1 … MAX_CAPACITY (see constants.ts). */
+export const CapacitySchema = z.number().int().min(1).max(MAX_CAPACITY);
 /** Epoch seconds used for DynamoDB TTL. */
 export const TtlSchema = z.number().int().min(0);
 
@@ -77,7 +80,7 @@ export const SessionSchema = z.object({
   startsAt: IsoTimestampSchema,
   /** `startsAt − 30 min`, fixed at creation (R4). */
   cutoffAt: IsoTimestampSchema,
-  capacity: PositiveIntSchema,
+  capacity: CapacitySchema,
   confirmed: NonNegativeIntSchema,
   held: NonNegativeIntSchema,
   status: SessionStatusSchema,

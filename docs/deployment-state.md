@@ -2,10 +2,13 @@
 
 Account `379549361891`, region `ap-southeast-1`, deployer IAM user `seatrelay-deployer`.
 Updated whenever a stack is (re)deployed. No secrets are stored here. The team's sender and alarm
-e-mail addresses are kept out of the repository: they are passed at deploy time (`SenderEmail`,
-`AlarmEmail` / `ALARM_EMAIL`) and appear below as placeholders.
+e-mail addresses are passed at deploy time (`SenderEmail`, `AlarmEmail` / `ALARM_EMAIL`) and are
+masked below as placeholders; the git history before `faea23b` still names the sender address, and
+that address, a personal gmail.com mailbox, is the live SES identity (DKIM not set up) and the
+`From:` of every participant e-mail. A team alias or a DKIM-signed team domain is future work
+(the report's future-work list says so).
 
-## seatrelay-auth (deployed 2026-10-16, CREATE_COMPLETE)
+## seatrelay-auth (deployed 2026-10-16, last updated 2026-10-17 for the pilot callback URLs, UPDATE_COMPLETE)
 
 | Output | Value |
 |---|---|
@@ -28,7 +31,8 @@ mails/24 h, 1 mail/s, verified recipients only); production access request: **su
 TRANSACTIONAL, website URL = CloudFront URL, use case = `docs/ses-production-request.md` §3). Account-level
 suppression list enabled for BOUNCE and COMPLAINT. Feedback notifications (Bounce/Complaint, with headers)
 published to SNS topic `seatrelay-ses-feedback`; the e-mail subscription for the team sender mailbox is
-pending confirmation (click the SNS confirmation e-mail).
+confirmed (checked 2026-10-30 with `sns list-subscriptions-by-topic`: a real subscription ARN, not
+`PendingConfirmation`).
 
 **2026-10-24: SES production access GRANTED** (same case, after the team's reply): out of the sandbox in
 ap-southeast-1, 50,000 messages per 24 h, 14 per second; `sesv2 get-account` shows `ProductionAccessEnabled: true`,
@@ -38,12 +42,12 @@ with `EmailEnabled=true` and `pilot` keeps it; end-to-end check with the SES mai
 only SES identity is a gmail.com address (see that summary).
 
 History: **2026-10-17 07:0x UTC: SES production access DENIED** (support case `179219791000451`). At review time the
-sender identity was still *unverified*, which is the usual cause. Next steps for the team: (1) click the SES
+sender identity was still *unverified*, which is the usual cause. Next steps for the team at the time (all done by 24 Oct): (1) click the SES
 verification e-mail sent to the team sender mailbox; (2) confirm the SNS subscription e-mail; (3) reply to the case
 in the AWS Support Center console (Basic support cannot reply via CLI) with the use-case text of
-`docs/ses-production-request.md` §3 and the CloudFront URL. Until approved the plan §9 fallback applies:
-participants rely on in-app notifications (`/me/notifications`), e-mail goes only to verified team addresses,
-and the dev stack runs with `EmailEnabled=false`.
+`docs/ses-production-request.md` §3 and the CloudFront URL. Until approved the plan §9 fallback applied:
+participants relied on in-app notifications (`/me/notifications`), e-mail went only to verified team addresses,
+and the dev stack ran with `EmailEnabled=false` (until 24 Oct).
 
 ## seatrelay-web-dev (deployed 2026-10-16, CREATE_COMPLETE)
 
@@ -56,7 +60,7 @@ and the dev stack runs with `EmailEnabled=false`.
 Callback/logout URLs registered in Cognito: localhost:5173, the dev CloudFront URL and the pilot CloudFront URL
 (`/callback` for sign-in, `/` for sign-out).
 
-## seatrelay-app-dev (deployed 2026-10-17, CREATE_COMPLETE)
+## seatrelay-app-dev (deployed 2026-10-17, last updated 2026-10-24, UPDATE_COMPLETE)
 
 Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=true WebOrigin=https://d2ni5e1z674t04.cloudfront.net AlarmEmail=<team alarm address>` (`EmailEnabled=false` until 2026-10-24).
 
@@ -69,7 +73,7 @@ Parameters: `Stage=dev AllowFaultFlags=true EmailEnabled=true WebOrigin=https://
 | DLQs | `seatrelay-dev-commands-dlq.fifo`, `seatrelay-dev-expiry-delay-dlq`, `seatrelay-dev-notify-dlq` |
 | Functions | `seatrelay-dev-{api,worker,expiry-forwarder,sweep,notifier}` (nodejs22.x, arm64) |
 | Dashboard | CloudWatch dashboard `seatrelay-dev` |
-| Alarm topic | `seatrelay-dev-alarms` (e-mail subscription pending confirmation) |
+| Alarm topic | `seatrelay-dev-alarms` (e-mail subscription confirmed, checked 2026-10-30) |
 
 Smoke test (plan §3 step 12) passed against the live stack twice; evidence in `results/2026-10-17-smoke-dev/`
 (`run.log`, `meta.json`, `smoke-dev.mjs`). After the runs: all DLQs empty, no alarm in ALARM state, 0 Lambda
@@ -99,7 +103,7 @@ Workshop (staged demo)") open on dev. Evidence: `results/2026-10-17-web-walkthro
 
 Registered in Cognito as callback (`/callback`) and logout (`/`) URL together with dev and localhost.
 
-## seatrelay-app-pilot (deployed 2026-10-17, CREATE_COMPLETE)
+## seatrelay-app-pilot (deployed 2026-10-17, last updated 2026-10-24, UPDATE_COMPLETE)
 
 Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https://diiztwl34x7s1.cloudfront.net AlarmEmail=<team alarm address>`.
 
@@ -111,6 +115,7 @@ Parameters: `Stage=pilot AllowFaultFlags=false EmailEnabled=true WebOrigin=https
 | Fault flags | `ALLOW_FAULT_FLAGS=false` (the API strips `_fault`) |
 | E-mail | `EMAIL_ENABLED=true`, sender `<team sender address>` (verified). Since 2026-10-24 SES is out of the sandbox, so every participant receives e-mail; addresses on reserved test domains are skipped (in-app only) |
 | Sweep schedule | `seatrelay-pilot-sweep` (EventBridge Scheduler, rate 5 min) |
+| Alarm topic | `seatrelay-pilot-alarms` (e-mail subscription confirmed, checked 2026-10-30) |
 
 Checks after deployment: `/health` 200 `{"ok":true,"stage":"pilot"}`, `/me` without token 401, pilot SPA `env.js`
 points at the pilot API.
@@ -158,9 +163,11 @@ responses of the first concurrency, backfill and k6 runs were Lambda throttles
   and the k6 script now keeps only e-mail and user id; the copies in git history stay valid until they expire
   at the latest 2026-10-18 02:15 UTC (12 h ID tokens; API Gateway's JWT authorizer cannot revoke them), for
   synthetic accounts in synthetic organisations only. The passwords above were rotated so that no new token
-  can be minted from public information.
-- **SES:** the sender identity (the team sender address) is verified; production access still shows **DENIED** for
-  case `179219791000451` (the team replied to the case; waiting for AWS). The sandbox fallback applies.
+  can be minted from public information. Status 2026-10-30: a known, closed exposure. The tokens expired on
+  2026-10-18 (the audit decoded one: `exp` 01:18:50 UTC); nothing is left to rotate and the history is not
+  rewritten.
+- **SES (status on 17 Oct):** the sender identity (the team sender address) is verified; production access showed
+  **DENIED** for case `179219791000451` (the team replied to the case). Granted on 24 Oct, see the next section.
 
 ## 2026-10-24: SES production access, notifier and web redeploys
 

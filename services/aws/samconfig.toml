@@ -63,7 +63,7 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 fail_on_empty_changeset = false
 tags = "Project=SeatRelay Stage=pilot"
-parameter_overrides = "Stage=pilot AllowFaultFlags=false EmailEnabled=true"
+parameter_overrides = "Stage=pilot AllowFaultFlags=false EmailEnabled=true AllowLocalOrigin=false"
 
 # ---------------------------------------------------------------- web
 [web-dev.global.parameters]
@@ -77,7 +77,7 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 fail_on_empty_changeset = false
 tags = "Project=SeatRelay Stage=dev"
-parameter_overrides = "Stage=dev"
+parameter_overrides = "Stage=dev ApiOrigin=https://3s8s2lavzi.execute-api.ap-southeast-1.amazonaws.com"
 
 [web-pilot.global.parameters]
 region = "ap-southeast-1"
@@ -90,4 +90,4 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 fail_on_empty_changeset = false
 tags = "Project=SeatRelay Stage=pilot"
-parameter_overrides = "Stage=pilot"
+parameter_overrides = "Stage=pilot ApiOrigin=https://dx40kccif3.execute-api.ap-southeast-1.amazonaws.com"

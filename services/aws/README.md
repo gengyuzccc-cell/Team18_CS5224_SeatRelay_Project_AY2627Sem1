@@ -29,7 +29,7 @@ HTTP API (Cognito JWT) ─► api ─► commands.fifo (group = workshopId) ─�
 | `src/adapters/dynamo/notifications.ts`| The notifier's status updates on notification items.                                                                                                                                 |
 | `src/adapters/sqs.ts`                 | `CommandQueue` (FIFO, explicit dedup ids) and `TimerScheduler` (`SendMessageBatch`, 10 per call, clamped `DelaySeconds`).                                                            |
 | `src/adapters/ses.ts`                 | `SendEmail` with permanent-vs-transient error classification.                                                                                                                        |
-| `src/lib/`                            | env, Powertools logger/metrics (EMF), JWT claims → `AuthUser`, e-mail rendering, token bucket, lazy production wiring (`ports.ts`).                                                   |
+| `src/lib/`                            | env, Powertools logger/metrics (EMF), JWT claims → `AuthUser` (`sub`, `email`, `name`; only when `email_verified` is true), e-mail rendering, token bucket, lazy production wiring (`ports.ts`). |
 | `templates/auth.yaml`                 | Cognito user pool + clients + hosted UI domain, SES sender identity, budgets. Deployed once as `seatrelay-auth`.                                                                      |
 | `templates/app.yaml`                  | Per-stage application stack (`seatrelay-app-dev` / `-pilot`): table, queues, functions, HTTP API, alarms, dashboard.                                                                 |
 | `templates/web.yaml`                  | Private S3 + CloudFront (OAC) for the SPA.                                                                                                                                           |
@@ -53,6 +53,7 @@ All configuration comes from the environment (set by `templates/app.yaml`).
 | `POWERTOOLS_LOG_LEVEL`           | all                     | `INFO` by default.                                                                                         |
 | `POWERTOOLS_LOGGER_LOG_EVENT`    | all                     | `false`: events are never logged verbatim (they carry JWT claims and e-mails).                             |
 | `WEB_ORIGIN`                     | api                     | Informational; CORS is answered by API Gateway's `CorsConfiguration`, not by the handler.                  |
+| `USER_POOL_ID`                   | api                     | The Cognito pool (auth stack export); turns on `POST /orgs/{orgId}/members` by e-mail through `ListUsers` (`adapters/cognito.ts`). Unset = user id only. |
 | `NODE_OPTIONS`                   | all                     | `--enable-source-maps` so stack traces point at TypeScript.                                                |
 
 Metrics (namespace `SeatRelay`, dimensions `service` and `stage`, i.e. one dimension set
@@ -72,9 +73,9 @@ pnpm --filter @seatrelay/aws validate      # sam validate --lint for the three t
 
 cd services/aws
 sam deploy --config-env auth --parameter-overrides SenderEmail=team@example.com BudgetEmail=team@example.com
-sam deploy --config-env dev                # seatrelay-app-dev   (AllowFaultFlags=true,  EmailEnabled=false)
+sam deploy --config-env dev                # seatrelay-app-dev   (AllowFaultFlags=true,  EmailEnabled=true, AllowLocalOrigin=true)
 sam deploy --config-env web-dev            # seatrelay-web-dev
-sam deploy --config-env pilot              # seatrelay-app-pilot (AllowFaultFlags=false, EmailEnabled=true)
+sam deploy --config-env pilot              # seatrelay-app-pilot (AllowFaultFlags=false, EmailEnabled=true, AllowLocalOrigin=false: CORS for its CloudFront origin only)
 sam deploy --config-env web-pilot
 ```
 
@@ -219,8 +220,11 @@ normal returns: `AWS/ApiGateway 5xx >= 1` (the api handler answers every unexpec
 500; `503 QUEUE_UNAVAILABLE` counts too) and `SeatRelay/WorkerRecordFailures{service=worker,
 stage} >= 1`.
 
-Least privilege per function (plan §2.4): api and worker `DynamoDBCrudPolicy` + their queue sends;
-forwarder FIFO + delay queue sends; sweep `dynamodb:Query` on `table/index/GSI1` +
+Least privilege per function (plan §2.4): api and worker an explicit statement with the DynamoDB
+actions the adapter issues (`GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `Query`,
+`BatchGetItem`, `ConditionCheckItem` on the table and its indexes; `TransactWriteItems` is
+authorised through the per-item actions) + their queue sends, and for the api
+`cognito-idp:ListUsers` on the pool (member lookup by e-mail); forwarder FIFO + delay queue sends; sweep `dynamodb:Query` on `table/index/GSI1` +
 `dynamodb:BatchGetItem` on the table (the DUE query and its consistent META confirmation) + FIFO
 send; notifier `dynamodb:GetItem`/`UpdateItem` on the table, `ses:SendEmail` on this account's SES
 identities (`identity/*`: the sender, and the verified recipients the sandbox also authorises

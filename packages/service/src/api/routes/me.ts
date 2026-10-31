@@ -15,6 +15,7 @@ import {
 } from '../../views';
 import { param, requireUser, type ApiRoute } from '../context';
 import { json } from '../http';
+import { MAX_MY_NOTIFICATIONS, mostRecentRegistrations } from '../limits';
 
 /**
  * The archived offers that `ending` needs for these registrations of one workshop: none when
@@ -73,7 +74,10 @@ export const meRoutes: ApiRoute[] = [
     auth: 'required',
     handler: async (ctx, deps) => {
       const user = requireUser(ctx);
-      const registrations = await deps.store.listRegistrationsForUser(user.userId);
+      // Capped to the most recent MAX_MY_REGISTRATIONS before the per-workshop reads below.
+      const registrations = mostRecentRegistrations(
+        await deps.store.listRegistrationsForUser(user.userId),
+      );
       const byWorkshop = new Map<string, Registration[]>();
       for (const registration of registrations) {
         const list = byWorkshop.get(registration.workshopId) ?? [];
@@ -119,7 +123,9 @@ export const meRoutes: ApiRoute[] = [
       const user = requireUser(ctx);
       const notifications = await deps.store.listNotificationsForUser(user.userId);
       notifications.sort((a, b) => compareIso(b.createdAt, a.createdAt) || (a.id < b.id ? 1 : -1));
-      return json(200, { notifications: notifications.map(notificationView) });
+      return json(200, {
+        notifications: notifications.slice(0, MAX_MY_NOTIFICATIONS).map(notificationView),
+      });
     },
   },
   {

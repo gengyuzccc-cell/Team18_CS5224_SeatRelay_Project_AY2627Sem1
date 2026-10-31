@@ -1,7 +1,7 @@
 # Run register
 
 Every run directory under `results/` with its `meta.json` fields (docs/EXPERIMENTS.md section 6).
-Generated from the run directories; the notes column is written by hand. Failed and aborted runs stay listed.
+Maintained by hand from each run's `meta.json` (`python3 -I report/tools/check_numbers.py` fails when a run directory has no matching row); the notes column is written by hand. Failed and aborted runs stay listed.
 
 | start (UTC) | experiment | target | commit (dirty?) | run id | runs | verdict (checks) | results dir | notes |
 |---|---|---|---|---|---|---|---|---|
@@ -36,6 +36,7 @@ Generated from the run directories; the notes column is written by hand. Failed 
 | 2026-10-17T21:16:19.960Z | access-control | dev | d34e0ac | d65305fd | 3 | PASS 177/177 | 2026-10-17-access-control-3 | regression after deploying d34e0ac to dev |
 | 2026-10-17T21:21:17.227Z | web-walkthrough-dev | dev | a563d92 (dirty) |  |  | PASS | 2026-10-17-web-walkthrough-dev-2 | real-browser walkthrough after deploying d34e0ac (ended card, named holders); screenshots and backup video in docs/demo/; not user evidence |
 | 2026-10-24T08:25:04.593Z | web-walkthrough-dev | dev | cb160d2 (dirty) |  |  | PASS (45 checks) | 2026-10-24-web-walkthrough-dev | redesigned web app after the 24 Oct SPA redeploy; screenshots and backup video in docs/demo/; not user evidence |
+| 2026-10-31T00:11:18.430Z | web-walkthrough-dev | dev | f994022 (dirty) |  |  | PASS (45 checks) | 2026-10-31-web-walkthrough-dev | same SPA (cb160d2) and app build (bcd7bd1) as 24 Oct, run after the web stack got its Content-Security-Policy headers (31 Oct): no CSP breakage; docs/demo/ kept from 24 Oct; not user evidence |
 
 Not harness runs (no `meta.json`), listed for completeness:
 

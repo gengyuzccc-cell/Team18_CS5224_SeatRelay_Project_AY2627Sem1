@@ -36,6 +36,7 @@ export function claimsOf(user: AuthUser): Record<string, unknown> {
   return {
     sub: user.userId,
     email: user.email,
+    email_verified: 'true',
     ...(user.name === undefined ? {} : { name: user.name }),
     aud: 'web-client',
     iss: 'https://cognito-idp.ap-southeast-1.amazonaws.com/ap-southeast-1_test',

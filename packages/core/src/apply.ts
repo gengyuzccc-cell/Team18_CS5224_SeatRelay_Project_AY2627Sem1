@@ -11,6 +11,7 @@ import type {
   Session,
   SetCapacityCommand,
 } from '@seatrelay/contracts';
+import { MAX_CAPACITY } from '@seatrelay/contracts';
 import { notifyConfirmed, notifyDeclined } from './notifications';
 import { registrationConflicts, requiresSingleSession } from './perSession';
 import { isPastCutoff } from './snapshot';
@@ -298,8 +299,12 @@ function setCapacity(st: WorkState, command: SetCapacityCommand): ApplyResult {
   if (typeof session === 'string') {
     return rejected(session);
   }
-  if (!Number.isInteger(command.capacity) || command.capacity < 1) {
-    return rejected('INVALID_CAPACITY');
+  if (
+    !Number.isInteger(command.capacity) ||
+    command.capacity < 1 ||
+    command.capacity > MAX_CAPACITY
+  ) {
+    return rejected('INVALID_CAPACITY'); // the schema bounds it too; this guards other routes in
   }
   if (command.capacity < session.confirmed + session.held) {
     return rejected('CAPACITY_BELOW_USAGE'); // R7

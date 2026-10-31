@@ -10,11 +10,15 @@ if ! aws cloudformation describe-stacks --stack-name "$AUTH_STACK" >/dev/null 2>
   sam deploy --config-env auth --parameter-overrides "MonthlyBudgetUsd=20 AnnualBudgetUsd=60 ${SENDER_EMAIL:+SenderEmail=$SENDER_EMAIL} ${BUDGET_EMAIL:+BudgetEmail=$BUDGET_EMAIL}"
 fi
 log "building lambda bundles"; (cd "$ROOT" && pnpm --filter @seatrelay/aws build)
-log "deploying web stack seatrelay-web-$STAGE"; sam deploy --config-env "web-$STAGE"
+# The web stack's CSP names the API origin: pinned once the app stack exists (first run: the
+# template's regional default), see templates/web.yaml.
+API_EXISTING="$(stack_output "seatrelay-app-$STAGE" ApiUrl 2>/dev/null || true)"
+log "deploying web stack seatrelay-web-$STAGE${API_EXISTING:+ (ApiOrigin=$API_EXISTING)}"
+sam deploy --config-env "web-$STAGE" ${API_EXISTING:+--parameter-overrides "Stage=$STAGE" "ApiOrigin=${API_EXISTING%/}"}
 WEB_URL="$(stack_output "seatrelay-web-$STAGE" WebUrl)"
 log "deploying app stack seatrelay-app-$STAGE (WebOrigin=$WEB_URL)"
 EXTRA="Stage=$STAGE WebOrigin=$WEB_URL ${ALARM_EMAIL:+AlarmEmail=$ALARM_EMAIL}"
-if [[ "$STAGE" == "dev" ]]; then EXTRA="$EXTRA AllowFaultFlags=true EmailEnabled=${EMAIL_ENABLED:-true}"; else EXTRA="$EXTRA AllowFaultFlags=false EmailEnabled=${EMAIL_ENABLED:-true}"; fi
+if [[ "$STAGE" == "dev" ]]; then EXTRA="$EXTRA AllowFaultFlags=true EmailEnabled=${EMAIL_ENABLED:-true} AllowLocalOrigin=true"; else EXTRA="$EXTRA AllowFaultFlags=false EmailEnabled=${EMAIL_ENABLED:-true} AllowLocalOrigin=false"; fi
 sam deploy --config-env "$STAGE" --parameter-overrides $EXTRA
 log "registering $WEB_URL as Cognito callback/logout URL"
 EXISTING_CB="$(aws cloudformation describe-stacks --stack-name "$AUTH_STACK" --query "Stacks[0].Parameters[?ParameterKey=='WebCallbackUrls'].ParameterValue" --output text)"

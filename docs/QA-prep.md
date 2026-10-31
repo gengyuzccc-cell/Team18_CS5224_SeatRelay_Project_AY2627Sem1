@@ -232,18 +232,20 @@ per-workshop serialisation. The on-prem reference runs the same engine on Postgr
 is not tied to DynamoDB.
 **Where:** `services/aws/src/adapters/dynamo/keys.ts`, `store.ts`, `packages/core/src/state.ts`, `services/local/`, ARCHITECTURE §8, §13.
 
-### 14. E-mail is in the SES sandbox. What happens to notifications?
+### 14. Is e-mail still in the SES sandbox? What happens to notifications?
 
-Our SES production request was denied on 2026-10-17 because the sender identity was not yet verified.
-The team has since verified the sender identity and replied to the support case; we are waiting for
-AWS (`docs/deployment-state.md`). Until production access is granted SES delivers only to verified
-addresses, at most 200 a day and 1 per second. Notifications are written in the same transaction as
-the state change, so every participant sees them in the in-app notification centre whatever happens
-to e-mail. The notifier treats `MessageRejected` as permanent and marks the item FAILED without
-retrying; throttling is transient and retried from the stream. Dev runs with `EmailEnabled=false`
-(items SKIPPED). Cognito's own sign-up e-mail has a separate quota of 50 a day, so experiment and
-demo accounts are created without e-mail.
-**Where:** `services/aws/src/handlers/notifier.ts`, `classifySesError()` in `services/aws/src/adapters/ses.ts`, ARCHITECTURE §7, plan §9.
+No: SES production access was granted on 2026-10-24 (support case `179219791000451`; the first
+request was refused on 17 Oct while the sender identity was unverified). The account may send
+50,000 messages a day at 14 per second, and e-mail is on in both stages (`EmailEnabled=true` on pilot since its 17 Oct deployment and on dev since 24 Oct). Notifications are written in the same transaction as the state
+change, so the in-app notification centre is the primary channel and shows every notification
+whatever happens to e-mail. The notifier never calls SES for an address on a reserved test domain
+(example.com/.net/.org and the `.example`, `.test`, `.invalid`, `.localhost` top-level domains): it
+marks such items SKIPPED, so the synthetic experiment and demo accounts cannot bounce. A permanent
+SES error (`MessageRejected`) marks the item FAILED without retry; throttling is transient and
+retried from the stream. Sign-up codes still come from Cognito's default mailer (50 a day), because
+the only verified SES identity is a gmail.com address, whose mail cannot be aligned with gmail.com's
+SPF/DKIM; experiment and demo accounts are created without e-mail.
+**Where:** `results/2026-10-24-ses-production-check/summary.md`, `isReservedAddress()` in `services/aws/src/handlers/notifier.ts`, `classifySesError()` in `services/aws/src/adapters/ses.ts`, ARCHITECTURE §7, plan §9.
 
 ### 15. How do you protect personal data?
 

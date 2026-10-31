@@ -1,7 +1,8 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useNotifications } from '../api/queries';
 import { useSession } from '../auth/useSession';
 import { useEnv } from '../env-context';
+import { DATA_NOTICE_ID } from '../util/notice';
 import { BrandMark } from './Icon';
 
 function UnreadCount() {
@@ -85,6 +86,7 @@ export function Layout() {
       </main>
       <footer className="footer muted">
         SeatRelay · unified waitlist with timed seat holds · all times shown in your local time zone
+        · <Link to={`/#${DATA_NOTICE_ID}`}>What we keep</Link>
       </footer>
     </div>
   );

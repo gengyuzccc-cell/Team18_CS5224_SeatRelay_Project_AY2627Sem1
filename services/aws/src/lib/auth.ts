@@ -4,9 +4,12 @@ import { MAX_DISPLAY_NAME_LENGTH, type AuthUser } from '@seatrelay/contracts';
 /**
  * The API Gateway JWT authorizer has already verified the token (issuer/audience/signature);
  * the identity is read from `event.requestContext.authorizer.jwt.claims` (CONVENTIONS §3):
- * `sub` → userId, `email`, optional `name`. The Cognito ID token carries all three.
- * Returns undefined when the request carried no usable identity (public routes, or a token
- * without `email` such as an access token); routes that require auth then answer 401.
+ * `sub` → userId, `email`, optional `name`. The Cognito ID token carries all three, plus
+ * `email_verified`, which must be true: the address is shown to organisers and e-mailed, so an
+ * address the user merely typed (Cognito lets a signed-in user change it; the pool now holds
+ * the old one until the new one is verified) is never trusted. Returns undefined when the
+ * request carried no usable identity (public routes, a token without `email` such as an access
+ * token, or an unverified address); routes that require auth then answer 401.
  */
 export function userFromEvent(event: APIGatewayProxyEventV2): AuthUser | undefined {
   const requestContext = event.requestContext as {
@@ -18,7 +21,7 @@ export function userFromEvent(event: APIGatewayProxyEventV2): AuthUser | undefin
   }
   const userId = claimString(claims.sub);
   const email = claimString(claims.email);
-  if (userId === undefined || email === undefined) {
+  if (userId === undefined || email === undefined || !claimTrue(claims.email_verified)) {
     return undefined;
   }
   const user: AuthUser = { userId, email };
@@ -35,4 +38,9 @@ function claimString(value: unknown): string | undefined {
   }
   const trimmed = value.trim();
   return trimmed.length === 0 ? undefined : trimmed;
+}
+
+/** The authorizer passes claims as strings (`"true"`); a decoded token has the boolean. */
+function claimTrue(value: unknown): boolean {
+  return value === true || value === 'true';
 }

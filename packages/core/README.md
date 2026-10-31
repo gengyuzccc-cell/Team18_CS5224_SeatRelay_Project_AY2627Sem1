@@ -32,7 +32,7 @@ decide(snapshot: WorkshopSnapshot, command: Command, ctx: { now, newId, limits? 
   command, writes nothing. The commit of any decision needs at most `MAX_ITEMS_PER_DECISION`
   (90) storage items under `COMMIT_ITEM_COST` (see Limits).
 - `notifications`: drafts for OFFER, CONFIRMED, EXPIRED, DECLINED, REVOKED, SESSION_CANCELLED,
-  WORKSHOP_CANCELLED (one per user), ENDED (cut-off). A participant's own cancel is silent.
+  WORKSHOP_CANCELLED (one per user, however many registrations and decisions the drain takes), ENDED (cut-off). A participant's own cancel is silent.
   Title and body are written for people (they are also the e-mail text): times are rendered by
   `formatDisplayTime` as `Wed 21 Oct 2026, 10:00 SGT` in `DISPLAY_TIME_ZONE` (`Asia/Singapore`,
   the deployment's audience; change the one constant in `src/displayTime.ts` to move them) with a

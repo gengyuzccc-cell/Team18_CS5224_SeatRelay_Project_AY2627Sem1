@@ -1283,7 +1283,7 @@ def section_study(book: Book, results: Path) -> None:
     book.num("StudyTimeN", len(totals) if have_totals else None, 0, f"{ssrc}: participants timed in both conditions", "participants in the paired time comparison")
     book.num("StudyTimeSRMedianS", med_sr, 0, f"{ssrc}: per-participant total time_s, SR (median)", "median total task time, SeatRelay (s)")
     book.num("StudyTimeCtrlMedianS", med_ctrl, 0, f"{ssrc}: per-participant total time_s, CTRL (median)", "median total task time, control (s)")
-    book.num("StudyTimeImprovementPct", improvement, 0, f"{ssrc}: (median CTRL - median SR) / median CTRL", "paired median task-time improvement (%)")
+    book.num("StudyTimeImprovementPct", improvement, 1, f"{ssrc}: (median CTRL - median SR) / median CTRL", "paired median task-time improvement (%)")
     book.pvalue("StudyTimeWilcoxonP", wt.get("p"), f"{ssrc}: Wilcoxon signed-rank on CTRL - SR totals (two-sided)", "Wilcoxon p-value, task time",
              reason=None if not have_totals else "Wilcoxon test not computable (too few non-zero pairs)")
     usrc = rel(sus_csv)
@@ -1387,18 +1387,18 @@ def section_interviews(book: Book, results: Path) -> None:
         pairs = [(s, e) for s, e in pairs if s is not None and e is not None]
         events = sum(e for _, e in pairs)
         p_event = (sum(s * e for s, e in pairs) / events * 100) if events else None
-    book.num("InterviewPEventWeightedPct", p_event, 0, f"{src}: organisers, sum(share_multi_session x events_per_year) / sum(events_per_year)", "p: share of events with >= 2 equivalent sessions, event-weighted (%)")
+    book.num("InterviewPEventWeightedPct", p_event, 1, f"{src}: organisers, sum(share_multi_session x events_per_year) / sum(events_per_year)", "p: share of events with >= 2 equivalent sessions, event-weighted (%)")
     shares = num(org, "share_multi_session")
-    book.num("InterviewPMeanPct", sum(shares) / len(shares) * 100 if shares else None, 0, f"{src}: organisers, share_multi_session (mean)", "p, simple mean over organisers (%)")
+    book.num("InterviewPMeanPct", sum(shares) / len(shares) * 100 if shares else None, 1, f"{src}: organisers, share_multi_session (mean)", "p, simple mean over organisers (%)")
     hours = num(org, "hours_per_event")
     book.num("InterviewHoursMedian", db.median(hours) if hours else None, 1, f"{src}: organisers, hours_per_event (median)", "person-hours of coordination per multi-session event (median)")
     book.num("InterviewHoursMin", min(hours) if hours else None, 1, f"{src}: organisers, hours_per_event (min)", "hours per event, smallest answer")
     book.num("InterviewHoursMax", max(hours) if hours else None, 1, f"{src}: organisers, hours_per_event (max)", "hours per event, largest answer")
     for column, name in (("wtp_too_cheap", "TooCheap"), ("wtp_bargain", "Bargain"), ("wtp_expensive", "Expensive"), ("wtp_too_expensive", "TooExpensive")):
         values = num(org, column)
-        book.num(f"InterviewWtp{name}Median", db.median(values) if values else None, 0, f"{src}: organisers, {column} (median, S$/month)", f"organiser willingness to pay, {column} (median S$/month)")
+        book.num(f"InterviewWtp{name}Median", db.median(values) if values else None, 1, f"{src}: organisers, {column} (median, S$/month)", f"organiser willingness to pay, {column} (median S$/month)")
     pshare = num(par, "share_multi_session")
-    book.num("InterviewParticipantShareMeanPct", sum(pshare) / len(pshare) * 100 if pshare else None, 0, f"{src}: participants, share_multi_session (mean)", "participants: share of events met with several sessions (%)")
+    book.num("InterviewParticipantShareMeanPct", sum(pshare) / len(pshare) * 100 if pshare else None, 1, f"{src}: participants, share_multi_session (mean)", "participants: share of events met with several sessions (%)")
 
 
 # ----------------------------------------------------------------------------- pilot
@@ -1406,7 +1406,9 @@ def section_interviews(book: Book, results: Path) -> None:
 def section_pilot(book: Book, runs, results: Path) -> None:
     dated = sorted((r for r in runs.get("pilot", [])), key=lambda r: (r.date, r.suffix), reverse=True)
     folder = dated[0].path if dated else results / "pilot"
-    exports = sorted(p for p in folder.glob("*.csv")) if folder.is_dir() else []
+    # Registration exports only: the backfill logs (backfills-<wsId>.csv, written by
+    # `tools/scripts dashboard-backfills`) are read separately below.
+    exports = sorted(p for p in folder.glob("*.csv") if "backfill" not in p.name.lower()) if folder.is_dir() else []
     frames = []
     for path in exports:
         frame = db.read_csv(path, book.notes)
@@ -1428,8 +1430,21 @@ def section_pilot(book: Book, runs, results: Path) -> None:
     if have and all("attended" in f.columns for _, f in frames):
         attended = sum(int(f["attended"].astype(str).str.lower().isin(["true", "1", "yes"]).sum()) for _, f in frames)
     book.num("PilotAttended", attended, 0, f"{src}: attended = true", "participants marked as attended")
-    book.num("PilotBackfills", None, 0, f"{rel(folder) if folder.is_dir() else 'results/pilot'}: dashboard backfill log", "backfills during the pilot",
-             reason="pilot backfill log not yet exported (no reader: the CSV export has no backfill records)" if have else None)
+    # Dashboard backfill log: results/pilot/backfills-<wsId>.csv per workshop, the rehearsal's
+    # columns (cause,session,releasedAt,reallocatedAt,latencyMs,recomputedMs,newParticipant,backfillId).
+    logs = sorted(folder.glob("*backfill*.csv")) if folder.is_dir() else []
+    bframes = [f for f in (db.read_csv(p, book.notes) for p in logs) if f is not None]
+    bsrc = f"{rel(folder) if folder.is_dir() else 'results/pilot'}/backfills-<wsId>.csv (dashboard-backfills export)"
+    have_logs = bool(bframes)
+    missing = "pilot backfill log not yet exported (tools/scripts dashboard-backfills writes results/pilot/backfills-<wsId>.csv)" if have else None
+    book.num("PilotBackfills", sum(len(f) for f in bframes) if have_logs else None, 0, f"{bsrc}: rows", "backfills during the pilot",
+             reason=None if have_logs else missing)
+    reallocated = sum(int(f["reallocatedAt"].notna().sum()) for f in bframes if "reallocatedAt" in f.columns) if have_logs else None
+    book.num("PilotBackfillsReallocated", reallocated, 0, f"{bsrc}: reallocatedAt non-empty", "backfills whose seat was relayed to someone",
+             reason=None if have_logs else missing)
+    latencies = [float(v) for f in bframes if "latencyMs" in f.columns for v in f["latencyMs"].tolist() if not is_missing(to_float(v))] if have_logs else []
+    book.num("PilotBackfillMaxMs", max(latencies) if latencies else None, 0, f"{bsrc}: latencyMs (max)", "largest backfill latency during the pilot (ms)",
+             reason=None if latencies else (missing if not have_logs else "no relayed backfill in the pilot log"))
 
 
 # ----------------------------------------------------------------------------- staged pilot rehearsal

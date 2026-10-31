@@ -2,7 +2,7 @@ import { ApiError } from '../api/client';
 
 const CODE_TEXT: Record<string, string> = {
   VALIDATION_ERROR: 'The server rejected the input',
-  UNAUTHORIZED: 'Your session has expired; please sign in again',
+  UNAUTHORIZED: 'Your session needs to be renewed; sign in again if this message stays',
   FORBIDDEN: 'You are not an organiser of this workshop',
   NOT_FOUND: 'Not found',
   CONFLICT: 'Conflict with an existing request',
@@ -20,12 +20,12 @@ export function describeError(error: unknown): string {
     if (prefix === undefined) {
       return error.message;
     }
-    if (
-      error.code === 'VALIDATION_ERROR' ||
-      error.code === 'NOT_FOUND' ||
-      error.code === 'CONFLICT'
-    ) {
+    if (error.code === 'VALIDATION_ERROR') {
       return `${prefix}: ${error.message}`;
+    }
+    if (error.code === 'NOT_FOUND' || error.code === 'CONFLICT') {
+      // The server message already says what was not found or what conflicts.
+      return error.message.length > 0 ? error.message : `${prefix}.`;
     }
     return `${prefix}.`;
   }
@@ -37,8 +37,4 @@ export function describeError(error: unknown): string {
 
 export function isNotFound(error: unknown): boolean {
   return error instanceof ApiError && error.status === 404;
-}
-
-export function isUnauthorized(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 401;
 }

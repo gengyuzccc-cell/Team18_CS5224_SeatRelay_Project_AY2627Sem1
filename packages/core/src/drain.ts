@@ -25,8 +25,9 @@ import {
  *   sessions), release its confirmed seats, remove it from every preference list, then mark it
  *   CANCELLED once nothing references it;
  * - a CANCELLING workshop: archive every live registration (ENDED, WORKSHOP_CANCELLED) with
- *   its offer revoked, one notification per user per decision, then cancel every session and
- *   mark the workshop CANCELLED.
+ *   its offer revoked, one notification per user across the whole drain (sent with the user's
+ *   last live registration, so a chain of continuations never repeats it), then cancel every
+ *   session and mark the workshop CANCELLED.
  *
  * When the budget runs out `continuationNeeded` is set: the REALLOCATE continuation (or the
  * sweep, since `nextDueAt` is `now` meanwhile) finishes the job. Every unit is complete on its
@@ -98,7 +99,6 @@ function drainSession(st: WorkState, session: Session): boolean {
 }
 
 function drainWorkshop(st: WorkState): void {
-  const notified = new Set<string>();
   for (const registration of liveRegistrations(st)) {
     if (!fitsBudget(st, UNIT_ITEM_COST.DRAIN_WORKSHOP_REGISTRATION)) {
       st.continuationNeeded = true;
@@ -112,8 +112,9 @@ function drainWorkshop(st: WorkState): void {
       touchSession(st, session);
     }
     archiveRegistration(st, registration, 'ENDED', 'WORKSHOP_CANCELLED');
-    if (!notified.has(registration.userId)) {
-      notified.add(registration.userId);
+    // The notice goes with the user's last live registration: a PER_SESSION participant with
+    // several registrations gets one, even when the budget splits the drain over decisions.
+    if (!hasLiveRegistration(st, registration.userId)) {
       notifyWorkshopCancelled(st, registration);
     }
   }
@@ -137,4 +138,13 @@ function drainWorkshop(st: WorkState): void {
   }
   st.workshop.status = 'CANCELLED';
   touchWorkshop(st);
+}
+
+function hasLiveRegistration(st: WorkState, userId: string): boolean {
+  for (const registration of st.registrations.values()) {
+    if (registration.userId === userId) {
+      return true;
+    }
+  }
+  return false;
 }
