@@ -1,6 +1,7 @@
 # Research
 
-This package contains the **interviews and usability study**, with records, analysis, charts and reports.
+This folder generates the **simulated interviews and usability study** (records, analysis, charts and
+reports in `results/research/`).
 Method: interview scenarios are authored and task/SUS responses are generated; no recruitment or
 human observation took place. Raw rows retain `source_type=SIMULATED`; field-evidence directories
 and the report's existing `Study*` / `Interview*` macros remain independent.
@@ -42,8 +43,10 @@ repository's existing TeX toolchain. There is no new Node dependency or product 
 - `report/Research.tex`: standalone English companion report; the main report and slides
   also show the prototype results with their simulated evidence status.
 
-All generated Markdown, CSV and JSON text is in English. `summary.md` is the research report;
-translate scenario inputs and rendering text before regeneration rather than editing output tables.
+All generated Markdown, CSV and JSON text is in English. `summary.md` is the research report. To
+change wording, edit `scenarios.json` or the module that writes the text (mostly `documents.py`; a
+few fixed strings in `study.py`, chart labels in `plot.py`) and regenerate; never edit the
+generated files.
 
 The default seed is fixed at 20261031; there is no search for favourable results. Use `--seed` and
 `--out /tmp/...` for another scenario without changing the default report. `--check` is read-only

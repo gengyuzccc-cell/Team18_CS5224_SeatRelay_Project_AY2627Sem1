@@ -21,7 +21,7 @@ import {
 import { errorText, sessionLabeller, trySend, type SendOutcome } from './lib/steps';
 
 /**
- * Table 3 "Concurrency" (plan §4: "50 个账号并发争 3 场共 5 席"): N accounts (default 50) race
+ * Table 3 "Concurrency" (plan §4): N accounts (default 50) race
  * in parallel for 3 sessions with 5 seats in total (capacities 2/2/1, i.e. 10 accounts per
  * seat), then every account holding an offer fires ACCEPT, DECLINE and CANCEL for it at the
  * same time, then the accounts the queue moved up accept at once. After every phase `verify`
@@ -35,8 +35,8 @@ concurrency — Table 3 "Concurrency": parallel registration race + same-account
   pnpm --filter @seatrelay/experiments concurrency --target local|dev [--runs N]
        [--accounts 50] [--capacities 2,2,1] [--seed 1]
 
---capacities LIST      per-session capacities, 2..5 sessions (default 2,2,1: plan §4 "3 sessions,
-                       5 seats in total")
+--capacities LIST      per-session capacities, 2..5 sessions (default 2,2,1: plan §4 "3 sessions
+                       with 5 seats in total")
 --sessions N --capacity C   alternative: N sessions of C seats each (instead of --capacities)
 
 Accounts: <prefix>-1 … <prefix>-<accounts>. Preferences are seeded random non-empty

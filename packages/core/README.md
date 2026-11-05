@@ -11,10 +11,12 @@ decide(snapshot: WorkshopSnapshot, command: Command, ctx: { now, newId, limits? 
 | `snapshot.ts`     | `WorkshopSnapshot` (workshop + sessions + live registrations + live offers + pending backfill records, plus the optional per-command `settledOffers`) and read helpers: `freeSeats`, `isAllocatable`, `queuePosition`, `queueLength`, `registrationSummary`, `distinctConfirmedUsers` |
 | `changes.ts`      | `Change` union written by a decision, `COMMIT_ITEM_COST` / `estimateCommitItems()` (the storage item budget) and the pure `applyChanges()` used by tests, the in-memory store and the replay |
 | `decide.ts`       | the steps (tick-first, apply, drain, allocate, nextDueAt/version), `Decision`, `computeNextDueAt` |
+| `state.ts`        | `DecisionLimits` and `DEFAULT_DECISION_LIMITS` (`MAX_OFFERS_PER_DECISION` 12, `MAX_EXPIRIES_PER_DECISION` 12, `MAX_ITEMS_PER_DECISION` 90), `UNIT_ITEM_COST` (worst-case items of one unit of each bounded step), `DecideContext`, `NotificationDraft`, `OfferTimer`; the engine-private `WorkState` (mutable working copy of the snapshot plus what changed), its item-budget check (`estimateItems`, `fitsBudget`) and the mutation helpers the steps share (archive a registration, settle an offer, drop a session from a registration (R5), backfill records, `notify`) |
 | `tick.ts`         | tick-first: expire due offers, end registrations past every cut-off                          |
 | `apply.ts`        | every command and every `RejectReason`, `commandItemReserve`                                 |
 | `drain.ts`        | budget-sized drains of CANCEL_SESSION / CANCEL_WORKSHOP (CANCELLING → CANCELLED)             |
 | `allocate.ts`     | seq-ordered allocation, `expiresAt = min(now + holdSeconds, cutoffAt)`, backfill attribution |
+| `notifications.ts` | the human-readable notification texts (in-app title/body, also the e-mail subject/body): one `notify…` function per kind (OFFER, CONFIRMED, EXPIRED, DECLINED, REVOKED, SESSION_CANCELLED, WORKSHOP_CANCELLED, ENDED), times via `formatDisplayTime`; exports `sessionCancelledTitle` (also used by the service) |
 | `invariants.ts`   | `checkInvariants(snapshot, now)` → C1, C2/R1, offer/registration consistency, no-starvation  |
 | `perSession.ts`   | the PER_SESSION baseline strategy (per-session queues and uniqueness)                        |
 | `factories.ts`    | `newWorkshop`, `newSession` (`cutoffAt = startsAt − 30 min`), `newSnapshot`                   |

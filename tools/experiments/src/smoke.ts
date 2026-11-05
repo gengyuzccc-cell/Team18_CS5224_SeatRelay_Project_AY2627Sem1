@@ -235,7 +235,7 @@ async function smokeOnce(
       detail: dead.detail,
     });
   } else if (ctx.ops.kind === 'aws') {
-    // RUNBOOK §3 step 7 / plan §3 step 12 ("DLQ 为 0") is an acceptance criterion of the cloud
+    // RUNBOOK §3 step 7 / plan §3 step 12 ("DLQ is 0") is an acceptance criterion of the cloud
     // deployment: without reading the DLQs the smoke cannot pass there.
     ctx.check({
       scenario,

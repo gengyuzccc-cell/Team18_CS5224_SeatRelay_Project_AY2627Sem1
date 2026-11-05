@@ -56,8 +56,10 @@ fetches the matching build. The browser uses the machine's proxy settings; the s
 HTTP request from Node itself (even the preflight reads `/env.js` and `/health` through a page).
 
 **Load.** Strictly sequential, one person acting at a time: a few requests per second at most
-(command polls 300 → 500 → 1000 ms, status pages and the dashboard every 10 s). That is safe under
-the account's Lambda concurrency quota of 10. Do not run several walkthroughs at once.
+(command polls 300 → 500 → 1000 ms, status pages and the dashboard every 10 s). That is far below
+the account's Lambda concurrency quota (1,000 since 2026-10-17). Do not run several walkthroughs at
+once: with the default `--prefix` they would drive the same four accounts, and each passing run
+publishes into `docs/demo/`.
 
 ## What it does and checks
 

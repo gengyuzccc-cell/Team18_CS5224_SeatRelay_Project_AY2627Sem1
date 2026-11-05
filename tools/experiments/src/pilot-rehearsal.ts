@@ -62,7 +62,7 @@ import { describeRegistration, errorText, sessionLabeller, trySend } from './lib
  * Staged pilot rehearsal (Prelim §5: "rehearsed events staged to exercise the flow are logged
  * separately"). One workshop on the PILOT stack is driven through the whole live-pilot flow by
  * synthetic accounts, strictly sequentially and at human pace (1–3 s between actions), so the
- * account's small Lambda concurrency quota is never stressed:
+ * account's Lambda concurrency quota is never stressed:
  *
  *   register (≈ 40 % S1 only, 30 % S2 only, 30 % both in either order) → answer the offers
  *   (most accept, a few decline, two let the hold expire) → wait for the timer-driven expiry
@@ -2240,7 +2240,7 @@ function buildResult(ctx: ExperimentContext, state: RunState, settings: Settings
         '',
         `CloudWatch, ${metrics.window.start} → ${metrics.window.end} (60 s periods):`,
         '',
-        `- Account Lambda ConcurrentExecutions, max of 1-min maxima: **${n(concurrencyMax)}** (account quota 10).`,
+        `- Account Lambda ConcurrentExecutions, max of 1-min maxima: **${n(concurrencyMax)}** (account quota 1,000).`,
         `- SeatRelay custom metrics are read with dimensions \`service\` + \`stage=${ctx.target.stage}\` (what the deployed functions emit), so ${otherStage} activity is excluded; ${otherStage} api + worker invocations in the window: ${n(otherInvocations)}. Other ${ctx.target.stage} traffic in the window would be included (the check "CloudWatch custom metrics agree with the API record" shows whether there was any).`,
         '',
         markdownTable(

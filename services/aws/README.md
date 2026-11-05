@@ -81,8 +81,9 @@ sam deploy --config-env web-pilot
 
 `sam deploy` uploads the esbuild output directly (`CodeUri: ../dist/<fn>`, no `BuildMethod`): the
 bundles are ESM, target `node22`, `@aws-sdk/*` left external (provided by the `nodejs22.x`
-runtime), with source maps. Each bundle is about 350 KiB. `samconfig.toml` holds the stack names,
-region (`ap-southeast-1`) and parameter overrides per environment.
+runtime), with source maps. Each bundle is about 350–400 KiB (the worker about 395 KiB).
+`samconfig.toml` holds the stack names, region (`ap-southeast-1`) and parameter overrides per
+environment.
 
 ## DynamoDB key design (plan §2.3)
 
