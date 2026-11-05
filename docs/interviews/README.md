@@ -4,7 +4,7 @@ Research package: the simulated (authored) interview records, coding and analysi
 [research](../research/README.md); no interviews were held. This directory retains the protocol and
 templates for future real interviews; simulated statements are not stored as field evidence.
 
-> Team summary: The original plan scheduled 20-minute interviews with 4-6 students and 25-minute interviews with 2-3 organisers for 16-24 October (all non-team members). The intended field data would support market share, coordination effort, pricing and problem evidence in Final sections 1-2. Use verbal consent, notes only and anonymous IDs. Store observed records under results/interviews/ and report actual sample sizes. The current generated research package is linked above. The purpose was real data: numbers enter the report only from `results/interviews/`; no fabricated or padded records.
+> **Summary.** The original plan scheduled 20-minute interviews with 4-6 students and 25-minute interviews with 2-3 organisers for 16-24 October (all non-team members). The intended field data would support market share, coordination effort, pricing and problem evidence in Final sections 1-2. Use verbal consent, notes only and anonymous IDs. Store observed records under results/interviews/ and report actual sample sizes. The current generated research package is linked above. The purpose was real data: numbers enter the report only from `results/interviews/`; no fabricated or padded records.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours, TAM/SAM/SOM), §3 step 6, §7.1 (Final §1–§2), §8 (10/16–10/24), §10 (every number traceable to `results/`).
 
@@ -19,7 +19,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours, TAM/SAM/SOM), §3
 | How often students meet multi-session events and hold several slots | participant E1–E3 | `share_multi_session` (participant), `held_multiple_slots` | Final §1 problem evidence, mechanism comparison framing |
 | Preferred channel, acceptable hold window | participant D1, D2 | `notify_channel`, `hold_window_ok_min` | `holdSeconds` default, notification design |
 | Data/privacy constraints | organiser F1–F3 | `privacy_constraints` | assumptions, SAM filter |
-| Pilot candidates | organiser G1 | `pilot_interest` | plan §8 (decide pilot by 10/22) |
+| Pilot candidates | organiser G1 | `pilot_interest` | plan §8 (decide pilot by 10/22; no pilot was run) |
 
 Target: 4–6 participants + 2–3 organisers (at least one student club and one department if possible). Report the number actually interviewed; a smaller n is reported as a smaller n.
 
@@ -40,6 +40,7 @@ Target: 4–6 participants + 2–3 organisers (at least one student club and one
 - No audio or video recording. Notes only.
 - The person may skip questions, stop at any time, and ask for their notes to be deleted until **2026-11-10** by quoting their code. Deletion = remove `results/interviews/I__.md` and the CSV row, and note the withdrawal (code and date only) in `results/interviews/log.md`.
 - Interviewees are not paid and are not team members.
+- The printable guides (`guide-*.md`) and the deadline above carry the original plan's dates (e.g. the 10 November deletion deadline and the pilot dates); re-date them before any use.
 
 ## 4. Anonymisation and coding rules
 

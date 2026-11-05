@@ -5,7 +5,7 @@ reuses this counterbalance and task protocol for twelve authored participant pro
 recruited or observed. Its data, SUS item responses and charts live under `results/research/`, apart
 from any future real study results (`results/user-study/`, still absent).
 
-Plan reference: `docs/plan/execution-plan.md` §3 step 18 (package), step 20 (pilot), step 22 (12 sessions), §5 (design and metrics), §10 (verification: raw CSV + `analysis.py` output, honest n).
+Plan reference: `docs/plan/execution-plan.md` §3 step 18 (package), step 20 (pre-test, called the "pilot" in this package), step 22 (12 sessions), §5 (design and metrics), §10 (verification: raw CSV + `analysis.py` output, honest n).
 
 ## 1. Study in one paragraph
 
@@ -45,14 +45,14 @@ The control is deliberately a *well-prepared* spreadsheet (duplicate-detection f
 | Date | What | Who |
 |---|---|---|
 | by 10/27 | Control condition built (`control-condition-setup.md`), SeatRelay study accounts + seed script ready (`tasks-*.md` state tables), task cards printed, 2 pilot people and 12 participants booked | team |
-| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (the UI freeze is the commit tagged `v0.9-study` (= commit `8ace25c`); the tag is created on the build deployed after the 30 Oct 2026 audit fixes, so until then nothing is frozen) | facilitator |
+| 10/28 | Dry run by the team: walk every task in both conditions, fill in the "expected value" column of the answer keys from what the UI actually shows (the UI freeze is commit `8ace25c`; its annotated tag `v0.9-study` exists only in the assistant's clone and is not on the remote, see `docs/SUBMISSION-CHECKLIST.md` row 2.7) | facilitator |
 | **10/29 (Thu)** | **Pilot, 2 people** (not counted). Fix task wording, time caps, reset checklist; record the changes in `results/user-study/study-log.md` | facilitator + note-taker |
 | **10/30 (Fri) – 11/05 (Thu)** | **12 sessions**, ~40 min each, 2 per day (suggested: 10/30 P01–P02, 10/31 P03–P04, 11/02 P05–P06, 11/03 P07–P08, 11/04 P09–P10, 11/05 P11–P12; 11/01 and evenings as buffer) | facilitator + note-taker |
 | after each session | Rows typed into `session-sheet.csv` / `sus-sheet.csv`; interview + background notes into `interview-notes.md`; both systems reset | note-taker |
 | 11/05 evening | `python3 docs/user-study/analysis.py` → `results/user-study/` | analyst |
 | 11/06–11/10 | Numbers and charts into Final §4; sample size and limitations stated as-is | report author |
 
-Status on 30 Oct 2026: none of the rows above has happened yet (no pilot run, no session); the dates are the original plan. The latest feasible schedule, as a proposal for the team, is in `docs/SUBMISSION-CHECKLIST.md` row 1.5.
+Status on 30 Oct 2026: none of the rows above has happened yet (no pilot run, no session); the dates are the original plan. The latest feasible schedule, as a proposal for the team, is in `docs/SUBMISSION-CHECKLIST.md` row 1.5. The printable forms and the recruitment schedule carry the original plan's dates (e.g. data withdrawal until 2026-11-10 and deletion of screen recordings by 2026-11-13 in `consent.md`, slots 10/29–11/05 in `recruitment.md`); re-date them before any use.
 
 Book sessions 50 min apart (40 min session + 10 min reset). Two sessions back-to-back need two laptops already reset, or the 10-min gap.
 

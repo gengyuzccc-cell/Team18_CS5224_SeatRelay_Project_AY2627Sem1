@@ -26,7 +26,7 @@ We are testing the tools, not you. Some tasks may be confusing on purpose — th
 | Whether each task was completed, how long it took, how many wrong clicks and requests for help, your questionnaire answers, notes of what you said | Your name, e-mail or student number in the data (the consent form is kept separately on paper) |
 | An anonymous ID (P01, P02, …) | Audio or video, unless you tick the optional box below |
 
-Data are stored as plain CSV/Markdown files in the team's project repository under your anonymous ID only. Summary statistics and anonymised quotes (e.g. "P07 said the countdown was clear") may appear in our course report and presentation. The link between your name and your ID exists only on this paper form, which is kept by the team until the course grade is released and then destroyed.
+Data are stored as plain CSV/Markdown files in the team's project repository under your anonymous ID only. The repository is public (on GitHub), so anyone can read these anonymised records and the results; nothing that identifies you is stored there. Summary statistics and anonymised quotes (e.g. "P07 said the countdown was clear") may appear in our course report and presentation. The link between your name and your ID exists only on this paper form, which is kept by the team until the course grade is released and then destroyed.
 
 ## Your rights
 

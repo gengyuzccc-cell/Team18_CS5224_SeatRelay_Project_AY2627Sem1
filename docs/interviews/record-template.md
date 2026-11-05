@@ -14,7 +14,7 @@
 | Field | Value |
 |---|---|
 | id | I__ |
-| date | 2026-10-__ |
+| date | 2026-__-__ |
 | role | participant / organiser |
 | org_type | student_club / department / cet_provider / other (participants: leave empty) |
 | interviewer / note-taker | initials |
@@ -112,4 +112,4 @@ EXAMPLE-P,2026-10-17,participant,,9,0.33,0.5,google_forms;telegram,0,1,3,5,yes
 EXAMPLE-O,2026-10-18,organiser,student_club,12,0.25,6,google_forms;sheets;telegram,2,8,20,40,yes
 ```
 
-Both example rows are present in `docs/interviews/interviews.csv` so the header and formats can be checked by script; `results/interviews/interviews.csv` (the real data) must not contain them.
+Both example rows are also in `docs/interviews/interviews.csv`, the template to copy (no script reads that file); `results/interviews/interviews.csv`, the real data that `report/tools/report_numbers.py` reads, must not contain them.

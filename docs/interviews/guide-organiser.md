@@ -1,6 +1,6 @@
 # Interview guide — organisers (clubs, departments, training providers), 25 minutes
 
-> Team summary: The original plan called for 25-minute interviews with 2-3 organisers on 16-24 October (plan section 8). Collect annual event counts, the number with at least two equivalent sessions, coordination hours per event, current tools, four van Westendorp prices, the response to S$10/month, and data/privacy restrictions.
+> **Summary.** The original plan called for 25-minute interviews with 2-3 organisers on 16-24 October (plan section 8). Collect annual event counts, the number with at least two equivalent sessions, coordination hours per event, current tools, four van Westendorp prices, the response to S$10/month, and data/privacy restrictions.
 > The original protocol also asked about a live pilot on 3-4 November, with the workshop to be agreed by 22 October. These dates describe the original plan, not completed fieldwork.
 > Bold questions are required; probes are follow-ups. Complete the records and interviews.csv within 24 hours.
 
@@ -24,7 +24,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (p, hours per event, S$120/y
 
 Read aloud, then tick `consent = yes`:
 
-> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 25-minute conversation about how you run sign-ups today. We take written notes only, no recording. Neither your name nor your organisation's name is written in our records; you get a code like I07 and an organisation type like 'student club'. Anonymised quotes and the numbers we collect may appear in our course report. Skip anything, stop any time, and you can ask us to delete your notes until 10 November. Is that okay?"
+> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 25-minute conversation about how you run sign-ups today. We take written notes only, no recording. Neither your name nor your organisation's name is written in our records; you get a code like I07 and an organisation type like 'student club'. We store your anonymised notes and answers under that code in our project's public GitHub repository, which anyone can read; nothing that identifies you or your organisation is stored there. Anonymised quotes and the numbers we collect may appear in our course report. Skip anything, stop any time, and you can ask us to delete your notes until 10 November. Is that okay?"
 
 Warm-up:
 - **What is your role, and what kind of organisation is it?** Code `org_type`: `student_club` / `department` / `cet_provider` / `other` (describe).

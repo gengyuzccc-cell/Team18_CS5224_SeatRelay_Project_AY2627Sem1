@@ -4,7 +4,7 @@ Eight participants (counterbalance track `participant`). Each does T1–T5 once 
 
 Persona in both tools: **Jordan Lee** (`study.jordan@example.com` in SeatRelay; the persona Gmail in the control — write the real address in the study log, not here).
 
-Every task: **cap 300 s** (`protocol.md` §6.1). "Expected" columns are what the dry run on 10/28 must confirm; correct them on the printed answer key if the UI shows something else, and log it.
+Every task: **cap 300 s** (`protocol.md` §6.1). "Expected" columns are what the dry run (planned for 10/28, not held) must confirm; correct them on the printed answer key if the UI shows something else, and log it.
 
 ## 1. Seeded state (reset to this before every round)
 
@@ -44,7 +44,7 @@ Jordan Lee has **no** registration, no form submission, no e-mail at reset.
 
 ### Reset
 
-- SeatRelay: `pnpm --filter @seatrelay/scripts seed-study -- --track participant --dataset A|B --stage dev` (deliverable of plan step 14; it must delete the two workshops and recreate exactly the tables above, and remove any registration of the persona). Until the script exists: cancel Jordan's registrations, then re-create the state by hand and tick it against the table.
+- SeatRelay: `pnpm --filter @seatrelay/scripts seed-study -- --track participant --dataset A|B --stage dev` (`tools/scripts/src/seed-study.ts`, the deliverable of plan step 14). It cancels the study organisation's workshops, which ends every registration of the persona (they stay listed under "Past"), recreates the two workshops exactly as in the tables above, and exits non-zero if the dashboard differs from the tables or `/verify` fails; the reset steps are listed in `tools/scripts/README.md`.
 - Control: `control-condition-setup.md` §6.
 
 ## 2. Task cards

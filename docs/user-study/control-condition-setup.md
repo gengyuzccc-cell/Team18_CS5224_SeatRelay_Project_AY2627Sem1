@@ -262,7 +262,7 @@ Note column E is empty at seed time.
 | 3 | Gmail inbox of the account the participant will use is empty (participant track) or holds exactly the cancellation e-mail (organiser track, before O2). |
 | 4 | Stopwatch reset. |
 
-## 7. Dry-run acceptance (10/28, before the pilot)
+## 7. Dry-run acceptance (planned for 10/28, before the pilot; not held)
 
 - Every formula cell shows a value, never `#REF!`/`#N/A`/`#ERROR!`; §3.4 values match.
 - Submitting the Tue form as Jordan makes Status board row 3 show `0` seats left and "Marcus Lim, Jordan Lee" within ~5 s of refresh.

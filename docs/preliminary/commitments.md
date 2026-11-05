@@ -86,6 +86,13 @@ run precedes the sessions and is excluded from the reported sample."
   staged to exercise the flow are logged separately**; team-organiser observations = internal operational evidence;
   independent participants' feedback = user evidence.
 
+Final: none of this was held with people. Final §4.4 reports a labelled simulation in its place: authored
+interview profiles (six student, three organiser) and generated task and SUS responses for twelve participant
+profiles following this design (counterbalanced order, the same kind of control, two scripted pre-study
+walkthroughs excluded); nobody was recruited or observed (`docs/research/`). §4.5 reports that the live
+pilot was not run before submission, and reports the staged rehearsal on the `pilot` stage (synthetic
+accounts, scripted actions) separately, as operational evidence, not user evidence.
+
 ## Cost (Prelim §3)
 
 Three layers (metered, after free tier, paid after credits). Budget US$15/month × 3 + US$15 reruns, ceiling US$60
@@ -106,7 +113,7 @@ ordering, transactions and TTL behaviour were verified against AWS documentation
 down. No AI-generated code appears here; **if code is generated with AI during implementation, the Final
 report declares that specifically.** Each member records their own learning from this work."
 
-The Final's declaration (`report/sections/07-declaration.tex`) quotes the first sentence as what the
+The Final's declaration (`report/sections/07-declaration.tex`) paraphrases the first sentence as what the
 Preliminary report declared, and prints the members' learning statements, drafted by the assistant from the
 project record and approved by the team on 2026-10-24 (`docs/ai-declaration-drafts.md`); a member may replace
 theirs with their own words (checklist 1.7).

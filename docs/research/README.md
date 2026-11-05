@@ -30,7 +30,7 @@ There is one formal study. Each participant uses SeatRelay and forms plus a spre
 
 ## Presentation guidance
 
-“The research uses nine interview scenarios and twelve participants' task responses, following the existing task cards and counterbalanced control order. It demonstrates how task records produce completion rates, paired timing and SUS scores. Failures and opposing views help identify held-versus-confirmed confusion, ranking, date-entry and short-window problems. The numbers reflect declared model assumptions rather than observed user validation.”
+Speak from the [generated speaking notes](../../results/research/presentation-notes.en.md), as [Part 6 of the talk notes](../walkthrough/part-6.md) directs. Their first spoken sentence says that the study is simulated (authored scenarios, generated responses, nobody recruited or observed); never drop it.
 
 Show the completion chart and explain why assisted success is separate from unassisted success. Then show paired timing and explain why one person's repeated tasks are not independent participants. Use SIM-I04's simple-form counterexample and SIM-I09's procurement constraint to explain the limits of adoption and pricing conclusions.
 

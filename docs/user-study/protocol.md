@@ -1,6 +1,6 @@
 # Session protocol (facilitator + note-taker script)
 
-> Team summary: Each session takes about 40 minutes. The participant uses SeatRelay and the control (one Google Form per session plus a spreadsheet), with order and datasets assigned by counterbalance.csv.
+> **Summary.** Each session takes about 40 minutes. The participant uses SeatRelay and the control (one Google Form per session plus a spreadsheet), with order and datasets assigned by counterbalance.csv.
 > The facilitator reads each task card verbatim, starts timing after reading and stops when the participant says "done". The five-minute cap is a failure. Give hints only through the hint ladder; a hint makes completion assisted.
 > Record one session-sheet.csv row immediately after every task and administer SUS after each tool. The final four minutes are a short debrief recorded in interview-notes.md.
 

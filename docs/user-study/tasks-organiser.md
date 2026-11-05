@@ -38,7 +38,7 @@ O1-B spec: **LaTeX for Theses** — S1 Tue 24 Nov 10:00–11:30, 12 seats · S2 
 
 ### Reset
 
-- SeatRelay: `pnpm --filter @seatrelay/scripts seed-study -- --track organiser --dataset A|B --stage dev` (plan step 14): recreate W3 exactly as above, delete any workshop created by the previous participant in NUS Data Club, re-register the cancelled participant (Mei Lin / Farah).
+- SeatRelay: `pnpm --filter @seatrelay/scripts seed-study -- --track organiser --dataset A|B --stage dev` (plan step 14): cancel every workshop of NUS Data Club, including any the previous participant created in O1 (there is no delete route, so they stay listed as CANCELLED), recreate W3 exactly as above and re-register the cancelled participant (Mei Lin / Farah); the reset steps are listed in `tools/scripts/README.md`.
 - Control: `control-condition-setup.md` §6 (restore the named version "SEED", trash the forms/sheet created in O1, delete e-mails and drafts).
 
 ## 2. Task cards

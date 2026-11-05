@@ -57,41 +57,17 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
    Before the first timed rehearsal, re-run `report/tools/report_numbers.py`, rebuild the slides and
    replace the marker here with the value from the named file. If it still does not exist on the
    day, say "not measured yet". Never estimate, round up, or quote a number from memory or chat.
-3. Status on 2026-10-17 (evening):
-   - Prelim. Table 3 (Final Table 5) on dev: all eight scripted experiments pass, three runs each, and
-     so does the smoke test, in the re-run after the account's Lambda concurrency quota rose from 10
-     to 1,000, on the same deployed code as the first series
-     (`results/2026-10-17-table3-dev-q1000-provenance.md`). The first series is kept: concurrency and
-     backfill failed there because API Gateway answered HTTP 503 whenever the API Lambda was throttled
-     at the quota of 10 (`results/2026-10-17-throttling-evidence/`).
-   - k6 matrix on dev: re-run at quota 1,000; every target met at all six levels, with 0.00 % HTTP
-     errors. The throttled first attempt is superseded. The on-prem matrix on the local stack is
-     complete: on the median of three rounds it met the targets up to 50 VUs, but two single rounds
-     at 50 VUs exceeded 5 s, and it has no network hop.
-   - Core engine tests and property test recorded (`results/2026-10-17-core-tests/`; re-run on the audited engine on 31 Oct, `results/2026-10-31-core-tests/`).
-   - Staged pilot rehearsal on the pilot stage (`results/2026-10-17-pilot-rehearsal-3/`; re-run on the
-     submitted build on 31 Oct, `results/2026-10-31-pilot-rehearsal/`, which the report quotes): synthetic
-     accounts and scripted actions. It is operational evidence, not user evidence; say "staged" every
-     time you mention it.
-   - Measured usage of the experiment day, read from CloudWatch and priced
-     (`results/cost/usage-priced.md`): US$3.25 at list price, US$1.19 after the free tier. CloudWatch
-     has no registration count, so the cost per registration is still modelled.
-   - Final: the dev smoke run (`results/2026-10-17-smoke-2/`), the mechanism comparison
-     (`results/replay/`) and the cost model (`results/cost/model-summary.md`).
-   Status on 2026-10-24: SES production access granted (e-mail on in both stages; reserved test
-   domains never e-mailed); market lower bound 713 organisations (SIT 170); the web app redesigned
-   (`cb160d2`), and the backup screenshots and video come from the 24 Oct walkthrough
-   (`results/2026-10-24-web-walkthrough-dev/`). This dated record predates the current research package; observed field interviews, a human study and a natural pilot remain unperformed.
-   Status on 2026-10-31: the audit-fix build `8ace25c` is published on dev and pilot (capacity field
-   explains invalid values, "What we keep" notice, favicon); the app stacks run `8ace25c` too since 05:26
-   UTC (capacity bound, member lookup by e-mail, verified-e-mail check); regression on dev passed
-   (`results/2026-10-31-{smoke,correctness,access-control,web-walkthrough-dev-3}/`). Core tests re-recorded
-   (`results/2026-10-31-core-tests/`: 156/156, branches 99.7 %); CI green since `8ace25c`. Simulated
-   research package merged (`results/research/`, seed 20261031): authored interview scenarios and
-   generated task/SUS responses, no people; field interviews, an observed study and a natural pilot
-   remain unperformed. Later on 31 Oct: the staged pilot rehearsal re-ran on the submitted backend build
-   (`results/2026-10-31-pilot-rehearsal/`, 85/85; the report quotes it), and both stages serve the web
-   app built from `82b7298` (no visible change; walkthrough 45/45, `results/2026-10-31-web-walkthrough-dev-4/`).
+3. **Status (5 Nov 2026).** Deployed: the five stacks listed in `docs/deployment-state.md` (each
+   last updated on 31 Oct); both app stacks run the `8ace25c` build, both stages serve the web app built from
+   `82b7298`, and e-mail is on. The latest evidence runs are those of 31 Oct: the regression on dev
+   after the app redeploy (smoke, correctness, access control, browser walkthrough), the core tests
+   (`results/2026-10-31-core-tests/`) and the staged pilot rehearsal on the submitted build
+   (`results/2026-10-31-pilot-rehearsal/`); the Table 3 series and the k6 matrix that the report
+   quotes are the 17 Oct re-runs at the Lambda quota of 1,000. `results/RUNS.md` lists every harness
+   run. The rehearsal used synthetic accounts: it is operational evidence, not user evidence; say
+   "staged" every time you mention it. The research is the simulated package (`results/research/`):
+   authored interview scenarios and generated task and SUS responses, nobody recruited or observed.
+   No interview or study with people was held, and the live pilot was not run before submission.
 4. Values seen during the demo are demo values. The rehearsal values in the DEMO.md appendix are not
    report measurements.
 5. A missed target is reported as missed, with the measured value and the explanation.
@@ -122,8 +98,8 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
 
 ## Rehearsal checklist
 
-- [ ] Every `[PENDING: …]` in parts 1–6 replaced from its file, or explicitly kept as "not measured
-      yet".
+- [x] Every `[PENDING: …]` in parts 1–6 replaced from its file, or explicitly kept as "not measured
+      yet" (none left on 5 Nov).
 - [x] The speaker mapping above confirmed by the team (or changed in the three places named above).
 - [ ] Two timed run-throughs, each at most 15:00 (plan §3 step 28). Note the clock at each hand-over.
 - [ ] Each speaker can answer the three questions at the end of their part without notes, and has

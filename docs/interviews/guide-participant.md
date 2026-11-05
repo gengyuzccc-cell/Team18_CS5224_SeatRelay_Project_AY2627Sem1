@@ -1,6 +1,6 @@
 # Interview guide — participants (students), 20 minutes
 
-> Team summary: The original plan called for 20-minute semi-structured interviews with 4-6 non-team students on 16-24 October (plan section 8), covering (1) real experiences and pain points with multi-session registration, (2) duplicate holds, waitlists and notification preferences, and (3) the two exact numbers market sizing needs: multi-session events (≥ 2 equivalent sessions) attended in the past year and the hours spent, plus willingness to pay.
+> **Summary.** The original plan called for 20-minute semi-structured interviews with 4-6 non-team students on 16-24 October (plan section 8), covering (1) real experiences and pain points with multi-session registration, (2) duplicate holds, waitlists and notification preferences, and (3) the two exact numbers market sizing needs: multi-session events (≥ 2 equivalent sessions) attended in the past year and the hours spent, plus willingness to pay.
 > For actual fieldwork, read the consent statement and record consent=yes, take notes without recording, use I01-style IDs instead of names, and complete record-template.md and interviews.csv within 24 hours.
 > Bold questions are required; indented probes are optional follow-ups if time permits.
 
@@ -25,7 +25,7 @@ Plan reference: `docs/plan/execution-plan.md` §1.1 (market sizing, p), §3 step
 
 Read aloud, then tick `consent = yes` in the record:
 
-> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 20-minute conversation about your experience signing up for events. We take written notes only, no recording. Your name is not written anywhere; you get a code like I03. Anonymised quotes and the numbers we collect may appear in our course report. You can skip any question or stop at any time, and you can ask us to delete your notes until 10 November. Is that okay?"
+> "Thanks for your time. We are NUS students doing a CS5224 course project called SeatRelay, a sign-up tool for workshops that run several identical sessions. This is a 20-minute conversation about your experience signing up for events. We take written notes only, no recording. Your name is not written anywhere; you get a code like I03. We store your anonymised notes and answers under that code in our project's public GitHub repository, which anyone can read; nothing that identifies you is stored there. Anonymised quotes and the numbers we collect may appear in our course report. You can skip any question or stop at any time, and you can ask us to delete your notes until 10 November. Is that okay?"
 
 If no: thank them and stop; do not create a record.
 
