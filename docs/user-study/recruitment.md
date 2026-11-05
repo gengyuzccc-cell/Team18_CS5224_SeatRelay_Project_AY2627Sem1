@@ -1,8 +1,15 @@
 # Recruitment
 
-> 团队摘要：从 10/20 起招募 12 位非组员的在读大学生（Prelim §5：twelve university students who are not team members；不招教职员，其中 ≥ 4 位有活动组织经验），另约 2 位预试（10/29，不计入）。
-> 用下面的消息模板发 Telegram/WhatsApp/邮件；用筛选问题确认资格与组织经验，然后按 `counterbalance.csv` 的顺序分配 ID 和场次。
-> 每场 40 分钟，间隔 50 分钟；排期表在 §5，排好后把日期写回 `counterbalance.csv`。
+> **Status:** not run. Nobody was recruited before submission; the report's study is simulated (Final §4.4).
+> This page is the plan for a study with people.
+>
+> **Summary.** From 20 Oct, recruit 12 current university students who are not team members (Prelim §5:
+> "twelve university students who are not team members"; no staff; at least 4 with event-organising
+> experience), plus about 2 people for a pre-test (29 Oct, not counted). Send the message template below
+> by Telegram, WhatsApp or e-mail; confirm eligibility and organising experience with the screening
+> questions, then assign IDs and slots in the order of `counterbalance.csv`. Each session takes 40
+> minutes, with 50 minutes between start times; the schedule is in §5, and the dates go back into
+> `counterbalance.csv` once set.
 
 ## 1. Who we need
 

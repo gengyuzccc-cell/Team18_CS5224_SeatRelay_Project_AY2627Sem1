@@ -1,6 +1,10 @@
 # Interview record template and CSV specification
 
-> 团队摘要：每次访谈后 24 小时内，复制 §1 的模板到 `results/interviews/I__.md`（只用编号，不写姓名、不写组织名称），把「Coded answers」里的数字按 §2 的列规范填到 `interviews.csv` 一行。§2 定义了每一列的类型、单位、取值；分析脚本只读这个 CSV，所以列名、单位和词表必须一字不差。
+> **Summary.** Within 24 hours of each interview, copy the template in §1 to `results/interviews/I__.md`
+> (codes only: no names and no organisation names) and enter the numbers from "Coded answers" as one row
+> of `interviews.csv`, following the column specification in §2. §2 defines each column's type, unit and
+> allowed values; the analysis script reads only this CSV, so column names, units and vocabularies must
+> match exactly.
 
 ## 1. Record block (one file per interview: `results/interviews/I__.md`)
 

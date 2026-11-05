@@ -1,8 +1,17 @@
 # SES production access request (ap-southeast-1)
 
-> 团队摘要：SES 新账号处于 **sandbox**（每 24 h 200 封、1 封/秒、只能发给已验证地址）。试点要给真实参与者发邮件，必须申请 production access（免费，通常 24 小时内回复）。§2 是表单每一栏填什么，§3 是直接粘贴的用例说明，§5 是操作步骤。申请前先把发件身份验证完成（点邮件里的链接）。获批前 Cognito 继续用 `COGNITO_DEFAULT`（plan §2.4）。
+> **Summary.** A new SES account starts in the **sandbox** (200 e-mails per 24 h, 1 e-mail per second,
+> verified recipients only). To e-mail real pilot participants, production access must be requested (free;
+> AWS usually replies within 24 hours). §2 lists what to enter in each field of the form, §3 is the
+> use-case text to paste as it is, and §5 lists the steps. Before applying, finish verifying the sender
+> identity (click the link in the e-mail). Until approval, Cognito keeps using `COGNITO_DEFAULT`
+> (plan §2.4).
 >
-> **状态（2026-10-24）：已获批。** AWS 回复：每日配额 50,000 封、最高 14 封/秒，账号已移出 sandbox（ap-southeast-1，立即生效）。`dev` 与 `pilot` 均已开启邮件；测试账号所用的保留域名（example.com 等）不会发信。核验记录见 `results/2026-10-24-ses-production-check/summary.md`。Cognito 验证码仍用 `COGNITO_DEFAULT`（每天 50 封），原因见该文件末段。
+> **Status (2026-10-24): approved.** AWS replied with a daily quota of 50,000 e-mails at up to 14 per
+> second, and the account left the sandbox (ap-southeast-1, effective immediately). E-mail is on in both
+> `dev` and `pilot`; the reserved domains of the test accounts (example.com and others) are never
+> e-mailed. Verification record: `results/2026-10-24-ses-production-check/summary.md`. Cognito
+> verification codes still use `COGNITO_DEFAULT` (50 a day); the last section of that file says why.
 
 Plan reference: `docs/plan/execution-plan.md` §2.4 (SES identity, notifier, `COGNITO_DEFAULT` until approval), §8 (10/15: submit the request), §9 (fallback if not approved: pilot e-mails only to verified team addresses, participants rely on in-app notifications). Live identifiers: `docs/deployment-state.md`.
 

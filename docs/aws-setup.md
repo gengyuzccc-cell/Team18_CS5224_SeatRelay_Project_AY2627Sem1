@@ -1,6 +1,12 @@
 # AWS account setup for the team (day 0)
 
-> 团队摘要：一位组员用 AWS 账号（root 或已有管理员）做四件事：(1) 建 IAM 用户 `seatrelay-deployer`（项目期内 AdministratorAccess）并生成 access key；(2) 开启 Cost Explorer；(3) 激活成本分配标签 `Project`；(4) 把 key 放进云端构建环境的 **环境设置（secrets）** 里，变量名 `AWS_ACCESS_KEY_ID`、`AWS_SECRET_ACCESS_KEY`、`AWS_DEFAULT_REGION=ap-southeast-1`。**key 绝不粘贴到聊天、Telegram、仓库或任何文档。** 验证命令 `aws sts get-caller-identity`。项目结束（11/13 teardown 后）停用 key 并删除用户。
+> **Summary.** One team member uses the AWS account (root or an existing administrator) for four things:
+> (1) create the IAM user `seatrelay-deployer` (AdministratorAccess for the duration of the project) and
+> generate an access key; (2) enable Cost Explorer; (3) activate the cost allocation tag `Project`; (4) put
+> the key into the **environment settings (secrets)** of the cloud build environment as
+> `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_DEFAULT_REGION=ap-southeast-1`. **Never paste the
+> key into a chat, Telegram, the repository or any document.** Check it with `aws sts get-caller-identity`.
+> When the project ends (after the 13 Nov teardown), deactivate the key and delete the user.
 
 Plan reference: `docs/plan/execution-plan.md` §2.4 (cost allocation tag, budgets), §2.8 (credentials are entered only by a team member, never via chat), §8 (10/14 deadline). Related: `docs/RUNBOOK.md` §0–§1, `tools/scripts/bin/activate-cost-tags.sh`, `docs/deployment-state.md` (current state: account `379549361891`, user `seatrelay-deployer` exists).
 

@@ -1,6 +1,16 @@
 # Market sizing and competitor scan: verified inputs for Final §1
 
-> 团队摘要：§2 是 2026-10-17 逐项核实过的计数表（每行有出处键、页面日期、核实等级）；NUS / SIT / SMU 三行原先只能从搜索引擎摘录核对，**2026-10-24 已用浏览器打开并保存带日期的截图**（`results/market/screenshots/`，§8）：NUS 200 不变；**SIT 由 150 变为 170**（N_clubs 693 → 713）；SMU 2022 页面现返回 403（页面已不公开），SMU 主站 campus-life 页面写 "over 150 student clubs and societies"，150 不变。p 还没有（访谈未做），所以 §3 的公式里 p 保持符号，§4 只给 p = 0.2 / 0.4 的**示意**算例。§5 是竞品表，§7 是可直接放进 Final §1 的约 120 词段落（用 `\pending{}` 标出缺的 p）。所有出处键在 `report/references.bib`，每条的用途和核实方式在 `report/sources.md`。
+> **Summary.** §2 is the count table checked item by item on 2026-10-17 (each row has a source key, a page
+> date and a verification level). The NUS, SIT and SMU rows could at first be checked only against
+> search-engine excerpts; **on 2026-10-24 they were opened in a browser and saved as dated screenshots**
+> (`results/market/screenshots/`, §8): NUS is unchanged at 200; **SIT changed from 150 to 170** (N_clubs
+> 693 → 713); the SMU 2022 page now returns 403 (it is no longer public), and the main SMU campus-life page
+> says "over 150 student clubs and societies", so 150 is unchanged. p is not measured (no interviews were
+> held), so §3 keeps p as a symbol and §4 gives only **illustrative** examples for p = 0.2 / 0.4; the
+> Final report uses the simulated scenario value instead (§1, step 3). §5 is the competitor table, and §7 is
+> a paragraph of about 120 words drafted for Final §1 (with `\pending{}` marking the missing p). Every
+> source key is in `report/references.bib`; what each source is used for and how it was verified is in
+> `report/sources.md`.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (method, candidate figures, TAM/SAM/SOM, 4-row table and about 120 words), §7.1 (Final §1 page budget), §10 (placeholder check). Interview inputs: `docs/interviews/README.md` §5 (`results/interviews/summary.md`, not yet produced). Citation keys: `report/references.bib`. Per-source claims and verification notes: `report/sources.md`.
 
