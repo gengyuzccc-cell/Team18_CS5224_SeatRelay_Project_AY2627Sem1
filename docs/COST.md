@@ -177,7 +177,8 @@ storage (`onprem.json: backup.object_storage` = US$0.00695/GB-month, Backblaze B
 **assumption**, benchmarked against Paylab/PayScale systems-administrator pay).
 
 `n_servers = ceil(N / onprem.json: server.capacity_registrations_per_month)`, i.e. one machine up to 1M
-registrations/month (assumption; to be refined with the `services/local` k6 + `docker stats` runs). The
+registrations/month (assumption; the `services/local` k6 + `docker stats` runs exist,
+`results/loadtest/2026-10-17/` target `local`, but the ceiling was not refined from them). The
 utilisation fraction used for the power draw is 2% / 5% / 20% at the three tiers
 (`onprem.json: power.utilisation_by_tier`, assumption).
 
@@ -196,7 +197,8 @@ offers means missed expiries and backfills during every outage.
 
 The cloud build is multi-AZ by construction: DynamoDB, SQS, Lambda, API Gateway, Cognito and CloudFront
 each replicate across availability zones and carry published SLAs (`pricing.json: sla_reference`,
-99.9-99.99% monthly, not re-verified in this session), and PITR gives 35-day continuous restore. The
+99.9-99.99% monthly; flagged `unverified`, not checked against the AWS SLA pages when the price file
+was compiled on 2026-10-16), and PITR gives 35-day continuous restore. The
 comparison in section 7 therefore compares the on-prem price of a lower-availability product with the
 cloud price of a higher-availability one; the "fully amortised" view is the closer like-for-like because
 it at least pays for an off-site backup and for someone to respond to failures.
@@ -299,8 +301,11 @@ While credits last, the actual invoice is 0 at every tier.
   (`verified_snippet`; the UPS price and the business line were re-read from the vendors' pages on
   2026-10-17, `verified_official`), the power figures come from a review of the same model relayed by secondary
   sources, the SP Group tariff from press coverage of the SP Group release, and the SGD/USD rate from a
-  retail aggregator on 1 Oct 2026; all four should be refreshed before the final report. Labour is an
-  explicit assumption. The capacity ceiling (1M registrations/month per machine) is unmeasured.
+  retail aggregator on 1 Oct 2026; the model took all four on 2026-10-16 (the rate as quoted for 1 Oct).
+  On 2026-10-17 the review itself, the SP Group tariff page and the rate page were fetched for
+  `report/sources.md` and showed the same values, while the server and disk pages returned HTTP 403;
+  none was re-read after that. Labour is an explicit assumption. The capacity ceiling
+  (1M registrations/month per machine) is unmeasured.
 - The comparison holds functionality and retention constant but not availability (section 5);
   no monetary value is assigned to downtime, to the team's own time in the increment view, or to the
   security patching and Keycloak upgrades that a self-hosted identity provider requires.

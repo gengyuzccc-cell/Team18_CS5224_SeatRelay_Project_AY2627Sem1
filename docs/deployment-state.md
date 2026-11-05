@@ -19,7 +19,7 @@ that address, a personal gmail.com mailbox, is the live SES identity (DKIM not s
 | HostedUiDomain | `https://seatrelay-379549361891.auth.ap-southeast-1.amazoncognito.com` |
 | SenderEmail (SES identity) | `<team sender address>` — verified (2026-10-17) |
 | Budgets | `seatrelay-monthly` US$20 (IncludeCredit=false), `seatrelay-annual` US$60 |
-| Cost allocation tag | `Project` activation requested 2026-10-16 (visible in Cost Explorer after ≤ 24 h) |
+| Cost allocation tag | `Project` active since 2026-10-16 (checked 2026-11-05) |
 
 Validation performed: hosted UI login page HTTP 200; OIDC discovery OK (note: Cognito now publishes
 `end_session_endpoint`, so RP-initiated logout also works besides the classic `/logout` endpoint);
@@ -89,7 +89,8 @@ the dev API (`STAGE=dev tools/scripts/bin/deploy-web.sh`).
 **2026-10-17 17:15 UTC: dev SPA republished** (same script, bundle `index-Dx1ogDmM.js` / `index-DW27saFr.css`) with
 the front-end fixes found by the first real-browser walkthrough: buttons no longer stretched across column
 containers, wizard step 1 top-aligned, *My registrations → Past* shows the human end-reason copy. The **pilot SPA
-was not republished** and still serves the previous bundle. Walkthrough accounts (Cognito, e-mail suppressed,
+was not republished** then and kept the previous bundle; both stages now serve the same bundle
+(section "2026-10-31 afternoon" below). Walkthrough accounts (Cognito, e-mail suppressed,
 display names "… (staged)"): `walkthrough-{organiser,alice,bob,carol}@example.com`, created by
 `tools/e2e/bin/ensure-users.sh` (recreated once on 2026-10-17, so the published screenshots start from empty
 histories). The walkthrough leaves its staged organisations and workshops ("Staged walkthrough …", "Cloud Computing

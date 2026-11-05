@@ -458,7 +458,7 @@ sequenceDiagram
 
 ## 8. Data model
 
-### 8.1 Key table (plan §2.3, translated)
+### 8.1 Key table (plan §2.3)
 
 Single table `seatrelay-{stage}`: string PK/SK, on-demand, PITR on, Streams `NEW_AND_OLD_IMAGES`,
 TTL attribute `ttl` (epoch seconds).
@@ -680,8 +680,9 @@ Prices and the per-dimension model are in `docs/COST.md` (`tools/experiments/cos
    the caller's notifications since such an ending (section 8.2; a few RRU).
 7. **Stream filter on the notifier.** Only notification inserts invoke it; every other table write is
    free for the notifier.
-8. **Low-cardinality metrics.** EMF metrics carry only the `service` dimension, because each distinct
-   metric/dimension combination is billed. There are no per-workshop or per-user dimensions.
+8. **Low-cardinality metrics.** EMF metrics carry only the `service` and `stage` dimensions, because
+   each distinct metric/dimension combination is billed. There are no per-workshop or per-user
+   dimensions.
 9. **Retention by TTL and log retention.** Explicit log groups keep 14 days. DynamoDB TTL deletes
    command records (30 d) and notifications (90 d) without write cost.
 10. **Spend guards.**

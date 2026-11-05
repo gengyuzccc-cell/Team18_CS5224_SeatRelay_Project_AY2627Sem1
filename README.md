@@ -10,7 +10,7 @@ once with an ordered list of acceptable sessions, joins one queue, holds at most
 seat is offered automatically to the next person in line with a time limit to confirm (a timed hold).
 
 This README is the source of Final report §6 (Code Explanation). The design as implemented is in
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); the full plan (Chinese) is
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); the full plan is
 [docs/plan/execution-plan.md](docs/plan/execution-plan.md).
 
 ## 1. Live deployments
@@ -34,26 +34,26 @@ pnpm workspace (Node 22, TypeScript, ESM). Dependency direction: `contracts` ←
 
 | Path | Package | One line |
 |---|---|---|
-| `packages/contracts` | `@seatrelay/contracts` | zod schemas and types shared by every layer: entities, enums, commands, API bodies, error codes, constants (hold bounds, cut-off, TTLs) |
-| `packages/core` | `@seatrelay/core` | the pure engine: `decide()` (tick-first), `allocate()`, `checkInvariants()`, the PER_SESSION baseline; no I/O, no clock |
-| `packages/service` | `@seatrelay/service` | ports, the HTTP route table (`createApiApp`), the worker protocol (`processCommand`), the sweep (`runSweep`), read models, in-memory adapters |
-| `services/aws` | `@seatrelay/aws` | SAM templates (`auth`, `app`, `web`), five Lambda handlers, DynamoDB / SQS / SES adapters, esbuild bundler |
-| `services/local` | `@seatrelay/local` | on-prem reference: Fastify + PostgreSQL + Keycloak + Mailpit + nginx (Docker Compose), same `service` and `core` code |
-| `apps/web` | `@seatrelay/web` | React SPA (Vite); one build for CloudFront and for the local nginx; OIDC code + PKCE; command polling |
-| `tools/e2e` | `@seatrelay/e2e` | Playwright walkthrough of the deployed SPA (hosted-UI sign-in, polling, dashboard) by four staged accounts; writes `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and `results/<date>-web-walkthrough-<stage>/` |
-| `tools/experiments` | `@seatrelay/experiments` | one script per Table 3 row plus `smoke`; `bin/run-table3.sh`; `analysis/plot_results.py`; `cost/` (prices, on-prem inputs, `model.py`) |
-| `tools/loadtest` | `@seatrelay/loadtest` | k6 scenarios `cross-workshop` and `hotspot`, `prepare-scenario`, `run-matrix` |
-| `tools/replay` | `@seatrelay/replay` | mechanism comparison: the same arrivals replayed through the real engine in UNIFIED and PER_SESSION mode, 1,000 seeds |
-| `tools/scripts` | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, `dashboard-backfills` (pilot backfill log export), and the Bash deploy / web publish / teardown / cost-snapshot scripts |
-| `tools/market` | | market counts: `inputs.json` (sources, quotes, counts), `count.py` → `results/market/<date>/counts.json`, `capture.py`; dated page captures of the NUS/SMU/SIT sources with `results/market/screenshots/capture.mjs` (`docs/market-sizing.md`) |
-| `tools/research` | | simulated research package: authored `scenarios.json` → generated CSV/JSON/Markdown/TeX, charts and an integrity manifest (`simulate.py --check`); no people, no Node package |
+| [`packages/contracts`](packages/contracts/README.md) | `@seatrelay/contracts` | zod schemas and types shared by every layer: entities, enums, commands, API bodies, error codes, constants (hold bounds, cut-off, TTLs) |
+| [`packages/core`](packages/core/README.md) | `@seatrelay/core` | the pure engine: `decide()` (tick-first), `allocate()`, `checkInvariants()`, the PER_SESSION baseline; no I/O, no clock |
+| [`packages/service`](packages/service/README.md) | `@seatrelay/service` | ports, the HTTP route table (`createApiApp`), the worker protocol (`processCommand`), the sweep (`runSweep`), read models, in-memory adapters |
+| [`services/aws`](services/aws/README.md) | `@seatrelay/aws` | SAM templates (`auth`, `app`, `web`), five Lambda handlers, DynamoDB / SQS / SES adapters, esbuild bundler |
+| [`services/local`](services/local/README.md) | `@seatrelay/local` | on-prem reference: Fastify + PostgreSQL + Keycloak + Mailpit + nginx (Docker Compose), same `service` and `core` code |
+| [`apps/web`](apps/web/README.md) | `@seatrelay/web` | React SPA (Vite); one build for CloudFront and for the local nginx; OIDC code + PKCE; command polling |
+| [`tools/e2e`](tools/e2e/README.md) | `@seatrelay/e2e` | Playwright walkthrough of the deployed SPA (hosted-UI sign-in, polling, dashboard) by four staged accounts; writes `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and `results/<date>-web-walkthrough-<stage>/` |
+| [`tools/experiments`](tools/experiments/README.md) | `@seatrelay/experiments` | one script per Table 3 row plus `smoke`; `bin/run-table3.sh`; `analysis/plot_results.py`; `cost/` (prices, on-prem inputs, `model.py`) |
+| [`tools/loadtest`](tools/loadtest/README.md) | `@seatrelay/loadtest` | k6 scenarios `cross-workshop` and `hotspot`, `prepare-scenario`, `run-matrix` |
+| [`tools/replay`](tools/replay/README.md) | `@seatrelay/replay` | mechanism comparison: the same arrivals replayed through the real engine in UNIFIED and PER_SESSION mode, 1,000 seeds |
+| [`tools/scripts`](tools/scripts/README.md) | `@seatrelay/scripts` | test accounts and token caches, `seed-demo`, `seed-study`, `dashboard-backfills` (pilot backfill log export), and the Bash deploy / web publish / teardown / cost-snapshot scripts |
+| `tools/market` | | market counts: `inputs.json` (cited counts with source keys and quotes); `capture.py` saves the raw pages behind the team's own counts (NTU directory pages, NUS and SMU library calendars) to `results/market/<date>/raw/`; `count.py` → `results/market/<date>/counts.json`, which `report/tools/report_numbers.py` turns into the market macros; dated browser captures (PNG, text, SHA-256) of the NUS/SMU/SIT pages with `results/market/screenshots/capture.mjs`. Method and checklist: `docs/market-sizing.md` |
+| [`tools/research`](tools/research/README.md) | | simulated research package: authored `scenarios.json` → generated CSV/JSON/Markdown/TeX, charts and an integrity manifest (`simulate.py --check`); no people, no Node package |
 | `docs/` | | architecture, conventions, runbook, experiments, cost, demo, market sizing, interview and user-study packages, talk notes |
 | `results/` | | raw outputs of every run (the only source of report numbers), see section 9 |
 | `report/` | | Final report sources, `report/build.sh` (page and placeholder checks; `-s` builds the git-ignored Canvas copy with student numbers), `report/tools/report_numbers.py` (numbers file generator) |
 | `.github/workflows/ci.yml` | | CI: lint, typecheck, tests (with core coverage), web and Lambda builds, `pnpm audit`, `sam validate --lint` |
 
-Each package has its own README with module tables and environment variables; an index is in
-[docs/README-index.md](docs/README-index.md).
+Where a Path cell is a link, the README it opens describes that package in detail, including its
+environment variables where it has any.
 
 ## 3. How the pieces fit
 
@@ -149,9 +149,10 @@ set +a` (PowerShell: see the file). Three ways to run things:
   `apps/web/public/env.js` at the dev values from `docs/deployment-state.md` (provider `cognito`, the
   Cognito issuer, web client id, hosted UI domain, dev API URL; all public ids) without committing the
   edit; `http://localhost:5173/callback` is a registered sign-in callback.
-- **Deploy, experiments, walkthrough, seeding on dev/pilot**: your own access key of the IAM user
-  `seatrelay-deployer` (`docs/aws-setup.md` §C, laptop alternative `aws configure`) and the test
-  accounts' password `SEATRELAY_TEST_PASSWORD` from the member who set it (never through chat).
+- **Deploy, experiments, walkthrough, seeding on dev/pilot**: the access key of the IAM user
+  `seatrelay-deployer`, kept in the team password manager (`docs/aws-setup.md` §C; on a laptop,
+  `aws configure` can hold it instead of `.env`), and the test accounts' password
+  `SEATRELAY_TEST_PASSWORD` from the member who set it; never through chat.
 
 ## 5. Deploy (AWS)
 
@@ -309,13 +310,20 @@ Rules (EXPERIMENTS §7–8):
 
 | Document | Content |
 |---|---|
+| [docs/plan/execution-plan.md](docs/plan/execution-plan.md) | the project plan and functional specification; the authority for rules and targets |
+| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | binding cross-package engineering conventions; code comments cite its sections |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | design as implemented, Figures A–C (Mermaid), rule and constraint map, failure modes, security, on-prem mapping |
 | [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) | Table 3 procedures, run checklist, path of a number into the report |
 | [docs/COST.md](docs/COST.md) | three-layer cloud cost, on-prem model, crossover, sources |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | deployment, local stack, smoke, fault injection, alarms |
 | [docs/DEMO.md](docs/DEMO.md) | live-demo script, fallback, reset |
+| [docs/demo/](docs/demo/) | screenshots of the staged browser walkthrough (`screenshots/`, with a README of what each shows) and the backup demo video (`backup-demo.mp4`, chapters in `backup-demo-chapters.txt`) |
 | [docs/walkthrough/](docs/walkthrough/README.md), [docs/QA-prep.md](docs/QA-prep.md) | per-speaker talk notes and Q&A preparation |
+| [docs/poster/README.md](docs/poster/README.md) | STePS poster (A1): PNG and print PDF, the HTML template and the build scripts |
 | [docs/market-sizing.md](docs/market-sizing.md) | market-size inputs with sources, competitor scan |
-| [docs/interviews/](docs/interviews/README.md), [docs/user-study/](docs/user-study/README.md) | interview and user-study packages (protocol, consent, tasks, SUS, analysis) |
+| [docs/research/README.md](docs/research/README.md) | simulated research package (authored interview profiles, generated usability-study responses; no people took part); the report's §4.4 uses it |
+| [docs/interviews/](docs/interviews/README.md), [docs/user-study/](docs/user-study/README.md) | interview and user-study packages (protocol, consent, tasks, SUS, analysis), prepared for work with people that was not run; the report uses the simulated package |
 | [docs/deployment-state.md](docs/deployment-state.md), [docs/aws-setup.md](docs/aws-setup.md), [docs/ses-production-request.md](docs/ses-production-request.md) | live identifiers, account setup, SES request |
+| [docs/SUBMISSION-CHECKLIST.md](docs/SUBMISSION-CHECKLIST.md) | every action before the 13 Nov 2026 submission, with owner role and files; the evidence steps that were not done with people; build and upload steps |
+| [docs/preliminary/commitments.md](docs/preliminary/commitments.md) | the Preliminary report's commitments that the Final must honour, and where the Final report and the code answer each |
 | [docs/ai-declaration-drafts.md](docs/ai-declaration-drafts.md) | each member's statement in the Final report's AI usage declaration, with the project-record sources it was drafted from |

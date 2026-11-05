@@ -12,6 +12,9 @@
 > `dev` and `pilot`; the reserved domains of the test accounts (example.com and others) are never
 > e-mailed. Verification record: `results/2026-10-24-ses-production-check/summary.md`. Cognito
 > verification codes still use `COGNITO_DEFAULT` (50 a day); the last section of that file says why.
+>
+> §1 and §3 are kept as they were when the request was submitted on 17 Oct 2026; the pilot and the
+> user study they mention were not held (Final §4.4–4.5).
 
 Plan reference: `docs/plan/execution-plan.md` §2.4 (SES identity, notifier, `COGNITO_DEFAULT` until approval), §8 (10/15: submit the request), §9 (fallback if not approved: pilot e-mails only to verified team addresses, participants rely on in-app notifications). Live identifiers: `docs/deployment-state.md`.
 
@@ -93,4 +96,4 @@ You receive this because you registered for this workshop with this address. To 
 
 8. Expect a reply within 24 h (up to 2 business days) from AWS Support to the account's root e-mail and the additional contact; if they ask for more information, reply in the same case with: the sample in §4, the repository URL, and the two sentences on opt-in and bounce handling from §3.
 9. On approval: the Account dashboard shows "Production access: Enabled" and the new daily quota. Update `docs/deployment-state.md`. Deploy the pilot stage with `EmailEnabled=true` (`docs/RUNBOOK.md` §1.2). Done on 2026-10-24 except this optional step, which was deliberately not taken because the only identity is a gmail.com address (see `results/2026-10-24-ses-production-check/summary.md`): optionally switch the Cognito user pool to send through SES (`EmailSendingAccount: DEVELOPER`, source ARN = the identity) to escape the 50 e-mails/day Cognito limit; do **not** do this before approval (sandbox would break sign-up verification codes for unverified addresses).
-10. If denied: reply with clarifications (they usually ask about opt-in or complaint handling) and resubmit once; if still denied by 10/29, apply plan §9: pilot e-mails go only to verified team addresses, participants use in-app notifications, and the report states this.
+10. If denied: reply with clarifications (they usually ask about opt-in or complaint handling) and resubmit once; if still denied by 10/29, apply plan §9: pilot e-mails go only to verified team addresses, participants use in-app notifications, and the report states this. Moot since the approval of 24 Oct: the 10/29 fallback was not needed.

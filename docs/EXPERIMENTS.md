@@ -461,8 +461,10 @@ times per run.
   - `k6/<target>/*.json` and `logs/<target>/*.log`;
   - `docker-stats.csv` (local only).
 - **Into the report.** The performance figure (p95 by VU level, two scenarios, two targets) and the
-  results-table row are built from `summary.md`. `docker-stats.csv` sizes the on-prem machine in the
-  cost model (`docs/COST.md`).
+  results-table row are built from `summary.md`. `docker-stats.csv` gives the local stack's peak CPU
+  and memory (via `report/tools/report_numbers.py`), which the report quotes in its §2 on-premise
+  reference paragraph and in the Cost row of the §4.2 results table. The cost model does not read it:
+  one machine's capacity is an assumption (`docs/COST.md` §4).
 
 ---
 
@@ -508,13 +510,9 @@ times per run.
 - **Status.** `results/replay/summary.md` already holds a 1,000-seed run (generated
   2026-10-17T01:48Z). Re-run only after an engine change, and keep the old directory: `pnpm replay`
   without `--out` overwrites `results/replay/`, so use a dated `--out` for any later run.
-- **The plan's "one real replay per mode on dev" has no script.** If the team wants it, the minimal
-  manual version is:
-  1. Create one UNIFIED and one PER_SESSION workshop with the wizard.
-  2. Run `smoke`-sized traffic.
-  3. Export both CSVs into `results/<date>-mechanism-dev/`.
-
-  Otherwise the report states that the comparison is a simulation on the production engine.
+- **The plan's "one real replay per mode on dev" has no script and was not done**
+  (`docs/ARCHITECTURE.md` §17). The report states that the comparison is a simulation on the
+  production engine.
 - **Pass** (reporting): means, medians and 95 % bootstrap CIs per mode, plus paired differences. In
   UNIFIED mode the duplicate holds must be exactly 0, which doubles as an invariant check.
 - **Into the report.** The mechanism-comparison figure (the SVGs, redrawn) and the headline table of
@@ -633,8 +631,8 @@ results/
   cost/                                    model-summary.md, crossover.png, unit-cost.png, crossover-curve.csv,
                                            usage-priced.md, snapshots/<date>.json
   research/                                SIMULATED research package: authored interview profiles, generated task/SUS rows, charts, summary.md, manifest.json (docs/research/README.md)
-  interviews/                              interview records (docs/interviews/README.md)
-  user-study/                              study CSV outputs, summary.md, charts (docs/user-study/README.md)
+  interviews/                              interview records (docs/interviews/README.md); not produced: no interviews were held
+  user-study/                              study CSV outputs, summary.md, charts (docs/user-study/README.md); not produced: no study with people was held
 ```
 
 Rules:

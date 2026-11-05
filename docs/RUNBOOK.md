@@ -165,4 +165,4 @@ retried), `AFTER_COMMIT` throws after the transaction (retry hits `COMMAND_ALREA
 | `worker-record-failures` (`WorkerRecordFailures` ≥ 1) | the worker reported partial batch failures: a message it could not settle (malformed message, infrastructure error; injected faults are not counted) | find the command id in the worker log and check `GET /commands/{id}`; an infrastructure error is retried and reaches the DLQ after 3 attempts, a malformed message is dropped (logged, not retried) and must be re-sent by the client |
 | `notify-dlq-not-empty` | notification batch exhausted retries | inspect SES quota and account status (`aws sesv2 get-account`), notifier logs |
 | `notifier-iterator-age > 60 s` | stream consumer lagging | check SES throttling |
-| budget 50/80/100 % | spend (credits excluded) | pause experiments; `teardown.sh dev` |
+| budget 50/80/100 % | spend (credits excluded) | pause experiments; `STAGE=dev tools/scripts/bin/teardown.sh` |

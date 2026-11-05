@@ -8,9 +8,9 @@
 > says "over 150 student clubs and societies", so 150 is unchanged. p is not measured (no interviews were
 > held), so §3 keeps p as a symbol and §4 gives only **illustrative** examples for p = 0.2 / 0.4; the
 > Final report uses the simulated scenario value instead (§1, step 3). §5 is the competitor table, and §7 is
-> a paragraph of about 120 words drafted for Final §1 (with `\pending{}` marking the missing p). Every
-> source key is in `report/references.bib`; what each source is used for and how it was verified is in
-> `report/sources.md`.
+> a superseded draft of the Final §1 paragraph (the printed one is in `report/sections/01-motivation.tex`).
+> Every source key is in `report/references.bib`; what each source is used for and how it was verified is
+> in `report/sources.md`.
 
 Plan reference: `docs/plan/execution-plan.md` §1.1 (method, candidate figures, TAM/SAM/SOM, 4-row table and about 120 words), §7.1 (Final §1 page budget), §10 (placeholder check). Interview inputs: `docs/interviews/README.md` §5 (`results/interviews/summary.md`, not yet produced). Citation keys: `report/references.bib`. Per-source claims and verification notes: `report/sources.md`.
 
@@ -121,16 +121,22 @@ Columns: **multi-session** = one listing can offer several dated sessions; **wai
 
 Reading: Eventbrite is the only scanned tool with automatic relay and a timed claim window, but it treats each date and ticket type as a separate inventory. No scanned tool ties several acceptable sessions to one queue position with a one-seat-per-person rule. These cells are the vendors' documentation as of 2026-10-17, not our tests.
 
+Final Table 2 (`tab:competitors`) also has a Humanitix row, which this table lacks (keys `humanitix-recurring`, `humanitix-waitlist`, `humanitix-fees`; quotes and verification in `report/sources.md`).
+
 ## 6. Final §1 four-row table (plan §1.1)
 
 | Population | Count | Source | Estimation basis |
 |---|---|---|---|
-| Student organisations, 5 AUs | ≥ 713 | `nus-osa-getstarted`, `ntu-special-interest-clubs`, `ntu-su-council`, `smu-osl-2022`, `sutd-fifth-row`, `sit-find-your-tribe` | official counts as lower bounds; NTU counted from its directory pages on 2026-10-17; NUS, SMU and SIT re-checked with dated browser screenshots on 2026-10-24 |
+| Student organisations, 5 AUs | ≥ 713 | `nus-osa-getstarted`, `ntu-special-interest-clubs`, `ntu-su-council`, `ntu-clubs-societies`, `smu-osl-2022`, `smu-student-experiences`, `sutd-fifth-row`, `sit-find-your-tribe` | official counts as lower bounds; NTU counted from its directory pages on 2026-10-17; NUS, SMU and SIT re-checked with dated browser screenshots on 2026-10-24 |
 | CET training providers | > 700 (2016) | `ssg-credit-progress-2016` | latest official count found; context, reported separately |
 | Organisers with multi-session sign-ups | 713 × p | scripted scenario p = 37.0 % (`results/research/`); interview value pending | labelled scenario value in the report |
 | Price | S$120 per organiser-year | plan §1.1 | S$10/month; justified by `h × w × k ≥ P` |
 
-## 7. Paragraph for Final §1 (about 120 words, LaTeX)
+## 7. Paragraph for Final §1 (superseded draft)
+
+> **Superseded.** The printed paragraph is the Market size paragraph of
+> `report/sections/01-motivation.tex`. It uses the scenario macros (`\SimMultiSessionPct`,
+> `\SimServiceablePct`, `\SimAdoptionPct`) and has no `\pending{}`. The draft below is kept as written.
 
 ```latex
 We size the market bottom-up. Singapore has six autonomous universities and five
@@ -145,7 +151,7 @@ a year; SAM and SOM apply the shares on free or SaaS tools and adopting in year 
 tool combines one queue across sessions with timed relay (Table~\ref{tab:competitors}).
 ```
 
-About 120 words of prose (citations excluded). The only placeholder is `\pending{…}` for p, which the build check counts until `results/interviews/summary.md` exists. `tab:competitors` is the label the report should give the §5 table.
+Superseded draft, as written: about 120 words of prose (citations excluded) with one placeholder, `\pending{…}` for p; the printed paragraph uses the scenario value instead. The report gave its competitor table the label `tab:competitors` (Final Table 2).
 
 ## 8. Checklist before the paragraph enters the report
 
@@ -154,4 +160,4 @@ About 120 words of prose (citations excluded). The only placeholder is `\pending
 - [ ] `p`, `h`, `s` replaced by values from `results/interviews/summary.md` (currently the labelled simulated scenario values from `results/research/`); replace the illustrative §4 rows.
 - [ ] `w` (hourly rate) has a citation.
 - [ ] Optional: count SUSS and polytechnic student groups to raise the lower bound.
-- [ ] Placeholder scan of the report finds no `\pending{}` left (plan §10).
+- [x] Placeholder scan of the report finds no `\pending{}` left (plan §10): the Final build reports `placeholders=0` (`docs/SUBMISSION-CHECKLIST.md` row 3.1).

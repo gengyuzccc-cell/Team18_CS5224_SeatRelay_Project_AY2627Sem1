@@ -209,24 +209,13 @@ message pauses only *its own* workshop: the expiry runs on another workshop's qu
 Notation: **Do** = operator action, **Expect** = what appears (exact UI text where it matters),
 **Say** = narrator line. Times are relative to the start of the demo block.
 
-> **Deployed build.** Since 2026-10-24 08:24 UTC dev and pilot serve the redesigned web app (commit
-> `cb160d2`: poster colours and fonts, hold meter, seat bars, animated preference reordering, grouped
-> dashboard actions). On 2026-10-31 the audit-fix build `8ace25c` was published (dev 00:30 UTC;
-> pilot, see `docs/deployment-state.md`): same screens, plus a capacity field that explains an invalid
-> value before sending, a "What we keep" notice on the home page and real favicon files; every visible
-> text the demo relies on is unchanged. The browser walkthrough re-ran against each build (24 Oct and
-> 31 Oct, 45/45 checks each; `results/2026-10-24-web-walkthrough-dev/`,
-> `results/2026-10-31-web-walkthrough-dev-2/`; the earlier 31 Oct run, `results/2026-10-31-web-walkthrough-dev/`,
-> checked the new Content-Security-Policy on the unchanged 24 Oct build); `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4`
-> and the backup slides still come from the 24 Oct run. The 17 Oct walkthroughs
-> (`results/2026-10-17-web-walkthrough-dev{,-2}/`) show the earlier UI and are kept as history. The app
-> stacks run the `8ace25c` build since 31 Oct 05:26 UTC (capacity bound, member lookup by e-mail,
-> verified-e-mail check, least-privilege roles; the 24 Oct notifier rule stays: with SES out of the
-> sandbox, real participants get e-mail, test accounts on reserved domains never do). Since 31 Oct
-> 13:09 UTC (dev) and 13:20 UTC (pilot) both stages serve the web app built from `82b7298`: the
-> `8ace25c` screens plus a check that stops a cancelled status poll from applying a late answer;
-> nothing visible changed, and the walkthrough passed again (45/45,
-> `results/2026-10-31-web-walkthrough-dev-4/`).
+> **Deployed build.** Since 31 Oct 2026 both stages serve the web app built from `82b7298` (dev
+> 13:09 UTC, pilot 13:20 UTC), and the app stacks run the `8ace25c` bundles, whose backend code is
+> identical to `82b7298`. Every visible text the demo relies on is unchanged since the 24 Oct redesign
+> (`cb160d2`), and the walkthrough passed on the current build (45/45,
+> `results/2026-10-31-web-walkthrough-dev-4/`). Build history and checks: `docs/deployment-state.md`.
+> `docs/demo/screenshots/`, `docs/demo/backup-demo.mp4` and the backup slides still come from the
+> 24 Oct run (`results/2026-10-24-web-walkthrough-dev/`).
 
 ### D1 (0:00–0:50): register → offer → accept (Window A, *Demo workshop*)
 
@@ -444,7 +433,7 @@ over it.
 | Symptom | Likely cause | Action (≤ 10 s, otherwise Plan C) |
 |---|---|---|
 | A status card does not change after the other window acted | auto-refresh runs every 10 s (30 s once confirmed) and only while the tab is visible | press F5 in that window |
-| After an offer expired or a cancellation, the card vanished and the empty registration form is back, with no message | the browser still runs an SPA build from before 2026-10-17 21:08 UTC (cached) | hard refresh (Ctrl+Shift+R); otherwise say "her registration ended because the hold ran out" and open **Notifications** |
+| After an offer expired or a cancellation, the card vanished and the empty registration form is back, with no message | the browser runs a cached older SPA build | hard refresh (Ctrl+Shift+R); otherwise say "her registration ended because the hold ran out" and open **Notifications** |
 | *Checking your registrations…* under the sessions table for a few seconds after the card vanished | expected: the page waits for *My registrations* (up to about 6 s) instead of showing the empty form | wait; F5 if it stays |
 | The ended card says that the registration was cancelled or has ended, but not for which session or what happened to the seat (it starts *You cancelled your registration at ‹time›* or *Your registration has ended at ‹time›*) | *My registrations* (an eventually consistent index on AWS) has not caught up yet; the page asks again for a few seconds | wait 2 s or press F5 |
 | The counters on a confirmed participant's page (*Free*, *Waiting*) lag behind | the page refreshes every 30 s while the seat is confirmed (10 s while queued or offered) | **Refresh** button or F5 |

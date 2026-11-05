@@ -97,11 +97,11 @@ Also `aws configure list` should show `region ap-southeast-1` with source `env` 
 
 | # | Step | Owner | Done on |
 |---|---|---|---|
-| A | Root MFA on; no root keys | | |
+| A | Root MFA on; no root keys | | root MFA on (checked 2026-11-05) |
 | B | IAM user `seatrelay-deployer` with AdministratorAccess | | 2026-10-16 (see `deployment-state.md`) |
-| C | One access key, stored in password manager | | |
-| D | Cost Explorer enabled | | |
-| E | Cost allocation tag `Project` activated | | 2026-10-16 requested |
-| F | Three environment secrets set in the cloud environment; new session started | | |
-| G | `aws sts get-caller-identity` shows the user ARN | | |
-| H | Teardown date agreed | | |
+| C | One access key, stored in password manager | | one active key, created 2026-10-16 (checked 2026-11-05) |
+| D | Cost Explorer enabled | | by 2026-10-17 (Cost Explorer snapshot `results/cost/snapshots/2026-10-17.json`) |
+| E | Cost allocation tag `Project` activated | | active since 2026-10-16 (checked 2026-11-05) |
+| F | Three environment secrets set in the cloud environment; new session started | | set (cloud sessions use them) |
+| G | `aws sts get-caller-identity` shows the user ARN | | checked 2026-11-05 |
+| H | Teardown date agreed | | `dev` after the 13 Nov presentation, the rest after grades (§H; `docs/SUBMISSION-CHECKLIST.md` row 3.6) |

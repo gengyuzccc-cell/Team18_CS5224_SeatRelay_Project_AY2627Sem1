@@ -11,10 +11,8 @@
 > statement edits `report/sections/07-declaration.tex` (first person, at most 45 words, about something
 > that really happened) and rebuilds.
 
-The Preliminary report (§4) lists six work lines but does not assign them to names. The drafts
-below assign the lines **in the order the names appear on the title page**. **If the real
-assignment differs, correct the mapping here and in `report/sections/07-declaration.tex`** (and
-then rewrite the affected paragraphs, because each draft is written for its line).
+The Preliminary report (§4) lists six work lines without names; the team approved the mapping
+below, which follows the order of the names on the title page, on 2026-10-24.
 
 | # | Member | Work line (Prelim §4) | Approved |
 |---|---|---|---|
@@ -25,7 +23,7 @@ then rewrite the affected paragraphs, because each draft is written for its line
 | 5 | LIANG ZIHAN | user research and evaluation tooling | team, 2026-10-24 |
 | 6 | ZHANG TIANYI | organiser dashboard, cross-cutting QA and documentation | team, 2026-10-24 |
 
-## Drafts
+## Statements
 
 ### 1. LI ZONGZE (product and front end), 43 words
 

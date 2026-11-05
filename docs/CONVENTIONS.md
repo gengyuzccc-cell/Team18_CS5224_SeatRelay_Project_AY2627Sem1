@@ -1,6 +1,6 @@
 # SeatRelay engineering conventions (read before touching any package)
 
-The authoritative functional specification is `docs/plan/execution-plan.md` (Chinese). This file
+The authoritative functional specification is `docs/plan/execution-plan.md`. This file
 pins the cross-package technical decisions so that independently written packages fit together.
 
 ## 1. Workspace map and dependency direction
@@ -17,6 +17,9 @@ tools/replay         @seatrelay/replay     mechanism-comparison simulation (pure
 tools/loadtest       @seatrelay/loadtest   k6 scripts + token helpers.
 tools/experiments    @seatrelay/experiments Table-3 experiment scripts + metric fetchers + Python analysis.
 tools/scripts        @seatrelay/scripts    operational scripts (create test users, seed demo, deploy web, teardown, cost snapshot).
+tools/e2e            @seatrelay/e2e        Playwright walkthrough of the deployed SPA (slide screenshots, backup video, results/).
+tools/market         (no package)          market-size counts: inputs.json, capture.py, count.py (Python).
+tools/research       (no package)          simulated research package: scenarios.json → results/research/ (Python).
 ```
 
 Rules: `contracts` ← `core` ← `service` ← {`aws`, `local`}. `apps/web` depends only on `contracts`.
@@ -29,7 +32,7 @@ Never import from `services/*` or `apps/*` into `packages/*`.
 - Each package: `pnpm typecheck` (= `tsc -p tsconfig.json`, noEmit) and `pnpm test` (= `vitest run`). Tests live in `test/**/*.test.ts` (or `src/**/*.test.ts`).
 - Lint: root `eslint.config.js` (typescript-eslint recommended, `consistent-type-imports`). Prettier: single quotes, 100 cols, trailing commas.
 - No `any` unless unavoidable (`// eslint-disable-next-line` with a reason). No `console.log` in library code; use the injected logger.
-- Dependencies are pre-declared in each `package.json` and installed. If you truly need another one, `pnpm add <pkg> --filter <your-package>`; if the lockfile write collides with a concurrent install, retry. Mention every added dependency in your report.
+- Dependencies are declared in each `package.json` and pinned in `pnpm-lock.yaml`; add one with `pnpm add <pkg> --filter <package>`.
 - Node built-ins: use `node:crypto` `randomUUID()` for IDs (never the `uuid` package).
 
 ## 3. Cross-cutting data conventions
@@ -43,14 +46,14 @@ Never import from `services/*` or `apps/*` into `packages/*`.
 
 ## 4. Domain rules you must not reinterpret
 
-All rules R1–R7, constraints C1–C7, tick-first expiry, `expiresAt = min(now + holdSeconds, cutoffAt)`, `cutoffAt = startsAt − 30 min` (set when the session is created), at most **12 offers per command** (overflow ⇒ `REALLOCATE` continuation command), `nextDueAt = min(earliest live offer expiresAt, nearest session cutoffAt among OPEN sessions with QUEUED/OFFERED demand)`, PER_SESSION baseline mode, and the reject reasons are specified in `docs/plan/execution-plan.md` §1.2, §2.2. `decide()` is a pure function:
+All rules R1–R7, constraints C1–C7, tick-first expiry, `expiresAt = min(now + holdSeconds, cutoffAt)`, `cutoffAt = startsAt − 30 min` (set when the session is created), at most **12 offers per command** (overflow ⇒ `REALLOCATE` continuation command), `nextDueAt = min(earliest live offer expiresAt, nearest session cutoffAt among OPEN sessions with QUEUED/OFFERED demand)`, PER_SESSION baseline mode, and the reject reasons are specified in `docs/plan/execution-plan.md` §1.2, §2.2. The engine adds two more per-decision limits, **12 expiries** and **90 storage items** (`DEFAULT_DECISION_LIMITS` in `packages/core/src/state.ts`; ARCHITECTURE §17), with the same `REALLOCATE` overflow. `decide()` is a pure function:
 
 ```ts
 decide(snapshot: WorkshopSnapshot, command: Command, ctx: { now: string; newId: () => string }): Decision
 ```
 
-`Decision = { status: 'APPLIED' | 'REJECTED', reason?: RejectReason, writes: Change[], notifications: NotificationDraft[], timers: { offerId, expiresAt }[], backfills: BackfillEvent[], continuation?: Command, metrics: {...} }`.
-`Change` is a discriminated union over entity kinds (`PUT_WORKSHOP`, `PUT_SESSION`, `PUT_REGISTRATION`, `ARCHIVE_REGISTRATION`, `PUT_OFFER`, `ARCHIVE_OFFER`, `PUT_BACKFILL`, …) so that storage adapters can map it 1:1 onto DynamoDB items / Postgres rows. Adapters never run business logic.
+`Decision = { status: 'APPLIED' | 'REJECTED', reason?: RejectReason, writes: Change[], notifications: NotificationDraft[], timers: { offerId, expiresAt }[], backfills: BackfillRecord[], continuation?: Command, metrics: {...}, resultForCommand?: CommandResultPayload }`.
+`Change` is a discriminated union over entity kinds (`PUT_WORKSHOP_STATE`, `PUT_SESSION`, `PUT_REGISTRATION`, `ARCHIVE_REGISTRATION`, `PUT_OFFER`, `ARCHIVE_OFFER`, `PUT_BACKFILL`, …) so that storage adapters can map it 1:1 onto DynamoDB items / Postgres rows. Adapters never run business logic.
 
 TICK is an internal command with no `commandId`/`CommandResult`; it is naturally idempotent. REALLOCATE is likewise internal.
 
@@ -58,7 +61,7 @@ TICK is an internal command with no `commandId`/`CommandResult`; it is naturally
 
 - `WorkshopStore`: `loadSnapshot(wsId)` (consistent read of live items), `commit(wsId, expectedVersion, decision, commandResult?)` returning `{ ok: true } | { ok: false, conflict: 'VERSION' | 'COMMAND_ALREADY_SETTLED' }`, plus read models for the API (org/workshop CRUD, my registrations, notifications, dashboard, attendance, backfills, command results, `putCommandAccepted(cmd)` conditional insert returning the existing result if present, `deleteCommandIfAccepted(commandId)`).
 - `CommandQueue.enqueue(cmd)` (FIFO, group = workshopId, dedup = commandId or `tick#offerId#expiresAt`).
-- `TimerScheduler.schedule(timers[])` (called **before** commit; extra ticks are harmless).
+- `TimerScheduler.schedule(wsId, timers)` (called **before** commit; extra ticks are harmless).
 - `Clock.now(): string`, `IdGen.newId(): string`, `Logger { info, warn, error }(msg, fields)`.
 - `processCommand(ports, cmd)` in `service` does: load snapshot → `decide` → schedule timers → commit (retry ≤ 3 on VERSION conflict with reload; ack on COMMAND_ALREADY_SETTLED) → emit metrics. Deterministic rejections settle the command as REJECTED and **never throw**.
 - `createApiApp(ports)` exposes `handle(req: ApiRequest): Promise<ApiResponse>` where `ApiRequest = { method, path, query, headers, body (parsed JSON or undefined), user?: AuthUser }`. Both the Lambda `api` handler and the Fastify server are thin adapters around it. Route list = plan §2.5.
@@ -81,10 +84,10 @@ TICK is an internal command with no `commandId`/`CommandResult`; it is naturally
 - `service`: tests against the in-memory adapters for the API routes (auth/403/404/202 flow, idempotent commandId, `GET /commands/{id}` visibility) and `processCommand` (version-conflict retry, already-settled ack, deterministic rejection never throws).
 - `aws`: adapter mapping tests with `aws-sdk-client-mock`; `sam validate --lint` for all three templates; esbuild build produces `dist/<fn>/index.mjs` for every function.
 - `local`: schema applies cleanly on `postgres:16-alpine`; smoke flow against docker compose.
-- `web`: `tsc` + `vite build` clean.
+- `web`: `tsc` + `vite build` clean, and the vitest suite (`apps/web/test/`) passes.
 
 ## 9. Things that are intentionally NOT done in code
 
 - No WebSockets (polling protocol, plan §1.3).
 - No business logic in storage adapters, Lambda handlers, or React components.
-- No model/AI attribution strings anywhere in the repository (commit messages, comments, docs).
+- No model/AI attribution strings in commit messages, code comments or docs, outside the AI usage declaration that the course requires (the Final report's, `report/sections/07-declaration.tex`, which names the assistants) and the texts that record or restate it, e.g. `docs/ai-declaration-drafts.md` and `docs/QA-prep.md`.
