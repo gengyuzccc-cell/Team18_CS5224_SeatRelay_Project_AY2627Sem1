@@ -76,7 +76,7 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
 
 | Slide | Owner | Content | Source |
 |---|---|---|---|
-| 1 | LI ZONGZE | title, team, repository URL | README §1 |
+| 1 | LI ZONGZE | title, team, web app URL (dev stage), repository URL | README §1 |
 | 2 | LI ZONGZE | problem, SeatRelay in one line, market figures (≥ 713 organisations, 11 of 37 repeats, campus market × p) | Final report §1, Table 1; `results/market/` |
 | 3 | LI ZONGZE | pricing, value test, research scenario inputs, simulated duplicate clean-up, competitors | Final report §2, Table 2; `results/replay/summary.md` |
 | 4 | CHEN YANG | Fig. 1 flow, R1–R7 and C1–C7 one line each (abridged; full wording in Final report Table 4) | Final report Fig. 1, Table 4; `docs/ARCHITECTURE.md` §9–10 |
@@ -89,7 +89,7 @@ the pilot status and the close, and opens the Q&A. The name-to-line mapping was 
 | 11 | ZHU GENGYU | cost table (3 loads × cloud and on-prem views) and crossover chart | Final report §2 (cost, its Table 3); `results/cost/model-summary.md` |
 | 12 | LIANG ZIHAN | interview themes, one study, denominators and evidence status | `results/research/summary.json`; `results/research/interviews/` |
 | 13 | LIANG ZIHAN | limitations, future work, AI use, roles | Final report §5 and AI usage declaration |
-| 14 | LIANG ZIHAN | thank you, questions, repository URL | — |
+| 14 | LIANG ZIHAN | thank you, questions, web app URL (dev stage), repository URL | — |
 | B1 | ZHANG TIANYI (LI ZONGZE plays it) | demo recording (Plan C), chapter marks | `docs/demo/backup-demo-chapters.txt`, `docs/DEMO.md` §6 |
 | B2–B5 | ZHANG TIANYI | screenshots of D1–D4 from the staged walkthrough (Plan D): other accounts and data than the live click path, so narrate them with the fallback script in part-4.md | `docs/demo/screenshots/`, `docs/DEMO.md` §6, §9 |
 | B6 | ZHANG TIANYI (ZHU GENGYU in Q&A) | D5 has no screenshot: what the repeat-execution and failure-recovery runs recorded | `results/2026-10-17-repeat-execution-2/`, `results/2026-10-17-failure-recovery-2/` |
